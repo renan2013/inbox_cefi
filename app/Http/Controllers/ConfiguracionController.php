@@ -76,8 +76,9 @@ class ConfiguracionController extends Controller
 
         // Configuración activa de WhatsApp / Evolution API
         $waConfig = WhatsAppService::getConfig();
+        $devUnlocked = session('dev_modules_unlocked', false);
 
-        return view('configuracion.index', compact('cliente', 'configDb', 'modulos', 'activeTab', 'waConfig'));
+        return view('configuracion.index', compact('cliente', 'configDb', 'modulos', 'activeTab', 'waConfig', 'devUnlocked'));
     }
 
     /**
@@ -218,8 +219,13 @@ class ConfiguracionController extends Controller
             $fields['cliente_favicon'] = $request->input('favicon_url');
         }
 
-        // 5. Personalización y Activación Modular
+        // 5. Personalización y Activación Modular (RESTRINGIDO AL FABRICANTE / DESARROLLADOR)
         if ($request->has('submitted_modules')) {
+            if (!session('dev_modules_unlocked', false)) {
+                return redirect()->route('configuracion.index', ['tab' => 'modulos'])
+                    ->with('error', 'Acceso denegado: La activación o desactivación de módulos está bloqueada por licencia y requiere autorización del fabricante/desarrollador.');
+            }
+
             $allModules = array_keys(config('modules.modules', []));
             $inputModules = $request->input('modules', []);
 
@@ -434,5 +440,40 @@ class ConfiguracionController extends Controller
     {
         DB::table('base_conocimiento_inbox_ai')->where('id', $id)->delete();
         return redirect()->route('configuracion.conocimiento_ai')->with('success', 'Registro de conocimiento eliminado.');
+    }
+
+    /**
+     * Valida la Clave Maestra de Fabricante / Desarrollador para desbloquear la edición de módulos contratados.
+     */
+    public function desbloquearModulos(Request $request)
+    {
+        $request->validate(['clave_desarrollador' => 'required|string']);
+        $input = trim((string)$request->input('clave_desarrollador'));
+        $devKey = config('modules.developer_key', 'RenanDev2026_MasterLic!');
+
+        $validKeys = array_filter([
+            $devKey,
+            'RenanDev2026_MasterLic!',
+            'Medrano_2027_inbox'
+        ]);
+
+        if (in_array($input, $validKeys, true)) {
+            session(['dev_modules_unlocked' => true]);
+            return redirect()->route('configuracion.index', ['tab' => 'modulos'])
+                ->with('success', '¡Modo Fabricante activado! Ahora puede modificar y guardar la licencia de módulos.');
+        }
+
+        return redirect()->route('configuracion.index', ['tab' => 'modulos'])
+            ->with('error', 'Clave de Fabricante / Desarrollador incorrecta. Acceso de licenciamiento denegado.');
+    }
+
+    /**
+     * Bloquea el Modo Fabricante y devuelve los módulos a solo lectura para el cliente.
+     */
+    public function bloquearModulos()
+    {
+        session()->forget('dev_modules_unlocked');
+        return redirect()->route('configuracion.index', ['tab' => 'modulos'])
+            ->with('success', 'Modo Fabricante bloqueado. Los módulos volvieron al modo de solo lectura.');
     }
 }

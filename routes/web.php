@@ -74,6 +74,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/test-n8n', [ConfiguracionController::class, 'testN8n'])->name('test_n8n');
         Route::post('/test-whatsapp', [ConfiguracionController::class, 'testWhatsApp'])->name('test_whatsapp');
 
+        // Licenciamiento de módulos (Fabricante / Desarrollador)
+        Route::post('/dev-desbloquear', [ConfiguracionController::class, 'desbloquearModulos'])->name('dev_desbloquear');
+        Route::post('/dev-bloquear', [ConfiguracionController::class, 'bloquearModulos'])->name('dev_bloquear');
+
         // Compatibilidad con rutas anteriores de parámetros
         Route::get('/parametros', [ConfiguracionController::class, 'parametros'])->name('parametros');
         Route::post('/parametros', [ConfiguracionController::class, 'guardarParametros'])->name('parametros.store');

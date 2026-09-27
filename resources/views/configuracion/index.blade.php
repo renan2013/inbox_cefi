@@ -330,6 +330,20 @@
         display: none;
         margin-top: 0.75rem;
     }
+
+    [data-theme="light"] .modal-content {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+    [data-theme="light"] .modal-header {
+        border-bottom-color: #e2e8f0 !important;
+    }
+    [data-theme="light"] .modal-footer {
+        border-top-color: #e2e8f0 !important;
+    }
+    [data-theme="light"] .modal-content .btn-close-white {
+        filter: invert(1) !important;
+    }
 </style>
 @endsection
 
@@ -749,26 +763,75 @@
         </div>
 
         <!-- =================================================================== -->
-        <!-- PESTAÑA 4: MÓDULOS Y PERSONALIZACIÓN                               -->
+        <!-- PESTAÑA 4: MÓDULOS Y PERSONALIZACIÓN (PROTEGIDA POR LICENCIA)       -->
         <!-- =================================================================== -->
         <div class="tab-pane fade {{ $activeTab === 'modulos' ? 'show active' : '' }}" id="pane-modulos" role="tabpanel">
+
+            @if($devUnlocked)
+                <!-- Banner Modo Fabricante / Desarrollador Desbloqueado -->
+                <div class="alert alert-warning border-0 rounded-4 d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 shadow-sm" style="background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3) !important;">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-shield-lock-fill fs-3 text-warning"></i>
+                        <div>
+                            <strong class="d-block text-warning fw-bold">Modo Fabricante / Desarrollador Activado</strong>
+                            <small class="text-white-50">Tiene permisos exclusivos para activar, desactivar y licenciar módulos en esta instalación.</small>
+                        </div>
+                    </div>
+                    <form action="{{ route('configuracion.dev_bloquear') }}" method="POST" class="m-0">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-warning btn-sm rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1">
+                            <i class="bi bi-lock-fill"></i> Bloquear Modo Fabricante
+                        </button>
+                    </form>
+                </div>
+            @else
+                <!-- Banner Modo Cliente (Solo Lectura) -->
+                <div class="alert alert-config-info border-0 rounded-4 d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 shadow-sm">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-shield-check fs-3 text-info"></i>
+                        <div>
+                            <strong class="d-block text-white fw-bold">Plan de Módulos Contratado (Solo Lectura)</strong>
+                            <small class="text-white-50">Los módulos activos corresponden a las licencias adquiridas para esta institución. Los interruptores están protegidos.</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $cliente['telefono'] ?? '50687777849') }}?text={{ urlencode('Hola, deseo consultar sobre la activación de módulos adicionales para nuestra plataforma Inbox CEFI.') }}" target="_blank" class="btn btn-outline-success btn-sm rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1">
+                            <i class="bi bi-whatsapp"></i> Contratar Módulos
+                        </a>
+                        <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalDevKey">
+                            <i class="bi bi-key-fill text-warning"></i> Modo Desarrollador
+                        </button>
+                    </div>
+                </div>
+            @endif
+
             <form action="{{ route('configuracion.guardar') }}" method="POST">
                 @csrf
                 <input type="hidden" name="active_tab" value="modulos">
-                <input type="hidden" name="submitted_modules" value="1">
+                @if($devUnlocked)
+                    <input type="hidden" name="submitted_modules" value="1">
+                @endif
 
                 <div class="config-card">
                     <div class="config-card-header">
                         <div>
                             <div class="d-flex align-items-center gap-2">
                                 <i class="bi bi-toggles2 text-primary fs-5"></i>
-                                <h5 class="fw-bold mb-0 text-white">Control de Activación Modular (Feature Flags)</h5>
+                                <h5 class="fw-bold mb-0 text-white">Catálogo de Módulos del Sistema</h5>
                             </div>
-                            <small class="text-white-50">Active o desactive módulos de la plataforma según la contratación o requerimientos específicos de la institución.</small>
+                            <small class="text-white-50">
+                                @if($devUnlocked)
+                                    Modifique el estado de las características contratadas y presione Guardar.
+                                @else
+                                    Muestra el estado de cada módulo contratado en su suscripción actual.
+                                @endif
+                            </small>
                         </div>
-                        <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2">
-                            <i class="bi bi-floppy2-fill"></i> Guardar Módulos
-                        </button>
+                        @if($devUnlocked)
+                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 shadow">
+                                <i class="bi bi-floppy2-fill"></i> Guardar Licencia de Módulos
+                            </button>
+                        @endif
                     </div>
                     <div class="config-card-body">
                         <div class="row g-3">
@@ -779,7 +842,11 @@
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <span class="badge bg-secondary bg-opacity-25 text-white-50 small">{{ $mod['categoria'] ?? 'General' }}</span>
                                                 <div class="form-check form-switch m-0">
-                                                    <input class="form-check-input" type="checkbox" name="modules[{{ $key }}]" value="1" id="mod_{{ $key }}" {{ $mod['enabled'] ? 'checked' : '' }}>
+                                                    @if($devUnlocked)
+                                                        <input class="form-check-input" type="checkbox" name="modules[{{ $key }}]" value="1" id="mod_{{ $key }}" {{ $mod['enabled'] ? 'checked' : '' }}>
+                                                    @else
+                                                        <input class="form-check-input" type="checkbox" disabled {{ $mod['enabled'] ? 'checked' : '' }} title="Protegido por licencia comercial">
+                                                    @endif
                                                 </div>
                                             </div>
                                             <h6 class="fw-bold text-white mb-1">{{ $mod['nombre'] }}</h6>
@@ -788,9 +855,9 @@
                                         <div class="pt-2 border-top border-secondary border-opacity-10 d-flex justify-content-between align-items-center">
                                             <code class="text-info x-small font-monospace">{{ $key }}</code>
                                             @if($mod['enabled'])
-                                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 x-small"><i class="bi bi-check-circle-fill me-1"></i>Habilitado</span>
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 x-small"><i class="bi bi-check-circle-fill me-1"></i>Contratado / Activo</span>
                                             @else
-                                                <span class="badge bg-secondary bg-opacity-25 text-white-50 x-small"><i class="bi bi-dash-circle me-1"></i>Desactivado</span>
+                                                <span class="badge bg-secondary bg-opacity-25 text-white-50 x-small"><i class="bi bi-lock-fill me-1"></i>No contratado</span>
                                             @endif
                                         </div>
                                     </div>
@@ -798,11 +865,20 @@
                             @endforeach
                         </div>
 
-                        <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary px-5 py-3 fw-bold rounded-pill shadow-lg d-flex align-items-center gap-2">
-                                <i class="bi bi-check-circle-fill"></i> Guardar Estado de Módulos
-                            </button>
-                        </div>
+                        @if($devUnlocked)
+                            <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary px-5 py-3 fw-bold rounded-pill shadow-lg d-flex align-items-center gap-2">
+                                    <i class="bi bi-check-circle-fill"></i> Guardar Licencia de Módulos
+                                </button>
+                            </div>
+                        @else
+                            <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center flex-wrap gap-2 text-white-50 small">
+                                <div><i class="bi bi-info-circle me-1"></i> Para habilitar módulos adicionales, contacte al proveedor oficial del software.</div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalDevKey">
+                                    <i class="bi bi-shield-lock me-1"></i> Desbloquear como Desarrollador
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </form>
@@ -860,10 +936,71 @@
     </div>
 
 </div>
+
+<!-- Modal Desbloqueo de Fabricante / Desarrollador -->
+<div class="modal fade" id="modalDevKey" tabindex="-1" aria-labelledby="modalDevKeyLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--card-dark); border: 1px solid var(--border-dark); border-radius: 1.25rem; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 pt-4 pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width: 40px; height: 40px; background: rgba(245, 158, 11, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fbbf24;">
+                        <i class="bi bi-shield-lock-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="modalDevKeyLabel">Licenciamiento de Fabricante</h5>
+                        <small class="text-white-50">Acceso exclusivo para el desarrollador del sistema</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('configuracion.dev_desbloquear') }}" method="POST">
+                @csrf
+                <div class="modal-body px-4 py-4">
+                    <p class="text-white-50 small mb-4">
+                        Para habilitar la edición y activación de módulos comerciales en esta instalación, ingrese la <strong>Clave Secreta de Fabricante</strong>.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Clave Secreta de Fabricante</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-end-0" style="background-color: var(--card-dark); border-color: var(--border-dark); color: var(--text-muted);"><i class="bi bi-key-fill"></i></span>
+                            <input type="password" name="clave_desarrollador" id="clave_desarrollador" class="form-control form-control-custom border-start-0 border-end-0" placeholder="••••••••••••" required autocomplete="current-password">
+                            <button class="btn btn-outline-secondary border-start-0" type="button" onclick="togglePasswordVisibility('clave_desarrollador', 'iconDevPass')" style="background-color: var(--card-dark); border-color: var(--border-dark); color: var(--text-muted);">
+                                <i class="bi bi-eye" id="iconDevPass"></i>
+                            </button>
+                        </div>
+                        <div class="form-text text-white-50 small mt-1">
+                            <i class="bi bi-info-circle me-1"></i>Esta clave está definida en el entorno seguro del servidor por el desarrollador.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 px-4 pb-4 pt-3">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold d-flex align-items-center gap-2">
+                        <i class="bi bi-unlock-fill"></i> Validar y Desbloquear
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
+    function togglePasswordVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+
     function previewImage(input, targetId) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();

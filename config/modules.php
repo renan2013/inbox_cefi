@@ -35,8 +35,17 @@ return [
         'planilla' => false,
         'soporte' => false,
         'whatsapp_n8n' => false,
-        'inbox_ai' => false,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Clave Secreta de Fabricante / Desarrollador (Licenciamiento)
+    |--------------------------------------------------------------------------
+    |
+    | Protege la activación de módulos para que solo el vendedor pueda habilitarlos.
+    |
+    */
+    'developer_key' => env('INBOX_DEVELOPER_KEY', 'RenanDev2026_MasterLic!'),
 
     /*
     |--------------------------------------------------------------------------
