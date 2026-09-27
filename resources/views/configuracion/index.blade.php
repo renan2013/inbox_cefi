@@ -10,12 +10,62 @@
     }
 
     .config-hero {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
         border: 1px solid var(--border-dark);
         border-radius: 1.25rem;
         padding: 1.75rem 2rem;
         margin-bottom: 2rem;
         box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    /* Overrides para tema claro en Hero */
+    [data-theme="light"] .config-hero {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    [data-theme="light"] .config-hero h1 {
+        color: #0f172a !important;
+    }
+
+    [data-theme="light"] .config-hero p {
+        color: #475569 !important;
+    }
+
+    [data-theme="light"] .config-hero .btn-outline-danger {
+        color: #dc2626 !important;
+        background-color: #fef2f2 !important;
+        border-color: #fca5a5 !important;
+    }
+
+    [data-theme="light"] .config-hero .btn-outline-danger:hover {
+        background-color: #dc2626 !important;
+        color: #ffffff !important;
+        border-color: #dc2626 !important;
+    }
+
+    [data-theme="light"] .config-hero .btn-outline-secondary {
+        color: #334155 !important;
+        background-color: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+    }
+
+    [data-theme="light"] .config-hero .btn-outline-secondary:hover {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
+    }
+
+    [data-theme="light"] .badge-admin {
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+        border: 1px solid #fde68a !important;
+    }
+
+    [data-theme="light"] .badge-unlocked {
+        background-color: #d1fae5 !important;
+        color: #065f46 !important;
+        border: 1px solid #a7f3d0 !important;
     }
 
     .config-nav-pills {
@@ -25,6 +75,12 @@
         border-radius: 1rem;
         border: 1px solid var(--border-dark);
         margin-bottom: 2rem;
+    }
+
+    [data-theme="light"] .config-nav-pills {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
     }
 
     .config-nav-pills .nav-link {
@@ -39,9 +95,18 @@
         border: 1px solid transparent;
     }
 
+    [data-theme="light"] .config-nav-pills .nav-link {
+        color: #64748b !important;
+    }
+
     .config-nav-pills .nav-link:hover {
         color: #f8fafc;
         background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="light"] .config-nav-pills .nav-link:hover {
+        color: #0f172a !important;
+        background-color: #f1f5f9 !important;
     }
 
     .config-nav-pills .nav-link.active {
@@ -51,7 +116,9 @@
     }
 
     [data-theme="light"] .config-nav-pills .nav-link.active {
+        background-color: var(--primary) !important;
         color: #ffffff !important;
+        box-shadow: 0 4px 15px rgba(95, 178, 48, 0.25) !important;
     }
 
     .config-card {
@@ -63,6 +130,12 @@
         overflow: hidden;
     }
 
+    [data-theme="light"] .config-card {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
+    }
+
     .config-card-header {
         padding: 1.25rem 1.75rem;
         border-bottom: 1px solid var(--border-dark);
@@ -70,6 +143,15 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+    }
+
+    [data-theme="light"] .config-card-header {
+        background-color: #f8fafc !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+
+    [data-theme="light"] .config-card-header h5 {
+        color: #0f172a !important;
     }
 
     .config-card-body {
@@ -86,7 +168,7 @@
     }
 
     [data-theme="light"] .form-label-custom {
-        color: #475569;
+        color: #334155 !important;
     }
 
     .form-control-custom, .form-select-custom {
@@ -102,11 +184,18 @@
     [data-theme="light"] .form-select-custom {
         color: #0f172a !important;
         background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
     }
 
     .form-control-custom:focus, .form-select-custom:focus {
         border-color: var(--primary) !important;
         box-shadow: 0 0 0 3px rgba(95, 178, 48, 0.2) !important;
+    }
+
+    [data-theme="light"] .input-group-text {
+        background-color: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: #64748b !important;
     }
 
     .logo-preview-box {
@@ -121,6 +210,15 @@
         justify-content: center;
         min-height: 140px;
         transition: background 0.3s ease;
+    }
+
+    [data-theme="light"] .logo-preview-box {
+        background: #f8fafc !important;
+        border: 2px dashed #cbd5e1 !important;
+    }
+
+    [data-theme="light"] .logo-preview-box small {
+        color: #64748b !important;
     }
 
     .logo-preview-img {
@@ -148,10 +246,33 @@
         justify-content: space-between;
     }
 
+    [data-theme="light"] .module-card {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+
     .module-card:hover {
         border-color: rgba(95, 178, 48, 0.4);
         background: rgba(255, 255, 255, 0.04);
         transform: translateY(-2px);
+    }
+
+    [data-theme="light"] .module-card:hover {
+        background: #ffffff !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    [data-theme="light"] .module-card h6 {
+        color: #0f172a !important;
+    }
+
+    [data-theme="light"] .module-card p {
+        color: #64748b !important;
+    }
+
+    [data-theme="light"] .module-card code {
+        color: #0284c7 !important;
     }
 
     .form-switch .form-check-input {
@@ -163,6 +284,43 @@
     .form-switch .form-check-input:checked {
         background-color: var(--primary);
         border-color: var(--primary);
+    }
+
+    /* Alertas */
+    .alert-config-success {
+        background-color: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    [data-theme="light"] .alert-config-success {
+        background-color: #ecfdf5 !important;
+        color: #065f46 !important;
+        border: 1px solid #a7f3d0 !important;
+    }
+    [data-theme="light"] .alert-config-success .bi {
+        color: #059669 !important;
+    }
+
+    .alert-config-danger {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    [data-theme="light"] .alert-config-danger {
+        background-color: #fef2f2 !important;
+        color: #991b1b !important;
+        border: 1px solid #fecaca !important;
+    }
+
+    .alert-config-info {
+        background-color: rgba(59, 130, 246, 0.15);
+        color: #93c5fd;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    }
+    [data-theme="light"] .alert-config-info {
+        background-color: #eff6ff !important;
+        color: #1e40af !important;
+        border: 1px solid #bfdbfe !important;
     }
 
     .test-result-box {
@@ -182,10 +340,10 @@
     <div class="config-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1 font-monospace small">
+                <span class="badge badge-admin bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1 font-monospace small">
                     <i class="bi bi-shield-check me-1"></i> CONTROL ADMINISTRADOR GENERAL
                 </span>
-                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 font-monospace small">
+                <span class="badge badge-unlocked bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 font-monospace small">
                     <i class="bi bi-lock-fill me-1"></i> SESIÓN DESBLOQUEADA
                 </span>
             </div>
@@ -209,20 +367,20 @@
 
     <!-- Mensajes de Notificación -->
     @if (session('success'))
-        <div class="alert alert-success border-0 rounded-4 d-flex align-items-center mb-4 shadow-sm" style="background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3) !important;">
+        <div class="alert alert-config-success border-0 rounded-4 d-flex align-items-center mb-4 shadow-sm">
             <i class="bi bi-check-circle-fill fs-4 me-3"></i>
             <div>{{ session('success') }}</div>
         </div>
     @endif
 
     @if (session('error'))
-        <div class="alert alert-danger border-0 rounded-4 mb-4 shadow-sm" style="background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3) !important;">
+        <div class="alert alert-config-danger border-0 rounded-4 mb-4 shadow-sm">
             <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
         </div>
     @endif
 
     @if ($errors->any())
-        <div class="alert alert-danger border-0 rounded-4 mb-4 shadow-sm" style="background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3) !important;">
+        <div class="alert alert-config-danger border-0 rounded-4 mb-4 shadow-sm">
             <ul class="mb-0 ps-3">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -669,7 +827,7 @@
                                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Protección Crítica</span>
                             </div>
                             <div class="config-card-body">
-                                <div class="alert alert-info border-0 rounded-4 d-flex align-items-start mb-4" style="background-color: rgba(59, 130, 246, 0.12); color: #93c5fd;">
+                                <div class="alert alert-config-info border-0 rounded-4 d-flex align-items-start mb-4">
                                     <i class="bi bi-info-circle-fill fs-4 me-3 mt-1"></i>
                                     <div class="small">
                                         Esta clave es el segundo factor de seguridad que blinda la parametrización técnica de la plataforma. Ningún operador regular, administrativo o docente puede ingresar a este módulo sin esta clave.

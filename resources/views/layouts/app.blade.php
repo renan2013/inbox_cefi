@@ -56,6 +56,31 @@
         [data-theme="light"] .nav-link-custom {
             color: #475569 !important;
         }
+        .nav-link-config {
+            color: #6ee7b7 !important;
+            font-weight: 700;
+        }
+        [data-theme="light"] .nav-link-config {
+            color: #15803d !important;
+            font-weight: 700;
+        }
+        [data-theme="light"] .nav-link-config:hover,
+        [data-theme="light"] .nav-link-config.active {
+            color: #166534 !important;
+            background-color: rgba(22, 163, 74, 0.08) !important;
+        }
+        .btn-gear-config {
+            color: #6ee7b7 !important;
+        }
+        [data-theme="light"] .btn-gear-config {
+            color: #15803d !important;
+            border-color: #cbd5e1 !important;
+            background-color: #f8fafc !important;
+        }
+        [data-theme="light"] .btn-gear-config:hover {
+            color: #166534 !important;
+            background-color: #f1f5f9 !important;
+        }
         [data-theme="light"] .nav-link-custom:hover, 
         [data-theme="light"] .nav-link-custom.active {
             color: #0f172a !important;
@@ -497,7 +522,7 @@
                     <!-- Configuración Dropdown (Solo Administrador General con Clave) -->
                     @if(Auth::check() && Auth::user()->id_rol == 1)
                     <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-custom dropdown-toggle {{ Request::is('configuracion*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: #6ee7b7 !important; font-weight: 700;">
+                        <a class="nav-link nav-link-custom nav-link-config dropdown-toggle {{ Request::is('configuracion*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-sliders2-vertical me-1"></i> Configuración
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom dropdown-menu-end">
@@ -526,7 +551,7 @@
                 <!-- User Profile & Logout -->
                 <div class="d-flex align-items-center">
                     @if(Auth::check() && Auth::user()->id_rol == 1)
-                    <a href="{{ route('configuracion.index') }}" class="btn btn-outline-secondary rounded-circle me-2" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-color: var(--border-dark); color: #6ee7b7;" title="Configuración de la Plataforma">
+                    <a href="{{ route('configuracion.index') }}" class="btn btn-outline-secondary btn-gear-config rounded-circle me-2" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-color: var(--border-dark);" title="Configuración de la Plataforma">
                         <i class="bi bi-gear-fill"></i>
                     </a>
                     @endif
