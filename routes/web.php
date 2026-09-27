@@ -56,16 +56,20 @@ Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaControl
 
 // Ruta de Mantenimiento / Limpieza de Caché y Diagnóstico de Módulos
 Route::get('/limpiar-cache-cefi', function () {
-    \Illuminate\Support\Facades\Artisan::call('view:clear');
-    \Illuminate\Support\Facades\Artisan::call('config:clear');
-    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    $hasConfigCache = file_exists(base_path('bootstrap/cache/config.php'));
+    $configPath = config_path('modules.php');
+    $configContent = file_exists($configPath) ? file_get_contents($configPath) : 'NOT_FOUND';
+    
+    // Si existe config.php en bootstrap/cache, forzar eliminación
+    if ($hasConfigCache) {
+        @unlink(base_path('bootstrap/cache/config.php'));
+    }
     
     return response()->json([
-        'mensaje' => 'Caché de vistas y configuración limpiada con éxito en Hostinger.',
-        'inventario_enabled' => \App\Services\ModuleService::isEnabled('inventario'),
-        'planilla_enabled' => \App\Services\ModuleService::isEnabled('planilla'),
-        'soporte_enabled' => \App\Services\ModuleService::isEnabled('soporte'),
-        'raw_config' => config('modules.modules'),
+        'has_config_cache_before' => $hasConfigCache,
+        'config_path' => $configPath,
+        'config_file_has_false' => str_contains($configContent, "'inventario' => env('MODULE_INVENTARIO', false)"),
+        'modules_php_sample' => substr($configContent, 300, 300),
     ]);
 });
 
