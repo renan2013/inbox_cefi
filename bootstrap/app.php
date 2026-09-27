@@ -13,7 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'module' => \App\Http\Middleware\CheckModuleEnabled::class,
+            'module'       => \App\Http\Middleware\CheckModuleEnabled::class,
+            'admin.config' => \App\Http\Middleware\EnsureConfigAdminAuthorized::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'api/*',

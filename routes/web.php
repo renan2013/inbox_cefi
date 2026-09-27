@@ -57,16 +57,36 @@ Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaControl
 
 
 Route::middleware('auth')->group(function () {
-    // --- PARÁMETROS DEL SISTEMA & CONFIGURACIÓN GLOBAL ---
-    Route::get('/configuracion/parametros', [ConfiguracionController::class, 'parametros'])->name('configuracion.parametros');
-    Route::post('/configuracion/parametros', [ConfiguracionController::class, 'guardarParametros'])->name('configuracion.parametros.store');
-    Route::post('/configuracion/parametros/acceder', [ConfiguracionController::class, 'accederParametros'])->name('configuracion.parametros.acceder');
-    Route::post('/configuracion/parametros/salir', [ConfiguracionController::class, 'salirParametros'])->name('configuracion.parametros.salir');
-    Route::get('/configuracion/whatsapp', [WhatsAppController::class, 'configuracion'])->name('configuracion.whatsapp');
-    Route::post('/configuracion/whatsapp', [WhatsAppController::class, 'guardarConfiguracion'])->name('configuracion.whatsapp.store');
-    Route::post('/configuracion/whatsapp/test', [WhatsAppController::class, 'testEnvio'])->name('configuracion.whatsapp.test');
-    Route::get('/configuracion/alertas', [ConfiguracionController::class, 'alertas'])->name('configuracion.alertas');
-    Route::post('/configuracion/alertas', [ConfiguracionController::class, 'guardarAlertas'])->name('configuracion.alertas.store');
+    // =========================================================================
+    // --- CONTROL DE SEGURIDAD & ACCESO SUPERIOR A CONFIGURACIÓN ---
+    // =========================================================================
+    Route::get('/configuracion/seguridad', [ConfiguracionController::class, 'login'])->name('configuracion.login');
+    Route::post('/configuracion/seguridad/acceder', [ConfiguracionController::class, 'acceder'])->name('configuracion.acceder');
+    Route::post('/configuracion/seguridad/salir', [ConfiguracionController::class, 'salir'])->name('configuracion.salir');
+
+    // Rutas protegidas exclusivamente para Administrador General con Clave Superior
+    Route::middleware('admin.config')->prefix('configuracion')->name('configuracion.')->group(function () {
+        // Hub Central de Configuración
+        Route::get('/', [ConfiguracionController::class, 'index'])->name('index');
+        Route::post('/guardar', [ConfiguracionController::class, 'guardar'])->name('guardar');
+
+        // Test de conectividad
+        Route::post('/test-n8n', [ConfiguracionController::class, 'testN8n'])->name('test_n8n');
+        Route::post('/test-whatsapp', [ConfiguracionController::class, 'testWhatsApp'])->name('test_whatsapp');
+
+        // Compatibilidad con rutas anteriores de parámetros
+        Route::get('/parametros', [ConfiguracionController::class, 'parametros'])->name('parametros');
+        Route::post('/parametros', [ConfiguracionController::class, 'guardarParametros'])->name('parametros.store');
+        Route::post('/parametros/acceder', [ConfiguracionController::class, 'acceder'])->name('parametros.acceder');
+        Route::post('/parametros/salir', [ConfiguracionController::class, 'salir'])->name('parametros.salir');
+
+        // Configuración de WhatsApp y Alertas dentro del módulo seguro
+        Route::get('/whatsapp', [WhatsAppController::class, 'configuracion'])->name('whatsapp');
+        Route::post('/whatsapp', [WhatsAppController::class, 'guardarConfiguracion'])->name('whatsapp.store');
+        Route::post('/whatsapp/test', [WhatsAppController::class, 'testEnvio'])->name('whatsapp.test');
+        Route::get('/alertas', [ConfiguracionController::class, 'alertas'])->name('alertas');
+        Route::post('/alertas', [ConfiguracionController::class, 'guardarAlertas'])->name('alertas.store');
+    });
 
     // --- DASHBOARD & TAREAS ---
     Route::middleware('module:dashboard')->group(function () {
@@ -165,14 +185,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/expedientes/{id}/record-pdf', [ExpedienteController::class, 'generarRecordPdf'])->name('expedientes.record_pdf');
     });
 
-    // --- CONFIGURACIÓN ALERTAS / WHATSAPP ---
+    // --- DIFUSIÓN WHATSAPP & MARKETING PROSPECTOS ---
     Route::middleware('module:whatsapp_n8n')->group(function () {
-        Route::get('/configuracion/whatsapp', [WhatsAppController::class, 'configuracion'])->name('configuracion.whatsapp');
-        Route::post('/configuracion/whatsapp', [WhatsAppController::class, 'guardarConfiguracion'])->name('configuracion.whatsapp.store');
-        Route::post('/configuracion/whatsapp/test', [WhatsAppController::class, 'testEnvio'])->name('configuracion.whatsapp.test');
-        Route::get('/configuracion/alertas', [ConfiguracionController::class, 'alertas'])->name('configuracion.alertas');
-        Route::post('/configuracion/alertas', [ConfiguracionController::class, 'guardarAlertas'])->name('configuracion.alertas.store');
-
         // Campañas y Difusión Masiva (Oferta Académica)
         Route::get('/whatsapp/campanas', [CampanaWhatsAppController::class, 'index'])->name('whatsapp.campanas.index');
         Route::get('/whatsapp/campanas/destinatarios-ajax', [CampanaWhatsAppController::class, 'destinatariosAjax'])->name('whatsapp.campanas.destinatarios_ajax');

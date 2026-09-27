@@ -20,7 +20,19 @@ class ModuleService
 
         $modules = config('modules.modules', []);
 
-        // 1. Si el módulo está apagado en la configuración, tiene prioridad absoluta (soporta boolean o string)
+        // 1. Revisar si hay override específico en base de datos
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
+                $dbVal = \App\Models\ConfiguracionSistema::where('clave', 'module_' . $moduleKey)->value('valor');
+                if ($dbVal !== null && $dbVal !== '') {
+                    return self::$runtimeCache[$moduleKey] = in_array((string)$dbVal, ['1', 'true', 'yes'], true);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Continuar con config si BD no está accesible aún
+        }
+
+        // 2. Si no hay override en BD, consultar configuración del archivo
         if (array_key_exists($moduleKey, $modules)) {
             $val = $modules[$moduleKey];
             if (is_string($val)) {
@@ -29,18 +41,6 @@ class ModuleService
             if (!$val) {
                 return self::$runtimeCache[$moduleKey] = false;
             }
-        }
-
-        // 2. Revisar si hay override específico en base de datos
-        try {
-            if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
-                $dbVal = \App\Models\ConfiguracionSistema::where('clave', 'module_' . $moduleKey)->value('valor');
-                if ($dbVal !== null) {
-                    return self::$runtimeCache[$moduleKey] = in_array((string)$dbVal, ['1', 'true', 'yes'], true);
-                }
-            }
-        } catch (\Throwable $e) {
-            // Continuar con config si BD no está accesible aún
         }
 
         if (!array_key_exists($moduleKey, $modules)) {
@@ -70,7 +70,7 @@ class ModuleService
 
             $result[$key] = array_merge($meta, [
                 'key'     => $key,
-                'enabled' => (bool)$enabled,
+                'enabled' => self::isEnabled($key),
             ]);
         }
 

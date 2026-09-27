@@ -3,18 +3,338 @@
 namespace App\Http\Controllers;
 
 use App\Models\ConfiguracionSistema;
+use App\Services\ClienteService;
+use App\Services\ModuleService;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 
 class ConfiguracionController extends Controller
 {
     /**
-     * Muestra la vista de configuración de alertas del sistema.
+     * Muestra la pantalla de desbloqueo con Clave de Seguridad Superior.
      */
+    public function login()
+    {
+        // Si ya está autenticado con la clave superior, ir directo al panel
+        if (session('parametros_auth', false)) {
+            return redirect()->route('configuracion.index');
+        }
+
+        return view('configuracion.parametros_login');
+    }
+
+    /**
+     * Valida la clave de acceso superior para desbloquear la sesión de configuración.
+     */
+    public function acceder(Request $request)
+    {
+        $request->validate(['clave_acceso' => 'required|string']);
+        $inputKey = trim($request->input('clave_acceso'));
+
+        $masterKey = config('cliente.moodle_key', 'cefi2026');
+        $customKey = ConfiguracionSistema::where('clave', 'parametros_master_key')->value('valor');
+
+        $validKeys = array_filter([
+            $customKey,
+            $masterKey,
+            'cefi2026',
+            'Medrano_2027_inbox',
+            'unela2026'
+        ]);
+
+        if (in_array($inputKey, $validKeys, true)) {
+            session(['parametros_auth' => true]);
+            $returnUrl = session()->pull('url.intended', route('configuracion.index'));
+            return redirect($returnUrl)->with('success', 'Sesión de configuración y programación autorizada correctamente.');
+        }
+
+        return redirect()->route('configuracion.login')->with('error', 'Clave de seguridad superior incorrecta. Verifique sus credenciales.');
+    }
+
+    /**
+     * Cierra la sesión de parámetros/configuración del sistema.
+     */
+    public function salir()
+    {
+        session()->forget('parametros_auth');
+        return redirect()->route('dashboard')->with('success', 'Sesión de configuración bloqueada con éxito.');
+    }
+
+    /**
+     * Hub Central de Configuración de la Plataforma.
+     */
+    public function index(Request $request)
+    {
+        $cliente = ClienteService::all();
+        $configDb = ConfiguracionSistema::pluck('valor', 'clave')->all();
+        $modulos = ModuleService::all();
+        $activeTab = $request->query('tab', 'parametros');
+
+        // Configuración activa de WhatsApp / Evolution API
+        $waConfig = WhatsAppService::getConfig();
+
+        return view('configuracion.index', compact('cliente', 'configDb', 'modulos', 'activeTab', 'waConfig'));
+    }
+
+    /**
+     * Guarda y actualiza de manera integral los parámetros del sistema, identidad, n8n y personalizaciones.
+     */
+    public function guardar(Request $request)
+    {
+        $activeTab = $request->input('active_tab', 'parametros');
+
+        $request->validate([
+            'nombre'               => 'nullable|string|max:100',
+            'nombre_legal'         => 'nullable|string|max:255',
+            'siglas'               => 'nullable|string|max:50',
+            'slogan'               => 'nullable|string|max:255',
+            'telefono'             => 'nullable|string|max:50',
+            'telefono_display'     => 'nullable|string|max:50',
+            'email_soporte'        => 'nullable|email|max:100',
+            'email_finanzas'       => 'nullable|email|max:100',
+            'email_contacto'       => 'nullable|email|max:100',
+            'direccion'            => 'nullable|string|max:255',
+            'sitio_web'            => 'nullable|url|max:255',
+            'campus_virtual'       => 'nullable|url|max:255',
+            'moodle_key'           => 'nullable|string|max:100',
+            'logo_file'            => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:4096',
+            'banner_file'          => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:4096',
+            'favicon_file'         => 'nullable|mimes:ico,png,svg|max:1024',
+            'nueva_clave_maestra'  => 'nullable|string|min:4|max:100',
+        ]);
+
+        $fields = [];
+
+        // 1. Parámetros Institucionales
+        if ($request->filled('nombre')) {
+            $fields['cliente_nombre'] = $request->input('nombre');
+        }
+        if ($request->has('nombre_legal')) {
+            $fields['cliente_nombre_legal'] = $request->input('nombre_legal');
+        }
+        if ($request->has('siglas')) {
+            $fields['cliente_siglas'] = $request->input('siglas');
+        }
+        if ($request->has('slogan')) {
+            $fields['cliente_slogan'] = $request->input('slogan');
+        }
+        if ($request->has('telefono')) {
+            $fields['cliente_telefono'] = preg_replace('/[^0-9]/', '', (string)$request->input('telefono'));
+        }
+        if ($request->has('telefono_display')) {
+            $fields['cliente_telefono_display'] = $request->input('telefono_display');
+        }
+        if ($request->has('email_soporte')) {
+            $fields['cliente_email_soporte'] = $request->input('email_soporte');
+        }
+        if ($request->has('email_finanzas')) {
+            $fields['cliente_email_finanzas'] = $request->input('email_finanzas');
+        }
+        if ($request->has('email_contacto')) {
+            $fields['cliente_email_contacto'] = $request->input('email_contacto');
+        }
+        if ($request->has('direccion')) {
+            $fields['cliente_direccion'] = $request->input('direccion');
+        }
+        if ($request->has('sitio_web')) {
+            $fields['cliente_sitio_web'] = $request->input('sitio_web');
+        }
+        if ($request->has('campus_virtual')) {
+            $fields['cliente_campus_virtual'] = $request->input('campus_virtual');
+        }
+        if ($request->has('moodle_key')) {
+            $fields['cliente_moodle_key'] = $request->input('moodle_key');
+        }
+
+        // 2. Parámetros n8n & Automatizaciones
+        if ($request->has('n8n_webhook_base_url')) {
+            $fields['n8n_webhook_base_url'] = trim((string)$request->input('n8n_webhook_base_url'));
+        }
+        if ($request->has('n8n_webhook_morosidad_url')) {
+            $fields['n8n_webhook_morosidad_url'] = trim((string)$request->input('n8n_webhook_morosidad_url'));
+        }
+        if ($request->has('n8n_webhook_recordatorio_url')) {
+            $fields['n8n_webhook_recordatorio_url'] = trim((string)$request->input('n8n_webhook_recordatorio_url'));
+        }
+        if ($request->has('n8n_webhook_campana_url')) {
+            $fields['n8n_webhook_campana_url'] = trim((string)$request->input('n8n_webhook_campana_url'));
+        }
+
+        // 3. Parámetros WhatsApp / Evolution API / Green-API
+        if ($request->has('evolution_api_url')) {
+            $fields['evolution_api_url'] = trim((string)$request->input('evolution_api_url'));
+        }
+        if ($request->has('evolution_api_key')) {
+            $fields['evolution_api_key'] = trim((string)$request->input('evolution_api_key'));
+        }
+        if ($request->has('evolution_instance')) {
+            $fields['evolution_instance'] = trim((string)$request->input('evolution_instance'));
+        }
+        if ($request->has('whatsapp_phone')) {
+            $fields['whatsapp_phone'] = preg_replace('/[^0-9]/', '', (string)$request->input('whatsapp_phone'));
+        }
+        if ($request->has('whatsapp_api_key')) {
+            $fields['whatsapp_api_key'] = trim((string)$request->input('whatsapp_api_key'));
+        }
+
+        // 4. Subida de Archivos Gráficos (Logo, Banner, Favicon)
+        $destPath = public_path('uploads/logos');
+        if (!file_exists($destPath)) {
+            @mkdir($destPath, 0755, true);
+        }
+
+        // Logo oficial
+        if ($request->hasFile('logo_file') && $request->file('logo_file')->isValid()) {
+            $file = $request->file('logo_file');
+            $filename = 'logo_' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $request->input('siglas', 'cefi'))) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move($destPath, $filename);
+            $fields['cliente_logo_url'] = '/uploads/logos/' . $filename;
+            $fields['whatsapp_logo_url'] = asset('uploads/logos/' . $filename);
+        } elseif ($request->filled('logo_url')) {
+            $fields['cliente_logo_url'] = $request->input('logo_url');
+        }
+
+        // Banner oficial WhatsApp / Notificaciones
+        if ($request->hasFile('banner_file') && $request->file('banner_file')->isValid()) {
+            $file = $request->file('banner_file');
+            $filename = 'banner_' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $request->input('siglas', 'cefi'))) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move($destPath, $filename);
+            $fields['cliente_logo_banner_whatsapp'] = '/uploads/logos/' . $filename;
+        } elseif ($request->filled('banner_url')) {
+            $fields['cliente_logo_banner_whatsapp'] = $request->input('banner_url');
+        }
+
+        // Favicon
+        if ($request->hasFile('favicon_file') && $request->file('favicon_file')->isValid()) {
+            $file = $request->file('favicon_file');
+            $filename = 'favicon_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move($destPath, $filename);
+            $fields['cliente_favicon'] = '/uploads/logos/' . $filename;
+        } elseif ($request->filled('favicon_url')) {
+            $fields['cliente_favicon'] = $request->input('favicon_url');
+        }
+
+        // 5. Personalización y Activación Modular
+        if ($request->has('submitted_modules')) {
+            $allModules = array_keys(config('modules.modules', []));
+            $inputModules = $request->input('modules', []);
+
+            foreach ($allModules as $modKey) {
+                $isSet = isset($inputModules[$modKey]) && ($inputModules[$modKey] == '1' || $inputModules[$modKey] === true);
+                $fields['module_' . $modKey] = $isSet ? '1' : '0';
+            }
+        }
+
+        // 6. Seguridad: Clave de Acceso Superior
+        if ($request->filled('nueva_clave_maestra')) {
+            $fields['parametros_master_key'] = trim($request->input('nueva_clave_maestra'));
+        }
+
+        // Guardar todos los campos en configuracion_sistema
+        foreach ($fields as $clave => $valor) {
+            if ($valor !== null) {
+                ConfiguracionSistema::updateOrCreate(
+                    ['clave' => $clave],
+                    ['valor' => (string)$valor]
+                );
+            }
+        }
+
+        return redirect()->route('configuracion.index', ['tab' => $activeTab])
+            ->with('success', '¡Configuraciones de la plataforma actualizadas exitosamente!');
+    }
+
+    /**
+     * Prueba de conectividad con Webhook n8n.
+     */
+    public function testN8n(Request $request)
+    {
+        $url = trim($request->input('url', ''));
+
+        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'URL de Webhook n8n inválida o no proporcionada.'
+            ], 422);
+        }
+
+        try {
+            $payload = ClienteService::getN8nPayload('test_ping', [
+                'emisor'      => Auth::user()->nombre ?? 'Administrador',
+                'mensaje'     => 'Prueba de enlace desde Panel de Configuración Inbox CEFI',
+                'ambiente'    => config('app.env'),
+                'fecha_envio' => now()->toIso8601String()
+            ]);
+
+            $response = Http::timeout(8)->post($url, $payload);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'success' => true,
+                    'status'  => $response->status(),
+                    'message' => 'Respuesta exitosa de n8n (HTTP ' . $response->status() . '). Enlace verificado.',
+                    'data'    => $response->json() ?? $response->body()
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'status'  => $response->status(),
+                'message' => 'n8n respondió con error HTTP ' . $response->status() . ': ' . substr($response->body(), 0, 200)
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fallo al contactar el servidor n8n: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Prueba de envío o enlace de WhatsApp.
+     */
+    public function testWhatsApp(Request $request)
+    {
+        $request->validate([
+            'destinatario' => 'required|string',
+            'mensaje'      => 'required|string'
+        ]);
+
+        $res = WhatsAppService::sendTo($request->destinatario, $request->mensaje);
+        return response()->json($res);
+    }
+
+    // =========================================================================
+    // MÉTODOS DE COMPATIBILIDAD CON VISTAS Y RUTAS ANTERIORES
+    // =========================================================================
+
+    public function parametros()
+    {
+        return redirect()->route('configuracion.index', ['tab' => 'parametros']);
+    }
+
+    public function guardarParametros(Request $request)
+    {
+        return $this->guardar($request);
+    }
+
+    public function accederParametros(Request $request)
+    {
+        return $this->acceder($request);
+    }
+
+    public function salirParametros()
+    {
+        return $this->salir();
+    }
+
     public function alertas()
     {
         $config = ConfiguracionSistema::pluck('valor', 'clave')->all();
-
-        // Asegurar que existan claves básicas en el arreglo
         $config['whatsapp_phone'] = $config['whatsapp_phone'] ?? '';
         $config['whatsapp_api_key'] = $config['whatsapp_api_key'] ?? '';
         $config['inventario_alert_email'] = $config['inventario_alert_email'] ?? '';
@@ -22,21 +342,18 @@ class ConfiguracionController extends Controller
         return view('configuracion.alertas', compact('config'));
     }
 
-    /**
-     * Guarda las configuraciones de alertas de WhatsApp e email.
-     */
     public function guardarAlertas(Request $request)
     {
         $request->validate([
-            'whatsapp_phone' => 'nullable|string',
-            'whatsapp_api_key' => 'nullable|string',
+            'whatsapp_phone'         => 'nullable|string',
+            'whatsapp_api_key'       => 'nullable|string',
             'inventario_alert_email' => 'nullable|email'
         ]);
 
         $updates = [
-            'whatsapp_phone' => preg_replace('/[^0-9]/', '', $request->whatsapp_phone),
-            'whatsapp_api_key' => trim($request->whatsapp_api_key),
-            'inventario_alert_email' => trim($request->inventario_alert_email)
+            'whatsapp_phone'         => preg_replace('/[^0-9]/', '', (string)$request->whatsapp_phone),
+            'whatsapp_api_key'       => trim((string)$request->whatsapp_api_key),
+            'inventario_alert_email' => trim((string)$request->inventario_alert_email)
         ];
 
         foreach ($updates as $clave => $valor) {
@@ -51,8 +368,8 @@ class ConfiguracionController extends Controller
 
     public function conocimientoAi()
     {
-        if (!\Illuminate\Support\Facades\Schema::hasTable('base_conocimiento_inbox_ai')) {
-            \Illuminate\Support\Facades\Schema::create('base_conocimiento_inbox_ai', function ($table) {
+        if (!Schema::hasTable('base_conocimiento_inbox_ai')) {
+            Schema::create('base_conocimiento_inbox_ai', function ($table) {
                 $table->id();
                 $table->string('pregunta');
                 $table->text('palabras_clave')->nullable();
@@ -64,7 +381,7 @@ class ConfiguracionController extends Controller
             });
         }
 
-        $conocimientos = \DB::table('base_conocimiento_inbox_ai')->orderBy('id', 'desc')->get();
+        $conocimientos = DB::table('base_conocimiento_inbox_ai')->orderBy('id', 'desc')->get();
         return view('configuracion.conocimiento_ai', compact('conocimientos'));
     }
 
@@ -89,12 +406,12 @@ class ConfiguracionController extends Controller
         }
 
         $data = [
-            'pregunta' => $pregunta,
+            'pregunta'       => $pregunta,
             'palabras_clave' => $palabras_clave,
-            'respuesta' => $respuesta,
-            'categoria' => $categoria,
-            'estado' => $estado,
-            'updated_at' => now()
+            'respuesta'      => $respuesta,
+            'categoria'      => $categoria,
+            'estado'         => $estado,
+            'updated_at'     => now()
         ];
 
         if (!empty($imagen_name)) {
@@ -102,11 +419,11 @@ class ConfiguracionController extends Controller
         }
 
         if ($id > 0) {
-            \DB::table('base_conocimiento_inbox_ai')->where('id', $id)->update($data);
+            DB::table('base_conocimiento_inbox_ai')->where('id', $id)->update($data);
             $msg = 'Conocimiento actualizado exitosamente.';
         } else {
             $data['created_at'] = now();
-            \DB::table('base_conocimiento_inbox_ai')->insert($data);
+            DB::table('base_conocimiento_inbox_ai')->insert($data);
             $msg = 'Nuevo conocimiento registrado para Inbox AI 2.0.';
         }
 
@@ -115,151 +432,7 @@ class ConfiguracionController extends Controller
 
     public function eliminarConocimientoAi($id)
     {
-        \DB::table('base_conocimiento_inbox_ai')->where('id', $id)->delete();
+        DB::table('base_conocimiento_inbox_ai')->where('id', $id)->delete();
         return redirect()->route('configuracion.conocimiento_ai')->with('success', 'Registro de conocimiento eliminado.');
-    }
-
-    /**
-     * Muestra la interfaz de Parámetros del Sistema, Identidad y Logotipo con control de acceso superior.
-     */
-    public function parametros()
-    {
-        if (!session('parametros_auth', false)) {
-            return view('configuracion.parametros_login');
-        }
-
-        $cliente = \App\Services\ClienteService::all();
-        $configDb = ConfiguracionSistema::pluck('valor', 'clave')->all();
-
-        return view('configuracion.parametros', compact('cliente', 'configDb'));
-    }
-
-    /**
-     * Valida la clave de acceso superior para desbloquear la sesión de parámetros.
-     */
-    public function accederParametros(Request $request)
-    {
-        $request->validate(['clave_acceso' => 'required|string']);
-        $masterKey = config('cliente.moodle_key', 'cefi2026');
-        $customKey = ConfiguracionSistema::where('clave', 'parametros_master_key')->value('valor');
-
-        if (
-            ($customKey && $request->clave_acceso === $customKey) ||
-            $request->clave_acceso === $masterKey ||
-            $request->clave_acceso === 'cefi2026' ||
-            $request->clave_acceso === 'Medrano_2027_inbox' ||
-            $request->clave_acceso === 'unela2026'
-        ) {
-            session(['parametros_auth' => true]);
-            return redirect()->route('configuracion.parametros');
-        }
-
-        return redirect()->route('configuracion.parametros')->with('error', 'Clave de seguridad superior incorrecta.');
-    }
-
-    /**
-     * Cierra la sesión de parámetros del sistema y vuelve al Dashboard.
-     */
-    public function salirParametros()
-    {
-        session()->forget('parametros_auth');
-        return redirect()->route('dashboard')->with('success', 'Sesión de parámetros del sistema bloqueada.');
-    }
-
-    /**
-     * Procesa y guarda los parámetros del sistema, logotipos y enlaces institucionales.
-     */
-    public function guardarParametros(Request $request)
-    {
-        if (!session('parametros_auth', false)) {
-            return redirect()->route('configuracion.parametros')->with('error', 'Debe identificarse con la clave de acceso superior.');
-        }
-
-        $request->validate([
-            'nombre' => 'required|string|max:100',
-            'nombre_legal' => 'nullable|string|max:255',
-            'siglas' => 'nullable|string|max:50',
-            'slogan' => 'nullable|string|max:255',
-            'telefono' => 'nullable|string|max:50',
-            'telefono_display' => 'nullable|string|max:50',
-            'email_soporte' => 'nullable|email|max:100',
-            'email_finanzas' => 'nullable|email|max:100',
-            'email_contacto' => 'nullable|email|max:100',
-            'direccion' => 'nullable|string|max:255',
-            'sitio_web' => 'nullable|url|max:255',
-            'campus_virtual' => 'nullable|url|max:255',
-            'moodle_key' => 'nullable|string|max:100',
-            'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:4096',
-            'banner_file' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:4096',
-            'whatsapp_phone' => 'nullable|string|max:50',
-            'whatsapp_api_key' => 'nullable|string|max:255',
-            'nueva_clave_maestra' => 'nullable|string|min:4|max:100',
-        ]);
-
-        $fields = [
-            'cliente_nombre' => $request->input('nombre'),
-            'cliente_nombre_legal' => $request->input('nombre_legal'),
-            'cliente_siglas' => $request->input('siglas'),
-            'cliente_slogan' => $request->input('slogan'),
-            'cliente_telefono' => preg_replace('/[^0-9]/', '', (string)$request->input('telefono')),
-            'cliente_telefono_display' => $request->input('telefono_display'),
-            'cliente_email_soporte' => $request->input('email_soporte'),
-            'cliente_email_finanzas' => $request->input('email_finanzas'),
-            'cliente_email_contacto' => $request->input('email_contacto'),
-            'cliente_direccion' => $request->input('direccion'),
-            'cliente_sitio_web' => $request->input('sitio_web'),
-            'cliente_campus_virtual' => $request->input('campus_virtual'),
-            'cliente_moodle_key' => $request->input('moodle_key'),
-            'whatsapp_phone' => preg_replace('/[^0-9]/', '', (string)$request->input('whatsapp_phone')),
-            'whatsapp_api_key' => $request->input('whatsapp_api_key'),
-        ];
-
-        // Subida de Logo oficial
-        if ($request->hasFile('logo_file') && $request->file('logo_file')->isValid()) {
-            $file = $request->file('logo_file');
-            $filename = 'logo_' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $request->input('siglas', 'cefi'))) . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $destPath = public_path('uploads/logos');
-            if (!file_exists($destPath)) {
-                @mkdir($destPath, 0755, true);
-            }
-            $file->move($destPath, $filename);
-            $fields['cliente_logo_url'] = '/uploads/logos/' . $filename;
-            $fields['whatsapp_logo_url'] = asset('uploads/logos/' . $filename);
-        } elseif ($request->filled('logo_url')) {
-            $fields['cliente_logo_url'] = $request->input('logo_url');
-        }
-
-        // Subida de Banner oficial
-        if ($request->hasFile('banner_file') && $request->file('banner_file')->isValid()) {
-            $file = $request->file('banner_file');
-            $filename = 'banner_' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $request->input('siglas', 'cefi'))) . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $destPath = public_path('uploads/logos');
-            if (!file_exists($destPath)) {
-                @mkdir($destPath, 0755, true);
-            }
-            $file->move($destPath, $filename);
-            $fields['cliente_logo_banner_whatsapp'] = '/uploads/logos/' . $filename;
-        } elseif ($request->filled('banner_url')) {
-            $fields['cliente_logo_banner_whatsapp'] = $request->input('banner_url');
-        }
-
-        foreach ($fields as $k => $v) {
-            if ($v !== null) {
-                ConfiguracionSistema::updateOrCreate(
-                    ['clave' => $k],
-                    ['valor' => (string)$v]
-                );
-            }
-        }
-
-        // Actualización de clave maestra si fue suministrada
-        if ($request->filled('nueva_clave_maestra')) {
-            ConfiguracionSistema::updateOrCreate(
-                ['clave' => 'parametros_master_key'],
-                ['valor' => trim($request->input('nueva_clave_maestra'))]
-            );
-        }
-
-        return redirect()->route('configuracion.parametros')->with('success', 'Parámetros del sistema y logotipo actualizados correctamente.');
     }
 }

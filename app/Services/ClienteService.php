@@ -24,15 +24,40 @@ class ClienteService
 
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
-                $dbItems = ConfiguracionSistema::where('clave', 'like', 'cliente_%')
-                    ->pluck('valor', 'clave')
-                    ->all();
+                $dbItems = ConfiguracionSistema::pluck('valor', 'clave')->all();
 
                 foreach ($dbItems as $k => $val) {
-                    $prop = str_replace('cliente_', '', $k);
-                    if (!empty($val)) {
-                        $base[$prop] = $val;
+                    if (str_starts_with($k, 'cliente_')) {
+                        $prop = str_replace('cliente_', '', $k);
+                        if (!empty($val)) {
+                            $base[$prop] = $val;
+                        }
                     }
+                }
+
+                // Overrides para n8n
+                if (!empty($dbItems['n8n_webhook_base_url'])) {
+                    $base['n8n']['webhook_base_url'] = $dbItems['n8n_webhook_base_url'];
+                }
+                if (!empty($dbItems['n8n_webhook_morosidad_url'])) {
+                    $base['n8n']['webhook_morosidad'] = $dbItems['n8n_webhook_morosidad_url'];
+                }
+                if (!empty($dbItems['n8n_webhook_recordatorio_url'])) {
+                    $base['n8n']['webhook_recordatorio'] = $dbItems['n8n_webhook_recordatorio_url'];
+                }
+                if (!empty($dbItems['n8n_webhook_campana_url'])) {
+                    $base['n8n']['webhook_campana'] = $dbItems['n8n_webhook_campana_url'];
+                }
+
+                // Overrides para WhatsApp / Evolution API
+                if (!empty($dbItems['evolution_api_url'])) {
+                    $base['whatsapp']['api_url'] = $dbItems['evolution_api_url'];
+                }
+                if (!empty($dbItems['evolution_api_key'])) {
+                    $base['whatsapp']['api_key'] = $dbItems['evolution_api_key'];
+                }
+                if (!empty($dbItems['evolution_instance'])) {
+                    $base['whatsapp']['instance_name'] = $dbItems['evolution_instance'];
                 }
             }
         } catch (\Throwable $e) {

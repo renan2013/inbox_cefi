@@ -423,7 +423,6 @@
                              @module('whatsapp_n8n')
                              <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('whatsapp.campanas.index') }}"><i class="bi bi-megaphone-fill text-warning me-2"></i> Difusión y Campañas WhatsApp</a></li>
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('marketing.prospectos.index') }}"><i class="bi bi-person-lines-fill text-primary me-2"></i> Base de Prospectos (Marketing)</a></li>
-                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.whatsapp') }}"><i class="bi bi-whatsapp text-success me-2"></i> Suite WhatsApp & VPS</a></li>
                              @endmodule
                         </ul>
                     </li>
@@ -490,11 +489,35 @@
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('reportes.index') }}"><i class="bi bi-file-earmark-pdf"></i> Reportes del Sistema</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('utilitarios.index') }}"><i class="bi bi-tools"></i> Utilitarios</a></li>
-                            @if(Auth::check() && Auth::user()->id_rol == 1)
-                            <li><hr class="dropdown-divider-custom"></li>
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.parametros') }}"><i class="bi bi-gear-wide-connected text-success"></i> Parámetros del Sistema & Logo</a></li>
-                            @endif
                             @endmodule
+                        </ul>
+                    </li>
+                    @endif
+
+                    <!-- Configuración Dropdown (Solo Administrador General con Clave) -->
+                    @if(Auth::check() && Auth::user()->id_rol == 1)
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-custom dropdown-toggle {{ Request::is('configuracion*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: #6ee7b7 !important; font-weight: 700;">
+                            <i class="bi bi-sliders2-vertical me-1"></i> Configuración
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark-custom dropdown-menu-end">
+                            <li><h6 class="dropdown-header-custom"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Administración General</h6></li>
+                            <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('configuracion.index') }}"><i class="bi bi-speedometer2 text-info me-2"></i> Panel de Configuración</a></li>
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'parametros']) }}"><i class="bi bi-buildings text-primary me-2"></i> Parámetros del Sistema</a></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'identidad']) }}"><i class="bi bi-palette text-warning me-2"></i> Logotipo e Identidad</a></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'n8n']) }}"><i class="bi bi-diagram-3-fill text-success me-2"></i> Parámetros n8n & WhatsApp</a></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'modulos']) }}"><i class="bi bi-toggles2 text-danger me-2"></i> Módulos y Personalización</a></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'seguridad']) }}"><i class="bi bi-key-fill text-info me-2"></i> Clave Maestra Superior</a></li>
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li>
+                                <form action="{{ route('configuracion.salir') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item dropdown-item-custom text-danger">
+                                        <i class="bi bi-lock-fill me-2"></i> Bloquear Acceso Seguro
+                                    </button>
+                                </form>
+                            </li>
                         </ul>
                     </li>
                     @endif
@@ -503,7 +526,7 @@
                 <!-- User Profile & Logout -->
                 <div class="d-flex align-items-center">
                     @if(Auth::check() && Auth::user()->id_rol == 1)
-                    <a href="{{ route('configuracion.parametros') }}" class="btn btn-outline-secondary rounded-circle me-2" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-color: var(--border-dark); color: var(--text-muted);" title="Parámetros del Sistema e Identidad">
+                    <a href="{{ route('configuracion.index') }}" class="btn btn-outline-secondary rounded-circle me-2" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-color: var(--border-dark); color: #6ee7b7;" title="Configuración de la Plataforma">
                         <i class="bi bi-gear-fill"></i>
                     </a>
                     @endif
