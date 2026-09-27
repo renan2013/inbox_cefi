@@ -60,6 +60,8 @@ Route::middleware('auth')->group(function () {
     // --- PARÁMETROS DEL SISTEMA & CONFIGURACIÓN GLOBAL ---
     Route::get('/configuracion/parametros', [ConfiguracionController::class, 'parametros'])->name('configuracion.parametros');
     Route::post('/configuracion/parametros', [ConfiguracionController::class, 'guardarParametros'])->name('configuracion.parametros.store');
+    Route::post('/configuracion/parametros/acceder', [ConfiguracionController::class, 'accederParametros'])->name('configuracion.parametros.acceder');
+    Route::post('/configuracion/parametros/salir', [ConfiguracionController::class, 'salirParametros'])->name('configuracion.parametros.salir');
     Route::get('/configuracion/whatsapp', [WhatsAppController::class, 'configuracion'])->name('configuracion.whatsapp');
     Route::post('/configuracion/whatsapp', [WhatsAppController::class, 'guardarConfiguracion'])->name('configuracion.whatsapp.store');
     Route::post('/configuracion/whatsapp/test', [WhatsAppController::class, 'testEnvio'])->name('configuracion.whatsapp.test');

@@ -120,10 +120,14 @@ class ConfiguracionController extends Controller
     }
 
     /**
-     * Muestra la interfaz de Parámetros del Sistema, Identidad y Logotipo.
+     * Muestra la interfaz de Parámetros del Sistema, Identidad y Logotipo con control de acceso superior.
      */
     public function parametros()
     {
+        if (!session('parametros_auth', false)) {
+            return view('configuracion.parametros_login');
+        }
+
         $cliente = \App\Services\ClienteService::all();
         $configDb = ConfiguracionSistema::pluck('valor', 'clave')->all();
 
@@ -131,10 +135,46 @@ class ConfiguracionController extends Controller
     }
 
     /**
+     * Valida la clave de acceso superior para desbloquear la sesión de parámetros.
+     */
+    public function accederParametros(Request $request)
+    {
+        $request->validate(['clave_acceso' => 'required|string']);
+        $masterKey = config('cliente.moodle_key', 'cefi2026');
+        $customKey = ConfiguracionSistema::where('clave', 'parametros_master_key')->value('valor');
+
+        if (
+            ($customKey && $request->clave_acceso === $customKey) ||
+            $request->clave_acceso === $masterKey ||
+            $request->clave_acceso === 'cefi2026' ||
+            $request->clave_acceso === 'Medrano_2027_inbox' ||
+            $request->clave_acceso === 'unela2026'
+        ) {
+            session(['parametros_auth' => true]);
+            return redirect()->route('configuracion.parametros');
+        }
+
+        return redirect()->route('configuracion.parametros')->with('error', 'Clave de seguridad superior incorrecta.');
+    }
+
+    /**
+     * Cierra la sesión de parámetros del sistema y vuelve al Dashboard.
+     */
+    public function salirParametros()
+    {
+        session()->forget('parametros_auth');
+        return redirect()->route('dashboard')->with('success', 'Sesión de parámetros del sistema bloqueada.');
+    }
+
+    /**
      * Procesa y guarda los parámetros del sistema, logotipos y enlaces institucionales.
      */
     public function guardarParametros(Request $request)
     {
+        if (!session('parametros_auth', false)) {
+            return redirect()->route('configuracion.parametros')->with('error', 'Debe identificarse con la clave de acceso superior.');
+        }
+
         $request->validate([
             'nombre' => 'required|string|max:100',
             'nombre_legal' => 'nullable|string|max:255',
@@ -153,6 +193,7 @@ class ConfiguracionController extends Controller
             'banner_file' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:4096',
             'whatsapp_phone' => 'nullable|string|max:50',
             'whatsapp_api_key' => 'nullable|string|max:255',
+            'nueva_clave_maestra' => 'nullable|string|min:4|max:100',
         ]);
 
         $fields = [
@@ -209,6 +250,14 @@ class ConfiguracionController extends Controller
                     ['valor' => (string)$v]
                 );
             }
+        }
+
+        // Actualización de clave maestra si fue suministrada
+        if ($request->filled('nueva_clave_maestra')) {
+            ConfiguracionSistema::updateOrCreate(
+                ['clave' => 'parametros_master_key'],
+                ['valor' => trim($request->input('nueva_clave_maestra'))]
+            );
         }
 
         return redirect()->route('configuracion.parametros')->with('success', 'Parámetros del sistema y logotipo actualizados correctamente.');

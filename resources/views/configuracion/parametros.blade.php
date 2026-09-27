@@ -106,6 +106,12 @@
             <p class="text-white-50 mb-0">Configure el logotipo oficial, la información institucional de la entidad, plataformas y canales oficiales.</p>
         </div>
         <div class="d-flex gap-2">
+            <form action="{{ route('configuracion.parametros.salir') }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-outline-danger rounded-pill px-3 py-2 d-flex align-items-center gap-1" title="Bloquear acceso seguro a parámetros">
+                    <i class="bi bi-shield-lock-fill"></i> Bloquear Acceso
+                </button>
+            </form>
             <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
                 <i class="bi bi-arrow-left me-1"></i> Volver al Dashboard
             </a>
@@ -296,6 +302,31 @@
                             <div class="col-md-6">
                                 <label class="form-label-custom">Token API de Alertas (Opcional)</label>
                                 <input type="text" name="whatsapp_api_key" class="form-control form-control-custom" value="{{ old('whatsapp_api_key', $configDb['whatsapp_api_key'] ?? '') }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seguridad & Clave de Acceso Superior -->
+                <div class="config-card">
+                    <div class="config-card-header">
+                        <i class="bi bi-shield-lock-fill text-danger fs-5"></i>
+                        <h5 class="fw-bold mb-0 text-white">Seguridad & Clave de Acceso Superior</h5>
+                    </div>
+                    <div class="config-card-body">
+                        <p class="text-white-50 small mb-3">
+                            Esta clave protege este módulo con un control superior para que únicamente el personal directivo o autorizado pueda modificar el logotipo y los parámetros institucionales.
+                        </p>
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label-custom">Nueva Clave de Acceso Superior</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-end-0" style="background-color: var(--card-dark); border-color: var(--border-dark); color: var(--text-muted);"><i class="bi bi-key-fill"></i></span>
+                                    <input type="password" name="nueva_clave_maestra" class="form-control form-control-custom border-start-0" placeholder="Dejar en blanco para conservar la clave actual" autocomplete="new-password">
+                                </div>
+                                <div class="form-text text-white-50 mt-1 small">
+                                    <i class="bi bi-info-circle me-1"></i>Deje en blanco si no desea cambiar la clave. Clave inicial estándar: <code class="text-info">cefi2026</code>.
+                                </div>
                             </div>
                         </div>
                     </div>
