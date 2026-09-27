@@ -185,7 +185,7 @@
         <div class="text-center">
             <img src="{{ asset('imgs/SVG/logo_color.svg') }}" alt="Inbox BPM" class="brand-logo">
             <h1 class="welcome-text">¡Hola de nuevo!</h1>
-            <p class="subtitle-text">Ingresa tus credenciales para continuar</p>
+            <p class="subtitle-text">Ingresa tus credenciales para continuar.</p>
         </div>
 
         @if ($errors->any())
