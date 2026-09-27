@@ -17,27 +17,25 @@ return [
     'modules' => [
         // --- NÚCLEO Y PRODUCTIVIDAD ---
         'dashboard' => env('MODULE_DASHBOARD', true),
-        'tareas_gantt' => env('MODULE_TAREAS_GANTT', true),
+        'tareas_gantt' => env('MODULE_TAREAS_GANTT', false),
 
-        // --- GESTIÓN ACADÉMICA Y DOCENTE ---
+        // --- GESTIÓN ACADÉMICA Y DOCENTE (CONTRATADO) ---
         'gestion_cursos' => env('MODULE_GESTION_CURSOS', true),
         'registro_academico' => env('MODULE_REGISTRO_ACADEMICO', true),
         'expedientes_360' => env('MODULE_EXPEDIENTES_360', true),
         'moodle_sync' => env('MODULE_MOODLE_SYNC', true),
-        'estudiante_tcu' => env('MODULE_ESTUDIANTE_TCU', true),
+        'estudiante_tcu' => env('MODULE_ESTUDIANTE_TCU', false),
 
-        // --- FACTURACIÓN Y FINANZAS ---
+        // --- FACTURACIÓN Y FINANZAS (CONTRATADO) ---
         'boletas_matricula' => env('MODULE_BOLETAS_MATRICULA', true),
         'finanzas' => env('MODULE_FINANZAS', true),
 
-        // --- LOGÍSTICA Y OPERACIONES ---
-        'inventario' => env('MODULE_INVENTARIO', true),
-        'planilla' => env('MODULE_PLANILLA', true),
-
-        // --- SOPORTE Y AUTOMATIZACIÓN ---
-        'soporte' => env('MODULE_SOPORTE', true),
-        'whatsapp_n8n' => env('MODULE_WHATSAPP_N8N', true),
-        'inbox_ai' => env('MODULE_INBOX_AI', true),
+        // --- NO CONTRATADO POR CEFI (OCULTOS / DESACTIVADOS) ---
+        'inventario' => env('MODULE_INVENTARIO', false),
+        'planilla' => env('MODULE_PLANILLA', false),
+        'soporte' => env('MODULE_SOPORTE', false),
+        'whatsapp_n8n' => env('MODULE_WHATSAPP_N8N', false),
+        'inbox_ai' => env('MODULE_INBOX_AI', false),
     ],
 
     /*
