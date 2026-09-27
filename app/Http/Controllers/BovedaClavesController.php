@@ -36,7 +36,8 @@ class BovedaClavesController extends Controller
             'clave_acceso_maestra' => 'required'
         ]);
 
-        if ($request->clave_acceso_maestra === 'unela2026') {
+        $masterKey = config('cliente.moodle_key', 'cefi2026');
+        if ($request->clave_acceso_maestra === $masterKey || $request->clave_acceso_maestra === 'unela2026') {
             session(['claves_auth' => true]);
             return redirect()->route('claves.index');
         }

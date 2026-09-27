@@ -169,7 +169,7 @@
         <div class="alert alert-warning border-0 rounded-4 d-flex align-items-start mb-4" style="background-color: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2) !important;">
             <i class="bi bi-info-circle-fill fs-4 me-3 mt-1"></i>
             <div>
-                <strong>Nota Importante:</strong> Antes de crear el expediente digital, es necesario crear el usuario en <strong><a href="https://unela.ac.cr/virtual" target="_blank" style="color: inherit; text-decoration: underline;">Unela Virtual</a></strong>, ya que los usuarios de CEFI Virtual se sincronizan con Inbox.
+                <strong>Nota Importante:</strong> Antes de crear el expediente digital, es necesario crear el usuario en <strong><a href="{{ config('cliente.campus_virtual', '#') }}" target="_blank" style="color: inherit; text-decoration: underline;">{{ config('cliente.nombre', 'CEFI') }} Virtual</a></strong>, ya que los usuarios del campus virtual se sincronizan con Inbox.
             </div>
         </div>
 

@@ -47,26 +47,29 @@ class WhatsAppService
             'n8n_webhook_recordatorio_url'
         ])->pluck('valor', 'clave')->all();
 
+        $clienteCfg = ClienteService::all();
+
         return [
-            'evolution_url' => !empty($configMap['evolution_api_url']) ? $configMap['evolution_api_url'] : 'http://93.127.215.91:8080',
-            'evolution_key' => !empty($configMap['evolution_api_key']) ? $configMap['evolution_api_key'] : 'RenanEvolution2026_KeySecret!',
-            'evolution_instance' => !empty($configMap['evolution_instance']) ? $configMap['evolution_instance'] : 'renan_whatsapp',
-            'n8n_campana_webhook' => !empty($configMap['n8n_webhook_campana_url']) ? $configMap['n8n_webhook_campana_url'] : '',
+            'evolution_url' => !empty($configMap['evolution_api_url']) ? $configMap['evolution_api_url'] : ($clienteCfg['whatsapp']['api_url'] ?? 'http://93.127.215.91:8080'),
+            'evolution_key' => !empty($configMap['evolution_api_key']) ? $configMap['evolution_api_key'] : ($clienteCfg['whatsapp']['api_key'] ?? 'RenanEvolution2026_KeySecret!'),
+            'evolution_instance' => !empty($configMap['evolution_instance']) ? $configMap['evolution_instance'] : ($clienteCfg['whatsapp']['instance_name'] ?? 'cefi_whatsapp'),
+            'n8n_campana_webhook' => !empty($configMap['n8n_webhook_campana_url']) ? $configMap['n8n_webhook_campana_url'] : ($clienteCfg['n8n']['webhook_campana'] ?? ''),
             'url' => !empty($configMap['green_api_url']) ? $configMap['green_api_url'] : 'https://7107.api.greenapi.com',
             'instance' => !empty($configMap['green_api_instance']) ? $configMap['green_api_instance'] : '710722714932',
             'token' => !empty($configMap['green_api_token']) ? $configMap['green_api_token'] : '5239b260fd484deb853ddd1789d534509409e8737a7b43fbb2',
             'adjuntar_logo' => isset($configMap['whatsapp_adjuntar_logo']) ? ($configMap['whatsapp_adjuntar_logo'] === '1') : true,
-            'logo_url' => !empty($configMap['whatsapp_logo_url']) ? $configMap['whatsapp_logo_url'] : 'https://unela.org/bpm_unela/imgs/logo_unela_banner.jpg',
-            'admin_phone' => !empty($configMap['whatsapp_phone']) ? $configMap['whatsapp_phone'] : '50687777849',
-            'n8n_webhook' => !empty($configMap['n8n_webhook_recordatorio_url']) ? $configMap['n8n_webhook_recordatorio_url'] : ''
+            'logo_url' => !empty($configMap['whatsapp_logo_url']) ? $configMap['whatsapp_logo_url'] : ClienteService::bannerWhatsappUrl(),
+            'admin_phone' => !empty($configMap['whatsapp_phone']) ? $configMap['whatsapp_phone'] : ClienteService::telefono(),
+            'n8n_webhook' => !empty($configMap['n8n_webhook_recordatorio_url']) ? $configMap['n8n_webhook_recordatorio_url'] : ($clienteCfg['n8n']['webhook_recordatorio'] ?? '')
         ];
     }
 
     /**
      * Envía mensaje directamente usando Evolution API (VPS propio).
      */
-    public static function sendViaEvolutionApi($recipientPhone, string $message, ?string $mediaUrl = null, string $fileName = 'flyer_unela.jpg'): array
+    public static function sendViaEvolutionApi($recipientPhone, string $message, ?string $mediaUrl = null, ?string $fileName = null): array
     {
+        $fileName = $fileName ?: ('comunicado_' . ClienteService::id() . '.jpg');
         $cleanPhone = self::normalizarTelefono($recipientPhone);
         if (empty($cleanPhone) || empty(trim($message))) {
             return [
@@ -189,7 +192,7 @@ class WhatsAppService
                 $payloadImage = json_encode([
                     'chatId' => $cleanPhone . '@c.us',
                     'urlFile' => $logoUrl,
-                    'fileName' => 'logo_unela.png',
+                    'fileName' => 'logo_' . ClienteService::id() . '.png',
                     'caption' => $message
                 ]);
 
@@ -337,14 +340,16 @@ class WhatsAppService
             }
 
             $totalGeneral = number_format($totalCapital + $totalMora, 2);
+            $nombreInstitucion = ClienteService::nombre();
+            $firmaLegal = ClienteService::nombreLegal();
 
-            $customMessage = "🏛️ *UNIVERSIDAD UNELA - Departamento de Finanzas*\n\n" .
+            $customMessage = "🏛️ *{$nombreInstitucion} - Departamento de Finanzas*\n\n" .
                              "Estimado(a) estudiante *" . $nombre . "*,\n\n" .
                              "Le saludamos cordialmente. Nos comunicamos para informarle que mantiene cuota(s) vencidas con recargo de mora acumulada:\n\n" .
                              $detalleTxt . "\n" .
                              "📊 *Total Vencido a la fecha:* ¢" . $totalGeneral . "\n\n" .
                              "Le invitamos a realizar su pago vía Sinpe Móvil o transferencia bancaria y remitir su comprobante para mantener sus servicios académicos activos.\n\n" .
-                             "_Universidad Evangélica de las Américas - Control de Morosidad_";
+                             "_{$firmaLegal} - Control de Morosidad_";
         }
 
         $directWaUrl = "https://api.whatsapp.com/send?phone=" . $phoneClean . "&text=" . urlencode($customMessage);
@@ -383,21 +388,24 @@ class WhatsAppService
         $estado = $boleta->estado;
         $token = $boleta->token_firma ?? '';
 
+        $nombreInstitucion = ClienteService::nombre();
+        $firmaLegal = ClienteService::nombreLegal();
+
         if ($estado === 'pendiente_firma' && !empty($token)) {
             $linkFirma = url("/boleta/firmar/{$token}");
-            $mensaje = "🏛️ *UNIVERSIDAD UNELA - Boleta de Matrícula*\n\n" .
+            $mensaje = "🏛️ *{$nombreInstitucion} - Boleta de Matrícula*\n\n" .
                        "Estimado(a) estudiante *" . $nombre . "*,\n\n" .
                        "Se ha emitido su Boleta de Matrícula *" . $numBoleta . "* para el período *" . $periodo . "*.\n\n" .
                        "✍️ *Firma Digital Requerida:*\n" .
                        "Por favor ingrese al siguiente enlace oficial para estampar su firma digital de conformidad:\n" .
                        $linkFirma . "\n\n" .
-                       "_Departamento de Registro y Finanzas - Universidad UNELA_";
+                       "_Departamento de Registro y Finanzas - {$nombreInstitucion}_";
         } else {
             $total = number_format($boleta->total, 2);
             $saldo = number_format($boleta->saldo_pendiente, 2);
             $pdfLink = route('boletas.pdf', $boleta->id);
 
-            $mensaje = "🏛️ *UNIVERSIDAD UNELA - Comprobante de Matrícula*\n\n" .
+            $mensaje = "🏛️ *{$nombreInstitucion} - Comprobante de Matrícula*\n\n" .
                        "Estimado(a) estudiante *" . $nombre . "*,\n\n" .
                        "Le compartimos el estado oficial de su Boleta *" . $numBoleta . "* (Período: " . $periodo . "):\n\n" .
                        "• *Total Facturado:* ¢" . $total . "\n" .
@@ -405,7 +413,7 @@ class WhatsAppService
                        "• *Estado:* " . strtoupper(str_replace('_', ' ', $estado)) . "\n\n" .
                        "📄 *Ver Boleta Oficial en PDF:*\n" .
                        $pdfLink . "\n\n" .
-                       "_Universidad Evangélica de las Américas_";
+                       "_{$firmaLegal}_";
         }
 
         $directWaUrl = "https://api.whatsapp.com/send?phone=" . $phoneClean . "&text=" . urlencode($mensaje);

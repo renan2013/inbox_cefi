@@ -216,7 +216,8 @@ class SoporteController extends Controller
             'clave' => 'required'
         ]);
 
-        if ($request->clave !== 'unela2026') {
+        $masterKey = config('cliente.moodle_key', 'cefi2026');
+        if ($request->clave !== $masterKey && $request->clave !== 'unela2026') {
             return redirect()->route('soporte.categorias')->with('error', 'Clave de confirmación incorrecta. Categoría no eliminada.');
         }
 

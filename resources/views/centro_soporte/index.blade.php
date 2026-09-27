@@ -242,7 +242,7 @@
                                                     <button type="button" 
                                                         class="btn btn-sm btn-outline-success rounded-pill px-3 btn-compartir-wa" 
                                                         style="border-color: #25D366; color: #25D366;"
-                                                        data-plataforma="{{ $c->nombre_plataforma ?: 'UNELA VIRTUAL' }}"
+                                                        data-plataforma="{{ $c->nombre_plataforma ?: (config('cliente.nombre', 'CEFI') . ' VIRTUAL') }}"
                                                         data-usuario="{{ $c->usuario }}"
                                                         data-clave="{{ $c->clave }}"
                                                         data-link="{{ $c->link_acceso ?: '' }}"
@@ -519,7 +519,7 @@
         }
 
         function compartirWhatsApp(plataforma, usuario, clave, link, tipo_accion, attendee, notas) {
-            let titulo = (plataforma || 'UNELA VIRTUAL').toUpperCase();
+            let titulo = (plataforma || ("{{ config('cliente.nombre', 'CEFI') }} VIRTUAL")).toUpperCase();
             let ahora = new Date();
             let fechaHora = ahora.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -529,7 +529,7 @@
                           `🔑 CLAVE: *${clave || ''}*\n` +
                           `────────────────`;
             
-            mensaje += (link && link.trim() !== '') ? `\n\n🔗 *Link de acceso:* ${link}` : `\n\n🔗 *Link de acceso:* https://unela.ac.cr/virtual`;
+            mensaje += (link && link.trim() !== '') ? `\n\n🔗 *Link de acceso:* ${link}` : `\n\n🔗 *Link de acceso:* {{ config('cliente.campus_virtual', 'https://virtual.cefi.cr') }}`;
             if (notas && notas.trim() !== '') mensaje += `\n\n📝 *Notas:* ${notas}`;
             
             mensaje += `\n\n_Atendido por: ${attendee || 'Soporte'} el ${fechaHora}_`;

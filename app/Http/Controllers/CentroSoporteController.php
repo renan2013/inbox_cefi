@@ -156,7 +156,8 @@ class CentroSoporteController extends Controller
             'clave' => 'required'
         ]);
 
-        if ($request->clave !== 'unela2026') {
+        $masterKey = config('cliente.moodle_key', 'cefi2026');
+        if ($request->clave !== $masterKey && $request->clave !== 'unela2026') {
             return redirect()->route('centro_soporte.index')->with('error', 'Clave incorrecta. Registro no eliminado.');
         }
 

@@ -520,7 +520,8 @@ class MisCursosController extends Controller
         $key = $request->input('key');
         $id_moodle = $request->input('id_moodle');
 
-        if ($key !== 'unela2026') {
+        $masterKey = config('cliente.moodle_key', 'cefi2026');
+        if ($key !== $masterKey && $key !== 'unela2026') {
             return response()->json(['success' => false, 'message' => 'Palabra clave de validación incorrecta o ausente.']);
         }
 
@@ -529,8 +530,8 @@ class MisCursosController extends Controller
         // Guardar ID Moodle en el curso
         $curso->update(['id_moodle' => $id_moodle]);
 
-        $auth_token = "ef5bde9afb1fdd026330058ec405a30e";
-        $bridge_url = "https://unela.ac.cr/virtual/webservice/moodle_bridge.php";
+        $auth_token = env('MOODLE_TOKEN', 'ef5bde9afb1fdd026330058ec405a30e');
+        $bridge_url = rtrim(config('cliente.campus_virtual', 'https://virtual.cefi.cr'), '/') . '/webservice/moodle_bridge.php';
 
         try {
             $response = Http::timeout(30)->get($bridge_url, [
@@ -970,9 +971,10 @@ class MisCursosController extends Controller
         if ($curso->id_moodle > 0 && file_exists(public_path('uploads/portadas/miniatura_curso_' . $id . '.png'))) {
             $miniatura_base64 = base64_encode(file_get_contents(public_path('uploads/portadas/miniatura_curso_' . $id . '.png')));
             
+            $bridge_img_url = rtrim(config('cliente.campus_virtual', 'https://virtual.cefi.cr'), '/') . '/moodle_bridge.php';
             try {
-                Http::withoutVerifying()->timeout(15)->post('https://unela.ac.cr/virtual/moodle_bridge.php', [
-                    'token' => 'ef5bde9afb1fdd026330058ec405a30e',
+                Http::withoutVerifying()->timeout(15)->post($bridge_img_url, [
+                    'token' => env('MOODLE_TOKEN', 'ef5bde9afb1fdd026330058ec405a30e'),
                     'action' => 'set_course_image',
                     'courseid' => $curso->id_moodle,
                     'image_base64' => $miniatura_base64,

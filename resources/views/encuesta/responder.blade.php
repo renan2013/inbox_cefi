@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encuesta de Evaluación Docente — UNELA</title>
-    <meta name="description" content="Formulario de evaluación anónima del desempeño docente y calidad del curso. Universidad UNELA.">
+    <title>Encuesta de Evaluación Docente — {{ config('cliente.nombre', 'CEFI') }}</title>
+    <meta name="description" content="Formulario de evaluación anónima del desempeño docente y calidad del curso. {{ config('cliente.nombre_legal', 'CEFI') }}.">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -158,7 +158,7 @@
     <div class="enc-header">
         <div class="container" style="max-width: 780px;">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="badge-unela"><i class="bi bi-mortarboard-fill me-1"></i> UNELA Virtual</span>
+                <span class="badge-unela"><i class="bi bi-mortarboard-fill me-1"></i> {{ config('cliente.nombre', 'CEFI') }} Virtual</span>
                 <span class="badge" style="background: rgba(0,0,0,0.25); color: #fff; font-size: 11px; border-radius: 50px;">
                     <i class="bi bi-shield-lock-fill me-1"></i> 100% Anónima
                 </span>

@@ -20,7 +20,7 @@ class InboxAiController extends Controller
 
         $user = Auth::user();
         $user_name = $user ? trim(($user->nombre ?? '') . ' ' . ($user->apellidos ?? '')) : 'Usuario BPM';
-        $user_email = $user->email ?? 'usuario@unela.org';
+        $user_email = $user->email ?? ('usuario@' . config('cliente.id', 'cefi') . '.cr');
         $q_lower = mb_strtolower($query);
 
         // URL base absoluta garantizada de la aplicación
@@ -142,13 +142,15 @@ class InboxAiController extends Controller
                 'query' => $query,
                 'user_name' => $user_name,
                 'user_email' => $user_email,
+                'client_id' => config('cliente.id', 'cefi'),
+                'client_name' => config('cliente.nombre', 'CEFI'),
                 'context' => [
                     'total_deudores' => $total_deudores,
                     'total_vencido' => $total_vencido,
                     'total_cursos_activos' => $total_cursos_activos
                 ],
                 'timestamp' => now()->toIso8601String(),
-                'origen' => 'bpm_unela_laravel_2.0'
+                'origen' => 'bpm_' . config('cliente.id', 'cefi') . '_laravel_2.0'
             ]);
 
             if ($response->successful()) {
@@ -163,7 +165,8 @@ class InboxAiController extends Controller
         } catch (\Exception $e) {}
 
         // 4. PRIORIDAD 4: Respuesta por defecto limpia
-        $default_reply = "Entendí tu consulta sobre *\"{$query}\"*. ¿Podrías ser un poco más específico con tu pregunta? Puedo ayudarte a redactar contenidos o guiarte en cualquier módulo del sistema BPM de UNELA.";
+        $nombreCliente = config('cliente.nombre', 'CEFI');
+        $default_reply = "Entendí tu consulta sobre *\"{$query}\"*. ¿Podrías ser un poco más específico con tu pregunta? Puedo ayudarte a redactar contenidos o guiarte en cualquier módulo del sistema BPM de {$nombreCliente}.";
         return response()->json(['reply' => $default_reply]);
     }
 }

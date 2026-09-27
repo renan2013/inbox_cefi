@@ -34,7 +34,7 @@ class EncuestaController extends Controller
 
         $curso = CursoActivo::with(['planEstudio.programa', 'profesor'])->find($id_curso);
 
-        $moodle_url = config('services.moodle.url', 'https://unela.ac.cr/virtual');
+        $moodle_url = config('cliente.campus_virtual', config('services.moodle.url', 'https://virtual.cefi.cr'));
         $moodle_course_id = intval($curso->id_moodle ?? 0);
         $moodle_return_url = $moodle_course_id > 0
             ? rtrim($moodle_url, '/') . '/course/view.php?id=' . $moodle_course_id
@@ -141,7 +141,7 @@ class EncuestaController extends Controller
             $session_key = 'enc_resp_' . $id_curso;
             $request->session()->put($session_key, true);
 
-            $moodle_url = config('services.moodle.url', 'https://unela.ac.cr/virtual');
+            $moodle_url = config('cliente.campus_virtual', config('services.moodle.url', 'https://virtual.cefi.cr'));
             $moodle_course_id = intval($curso->id_moodle ?? 0);
             $return_url = $moodle_course_id > 0
                 ? rtrim($moodle_url, '/') . '/course/view.php?id=' . $moodle_course_id
@@ -450,10 +450,12 @@ class EncuestaController extends Controller
 
         $url_encuesta = url('/encuesta/' . $id_curso);
         $nombre_encuesta = "📋 Encuesta de Evaluación Docente — " . ($curso->planEstudio->materia ?? 'Curso');
-        $intro_encuesta = '<div style="font-family:sans-serif;padding:14px 18px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-left:5px solid #16a34a;border-radius:10px;margin-bottom:6px;"><p style="margin:0 0 6px;font-size:14px;color:#166534;">📋 <strong>Encuesta de Evaluación Docente</strong></p><p style="margin:0;font-size:13px;color:#15803d;">Estimado estudiante, haz clic en el <strong>enlace de arriba</strong> para completar la <strong>encuesta de evaluación docente</strong> de forma anónima. Tu opinión es muy importante para mejorar la calidad académica de UNELA. ¡Gracias por participar!</p></div>';
+        $nombreInstitucion = config('cliente.nombre', 'CEFI');
+        $intro_encuesta = '<div style="font-family:sans-serif;padding:14px 18px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-left:5px solid #16a34a;border-radius:10px;margin-bottom:6px;"><p style="margin:0 0 6px;font-size:14px;color:#166534;">📋 <strong>Encuesta de Evaluación Docente</strong></p><p style="margin:0;font-size:13px;color:#15803d;">Estimado estudiante, haz clic en el <strong>enlace de arriba</strong> para completar la <strong>encuesta de evaluación docente</strong> de forma anónima. Tu opinión es muy importante para mejorar la calidad académica de ' . $nombreInstitucion . '. ¡Gracias por participar!</p></div>';
 
+        $bridgeUrl = rtrim(config('cliente.campus_virtual', 'https://virtual.cefi.cr'), '/') . '/webservice/moodle_bridge.php';
         try {
-            $response = Http::withoutVerifying()->timeout(30)->post('https://unela.ac.cr/virtual/webservice/moodle_bridge.php', [
+            $response = Http::withoutVerifying()->timeout(30)->post($bridgeUrl, [
                 'token' => 'ef5bde9afb1fdd026330058ec405a30e',
                 'action' => 'create_act',
                 'courseid' => $id_moodle,

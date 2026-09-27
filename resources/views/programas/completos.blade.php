@@ -83,7 +83,7 @@
         <div class="page-header d-flex justify-content-between align-items-center flex-wrap g-3">
             <div>
                 <h1 class="display-6 fw-bold mb-1">Estructura de Programas Académicos</h1>
-                <p class="text-white-50 mb-0">Vista detallada de la oferta académica actual de UNELA y sus mallas curriculares correspondientes.</p>
+                <p class="text-white-50 mb-0">Vista detallada de la oferta académica actual de {{ config('cliente.nombre', 'CEFI') }} y sus mallas curriculares correspondientes.</p>
             </div>
         </div>
 

@@ -526,7 +526,7 @@
                             <span class="tag-chip" onclick="insertTag('{nombre}')"><i class="bi bi-plus"></i> {nombre}</span>
                             <span class="tag-chip" onclick="insertTag('{apellidos}')"><i class="bi bi-plus"></i> {apellidos}</span>
                             <span class="tag-chip" onclick="insertTag('{nombre_completo}')"><i class="bi bi-plus"></i> {nombre_completo}</span>
-                            <span class="tag-chip" onclick="insertTag('🏛️ *UNIVERSIDAD UNELA*')">Encabezado</span>
+                            <span class="tag-chip" onclick="insertTag('🏛️ *{{ config('cliente.nombre', 'CEFI') }}*')">Encabezado</span>
                             <span class="tag-chip" onclick="insertTag('📲 *INFO*')">Llamado a la acción</span>
                         </div>
                     </div>
@@ -589,9 +589,9 @@
 
                 <!-- Cabecera Chat WhatsApp -->
                 <div class="wa-chat-header">
-                    <img src="{{ asset('imgs/logo_unela_color.png') }}" alt="UNELA" class="wa-chat-avatar" id="simAvatar">
+                    <img src="{{ $config['logo_url'] ?? asset('imgs/logo.png') }}" alt="{{ config('cliente.nombre', 'CEFI') }}" class="wa-chat-avatar" id="simAvatar">
                     <div class="flex-grow-1 overflow-hidden">
-                        <div class="fw-bold small text-truncate" style="color: #ffffff !important;">Universidad UNELA</div>
+                        <div class="fw-bold small text-truncate" style="color: #ffffff !important;">{{ config('cliente.nombre', 'CEFI') }}</div>
                         <div style="font-size: 0.72rem; color: #aebac1 !important;"><i class="bi bi-circle-fill text-success" style="font-size: 0.55rem;"></i> en línea</div>
                     </div>
                     <div class="d-flex gap-3 text-white-50 fs-6">
@@ -610,7 +610,7 @@
 
                     <!-- Burbuja con Flyer y Texto Dinámico -->
                     <div class="wa-bubble">
-                        <img src="{{ asset('imgs/logo_unela_color.png') }}" 
+                        <img src="{{ $config['logo_url'] ?? asset('imgs/logo.png') }}" 
                              alt="Flyer Publicitario" class="wa-bubble-img" id="simFlyerImg">
                         <div class="wa-bubble-text" id="simBubbleText">Cargando vista previa...</div>
                         <div class="wa-bubble-meta">

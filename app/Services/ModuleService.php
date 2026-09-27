@@ -4,21 +4,39 @@ namespace App\Services;
 
 class ModuleService
 {
+    protected static array $runtimeCache = [];
+
     /**
-     * Comprueba si un módulo está habilitado en la configuración.
+     * Comprueba si un módulo está habilitado en la configuración o base de datos.
      *
      * @param string $moduleKey Clave del módulo (ej: 'inventario', 'finanzas')
      * @return bool
      */
     public static function isEnabled(string $moduleKey): bool
     {
+        if (isset(self::$runtimeCache[$moduleKey])) {
+            return self::$runtimeCache[$moduleKey];
+        }
+
+        // 1. Revisar si hay override específico en base de datos
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
+                $dbVal = \App\Models\ConfiguracionSistema::where('clave', 'module_' . $moduleKey)->value('valor');
+                if ($dbVal !== null) {
+                    return self::$runtimeCache[$moduleKey] = in_array((string)$dbVal, ['1', 'true', 'yes'], true);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Continuar con config si BD no está accesible aún
+        }
+
         $modules = config('modules.modules', []);
 
         if (!array_key_exists($moduleKey, $modules)) {
-            return true; // Por defecto disponible si no se ha restringido
+            return self::$runtimeCache[$moduleKey] = true; // Por defecto disponible si no se ha restringido
         }
 
-        return (bool)$modules[$moduleKey];
+        return self::$runtimeCache[$moduleKey] = (bool)$modules[$moduleKey];
     }
 
     /**

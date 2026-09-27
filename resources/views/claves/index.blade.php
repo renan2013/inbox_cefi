@@ -93,7 +93,7 @@
         <div class="page-header d-flex justify-content-between align-items-center flex-wrap g-3">
             <div>
                 <h1 class="display-6 fw-bold mb-1"><i class="bi bi-shield-lock-fill text-success me-2"></i> Gestión de Claves</h1>
-                <p class="text-white-50 mb-0">Administración de contraseñas de portales institucionales de UNELA.</p>
+                <p class="text-white-50 mb-0">Administración de contraseñas de portales institucionales de {{ config('cliente.nombre', 'CEFI') }}.</p>
             </div>
             <div class="d-flex gap-2">
                 <button class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#crearClaveModal" style="background-color: var(--primary); border: none;">

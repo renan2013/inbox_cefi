@@ -90,7 +90,7 @@
             <div class="credencial-card">
                 
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-3">
-                    <span class="logo-text"><i class="bi bi-mortarboard-fill me-1"></i> UNELA</span>
+                    <span class="logo-text"><i class="bi bi-mortarboard-fill me-1"></i> {{ config('cliente.nombre', 'CEFI') }}</span>
                     <span class="badge bg-success bg-opacity-20 text-success rounded-pill px-3 py-1.5 fw-bold border border-success border-opacity-25">CREDENTIAL</span>
                 </div>
 

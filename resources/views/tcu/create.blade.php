@@ -90,7 +90,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label-custom">Lugar de Realización *</label>
-                            <input type="text" name="lugar_realizacion" class="form-control form-control-custom w-100" placeholder="Ej: Oficinas centrales de UNELA" required>
+                            <input type="text" name="lugar_realizacion" class="form-control form-control-custom w-100" placeholder="Ej: Oficinas centrales de {{ config('cliente.nombre', 'CEFI') }}" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label-custom">Institución / Comunidad Beneficiada *</label>

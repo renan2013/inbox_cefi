@@ -53,7 +53,7 @@ class DescriptorPDF extends FPDF
         $this->SetY(-15);
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(148, 163, 184);
-        $this->Cell(100, 10, $this->toPdf('Documento Oficial de Plan de Estudios - UNELA'), 0, 0, 'L');
+        $this->Cell(100, 10, $this->toPdf('Documento Oficial de Plan de Estudios - ' . config('cliente.nombre', 'CEFI')), 0, 0, 'L');
         $this->Cell(0, 10, $this->toPdf('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'R');
     }
 
@@ -188,13 +188,16 @@ class DescriptorPdfService
         $pdf->SetMargins(12, 12, 12);
         $pdf->AddPage();
 
-        // Logo
-        $logo_unela = public_path('imgs/logo_unela_color.png');
-        if (!file_exists($logo_unela)) {
-            $logo_unela = dirname(base_path()) . '/imgs/logo_unela_color.png';
+        // Logo oficial del cliente
+        $logo_cliente = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
+        if (!file_exists($logo_cliente)) {
+            $logo_cliente = public_path('imgs/logo.png');
         }
-        if (file_exists($logo_unela)) {
-            $pdf->Image($logo_unela, 80, 15, 50);
+        if (!file_exists($logo_cliente)) {
+            $logo_cliente = public_path('imgs/logo_unela_color.png');
+        }
+        if (file_exists($logo_cliente)) {
+            $pdf->Image($logo_cliente, 80, 15, 50);
         }
 
         $pdf->SetY(38);

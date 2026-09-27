@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Expedientes Digitales 360° - UNELA')
+@section('title', 'Expedientes Digitales 360° - ' . config('cliente.nombre', 'CEFI'))
 
 @section('content')
 <div class="container-fluid px-4 py-4">

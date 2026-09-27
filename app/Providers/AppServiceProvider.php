@@ -31,5 +31,8 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('unlessmodule', function (string $moduleKey) {
             return !ModuleService::isEnabled($moduleKey);
         });
+
+        // Compartir el servicio de cliente para fácil uso en Blade: {{ $cliente::nombre() }}
+        \Illuminate\Support\Facades\View::share('cliente', \App\Services\ClienteService::class);
     }
 }

@@ -60,11 +60,13 @@ class LoginController extends Controller
                 $date_cr = new \DateTime("now", new \DateTimeZone("America/Costa_Rica"));
                 $n8n_webhook_url = config('app.n8n_webhook_url', 'https://n8n.renangalvan.net/webhook/ingreso-sistema');
                 $n8n_data = [
+                    "client_id" => config('cliente.id', 'cefi'),
+                    "client_name" => config('cliente.nombre', 'CEFI'),
                     "nombre" => trim(($user->nombre ?? '') . ' ' . ($user->apellidos ?? '')),
                     "email" => $user->email,
                     "id_rol" => $user->id_rol ?? 2,
                     "fecha" => $date_cr->format("Y-m-d H:i:s"),
-                    "origen" => "sistema_bpm_unela"
+                    "origen" => "sistema_bpm_" . config('cliente.id', 'cefi')
                 ];
 
                 $ch = curl_init($n8n_webhook_url);

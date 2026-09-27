@@ -6,6 +6,7 @@ use App\Models\ConfiguracionSistema;
 use App\Models\MarketingProspecto;
 use App\Models\Programa;
 use App\Models\Usuario;
+use App\Services\ClienteService;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,17 +43,20 @@ class CampanaWhatsAppController extends Controller
 
         $config = WhatsAppService::getConfig();
 
+        $nombreInstitucion = ClienteService::nombre();
+        $sloganInstitucion = ClienteService::slogan() ?: 'Excelencia y Liderazgo Académico';
+
         // Plantilla predeterminada de lanzamiento
-        $plantillaDefault = "🏛️ *UNIVERSIDAD UNELA - Nueva Oferta Académica*\n\n" .
+        $plantillaDefault = "🏛️ *{$nombreInstitucion} - Nueva Oferta Académica*\n\n" .
                             "¡Hola {nombre}! Esperamos que te encuentres muy bien.\n\n" .
-                            "Nos alegra presentarte nuestra *Nueva Oferta Académica y Programas Especializados* diseñados para impulsar tu crecimiento profesional y ministerial.\n\n" .
-                            "✨ *Beneficios Exclusivos para Estudiantes y Graduados:*\n" .
+                            "Nos alegra presentarte nuestra *Nueva Oferta Académica y Programas Especializados* diseñados para impulsar tu crecimiento profesional.\n\n" .
+                            "✨ *Beneficios Exclusivos:*\n" .
                             "• Modalidad 100% virtual y flexible.\n" .
                             "• Convalidaciones directas y planes de pago en cuotas.\n" .
-                            "• Certificación universitaria internacional.\n\n" .
+                            "• Certificación oficial.\n\n" .
                             "📲 *¿Deseas conocer los detalles del plan de estudios y matrícula?*\n" .
                             "Responde a este mensaje con la palabra *INFO* o contáctanos directamente a admisiones.\n\n" .
-                            "_Universidad Evangélica de las Américas - Formando Líderes para el Mundo_";
+                            "_{$nombreInstitucion} - {$sloganInstitucion}_";
 
         return view('configuracion.campanas', compact(
             'programas',
@@ -312,6 +316,8 @@ class CampanaWhatsAppController extends Controller
         $webhookN8n = $cfg['n8n_campana_webhook'] ?: ($request->input('webhook_n8n_override') ?: 'https://n8n.renangalvan.net/webhook/campana-whatsapp');
 
         $payload = [
+            'client_id' => ClienteService::id(),
+            'client_name' => ClienteService::nombre(),
             'campana_id' => 'CAMP-' . date('Ymd-His'),
             'titulo' => $request->titulo_campana,
             'fecha_lanzamiento' => now()->toIso8601String(),

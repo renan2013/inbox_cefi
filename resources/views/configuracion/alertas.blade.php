@@ -144,7 +144,7 @@
 
                             <div class="mb-5">
                                 <label for="inventario_alert_email" class="form-label-custom">Correo Destinatario de Reportes</label>
-                                <input type="email" name="inventario_alert_email" id="inventario_alert_email" class="form-control form-control-custom w-100" placeholder="ejemplo@unela.ac.cr" value="{{ old('inventario_alert_email', $config['inventario_alert_email']) }}">
+                                <input type="email" name="inventario_alert_email" id="inventario_alert_email" class="form-control form-control-custom w-100" placeholder="alertas@{{ config('cliente.id', 'cefi') }}.cr" value="{{ old('inventario_alert_email', $config['inventario_alert_email']) }}">
                             </div>
 
                             <button type="submit" class="btn btn-submit w-100 py-3 shadow">

@@ -193,7 +193,7 @@ class ExpedienteController extends Controller
         if (strlen($phoneWa) === 8) {
             $phoneWa = "506" . $phoneWa;
         }
-        $linkWa = !empty($phoneWa) ? "https://wa.me/{$phoneWa}?text=" . urlencode("Hola " . ($usuario->nombre ?? 'Estudiante') . ", le saludamos de Registro Académico de UNELA.") : "#";
+        $linkWa = !empty($phoneWa) ? "https://wa.me/{$phoneWa}?text=" . urlencode("Hola " . ($usuario->nombre ?? 'Estudiante') . ", le saludamos de Registro Académico de " . config('cliente.nombre', 'CEFI') . ".") : "#";
 
         // Categorías para bóveda
         $categoriasBoveda = ExpedienteStorageService::CATEGORIAS;

@@ -439,12 +439,14 @@
         const timeStr = dateNow.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         const header = `Estimado(a) profesor(a) *${profesor}*:\n\n`;
-        const footer = `\n------------------------------------------\n🔔 Acceso Inbox:\nhttps://unela.org/bpm_unela/\n\n🔔 Atendido por: ${senderName}\n🕒 Hora de envío: ${timeStr}`;
+        const footer = `\n------------------------------------------\n🔔 Acceso Inbox:\n{{ url('/') }}\n\n🔔 Atendido por: ${senderName}\n🕒 Hora de envío: ${timeStr}`;
+
+        const campusName = "{{ config('cliente.nombre', 'CEFI') }} Virtual";
 
         const templates = {
-            'apertura': `${header}Le informamos formalmente sobre la apertura de su curso:\n\n🔔 *Curso:* ${codigo} - ${curso}\n🔔 *Programa:* ${programa}\n📅 *Inicio de Lecciones:* ${fechaInicio || 'Por definir'}\n🕒 *Horario:* ${horario}\n\nFavor proceder con la revisión de su sílabo para iniciar con el montaje en Unela Virtual. ¡Muchos éxitos!${footer}`,
-            'moodle_act': `${header}Le informamos que el curso *${curso}* ya se encuentra habilitado en Unela Virtual. Favor verificar el montaje de materiales y la debida configuración de actividades bien programadas (tareas, foros, etc.).${footer}`,
-            'estudiantes': `${header}Le informamos que los estudiantes del curso *${curso}* han sido matriculados en Inbox y ya han sido sincronizados con Unela Virtual, para que pueda realizar al término del curso todo el proceso final de calificaciones.${footer}`,
+            'apertura': `${header}Le informamos formalmente sobre la apertura de su curso:\n\n🔔 *Curso:* ${codigo} - ${curso}\n🔔 *Programa:* ${programa}\n📅 *Inicio de Lecciones:* ${fechaInicio || 'Por definir'}\n🕒 *Horario:* ${horario}\n\nFavor proceder con la revisión de su sílabo para iniciar con el montaje en ${campusName}. ¡Muchos éxitos!${footer}`,
+            'moodle_act': `${header}Le informamos que el curso *${curso}* ya se encuentra habilitado en ${campusName}. Favor verificar el montaje de materiales y la debida configuración de actividades bien programadas (tareas, foros, etc.).${footer}`,
+            'estudiantes': `${header}Le informamos que los estudiantes del curso *${curso}* han sido matriculados en Inbox y ya han sido sincronizados con ${campusName}, para que pueda realizar al término del curso todo el proceso final de calificaciones.${footer}`,
             'calificaciones': `${header}Se le recuerda mantener las calificaciones de los estudiantes al día en la plataforma para el curso *${curso}*, asegurando el envío oportuno de las notas parciales.${footer}`,
             'acta': `${header}Se le solicita cordialmente el envío del acta final de calificaciones para el curso *${curso}*, una vez que todas las notas hayan sido notificadas a los estudiantes.${footer}`,
             'pago': `${header}Estimado(a) profesor(a), le informamos que el pago por impartir el curso *${curso}* ha sido procesado exitosamente, tras cumplir con todos los hitos de calidad académica. ¡Muchas gracias!${footer}`,

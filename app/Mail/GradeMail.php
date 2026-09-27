@@ -87,7 +87,7 @@ class GradeMail extends Mailable
                         <p>Si tiene alguna duda, por favor comuníquese con su profesor o con el departamento de registro.</p>
                     </div>
                     <div class="footer">
-                        <p>&copy; ' . date('Y') . ' Universidad Evangélica de las Américas (UNELA). Todos los derechos reservados.</p>
+                        <p>&copy; ' . date('Y') . ' ' . config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')) . '. Todos los derechos reservados.</p>
                     </div>
                 </div>
             </body>

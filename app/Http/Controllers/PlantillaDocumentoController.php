@@ -315,8 +315,9 @@ class PlantillaDocumentoController extends Controller
             }
 
             if ($tipo === 'qr' || $tipo === 'qr_info') {
-                $txt_qr = ($tipo === 'qr') ? ($valores_dinamicos[0] ?? 'UNELA') :
-                    "Nombre: " . ($valores_dinamicos[0] ?? '') . "\nUniv: " . ($request->input('qr_universidad', 'UNELA')) . "\nPer: " . ($request->input('qr_periodo', '')) . "\nEst: " . ($request->input('qr_estado', ''));
+                $nombreInst = config('cliente.nombre', 'CEFI');
+                $txt_qr = ($tipo === 'qr') ? ($valores_dinamicos[0] ?? $nombreInst) :
+                    "Nombre: " . ($valores_dinamicos[0] ?? '') . "\nUniv: " . ($request->input('qr_universidad', $nombreInst)) . "\nPer: " . ($request->input('qr_periodo', '')) . "\nEst: " . ($request->input('qr_estado', ''));
                 $url_qr = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($txt_qr);
                 $qr_data = @file_get_contents($url_qr);
                 if ($qr_data) {
@@ -443,8 +444,9 @@ class PlantillaDocumentoController extends Controller
             }
 
             if ($tipo === 'qr' || $tipo === 'qr_info') {
-                $txt_qr = ($tipo === 'qr') ? ($valores_dinamicos[0] ?? 'UNELA') :
-                    "Nombre: " . ($valores_dinamicos[0] ?? '') . "\nUniv: " . ($request->input('qr_universidad', 'UNELA')) . "\nPer: " . ($request->input('qr_periodo', '')) . "\nEst: " . ($request->input('qr_estado', ''));
+                $nombreInst = config('cliente.nombre', 'CEFI');
+                $txt_qr = ($tipo === 'qr') ? ($valores_dinamicos[0] ?? $nombreInst) :
+                    "Nombre: " . ($valores_dinamicos[0] ?? '') . "\nUniv: " . ($request->input('qr_universidad', $nombreInst)) . "\nPer: " . ($request->input('qr_periodo', '')) . "\nEst: " . ($request->input('qr_estado', ''));
                 $url_qr = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($txt_qr);
                 $qr_data = @file_get_contents($url_qr);
                 if ($qr_data) {

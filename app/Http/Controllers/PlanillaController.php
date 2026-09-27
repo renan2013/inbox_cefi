@@ -211,8 +211,9 @@ class PlanillaController extends Controller
             $vencido = Carbon::parse($user_data->vigencia_credencial)->isPast();
         }
 
-        // Generar Token
-        $qr_token = md5($id_usuario . 'unela_qr_secret_token_2026');
+        // Generar Token seguro para credencial QR
+        $qr_secret = config('app.key') ?: 'inbox_qr_secret_' . config('cliente.id', 'cefi');
+        $qr_token = md5($id_usuario . $qr_secret);
 
         $qr_payload = json_encode([
             "id" => $id_usuario,
@@ -243,9 +244,11 @@ class PlanillaController extends Controller
             'token' => 'required|string'
         ]);
 
-        $expected_token = md5($request->id_usuario . 'unela_qr_secret_token_2026');
+        $qr_secret = config('app.key') ?: 'inbox_qr_secret_' . config('cliente.id', 'cefi');
+        $expected_token = md5($request->id_usuario . $qr_secret);
+        $legacy_token = md5($request->id_usuario . 'unela_qr_secret_token_2026');
 
-        if ($request->token !== $expected_token) {
+        if ($request->token !== $expected_token && $request->token !== $legacy_token) {
             return response()->json(['success' => false, 'message' => 'Firma del código QR inválida. Acceso rechazado.']);
         }
 

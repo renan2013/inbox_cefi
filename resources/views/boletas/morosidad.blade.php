@@ -515,7 +515,10 @@
         <div id="contenedor_deudores">
             @forelse ($deudores as $deudor)
                 @php
-                    $banner_url = 'https://unela.org/bpm_unela/imgs/logo_unela_banner.jpg';
+                    $banner_url = asset(config('cliente.logo_banner_whatsapp', 'imgs/fondo_defecto_notificacion.png'));
+                    $nombreCliente = config('cliente.nombre', 'CEFI');
+                    $telefonoSinpe = config('cliente.telefono_display', '+506 8777-7849');
+                    $urlInbox = url('/');
 
                     // Pre-construir desglose de cuotas vencidas
                     $detalles_texto = "";
@@ -526,9 +529,9 @@
                     $primer_nombre = explode(' ', trim($deudor['nombre']))[0] ?? $deudor['nombre'];
 
                     // Plantilla oficial con logotipo garantizado para WhatsApp Web
-                    $wa_message = "https://unela.org/bpm_unela/\n\n";
+                    $wa_message = $urlInbox . "\n\n";
                     $wa_message .= "Estimado/a *" . $primer_nombre . "*,\n\n";
-                    $wa_message .= "Le saludamos cordialmente de parte de la Universidad UNELA.\n\n";
+                    $wa_message .= "Le saludamos cordialmente de parte de " . $nombreCliente . ".\n\n";
                     $wa_message .= "Le informamos que a la fecha presenta cuota(s) pendiente(s) de colegiatura con recargo por mora acumulada al " . ($tasa_interes_mora ?? '2.0') . "% diario:\n\n";
                     $wa_message .= "*Detalle de Cuotas Pendientes:*\n";
                     $wa_message .= $detalles_texto . "\n";
@@ -536,13 +539,13 @@
                     $wa_message .= "   • Capital pendiente: ₡" . number_format($deudor['total_capital'], 2) . "\n";
                     $wa_message .= "   • Recargos por mora: ₡" . number_format($deudor['total_mora'], 2) . "\n\n";
                     $wa_message .= "📌 *Medios de Pago Autorizados:*\n";
-                    $wa_message .= "• SINPE Móvil: 8777-7849\n";
+                    $wa_message .= "• SINPE Móvil: " . $telefonoSinpe . "\n";
                     $wa_message .= "• Transferencia bancaria (solicitar cuentas oficiales respondiendo a este mensaje)\n\n";
                     $wa_message .= "Agradecemos realizar su cancelación a la brevedad y remitir su comprobante por este medio.\n";
                     $wa_message .= "Si ya realizó su pago recientemente, por favor omita este recordatorio.\n\n";
                     $wa_message .= "------------------------------------------\n";
-                    $wa_message .= "🔔 *Acceso Inbox BPM - Universidad UNELA:*\n";
-                    $wa_message .= "https://unela.org/bpm_unela/\n\n";
+                    $wa_message .= "🔔 *Acceso Inbox BPM - " . $nombreCliente . ":*\n";
+                    $wa_message .= $urlInbox . "\n\n";
                     $wa_message .= "🔔 *Atendido por:* " . (auth()->user()->nombre ?? 'Dpto. Cobro') . " " . (auth()->user()->apellidos ?? '') . "\n";
                     $wa_message .= "🕒 *Hora de emisión:* " . date('g:i a');
 
@@ -752,7 +755,7 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        const BANNER_UNELA_URL = 'https://unela.org/bpm_unela/imgs/logo_unela_banner.jpg';
+        const BANNER_CLIENTE_URL = '{{ asset(config('cliente.logo_banner_whatsapp', 'imgs/fondo_defecto_notificacion.png')) }}';
 
         /**
          * Normaliza el número telefónico asegurando el prefijo de país.
@@ -772,8 +775,8 @@
          * Copia el mensaje al portapapeles en formato enriquecido (con el banner/logo institucional en HTML)
          * y en formato de texto plano con compatibilidad universal.
          */
-        async function copiarMensajeConLogo(texto, imgUrl = BANNER_UNELA_URL) {
-            const htmlContent = `<p><img src="${imgUrl}" alt="Universidad UNELA" style="max-width: 500px; height: auto; border-radius: 8px;"></p><div style="font-family: Arial, sans-serif; white-space: pre-wrap; font-size: 14px;">${texto.replace(/\n/g, '<br>')}</div>`;
+        async function copiarMensajeConLogo(texto, imgUrl = BANNER_CLIENTE_URL) {
+            const htmlContent = `<p><img src="${imgUrl}" alt="{{ config('cliente.nombre', 'CEFI') }}" style="max-width: 500px; height: auto; border-radius: 8px;"></p><div style="font-family: Arial, sans-serif; white-space: pre-wrap; font-size: 14px;">${texto.replace(/\n/g, '<br>')}</div>`;
 
             if (navigator.clipboard && window.ClipboardItem) {
                 try {
@@ -902,7 +905,7 @@
                             icon: 'success',
                             title: `¡Aviso Copiado para WhatsApp!`,
                             html: `
-                                <p class="mb-2 text-dark">El mensaje con membrete y logotipo de UNELA está en su portapapeles para <strong>${nombre}</strong>.</p>
+                                <p class="mb-2 text-dark">El mensaje con membrete y logotipo de {{ config('cliente.nombre', 'CEFI') }} está en su portapapeles para <strong>${nombre}</strong>.</p>
                                 <div class="p-3 bg-light rounded text-start small mb-3 border">
                                     <div><strong>Estudiante:</strong> ${nombre}</div>
                                     <div class="d-flex justify-content-between align-items-center mt-1">

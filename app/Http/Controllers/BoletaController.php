@@ -549,11 +549,12 @@ class BoletaController extends Controller
      */
     public function apiCuotasVencimiento(Request $request)
     {
-        $api_key_server = 'unela_n8n_secret_2026';
+        $clientMasterKey = config('cliente.moodle_key', 'cefi2026');
+        $api_key_server = env('N8N_API_KEY', $clientMasterKey);
         $provided_key = $request->get('key', $request->header('X-API-KEY', ''));
         $is_admin = auth()->check() && in_array(auth()->user()->id_rol, [1, 2]);
 
-        if (!$is_admin && $provided_key !== $api_key_server && $provided_key !== 'unela2026') {
+        if (!$is_admin && $provided_key !== $api_key_server && $provided_key !== $clientMasterKey && $provided_key !== 'unela2026') {
             return response()->json([
                 'success' => false,
                 'message' => 'No autorizado. Se requiere API Key o sesión de administrador.'
@@ -633,8 +634,10 @@ class BoletaController extends Controller
             $primer_nombre = explode(' ', trim($data['nombre']))[0] ?? $data['nombre'];
             $total_fmt = number_format($data['total_monto'], 2);
 
+            $nombreCliente = config('cliente.nombre', 'CEFI');
+
             if ($data['tiene_vencidas']) {
-                $msg = "Estimado/a *{$primer_nombre}*, de parte del Departamento Financiero de la Universidad UNELA le saludamos cordialmente.\n\n";
+                $msg = "Estimado/a *{$primer_nombre}*, de parte del Departamento Financiero de {$nombreCliente} le saludamos cordialmente.\n\n";
                 $msg .= "Le informamos que presenta cuota(s) vencida(s) de colegiatura con recargo por mora acumulada del 2% diario.\n\n";
                 $msg .= "*Desglose de Cuotas Pendientes:*\n";
                 foreach ($data['cuotas'] as $q) {
@@ -647,16 +650,16 @@ class BoletaController extends Controller
                     }
                 }
                 $msg .= "\n*Total a Cancelar:* ¢{$total_fmt}\n\n";
-                $msg .= "Le solicitamos realizar su pago a la brevedad para evitar la suspensión del acceso a Moodle y servicios académicos.";
+                $msg .= "Le solicitamos realizar su pago a la brevedad para evitar la suspensión del acceso al campus virtual y servicios académicos.";
             } else {
-                $msg = "Estimado/a *{$primer_nombre}*, de parte de la Universidad UNELA le recordamos que tiene cuota(s) de colegiatura próximas a vencer.\n\n";
+                $msg = "Estimado/a *{$primer_nombre}*, de parte de {$nombreCliente} le recordamos que tiene cuota(s) de colegiatura próximas a vencer.\n\n";
                 foreach ($data['cuotas'] as $q) {
                     $m_fmt = number_format($q['monto_total'], 2);
                     $v_fmt = date('d/m/Y', strtotime($q['fecha_vencimiento']));
                     $msg .= "• Cuota #{$q['numero_cuota']}: ¢{$m_fmt} (Vence el {$v_fmt})\n";
                 }
                 $msg .= "\n*Total a Pagar:* ¢{$total_fmt}\n\n";
-                $msg .= "Agradecemos realizar su pago oportunamente. ¡Que tenga un bendecido día!";
+                $msg .= "Agradecemos realizar su pago oportunamente. ¡Que tenga un excelente día!";
             }
 
             $data['mensaje_whatsapp'] = $msg;

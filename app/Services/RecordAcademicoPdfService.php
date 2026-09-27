@@ -10,10 +10,13 @@ class RecordPDF extends FPDF
 {
     function Header()
     {
-        // Logo oficial
-        $logoPath = public_path('imgs/logo_unela_color.png');
+        // Logo oficial del cliente
+        $logoPath = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
         if (!file_exists($logoPath)) {
-            $logoPath = dirname(base_path()) . '/imgs/logo_unela_color.png';
+            $logoPath = public_path('imgs/logo.png');
+        }
+        if (!file_exists($logoPath)) {
+            $logoPath = public_path('imgs/logo_unela_color.png');
         }
 
         if (file_exists($logoPath)) {
@@ -22,9 +25,9 @@ class RecordPDF extends FPDF
 
         // Títulos institucionales
         $this->SetFont('Arial', 'B', 14);
-        $this->SetTextColor(16, 102, 173); // Azul UNELA
+        $this->SetTextColor(16, 102, 173);
         $this->SetXY(58, 12);
-        $this->Cell(137, 6, $this->toPdf("UNIVERSIDAD EVANGÉLICA DE LAS AMÉRICAS"), 0, 1, 'L');
+        $this->Cell(137, 6, $this->toPdf(mb_strtoupper(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')))), 0, 1, 'L');
 
         $this->SetFont('Arial', 'B', 10);
         $this->SetTextColor(100, 116, 139);
@@ -52,7 +55,7 @@ class RecordPDF extends FPDF
         $this->SetY(-15);
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(148, 163, 184);
-        $this->Cell(90, 5, $this->toPdf("Documento Oficial Emitido por Sistema Inbox UNELA el " . date('d/m/Y g:i a')), 0, 0, 'L');
+        $this->Cell(90, 5, $this->toPdf("Documento Oficial Emitido por " . config('cliente.nombre', 'CEFI') . " el " . date('d/m/Y g:i a')), 0, 0, 'L');
         $this->Cell(90, 5, $this->toPdf("Página " . $this->PageNo() . " de {nb}"), 0, 0, 'R');
     }
 
@@ -265,7 +268,7 @@ class RecordAcademicoPdfService
         $pdf->SetX(125);
         $pdf->SetFont('Arial', '', 7.5);
         $pdf->SetTextColor(100, 116, 139);
-        $pdf->Cell(60, 4, $pdf->toPdf("UNELA Costa Rica"), 0, 0, 'C');
+        $pdf->Cell(60, 4, $pdf->toPdf(config('cliente.nombre', 'CEFI') . " - " . config('cliente.direccion', 'Costa Rica')), 0, 0, 'C');
 
         return $pdf->Output('S');
     }

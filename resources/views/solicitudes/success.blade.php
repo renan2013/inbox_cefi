@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscripción Exitosa - UNELA</title>
+    <title>Inscripción Exitosa - {{ config('cliente.nombre', 'CEFI') }}</title>
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -55,10 +55,10 @@
     <div class="success-card">
         <i class="bi bi-patch-check-fill success-icon"></i>
         <h2 class="fw-bold mb-3">¡Inscripción Recibida!</h2>
-        <p class="text-white-50 mb-4">Hemos registrado tu solicitud de admisión para el curso libre. Un asesor de UNELA se pondrá en contacto contigo muy pronto para formalizar tu ingreso.</p>
+        <p class="text-white-50 mb-4">Hemos registrado tu solicitud de admisión para el curso libre. Un asesor de {{ config('cliente.nombre', 'CEFI') }} se pondrá en contacto contigo muy pronto para formalizar tu ingreso.</p>
         <div class="d-grid">
-            <a href="https://unela.ac.cr" class="btn btn-success py-3 rounded-3 fw-bold" style="background-color: var(--primary); border: none;">
-                Volver a UNELA
+            <a href="{{ config('cliente.sitio_web', '#') }}" class="btn btn-success py-3 rounded-3 fw-bold" style="background-color: var(--primary); border: none;">
+                Volver a {{ config('cliente.nombre', 'CEFI') }}
             </a>
         </div>
     </div>

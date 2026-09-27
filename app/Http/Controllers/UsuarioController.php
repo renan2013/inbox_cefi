@@ -127,7 +127,7 @@ class UsuarioController extends Controller
             ], 422);
         }
 
-        // 2. Validar clave interna de administrador ('unela2026' o contraseña de la cuenta activa)
+        // 2. Validar clave interna de administrador (clave maestra o contraseña de la cuenta activa)
         $adminPassword = trim($request->input('admin_password', ''));
         if (empty($adminPassword)) {
             return response()->json([
@@ -136,8 +136,9 @@ class UsuarioController extends Controller
             ], 422);
         }
 
+        $masterKey = config('cliente.moodle_key', 'cefi2026');
         $claveValida = false;
-        if ($adminPassword === 'unela2026') {
+        if ($adminPassword === $masterKey || $adminPassword === 'unela2026') {
             $claveValida = true;
         } elseif (auth()->check() && Hash::check($adminPassword, auth()->user()->password)) {
             $claveValida = true;

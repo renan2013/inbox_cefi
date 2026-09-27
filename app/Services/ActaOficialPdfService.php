@@ -12,21 +12,24 @@ class ActaPDF extends FPDF
 {
     function Header()
     {
-        // Logo UNELA (Superior Izquierda)
-        $logo_unela = public_path('imgs/logo_unela_color.png');
-        if (!file_exists($logo_unela)) {
-            $logo_unela = dirname(base_path()) . '/imgs/logo_unela_color.png';
+        // Logo oficial del cliente (Superior Izquierda)
+        $logo_cliente = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
+        if (!file_exists($logo_cliente)) {
+            $logo_cliente = public_path('imgs/logo.png');
         }
-        if (file_exists($logo_unela)) {
-            $this->Image($logo_unela, 10, 10, 45);
+        if (!file_exists($logo_cliente)) {
+            $logo_cliente = public_path('imgs/logo_unela_color.png');
+        }
+        if (file_exists($logo_cliente)) {
+            $this->Image($logo_cliente, 10, 10, 45);
         }
 
         // Título y Nombre Institución (Derecha del logo)
         $this->SetY(12);
         $this->SetX(60);
         $this->SetFont('Arial', 'B', 11);
-        $this->SetTextColor(0, 51, 102); // Azul Oscuro UNELA
-        $this->Cell(0, 6, $this->toPdf('Universidad Evangélica de las Américas'), 0, 1, 'R');
+        $this->SetTextColor(0, 51, 102);
+        $this->Cell(0, 6, $this->toPdf(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'))), 0, 1, 'R');
         $this->SetX(60);
         $this->SetFont('Arial', 'B', 18);
         $this->Cell(0, 10, $this->toPdf('ACTA DE CALIFICACIONES'), 0, 1, 'R');

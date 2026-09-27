@@ -25,9 +25,12 @@ class DescriptorDocService
         }
 
         // Convertir logo a base64 para que Word lo renderice offline
-        $logo_path = public_path('imgs/logo_unela_color.png');
+        $logo_path = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
         if (!file_exists($logo_path)) {
-            $logo_path = dirname(base_path()) . '/imgs/logo_unela_color.png';
+            $logo_path = public_path('imgs/logo.png');
+        }
+        if (!file_exists($logo_path)) {
+            $logo_path = public_path('imgs/logo_unela_color.png');
         }
 
         $logo_base64 = '';
@@ -225,7 +228,7 @@ class DescriptorDocService
 
     <!-- PIE DE PÁGINA INSTITUCIONAL -->
     <div style='margin-top: 30pt; padding-top: 10pt; border-top: 1pt solid #cbd5e1; font-size: 8.5pt; color: #94a3b8; text-align: center;'>
-        UNELA — Universidad Evangélica de las Américas | Documento Descriptor Oficial de Curso
+        " . config('cliente.nombre', 'CEFI') . " — " . config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')) . " | Documento Descriptor Oficial de Curso
     </div>
 
 </div>

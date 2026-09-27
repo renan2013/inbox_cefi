@@ -145,7 +145,7 @@
                             <i class="bi bi-person-fill"></i>
                         </div>
                         <h4 class="fw-bold text-white mb-1" id="result-name">Nombre Colaborador</h4>
-                        <p class="text-white-50 small mb-4" id="result-email">email@unela.ac.cr</p>
+                        <p class="text-white-50 small mb-4" id="result-email">colaborador@{{ config('cliente.id', 'cefi') }}.cr</p>
                         
                         <div class="mb-3">
                             <div class="feedback-badge" id="result-badge">Marcado Exitoso</div>

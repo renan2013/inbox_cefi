@@ -166,7 +166,7 @@
                         <div class="form-check form-switch mb-3">
                             <input class="form-check-input" type="checkbox" name="whatsapp_adjuntar_logo" id="adjuntarLogoSwitch" {{ $config['adjuntar_logo'] ? 'checked' : '' }}>
                             <label class="form-check-label text-white fw-semibold" for="adjuntarLogoSwitch">
-                                Adjuntar imagen de encabezado UNELA en avisos de cobro y boletas
+                                Adjuntar imagen de encabezado institucional en avisos de cobro y boletas
                             </label>
                             <div class="text-white-50 small">Envía el mensaje como pie de foto (caption), garantizando fondo blanco sólido y aspecto institucional.</div>
                         </div>
@@ -219,7 +219,7 @@
 
                         <div class="mb-4">
                             <label class="form-label text-white-50 fw-semibold">Mensaje de Prueba</label>
-                            <textarea id="test_mensaje" class="form-control form-control-custom" rows="3" required>🏛️ *UNELA - Prueba de Conexión WhatsApp*\n\nEste es un mensaje de verificación enviado exitosamente desde Inbox BPM UNELA (Laravel).</textarea>
+                            <textarea id="test_mensaje" class="form-control form-control-custom" rows="3" required>🏛️ *{{ config('cliente.nombre', 'CEFI') }} - Prueba de Conexión WhatsApp*&#10;&#10;Este es un mensaje de verificación enviado exitosamente desde Inbox BPM (Laravel).</textarea>
                         </div>
 
                         <button type="submit" class="btn btn-outline-success w-100 py-2 fw-bold">
@@ -234,7 +234,7 @@
                         <i class="bi bi-eye text-primary me-2"></i>Vista Previa del Banner Activo
                     </h5>
                     <div class="logo-preview-box mb-3">
-                        <img src="{{ $config['logo_url'] }}" alt="Logo UNELA Banner" id="imgBannerPreview">
+                        <img src="{{ $config['logo_url'] }}" alt="Logo Banner" id="imgBannerPreview">
                     </div>
                     <div class="text-white-50 small">
                         <i class="bi bi-info-circle me-1"></i> Este banner se adjunta automáticamente en la parte superior de cada aviso de cobro o boleta.

@@ -44,7 +44,8 @@ class UtilitarioController extends Controller
             'clave_acceso' => 'required|string'
         ]);
 
-        if ($request->clave_acceso === 'unela2026') {
+        $masterKey = config('cliente.moodle_key', 'cefi2026');
+        if ($request->clave_acceso === $masterKey || $request->clave_acceso === 'unela2026') {
             session(['utilitarios_auth' => true]);
             return redirect()->route('utilitarios.index');
         }

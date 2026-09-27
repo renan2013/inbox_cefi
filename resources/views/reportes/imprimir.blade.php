@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Reporte - UNELA BPM')
+@section('title', 'Reporte - ' . config('cliente.nombre', 'CEFI') . ' BPM')
 
 @section('styles')
 <style>
@@ -131,7 +131,7 @@
             <div class="row align-items-center">
                 <div class="col-md-8 text-center text-md-start">
                     <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-                        <span class="fs-2 fw-bold text-success" style="letter-spacing: -1px;">UNELA</span>
+                        <span class="fs-2 fw-bold text-success" style="letter-spacing: -1px;">{{ config('cliente.nombre', 'CEFI') }}</span>
                         <span class="fs-5 text-white-50 border-start border-secondary ps-3 ms-2">BPM Intelligence System</span>
                     </div>
                 </div>

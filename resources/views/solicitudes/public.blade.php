@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNELA - Solicitud de Inscripción Curso Libre</title>
+    <title>{{ config('cliente.nombre', 'CEFI') }} - Solicitud de Inscripción Curso Libre</title>
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -113,7 +113,7 @@
     <div class="public-container">
         
         <div class="brand-header animate__animated animate__fadeIn">
-            <h2 class="mb-1"><i class="bi bi-mortarboard-fill me-2"></i>UNELA</h2>
+            <h2 class="mb-1"><i class="bi bi-mortarboard-fill me-2"></i>{{ config('cliente.nombre', 'CEFI') }}</h2>
             <p class="text-white-50">Formulario Oficial de Matrícula para Cursos Libres</p>
         </div>
 

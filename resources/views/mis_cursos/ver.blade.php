@@ -527,11 +527,11 @@
                             <div class="col-lg-5">
                                 <div class="bg-dark p-4 rounded-4 border border-secondary shadow-sm h-100 text-white">
                                     <h6 class="fw-bold text-success mb-3 border-bottom border-secondary pb-2"><i class="bi bi-info-circle-fill text-primary me-2"></i>Datos para Facturación</h6>
-                                    <div class="mb-2"><small class="text-white-50 d-block">Razón Social:</small><span class="fw-bold small">Asociación Universidad Evangélica de las Américas</span></div>
-                                    <div class="mb-2"><small class="text-white-50 d-block">Cédula Jurídica:</small><span class="fw-bold small">3-002-066646</span></div>
-                                    <div class="mb-2"><small class="text-white-50 d-block">Correo:</small><span class="fw-bold small">merlin@unela.ac.cr</span></div>
-                                    <div class="mb-2"><small class="text-white-50 d-block">Teléfono:</small><span class="fw-bold small">2221-7870</span></div>
-                                    <div><small class="text-white-50 d-block">Dirección:</small><span class="fw-bold small">San José, Distrito Hospital, Calle 2, Avenida 14-16.</span></div>
+                                    <div class="mb-2"><small class="text-white-50 d-block">Razón Social:</small><span class="fw-bold small">{{ config('cliente.nombre_legal', 'CEFI') }}</span></div>
+                                    <div class="mb-2"><small class="text-white-50 d-block">Cédula Jurídica:</small><span class="fw-bold small">{{ config('cliente.cedula_juridica', '3-002-000000') }}</span></div>
+                                    <div class="mb-2"><small class="text-white-50 d-block">Correo:</small><span class="fw-bold small">{{ config('cliente.email_finanzas', 'finanzas@cefi.cr') }}</span></div>
+                                    <div class="mb-2"><small class="text-white-50 d-block">Teléfono:</small><span class="fw-bold small">{{ config('cliente.telefono_display', '+506 8777-7849') }}</span></div>
+                                    <div><small class="text-white-50 d-block">Dirección:</small><span class="fw-bold small">{{ config('cliente.direccion', 'San José, Costa Rica') }}</span></div>
                                 </div>
                             </div>
                             <div class="col-lg-7 text-white">
@@ -792,11 +792,7 @@
         let modalRevisionesObj = null;
 
         function getLegacyUrl(path) {
-            let base = window.location.origin;
-            if (window.location.port === '8000') {
-                base = window.location.protocol + '//' + window.location.hostname;
-            }
-            return base + '/bpm_unela/' + path;
+            return '{{ url('/') }}/' + path;
         }
 
         function scrollToAndOpen(collapseId) {
@@ -863,7 +859,7 @@
                     }
 
                     Swal.fire({
-                        title: 'Sincronizar con Unela Virtual',
+                        title: 'Sincronizar con {{ config('cliente.nombre', 'CEFI') }} Virtual',
                         html: `
                             <div class="mb-4 text-center">
                                 <div class="d-inline-flex p-3 rounded-circle bg-light bg-opacity-10 mb-3">
@@ -907,7 +903,7 @@
                         preConfirm: () => {
                             const catId = document.getElementById('swal_cat_id').value;
                             const key = document.getElementById('swal_auth_key').value;
-                            if (key !== 'unela2026') {
+                            if (key !== "{{ config('cliente.moodle_key', 'cefi2026') }}") {
                                 Swal.showValidationMessage('Palabra clave incorrecta');
                                 return false;
                             }
@@ -964,7 +960,7 @@
                     cancelButtonText: 'Cerrar'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.open(`https://unela.ac.cr/virtual/course/view.php?id=${moodleId}`, '_blank');
+                        window.open(`{{ config('cliente.campus_virtual', 'https://virtual.cefi.cr') }}/course/view.php?id=${moodleId}`, '_blank');
                     }
                 });
                 return;
@@ -1023,7 +1019,7 @@
                 width: '450px',
                 preConfirm: () => {
                     const key = document.getElementById('swal_auth_key_est').value;
-                    if (key !== 'unela2026') {
+                    if (key !== "{{ config('cliente.moodle_key', 'cefi2026') }}") {
                         Swal.showValidationMessage('Palabra clave incorrecta');
                         return false;
                     }

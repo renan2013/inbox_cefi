@@ -156,7 +156,7 @@
                 <div class="alert alert-warning border-0 shadow-sm rounded-4 d-flex align-items-start mb-4 text-start" style="background-color: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2) !important; color: #fbbf24;">
                     <i class="bi bi-exclamation-triangle-fill fs-4 me-3 mt-1"></i>
                     <div>
-                        <strong>Sincronización con Moodle:</strong> Si necesita registrar un nuevo estudiante para sincronizarlo con Moodle, el punto de partida siempre será crear el usuario directamente en <strong><a href="https://unela.ac.cr/virtual" target="_blank" style="color: inherit; text-decoration: underline;">Unela Virtual</a></strong>. Este formulario es exclusivo para registrar usuarios directamente en el sistema local de Inbox.
+                        <strong>Sincronización con Moodle:</strong> Si necesita registrar un nuevo estudiante para sincronizarlo con Moodle, el punto de partida siempre será crear el usuario directamente en <strong><a href="{{ config('cliente.campus_virtual', '#') }}" target="_blank" style="color: inherit; text-decoration: underline;">{{ config('cliente.nombre', 'CEFI') }} Virtual</a></strong>. Este formulario es exclusivo para registrar usuarios directamente en el sistema local de Inbox.
                     </div>
                 </div>
 

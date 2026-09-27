@@ -58,7 +58,8 @@ class MoodleGradebookService
         }
 
         // 3. Consultar Calificaciones en Moodle Bridge
-        $bridge_url = env('MOODLE_BRIDGE_URL', 'https://unela.ac.cr/virtual/webservice/moodle_bridge.php');
+        $defaultBridgeUrl = rtrim(config('cliente.campus_virtual', 'https://virtual.cefi.cr'), '/') . '/webservice/moodle_bridge.php';
+        $bridge_url = env('MOODLE_BRIDGE_URL', $defaultBridgeUrl);
         $auth_token = env('MOODLE_TOKEN', 'ef5bde9afb1fdd026330058ec405a30e');
 
         $response = Http::asForm()->timeout(60)->post($bridge_url, [

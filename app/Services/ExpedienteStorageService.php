@@ -144,7 +144,7 @@ class ExpedienteStorageService
         if (file_exists($parentPath)) {
             return [
                 'full_path' => $parentPath,
-                'web_url'   => '/bpm_unela/uploads/expedientes/' . $nombreServidor,
+                'web_url'   => asset('uploads/expedientes/' . $nombreServidor),
                 'exists'    => true,
             ];
         }
@@ -199,8 +199,9 @@ class ExpedienteStorageService
         }
 
         // Agregar ficha informativa de texto
+        $nombreInstitucion = mb_strtoupper(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')));
         $infoText = "========================================================\n" .
-                    "UNIVERSIDAD UNELA - EXPEDIENTE DIGITAL ESTUDIANTIL 360°\n" .
+                    "{$nombreInstitucion} - EXPEDIENTE DIGITAL ESTUDIANTIL 360°\n" .
                     "========================================================\n" .
                     "Estudiante: {$nombreEstudiante}\n" .
                     "Identificación: " . ($usuario->cedula ?? $expediente->cedula_residencia ?? 'N/D') . "\n" .

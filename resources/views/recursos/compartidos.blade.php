@@ -53,7 +53,7 @@
         <div class="page-header d-flex justify-content-between align-items-center flex-wrap g-3">
             <div>
                 <h1 class="display-6 fw-bold mb-1">Recursos Compartidos</h1>
-                <p class="text-white-50 mb-0">Materiales y herramientas didácticas disponibles para todo el cuerpo docente de UNELA.</p>
+                <p class="text-white-50 mb-0">Materiales y herramientas didácticas disponibles para todo el cuerpo docente de {{ config('cliente.nombre', 'CEFI') }}.</p>
             </div>
             
             <div>

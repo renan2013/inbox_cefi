@@ -129,7 +129,7 @@
     <div class="content-container">
         
         <!-- Logo -->
-        <img src="https://unela.ac.cr/virtual/pluginfile.php/1/theme_adaptable/logo/1722880753/logo-unela.png" alt="UNELA" class="pulse-logo">
+        <img src="{{ asset(config('cliente.logo_url', 'imgs/logo.png')) }}" alt="{{ config('cliente.nombre', 'CEFI') }}" class="pulse-logo">
 
         <div class="welcome-title">Bienvenido a la clase virtual</div>
         

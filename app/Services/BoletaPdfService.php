@@ -13,21 +13,24 @@ class BoletaPDFEngine extends FPDF
 {
     function Header()
     {
-        // Logo UNELA
-        $logo_unela = public_path('imgs/logo_unela_color.png');
-        if (!file_exists($logo_unela)) {
-            $logo_unela = dirname(base_path()) . '/imgs/logo_unela_color.png';
+        // Logo institucional del cliente
+        $logo_cliente = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
+        if (!file_exists($logo_cliente)) {
+            $logo_cliente = public_path('imgs/logo.png');
         }
-        if (file_exists($logo_unela)) {
-            $this->Image($logo_unela, 15, 12, 42);
+        if (!file_exists($logo_cliente)) {
+            $logo_cliente = public_path('imgs/logo_unela_color.png');
+        }
+        if (file_exists($logo_cliente)) {
+            $this->Image($logo_cliente, 15, 12, 42);
         }
 
         // Títulos institucionales
         $this->SetY(12);
         $this->SetX(60);
         $this->SetFont('Arial', 'B', 13);
-        $this->SetTextColor(16, 102, 173); // Azul UNELA
-        $this->Cell(135, 6, $this->toPdf('UNIVERSIDAD EVANGÉLICA DE LAS AMÉRICAS'), 0, 1, 'R');
+        $this->SetTextColor(16, 102, 173);
+        $this->Cell(135, 6, $this->toPdf(mb_strtoupper(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')))), 0, 1, 'R');
 
         $this->SetX(60);
         $this->SetFont('Arial', 'B', 10);
@@ -51,7 +54,7 @@ class BoletaPDFEngine extends FPDF
         $this->SetY(-15);
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(148, 163, 184);
-        $this->Cell(100, 10, $this->toPdf('Documento Oficial de Matrícula - Sistema Inbox UNELA'), 0, 0, 'L');
+        $this->Cell(100, 10, $this->toPdf('Documento Oficial de Matrícula - ' . config('cliente.nombre', 'CEFI')), 0, 0, 'L');
         $this->Cell(0, 10, $this->toPdf('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'R');
     }
 
@@ -278,7 +281,7 @@ class BoletaPdfService
         $pdf->Cell($w_linea, 4, $pdf->toPdf('Sello y Firma - Departamento Financiero'), 0, 1, 'C');
         $pdf->SetX($x_fin);
         $pdf->SetFont('Arial', 'B', 8);
-        $pdf->Cell($w_linea, 4, $pdf->toPdf('Universidad Evangélica de las Américas'), 0, 0, 'C');
+        $pdf->Cell($w_linea, 4, $pdf->toPdf(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'))), 0, 0, 'C');
 
         // Guardar copia física en uploads/boletas si no existe
         $dir = public_path('uploads/boletas');

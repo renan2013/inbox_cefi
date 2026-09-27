@@ -71,7 +71,7 @@ class SilaboPDFEngine extends FPDF
         $this->SetY(-15);
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(120, 120, 120);
-        $this->Cell(100, 10, $this->toPdf('Sílabo Académico Oficial - UNELA'), 0, 0, 'L');
+        $this->Cell(100, 10, $this->toPdf('Sílabo Académico Oficial - ' . config('cliente.nombre', 'CEFI')), 0, 0, 'L');
         $this->Cell(0, 10, $this->toPdf('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'R');
     }
 
@@ -279,13 +279,16 @@ class SilaboPdfService
         $pdf->SetFillColor($pdf->azul_institucional[0], $pdf->azul_institucional[1], $pdf->azul_institucional[2]);
         $pdf->Rect(0, 0, 8, 297, 'F');
 
-        // Logo oficial
-        $logo_unela = public_path('imgs/logo_unela_color.png');
-        if (!file_exists($logo_unela)) {
-            $logo_unela = dirname(base_path()) . '/imgs/logo_unela_color.png';
+        // Logo oficial del cliente
+        $logo_cliente = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
+        if (!file_exists($logo_cliente)) {
+            $logo_cliente = public_path('imgs/logo.png');
         }
-        if (file_exists($logo_unela)) {
-            $pdf->Image($logo_unela, 15, 12, 45);
+        if (!file_exists($logo_cliente)) {
+            $logo_cliente = public_path('imgs/logo_unela_color.png');
+        }
+        if (file_exists($logo_cliente)) {
+            $pdf->Image($logo_cliente, 15, 12, 45);
         }
 
         $pdf->SetY(14);

@@ -297,8 +297,8 @@
                                 @if ($hasQrInfo)
                                     <div class="row g-2 mb-3">
                                         <div class="col-6">
-                                            <label class="form-label-custom">Universidad / Institución</label>
-                                            <input type="text" name="qr_universidad" class="form-control form-control-custom form-control-sm" value="UNELA">
+                                            <label class="form-label-custom">Institución / Emisor</label>
+                                            <input type="text" name="qr_universidad" class="form-control form-control-custom form-control-sm" value="{{ config('cliente.nombre', 'CEFI') }}">
                                         </div>
                                         <div class="col-6">
                                             <label class="form-label-custom">Periodo Académico</label>
@@ -359,9 +359,9 @@
                                 @endif
 
                                 <div class="mb-3">
-                                    <textarea name="datos_lote" id="textareaLote" class="form-control form-control-custom font-monospace" rows="7" placeholder="Juan Perez	juan@unela.org	Aprobado
-Maria Gonzalez	maria@unela.org	Sobresaliente
-Carlos Morales	carlos@unela.org	Aprobado" required></textarea>
+                                    <textarea name="datos_lote" id="textareaLote" class="form-control form-control-custom font-monospace" rows="7" placeholder="Juan Perez	juan@{{ config('cliente.id', 'cefi') }}.cr	Aprobado
+Maria Gonzalez	maria@{{ config('cliente.id', 'cefi') }}.cr	Sobresaliente
+Carlos Morales	carlos@{{ config('cliente.id', 'cefi') }}.cr	Aprobado" required></textarea>
                                 </div>
 
                                 <div class="d-flex justify-content-between align-items-center mb-3">
