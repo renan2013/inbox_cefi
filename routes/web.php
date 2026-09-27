@@ -57,6 +57,15 @@ Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaControl
 
 
 Route::middleware('auth')->group(function () {
+    // --- PARÁMETROS DEL SISTEMA & CONFIGURACIÓN GLOBAL ---
+    Route::get('/configuracion/parametros', [ConfiguracionController::class, 'parametros'])->name('configuracion.parametros');
+    Route::post('/configuracion/parametros', [ConfiguracionController::class, 'guardarParametros'])->name('configuracion.parametros.store');
+    Route::get('/configuracion/whatsapp', [WhatsAppController::class, 'configuracion'])->name('configuracion.whatsapp');
+    Route::post('/configuracion/whatsapp', [WhatsAppController::class, 'guardarConfiguracion'])->name('configuracion.whatsapp.store');
+    Route::post('/configuracion/whatsapp/test', [WhatsAppController::class, 'testEnvio'])->name('configuracion.whatsapp.test');
+    Route::get('/configuracion/alertas', [ConfiguracionController::class, 'alertas'])->name('configuracion.alertas');
+    Route::post('/configuracion/alertas', [ConfiguracionController::class, 'guardarAlertas'])->name('configuracion.alertas.store');
+
     // --- DASHBOARD & TAREAS ---
     Route::middleware('module:dashboard')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

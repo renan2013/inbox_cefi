@@ -118,4 +118,99 @@ class ConfiguracionController extends Controller
         \DB::table('base_conocimiento_inbox_ai')->where('id', $id)->delete();
         return redirect()->route('configuracion.conocimiento_ai')->with('success', 'Registro de conocimiento eliminado.');
     }
+
+    /**
+     * Muestra la interfaz de Parámetros del Sistema, Identidad y Logotipo.
+     */
+    public function parametros()
+    {
+        $cliente = \App\Services\ClienteService::all();
+        $configDb = ConfiguracionSistema::pluck('valor', 'clave')->all();
+
+        return view('configuracion.parametros', compact('cliente', 'configDb'));
+    }
+
+    /**
+     * Procesa y guarda los parámetros del sistema, logotipos y enlaces institucionales.
+     */
+    public function guardarParametros(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:100',
+            'nombre_legal' => 'nullable|string|max:255',
+            'siglas' => 'nullable|string|max:50',
+            'slogan' => 'nullable|string|max:255',
+            'telefono' => 'nullable|string|max:50',
+            'telefono_display' => 'nullable|string|max:50',
+            'email_soporte' => 'nullable|email|max:100',
+            'email_finanzas' => 'nullable|email|max:100',
+            'email_contacto' => 'nullable|email|max:100',
+            'direccion' => 'nullable|string|max:255',
+            'sitio_web' => 'nullable|url|max:255',
+            'campus_virtual' => 'nullable|url|max:255',
+            'moodle_key' => 'nullable|string|max:100',
+            'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:4096',
+            'banner_file' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:4096',
+            'whatsapp_phone' => 'nullable|string|max:50',
+            'whatsapp_api_key' => 'nullable|string|max:255',
+        ]);
+
+        $fields = [
+            'cliente_nombre' => $request->input('nombre'),
+            'cliente_nombre_legal' => $request->input('nombre_legal'),
+            'cliente_siglas' => $request->input('siglas'),
+            'cliente_slogan' => $request->input('slogan'),
+            'cliente_telefono' => preg_replace('/[^0-9]/', '', (string)$request->input('telefono')),
+            'cliente_telefono_display' => $request->input('telefono_display'),
+            'cliente_email_soporte' => $request->input('email_soporte'),
+            'cliente_email_finanzas' => $request->input('email_finanzas'),
+            'cliente_email_contacto' => $request->input('email_contacto'),
+            'cliente_direccion' => $request->input('direccion'),
+            'cliente_sitio_web' => $request->input('sitio_web'),
+            'cliente_campus_virtual' => $request->input('campus_virtual'),
+            'cliente_moodle_key' => $request->input('moodle_key'),
+            'whatsapp_phone' => preg_replace('/[^0-9]/', '', (string)$request->input('whatsapp_phone')),
+            'whatsapp_api_key' => $request->input('whatsapp_api_key'),
+        ];
+
+        // Subida de Logo oficial
+        if ($request->hasFile('logo_file') && $request->file('logo_file')->isValid()) {
+            $file = $request->file('logo_file');
+            $filename = 'logo_' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $request->input('siglas', 'cefi'))) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/logos');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $fields['cliente_logo_url'] = '/uploads/logos/' . $filename;
+            $fields['whatsapp_logo_url'] = asset('uploads/logos/' . $filename);
+        } elseif ($request->filled('logo_url')) {
+            $fields['cliente_logo_url'] = $request->input('logo_url');
+        }
+
+        // Subida de Banner oficial
+        if ($request->hasFile('banner_file') && $request->file('banner_file')->isValid()) {
+            $file = $request->file('banner_file');
+            $filename = 'banner_' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $request->input('siglas', 'cefi'))) . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/logos');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $fields['cliente_logo_banner_whatsapp'] = '/uploads/logos/' . $filename;
+        } elseif ($request->filled('banner_url')) {
+            $fields['cliente_logo_banner_whatsapp'] = $request->input('banner_url');
+        }
+
+        foreach ($fields as $k => $v) {
+            if ($v !== null) {
+                ConfiguracionSistema::updateOrCreate(
+                    ['clave' => $k],
+                    ['valor' => (string)$v]
+                );
+            }
+        }
+
+        return redirect()->route('configuracion.parametros')->with('success', 'Parámetros del sistema y logotipo actualizados correctamente.');
+    }
 }

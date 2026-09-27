@@ -490,12 +490,10 @@
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('reportes.index') }}"><i class="bi bi-file-earmark-pdf"></i> Reportes del Sistema</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('utilitarios.index') }}"><i class="bi bi-tools"></i> Utilitarios</a></li>
-                            @module('whatsapp_n8n')
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('whatsapp.campanas.index') }}"><i class="bi bi-megaphone-fill text-warning"></i> Difusión y Campañas WhatsApp</a></li>
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('marketing.prospectos.index') }}"><i class="bi bi-person-lines-fill text-primary"></i> Base de Prospectos (Marketing)</a></li>
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.whatsapp') }}"><i class="bi bi-whatsapp text-success"></i> Suite WhatsApp & VPS</a></li>
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.alertas') }}"><i class="bi bi-bell"></i> Configuración Alertas</a></li>
-                            @endmodule
+                            @if(Auth::check() && Auth::user()->id_rol == 1)
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.parametros') }}"><i class="bi bi-gear-wide-connected text-success"></i> Parámetros del Sistema & Logo</a></li>
+                            @endif
                             @endmodule
                         </ul>
                     </li>
@@ -504,6 +502,11 @@
 
                 <!-- User Profile & Logout -->
                 <div class="d-flex align-items-center">
+                    @if(Auth::check() && Auth::user()->id_rol == 1)
+                    <a href="{{ route('configuracion.parametros') }}" class="btn btn-outline-secondary rounded-circle me-2" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-color: var(--border-dark); color: var(--text-muted);" title="Parámetros del Sistema e Identidad">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
+                    @endif
                     <button type="button" class="btn btn-outline-secondary rounded-circle me-3" id="theme-toggle" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-color: var(--border-dark); color: var(--text-muted);" onclick="toggleTheme()" title="Cambiar Tema">
                         <i id="theme-icon" class="bi bi-sun-fill"></i>
                     </button>
