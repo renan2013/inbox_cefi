@@ -2,6 +2,29 @@
 
 @section('title', 'Expediente 360° - ' . ($usuario ? $usuario->nombre . ' ' . $usuario->apellidos : 'Estudiante'))
 
+@section('styles')
+<style>
+    .hero-card {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .tabs-card {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid var(--border-dark) !important;
+    }
+    [data-theme="light"] .hero-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    }
+    [data-theme="light"] .tabs-card {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="container-fluid px-4 py-4">
 
@@ -20,7 +43,7 @@
     @endif
 
     <!-- PERFIL HERO SUPERIOR -->
-    <div class="card border-0 shadow-sm mb-4 rounded-4 overflow-hidden" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%); border: 1px solid rgba(255, 255, 255, 0.08) !important;">
+    <div class="card hero-card border-0 shadow-sm mb-4 rounded-4 overflow-hidden">
         <div class="card-body p-4 p-md-5">
             <div class="d-flex flex-column flex-lg-row align-items-center align-items-lg-start gap-4">
                 
@@ -146,7 +169,7 @@
     </div>
 
     <!-- PESTAÑAS 360° -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: rgba(30, 41, 59, 0.8);">
+    <div class="card tabs-card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-header border-bottom border-secondary border-opacity-25 p-0 bg-transparent">
             <ul class="nav nav-tabs nav-fill border-0" id="expedienteTabs" role="tablist">
                 <li class="nav-item" role="presentation">

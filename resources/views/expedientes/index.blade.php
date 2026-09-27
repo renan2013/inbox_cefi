@@ -2,73 +2,141 @@
 
 @section('title', 'Expedientes Digitales 360° - ' . config('cliente.nombre', 'CEFI'))
 
+@section('styles')
+<style>
+    .exp-container {
+        padding-top: 1.5rem;
+        padding-bottom: 3.5rem;
+    }
+
+    .stat-card-item {
+        background-color: var(--card-dark);
+        border: 1px solid var(--border-dark);
+        border-radius: 1.25rem;
+        padding: 1.25rem 1.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        height: 100%;
+    }
+
+    .stat-card-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-panel {
+        background-color: var(--card-dark);
+        border: 1px solid var(--border-dark);
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .table-custom {
+        --bs-table-bg: transparent !important;
+        --bs-table-color: var(--text-light) !important;
+        --bs-table-border-color: var(--border-dark) !important;
+        --bs-table-hover-bg: rgba(95, 178, 48, 0.05) !important;
+        --bs-table-hover-color: var(--text-light) !important;
+        color: var(--text-light) !important;
+        background-color: transparent !important;
+    }
+
+    .table-custom th, .table-custom td {
+        background-color: transparent !important;
+        color: inherit !important;
+        border-color: var(--border-dark) !important;
+    }
+
+    .table-header-row th {
+        color: var(--text-muted) !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        background-color: rgba(0, 0, 0, 0.02) !important;
+        border-bottom: 1px solid var(--border-dark) !important;
+    }
+
+    [data-theme="dark"] .table-header-row th {
+        background-color: rgba(255, 255, 255, 0.02) !important;
+    }
+</style>
+@endsection
+
 @section('content')
-<div class="container-fluid px-4 py-4">
+<div class="container-fluid px-md-5 exp-container">
     <!-- Encabezado con Botón de Creación -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold text-white mb-1">
-                <i class="bi bi-folder-symlink-fill text-success me-2"></i>Expedientes Digitales 360°
-            </h2>
-            <p class="text-muted mb-0">Gestión integral de expedientes estudiantiles, récord académico, finanzas y bóveda documental.</p>
+            <h1 class="h2 fw-bold text-white mb-1">
+                <i class="bi bi-folder-symlink-fill text-primary me-2"></i>Expedientes Digitales 360°
+            </h1>
+            <p class="text-white-50 mb-0">Gestión integral de expedientes estudiantiles, récord académico, finanzas y bóveda documental.</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('expedientes.create') }}" class="btn btn-success px-4 py-2 fw-semibold rounded-3 shadow-sm d-flex align-items-center gap-2" style="background-color: var(--primary, #5fb230); border: none;">
-                <i class="bi bi-person-plus-fill"></i> Crear Expediente
+            <a href="{{ route('expedientes.create') }}" class="btn btn-primary px-4 py-2 fw-bold rounded-pill shadow-sm d-flex align-items-center gap-2">
+                <i class="bi bi-plus-lg"></i> Crear Expediente
             </a>
         </div>
     </div>
 
     <!-- Tarjetas de Métricas KPI -->
     <div class="row g-3 mb-4">
+        <!-- Total Expedientes -->
         <div class="col-xl-3 col-md-6">
-            <div class="card bg-dark text-white border-0 shadow-sm p-3 h-100 rounded-3" style="background: rgba(30, 41, 59, 0.7) !important; border-left: 4px solid #3b82f6 !important;">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="stat-card-item border-start border-4 border-primary">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase">Total Expedientes</div>
-                        <h3 class="fw-bold text-white mb-0 mt-1">{{ $totalExpedientes }}</h3>
+                        <span class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.75rem; letter-spacing: 0.5px;">Total Expedientes</span>
+                        <h3 class="mb-0 fw-bold text-primary mt-1">{{ $totalExpedientes }}</h3>
                     </div>
-                    <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary fs-3">
-                        <i class="bi bi-folder2-open"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(59, 130, 246, 0.12);">
+                        <i class="bi bi-folder2-open text-primary fs-3"></i>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Formalizados / Aprobados -->
         <div class="col-xl-3 col-md-6">
-            <div class="card bg-dark text-white border-0 shadow-sm p-3 h-100 rounded-3" style="background: rgba(30, 41, 59, 0.7) !important; border-left: 4px solid #10b981 !important;">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="stat-card-item border-start border-4 border-success">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase">Formalizados / Aprobados</div>
-                        <h3 class="fw-bold text-white mb-0 mt-1">{{ $totalAprobados }}</h3>
+                        <span class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.75rem; letter-spacing: 0.5px;">Formalizados / Aprobados</span>
+                        <h3 class="mb-0 fw-bold text-success mt-1">{{ $totalAprobados }}</h3>
                     </div>
-                    <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success fs-3">
-                        <i class="bi bi-check-circle-fill"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(16, 185, 129, 0.12);">
+                        <i class="bi bi-check-circle-fill text-success fs-3"></i>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- En Revisión / Pendientes -->
         <div class="col-xl-3 col-md-6">
-            <div class="card bg-dark text-white border-0 shadow-sm p-3 h-100 rounded-3" style="background: rgba(30, 41, 59, 0.7) !important; border-left: 4px solid #f59e0b !important;">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="stat-card-item border-start border-4 border-warning">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase">En Revisión / Pendientes</div>
-                        <h3 class="fw-bold text-white mb-0 mt-1">{{ $totalPendientes }}</h3>
+                        <span class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.75rem; letter-spacing: 0.5px;">En Revisión / Pendientes</span>
+                        <h3 class="mb-0 fw-bold text-warning mt-1">{{ $totalPendientes }}</h3>
                     </div>
-                    <div class="p-3 rounded-circle bg-warning bg-opacity-10 text-warning fs-3">
-                        <i class="bi bi-clock-history"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(245, 158, 11, 0.15);">
+                        <i class="bi bi-clock-history text-warning fs-3"></i>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Rechazados / Incompletos -->
         <div class="col-xl-3 col-md-6">
-            <div class="card bg-dark text-white border-0 shadow-sm p-3 h-100 rounded-3" style="background: rgba(30, 41, 59, 0.7) !important; border-left: 4px solid #ef4444 !important;">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="stat-card-item border-start border-4 border-danger">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase">Rechazados / Incompletos</div>
-                        <h3 class="fw-bold text-white mb-0 mt-1">{{ $totalRechazados }}</h3>
+                        <span class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.75rem; letter-spacing: 0.5px;">Rechazados / Incompletos</span>
+                        <h3 class="mb-0 fw-bold text-danger mt-1">{{ $totalRechazados }}</h3>
                     </div>
-                    <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger fs-3">
-                        <i class="bi bi-x-circle-fill"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(239, 68, 68, 0.12);">
+                        <i class="bi bi-x-circle-fill text-danger fs-3"></i>
                     </div>
                 </div>
             </div>
@@ -76,28 +144,28 @@
     </div>
 
     <!-- Filtros y Barra de Búsqueda -->
-    <div class="card border-0 shadow-sm p-3 mb-4 rounded-3" style="background: rgba(30, 41, 59, 0.7);">
+    <div class="card-panel p-3 mb-4">
         <form method="GET" action="{{ route('expedientes.index') }}" class="row g-2 align-items-center">
             <div class="col-md-5">
                 <div class="input-group">
-                    <span class="input-group-text bg-transparent border-secondary text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" name="q" value="{{ $busqueda }}" class="form-control bg-transparent border-secondary text-white" placeholder="Buscar por nombre, cédula, correo o carrera...">
+                    <span class="input-group-text border-end-0" style="background-color: var(--card-dark); border-color: var(--border-dark); color: var(--text-muted);"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" value="{{ $busqueda }}" class="form-control border-start-0" placeholder="Buscar por nombre, cédula, correo o carrera..." style="background-color: var(--card-dark); border-color: var(--border-dark); color: var(--text-light);">
                 </div>
             </div>
             <div class="col-md-4">
-                <select name="estado" class="form-select bg-transparent border-secondary text-white" onchange="this.form.submit()">
-                    <option value="" class="bg-dark text-white" {{ $estadoFiltro === '' ? 'selected' : '' }}>Todos los estados</option>
-                    <option value="Aprobado" class="bg-dark text-white" {{ $estadoFiltro === 'Aprobado' ? 'selected' : '' }}>Aprobados / Formalizados</option>
-                    <option value="Pendiente" class="bg-dark text-white" {{ $estadoFiltro === 'Pendiente' ? 'selected' : '' }}>Pendientes de Revisión</option>
-                    <option value="Rechazado" class="bg-dark text-white" {{ $estadoFiltro === 'Rechazado' ? 'selected' : '' }}>Rechazados</option>
+                <select name="estado" class="form-select" onchange="this.form.submit()" style="background-color: var(--card-dark); border-color: var(--border-dark); color: var(--text-light);">
+                    <option value="" {{ $estadoFiltro === '' ? 'selected' : '' }}>Todos los estados</option>
+                    <option value="Aprobado" {{ $estadoFiltro === 'Aprobado' ? 'selected' : '' }}>Aprobados / Formalizados</option>
+                    <option value="Pendiente" {{ $estadoFiltro === 'Pendiente' ? 'selected' : '' }}>Pendientes de Revisión</option>
+                    <option value="Rechazado" {{ $estadoFiltro === 'Rechazado' ? 'selected' : '' }}>Rechazados</option>
                 </select>
             </div>
             <div class="col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-primary px-4 w-100 fw-semibold rounded-3">
+                <button type="submit" class="btn btn-primary px-4 w-100 fw-semibold rounded-pill d-flex align-items-center justify-content-center gap-1 shadow-sm">
                     <i class="bi bi-funnel me-1"></i> Filtrar
                 </button>
                 @if(!empty($busqueda) || !empty($estadoFiltro))
-                    <a href="{{ route('expedientes.index') }}" class="btn btn-outline-secondary text-muted" title="Limpiar Filtros">
+                    <a href="{{ route('expedientes.index') }}" class="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center px-3" title="Limpiar Filtros">
                         <i class="bi bi-x-lg"></i>
                     </a>
                 @endif
@@ -106,18 +174,18 @@
     </div>
 
     <!-- Tabla Principal de Expedientes -->
-    <div class="card border-0 shadow-sm rounded-3 overflow-hidden" style="background: rgba(30, 41, 59, 0.7);">
+    <div class="card-panel overflow-hidden mb-4">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 text-white" style="border-color: rgba(255, 255, 255, 0.08);">
-                <thead style="background: rgba(15, 23, 42, 0.6); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            <table class="table table-hover align-middle mb-0 table-custom">
+                <thead class="table-header-row">
                     <tr>
-                        <th class="ps-4 py-3 text-muted">ID</th>
-                        <th class="py-3 text-muted">Estudiante</th>
-                        <th class="py-3 text-muted">Identificación</th>
-                        <th class="py-3 text-muted">Programa / Grado</th>
-                        <th class="py-3 text-muted text-center">Completitud</th>
-                        <th class="py-3 text-muted text-center">Estado</th>
-                        <th class="pe-4 py-3 text-end text-muted">Acciones</th>
+                        <th class="ps-4 py-3">ID</th>
+                        <th class="py-3">Estudiante</th>
+                        <th class="py-3">Identificación</th>
+                        <th class="py-3">Programa / Grado</th>
+                        <th class="py-3 text-center">Completitud</th>
+                        <th class="py-3 text-center">Estado</th>
+                        <th class="pe-4 py-3 text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -137,7 +205,7 @@
                                     {{ mb_substr($user->nombre ?? 'E', 0, 1) }}{{ mb_substr($user->apellidos ?? '', 0, 1) }}
                                 </div>
                                 <div>
-                                    <div class="fw-bold text-white">
+                                    <div class="fw-bold" style="color: var(--text-light);">
                                         {{ $user ? "{$user->apellidos}, {$user->nombre}" : 'Sin usuario asociado' }}
                                     </div>
                                     <div class="small text-muted">{{ $user->email ?? 'N/D' }}</div>
@@ -150,12 +218,12 @@
                             </span>
                         </td>
                         <td>
-                            <div class="text-white small fw-semibold">{{ $exp->especialidad_deseada ?: 'Programa General' }}</div>
+                            <div class="small fw-semibold" style="color: var(--text-light);">{{ $exp->especialidad_deseada ?: 'Programa General' }}</div>
                             <div class="text-muted small">{{ $exp->grado_a_matricular ?: 'N/D' }}</div>
                         </td>
                         <td class="text-center" style="min-width: 130px;">
                             <div class="d-flex align-items-center justify-content-center gap-2">
-                                <div class="progress flex-grow-1" style="height: 6px; background-color: rgba(255,255,255,0.1); border-radius: 4px;">
+                                <div class="progress flex-grow-1" style="height: 6px; background-color: rgba(125,125,125,0.15); border-radius: 4px;">
                                     <div class="progress-bar {{ $colorPorc }}" role="progressbar" style="width: {{ $porc }}%;"></div>
                                 </div>
                                 <span class="small text-muted fw-bold">{{ $porc }}%</span>
@@ -185,10 +253,15 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            <div class="fs-1 mb-2"><i class="bi bi-inbox"></i></div>
-                            <div class="fw-semibold">No se encontraron expedientes digitales.</div>
-                            <small>Ajuste los criterios de búsqueda o cree un nuevo expediente.</small>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="p-3 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background: rgba(95, 178, 48, 0.1);">
+                                <i class="bi bi-folder2-open text-primary fs-1"></i>
+                            </div>
+                            <h5 class="fw-bold mb-1" style="color: var(--text-light);">No se encontraron expedientes digitales</h5>
+                            <p class="text-muted small mb-3">Comience registrando un nuevo expediente o ajuste los filtros de búsqueda.</p>
+                            <a href="{{ route('expedientes.create') }}" class="btn btn-sm btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">
+                                <i class="bi bi-plus-lg me-1"></i> Crear Primer Expediente
+                            </a>
                         </td>
                     </tr>
                     @endforelse

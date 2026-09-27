@@ -67,6 +67,25 @@
             outline: none;
         }
 
+        [data-theme="light"] .page-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .form-control-custom,
+        [data-theme="light"] .form-select-custom {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        [data-theme="light"] .form-control-custom:focus,
+        [data-theme="light"] .form-select-custom:focus {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-color: var(--primary) !important;
+        }
+
         .form-label-custom {
             font-weight: 600;
             color: var(--text-light);
