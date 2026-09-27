@@ -54,8 +54,17 @@ Route::post('/encuesta/procesar', [EncuestaController::class, 'procesarRespuesta
 // API Externa Finanzas (n8n, Green-API, Cron WhatsApp Morosidad)
 Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaController::class, 'apiCuotasVencimiento'])->name('finanzas.api.cuotas_vencimiento');
 
-// Webhook Receptor Green-API / n8n
-Route::post('/api/whatsapp/webhook', [WhatsAppController::class, 'webhook'])->name('whatsapp.webhook');
+// Ruta de Mantenimiento / Limpieza de Caché y Diagnóstico de Módulos
+Route::get('/limpiar-cache-cefi', function () {
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    
+    return response()->json([
+        'mensaje' => 'Caché de vistas y configuración limpiada con éxito en Hostinger.',
+        'modulos' => \App\Services\ModuleService::all(),
+    ]);
+});
 
 Route::middleware('auth')->group(function () {
     // --- DASHBOARD & TAREAS ---
