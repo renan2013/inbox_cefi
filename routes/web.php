@@ -62,7 +62,10 @@ Route::get('/limpiar-cache-cefi', function () {
     
     return response()->json([
         'mensaje' => 'Caché de vistas y configuración limpiada con éxito en Hostinger.',
-        'modulos' => \App\Services\ModuleService::all(),
+        'inventario_enabled' => \App\Services\ModuleService::isEnabled('inventario'),
+        'planilla_enabled' => \App\Services\ModuleService::isEnabled('planilla'),
+        'soporte_enabled' => \App\Services\ModuleService::isEnabled('soporte'),
+        'raw_config' => config('modules.modules'),
     ]);
 });
 
