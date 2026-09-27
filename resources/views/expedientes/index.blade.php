@@ -24,11 +24,41 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
 
+    .card-kpi-label {
+        color: #ffffff !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        opacity: 0.95;
+    }
+
+    .page-subtitle {
+        color: #e2e8f0 !important;
+        font-size: 0.95rem;
+    }
+
     .card-panel {
         background-color: var(--card-dark);
         border: 1px solid var(--border-dark);
         border-radius: 1.25rem;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-input-addon {
+        background-color: var(--card-dark) !important;
+        border-color: var(--border-dark) !important;
+        color: #cbd5e1 !important;
+    }
+
+    .filter-input, .filter-select {
+        background-color: var(--card-dark) !important;
+        border-color: var(--border-dark) !important;
+        color: #ffffff !important;
+    }
+
+    .filter-input::placeholder {
+        color: #94a3b8 !important;
     }
 
     .table-custom {
@@ -48,17 +78,52 @@
     }
 
     .table-header-row th {
-        color: var(--text-muted) !important;
+        color: #ffffff !important;
         font-weight: 700;
         text-transform: uppercase;
         font-size: 0.75rem;
         letter-spacing: 0.5px;
-        background-color: rgba(0, 0, 0, 0.02) !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
         border-bottom: 1px solid var(--border-dark) !important;
     }
 
-    [data-theme="dark"] .table-header-row th {
-        background-color: rgba(255, 255, 255, 0.02) !important;
+    .empty-title {
+        color: #ffffff !important;
+    }
+
+    .empty-subtitle {
+        color: #e2e8f0 !important;
+        font-size: 0.9rem;
+    }
+
+    /* Light theme adaptaciones */
+    [data-theme="light"] .card-kpi-label {
+        color: #475569 !important;
+    }
+
+    [data-theme="light"] .page-subtitle {
+        color: #64748b !important;
+    }
+
+    [data-theme="light"] .filter-input-addon {
+        color: #64748b !important;
+    }
+
+    [data-theme="light"] .filter-input, [data-theme="light"] .filter-select {
+        color: #0f172a !important;
+    }
+
+    [data-theme="light"] .table-header-row th {
+        color: #475569 !important;
+        background-color: rgba(0, 0, 0, 0.02) !important;
+    }
+
+    [data-theme="light"] .empty-title {
+        color: #0f172a !important;
+    }
+
+    [data-theme="light"] .empty-subtitle {
+        color: #64748b !important;
     }
 </style>
 @endsection
@@ -71,7 +136,7 @@
             <h1 class="h2 fw-bold text-white mb-1">
                 <i class="bi bi-folder-symlink-fill text-primary me-2"></i>Expedientes Digitales 360°
             </h1>
-            <p class="text-white-50 mb-0">Gestión integral de expedientes estudiantiles, récord académico, finanzas y bóveda documental.</p>
+            <p class="page-subtitle mb-0">Gestión integral de expedientes estudiantiles, récord académico, finanzas y bóveda documental.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('expedientes.create') }}" class="btn btn-primary px-4 py-2 fw-bold rounded-pill shadow-sm d-flex align-items-center gap-2">
@@ -87,11 +152,11 @@
             <div class="stat-card-item border-start border-4 border-primary">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.75rem; letter-spacing: 0.5px;">Total Expedientes</span>
-                        <h3 class="mb-0 fw-bold text-primary mt-1">{{ $totalExpedientes }}</h3>
+                        <span class="card-kpi-label d-block">Total Expedientes</span>
+                        <h3 class="mb-0 fw-bold mt-1" style="color: #60a5fa;">{{ $totalExpedientes }}</h3>
                     </div>
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(59, 130, 246, 0.12);">
-                        <i class="bi bi-folder2-open text-primary fs-3"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(59, 130, 246, 0.15);">
+                        <i class="bi bi-folder2-open fs-3" style="color: #60a5fa;"></i>
                     </div>
                 </div>
             </div>
@@ -102,11 +167,11 @@
             <div class="stat-card-item border-start border-4 border-success">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.75rem; letter-spacing: 0.5px;">Formalizados / Aprobados</span>
-                        <h3 class="mb-0 fw-bold text-success mt-1">{{ $totalAprobados }}</h3>
+                        <span class="card-kpi-label d-block">Formalizados / Aprobados</span>
+                        <h3 class="mb-0 fw-bold mt-1" style="color: #34d399;">{{ $totalAprobados }}</h3>
                     </div>
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(16, 185, 129, 0.12);">
-                        <i class="bi bi-check-circle-fill text-success fs-3"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(16, 185, 129, 0.15);">
+                        <i class="bi bi-check-circle-fill fs-3" style="color: #34d399;"></i>
                     </div>
                 </div>
             </div>
@@ -117,11 +182,11 @@
             <div class="stat-card-item border-start border-4 border-warning">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.75rem; letter-spacing: 0.5px;">En Revisión / Pendientes</span>
-                        <h3 class="mb-0 fw-bold text-warning mt-1">{{ $totalPendientes }}</h3>
+                        <span class="card-kpi-label d-block">En Revisión / Pendientes</span>
+                        <h3 class="mb-0 fw-bold mt-1" style="color: #fbbf24;">{{ $totalPendientes }}</h3>
                     </div>
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(245, 158, 11, 0.15);">
-                        <i class="bi bi-clock-history text-warning fs-3"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(245, 158, 11, 0.18);">
+                        <i class="bi bi-clock-history fs-3" style="color: #fbbf24;"></i>
                     </div>
                 </div>
             </div>
@@ -132,11 +197,11 @@
             <div class="stat-card-item border-start border-4 border-danger">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <span class="text-muted fw-bold text-uppercase d-block" style="font-size: 0.75rem; letter-spacing: 0.5px;">Rechazados / Incompletos</span>
-                        <h3 class="mb-0 fw-bold text-danger mt-1">{{ $totalRechazados }}</h3>
+                        <span class="card-kpi-label d-block">Rechazados / Incompletos</span>
+                        <h3 class="mb-0 fw-bold mt-1" style="color: #f87171;">{{ $totalRechazados }}</h3>
                     </div>
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(239, 68, 68, 0.12);">
-                        <i class="bi bi-x-circle-fill text-danger fs-3"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(239, 68, 68, 0.15);">
+                        <i class="bi bi-x-circle-fill fs-3" style="color: #f87171;"></i>
                     </div>
                 </div>
             </div>
@@ -148,12 +213,12 @@
         <form method="GET" action="{{ route('expedientes.index') }}" class="row g-2 align-items-center">
             <div class="col-md-5">
                 <div class="input-group">
-                    <span class="input-group-text border-end-0" style="background-color: var(--card-dark); border-color: var(--border-dark); color: var(--text-muted);"><i class="bi bi-search"></i></span>
-                    <input type="text" name="q" value="{{ $busqueda }}" class="form-control border-start-0" placeholder="Buscar por nombre, cédula, correo o carrera..." style="background-color: var(--card-dark); border-color: var(--border-dark); color: var(--text-light);">
+                    <span class="input-group-text border-end-0 filter-input-addon"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" value="{{ $busqueda }}" class="form-control border-start-0 filter-input" placeholder="Buscar por nombre, cédula, correo o carrera...">
                 </div>
             </div>
             <div class="col-md-4">
-                <select name="estado" class="form-select" onchange="this.form.submit()" style="background-color: var(--card-dark); border-color: var(--border-dark); color: var(--text-light);">
+                <select name="estado" class="form-select filter-select" onchange="this.form.submit()">
                     <option value="" {{ $estadoFiltro === '' ? 'selected' : '' }}>Todos los estados</option>
                     <option value="Aprobado" {{ $estadoFiltro === 'Aprobado' ? 'selected' : '' }}>Aprobados / Formalizados</option>
                     <option value="Pendiente" {{ $estadoFiltro === 'Pendiente' ? 'selected' : '' }}>Pendientes de Revisión</option>
@@ -196,7 +261,7 @@
                         $colorPorc = $porc >= 80 ? 'bg-success' : ($porc >= 50 ? 'bg-warning' : 'bg-danger');
                     @endphp
                     <tr>
-                        <td class="ps-4 fw-bold text-muted" style="font-family: monospace;">
+                        <td class="ps-4 fw-bold" style="font-family: monospace; color: #cbd5e1;">
                             #{{ str_pad($exp->id_expediente, 5, '0', STR_PAD_LEFT) }}
                         </td>
                         <td>
@@ -208,7 +273,7 @@
                                     <div class="fw-bold" style="color: var(--text-light);">
                                         {{ $user ? "{$user->apellidos}, {$user->nombre}" : 'Sin usuario asociado' }}
                                     </div>
-                                    <div class="small text-muted">{{ $user->email ?? 'N/D' }}</div>
+                                    <div class="small" style="color: #cbd5e1;">{{ $user->email ?? 'N/D' }}</div>
                                 </div>
                             </div>
                         </td>
@@ -219,14 +284,14 @@
                         </td>
                         <td>
                             <div class="small fw-semibold" style="color: var(--text-light);">{{ $exp->especialidad_deseada ?: 'Programa General' }}</div>
-                            <div class="text-muted small">{{ $exp->grado_a_matricular ?: 'N/D' }}</div>
+                            <div class="small" style="color: #cbd5e1;">{{ $exp->grado_a_matricular ?: 'N/D' }}</div>
                         </td>
                         <td class="text-center" style="min-width: 130px;">
                             <div class="d-flex align-items-center justify-content-center gap-2">
-                                <div class="progress flex-grow-1" style="height: 6px; background-color: rgba(125,125,125,0.15); border-radius: 4px;">
+                                <div class="progress flex-grow-1" style="height: 6px; background-color: rgba(125,125,125,0.2); border-radius: 4px;">
                                     <div class="progress-bar {{ $colorPorc }}" role="progressbar" style="width: {{ $porc }}%;"></div>
                                 </div>
-                                <span class="small text-muted fw-bold">{{ $porc }}%</span>
+                                <span class="small fw-bold" style="color: #cbd5e1;">{{ $porc }}%</span>
                             </div>
                         </td>
                         <td class="text-center">
@@ -254,11 +319,11 @@
                     @empty
                     <tr>
                         <td colspan="7" class="text-center py-5">
-                            <div class="p-3 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background: rgba(95, 178, 48, 0.1);">
+                            <div class="p-3 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background: rgba(95, 178, 48, 0.15);">
                                 <i class="bi bi-folder2-open text-primary fs-1"></i>
                             </div>
-                            <h5 class="fw-bold mb-1" style="color: var(--text-light);">No se encontraron expedientes digitales</h5>
-                            <p class="text-muted small mb-3">Comience registrando un nuevo expediente o ajuste los filtros de búsqueda.</p>
+                            <h5 class="fw-bold mb-1 empty-title">No se encontraron expedientes digitales</h5>
+                            <p class="empty-subtitle mb-3">Comience registrando un nuevo expediente o ajuste los filtros de búsqueda.</p>
                             <a href="{{ route('expedientes.create') }}" class="btn btn-sm btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">
                                 <i class="bi bi-plus-lg me-1"></i> Crear Primer Expediente
                             </a>

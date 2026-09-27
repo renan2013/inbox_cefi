@@ -166,6 +166,22 @@
             color: #ffffff !important;
         }
 
+        /* Dark mode text contrast adjustments */
+        [data-theme="dark"] .text-muted,
+        html:not([data-theme="light"]) .text-muted {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .text-white-50,
+        html:not([data-theme="light"]) .text-white-50 {
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="dark"] .text-secondary,
+        html:not([data-theme="light"]) .text-secondary {
+            color: #cbd5e1 !important;
+        }
+
         body {
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-dark);
