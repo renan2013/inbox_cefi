@@ -54,43 +54,6 @@ Route::post('/encuesta/procesar', [EncuestaController::class, 'procesarRespuesta
 // API Externa Finanzas (n8n, Green-API, Cron WhatsApp Morosidad)
 Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaController::class, 'apiCuotasVencimiento'])->name('finanzas.api.cuotas_vencimiento');
 
-// Ruta de Mantenimiento / Limpieza de Caché y Diagnóstico de Módulos
-Route::get('/limpiar-cache-cefi', function () {
-    $hasConfigCache = file_exists(base_path('bootstrap/cache/config.php'));
-    if ($hasConfigCache) {
-        @unlink(base_path('bootstrap/cache/config.php'));
-    }
-    
-    // Limpiar vistas compiladas en storage/framework/views/
-    $viewFiles = glob(storage_path('framework/views/*.php'));
-    $viewsDeleted = 0;
-    foreach ($viewFiles as $vf) {
-        if (@unlink($vf)) {
-            $viewsDeleted++;
-        }
-    }
-
-    // Limpiar cache de Laravel
-    try {
-        \Illuminate\Support\Facades\Artisan::call('view:clear');
-        \Illuminate\Support\Facades\Artisan::call('config:clear');
-    } catch (\Throwable $e) {
-        // Ignorar si falla artisan en CLI
-    }
-
-    return response()->json([
-        'config_cache_removed' => $hasConfigCache,
-        'views_deleted_count' => $viewsDeleted,
-        'raw_config_modules' => config('modules.modules'),
-        'inventario_enabled' => \App\Services\ModuleService::isEnabled('inventario'),
-        'planilla_enabled' => \App\Services\ModuleService::isEnabled('planilla'),
-        'soporte_enabled' => \App\Services\ModuleService::isEnabled('soporte'),
-        'estudiante_enabled' => \App\Services\ModuleService::isEnabled('estudiante_tcu'),
-        'dashboard_enabled' => \App\Services\ModuleService::isEnabled('dashboard'),
-        'env_inventario' => env('MODULE_INVENTARIO', 'NOT_SET'),
-        'env_planilla' => env('MODULE_PLANILLA', 'NOT_SET'),
-    ]);
-});
 
 Route::middleware('auth')->group(function () {
     // --- DASHBOARD & TAREAS ---
