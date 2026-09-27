@@ -18,7 +18,14 @@ class ModuleService
             return self::$runtimeCache[$moduleKey];
         }
 
-        // 1. Revisar si hay override específico en base de datos
+        $modules = config('modules.modules', []);
+
+        // 1. Si el módulo está explícitamente apagado en la configuración, tiene prioridad absoluta
+        if (array_key_exists($moduleKey, $modules) && $modules[$moduleKey] === false) {
+            return self::$runtimeCache[$moduleKey] = false;
+        }
+
+        // 2. Revisar si hay override específico en base de datos
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
                 $dbVal = \App\Models\ConfiguracionSistema::where('clave', 'module_' . $moduleKey)->value('valor');
@@ -29,8 +36,6 @@ class ModuleService
         } catch (\Throwable $e) {
             // Continuar con config si BD no está accesible aún
         }
-
-        $modules = config('modules.modules', []);
 
         if (!array_key_exists($moduleKey, $modules)) {
             return self::$runtimeCache[$moduleKey] = true; // Por defecto disponible si no se ha restringido

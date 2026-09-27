@@ -310,7 +310,7 @@
 </head>
 <body>
 
-    <!-- Header / Navbar -->
+    <!-- Header / Navbar CEFI v2.1 -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container-fluid">
             <a class="brand-logo d-flex align-items-center text-decoration-none" href="{{ route('dashboard') }}">
