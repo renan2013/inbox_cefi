@@ -61,6 +61,7 @@ class ConfiguracionController extends Controller
     public function salir()
     {
         session()->forget('parametros_auth');
+        session()->forget('dev_modules_unlocked');
         return redirect()->route('dashboard')->with('success', 'Sesión de configuración bloqueada con éxito.');
     }
 
