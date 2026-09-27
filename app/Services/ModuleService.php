@@ -20,9 +20,15 @@ class ModuleService
 
         $modules = config('modules.modules', []);
 
-        // 1. Si el módulo está explícitamente apagado en la configuración, tiene prioridad absoluta
-        if (array_key_exists($moduleKey, $modules) && $modules[$moduleKey] === false) {
-            return self::$runtimeCache[$moduleKey] = false;
+        // 1. Si el módulo está apagado en la configuración, tiene prioridad absoluta (soporta boolean o string)
+        if (array_key_exists($moduleKey, $modules)) {
+            $val = $modules[$moduleKey];
+            if (is_string($val)) {
+                $val = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+            }
+            if (!$val) {
+                return self::$runtimeCache[$moduleKey] = false;
+            }
         }
 
         // 2. Revisar si hay override específico en base de datos

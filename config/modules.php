@@ -16,26 +16,26 @@ return [
 
     'modules' => [
         // --- NÚCLEO Y PRODUCTIVIDAD ---
-        'dashboard' => env('MODULE_DASHBOARD', true),
-        'tareas_gantt' => env('MODULE_TAREAS_GANTT', false),
+        'dashboard' => true,
+        'tareas_gantt' => false,
 
-        // --- GESTIÓN ACADÉMICA Y DOCENTE (CONTRATADO) ---
-        'gestion_cursos' => env('MODULE_GESTION_CURSOS', true),
-        'registro_academico' => env('MODULE_REGISTRO_ACADEMICO', true),
-        'expedientes_360' => env('MODULE_EXPEDIENTES_360', true),
-        'moodle_sync' => env('MODULE_MOODLE_SYNC', true),
-        'estudiante_tcu' => env('MODULE_ESTUDIANTE_TCU', false),
+        // --- GESTIÓN ACADÉMICA Y DOCENTE (CONTRATADO POR CEFI) ---
+        'gestion_cursos' => true,
+        'registro_academico' => true,
+        'expedientes_360' => true,
+        'moodle_sync' => true,
+        'estudiante_tcu' => false,
 
-        // --- FACTURACIÓN Y FINANZAS (CONTRATADO) ---
-        'boletas_matricula' => env('MODULE_BOLETAS_MATRICULA', true),
-        'finanzas' => env('MODULE_FINANZAS', true),
+        // --- FACTURACIÓN Y FINANZAS (CONTRATADO POR CEFI) ---
+        'boletas_matricula' => true,
+        'finanzas' => true,
 
         // --- NO CONTRATADO POR CEFI (OCULTOS / DESACTIVADOS) ---
-        'inventario' => env('MODULE_INVENTARIO', false),
-        'planilla' => env('MODULE_PLANILLA', false),
-        'soporte' => env('MODULE_SOPORTE', false),
-        'whatsapp_n8n' => env('MODULE_WHATSAPP_N8N', false),
-        'inbox_ai' => env('MODULE_INBOX_AI', false),
+        'inventario' => false,
+        'planilla' => false,
+        'soporte' => false,
+        'whatsapp_n8n' => false,
+        'inbox_ai' => false,
     ],
 
     /*

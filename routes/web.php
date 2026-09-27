@@ -57,19 +57,38 @@ Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaControl
 // Ruta de Mantenimiento / Limpieza de Caché y Diagnóstico de Módulos
 Route::get('/limpiar-cache-cefi', function () {
     $hasConfigCache = file_exists(base_path('bootstrap/cache/config.php'));
-    $configPath = config_path('modules.php');
-    $configContent = file_exists($configPath) ? file_get_contents($configPath) : 'NOT_FOUND';
-    
-    // Si existe config.php en bootstrap/cache, forzar eliminación
     if ($hasConfigCache) {
         @unlink(base_path('bootstrap/cache/config.php'));
     }
     
+    // Limpiar vistas compiladas en storage/framework/views/
+    $viewFiles = glob(storage_path('framework/views/*.php'));
+    $viewsDeleted = 0;
+    foreach ($viewFiles as $vf) {
+        if (@unlink($vf)) {
+            $viewsDeleted++;
+        }
+    }
+
+    // Limpiar cache de Laravel
+    try {
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+    } catch (\Throwable $e) {
+        // Ignorar si falla artisan en CLI
+    }
+
     return response()->json([
-        'has_config_cache_before' => $hasConfigCache,
-        'config_path' => $configPath,
-        'config_file_has_false' => str_contains($configContent, "'inventario' => env('MODULE_INVENTARIO', false)"),
-        'modules_php_sample' => substr($configContent, 300, 300),
+        'config_cache_removed' => $hasConfigCache,
+        'views_deleted_count' => $viewsDeleted,
+        'raw_config_modules' => config('modules.modules'),
+        'inventario_enabled' => \App\Services\ModuleService::isEnabled('inventario'),
+        'planilla_enabled' => \App\Services\ModuleService::isEnabled('planilla'),
+        'soporte_enabled' => \App\Services\ModuleService::isEnabled('soporte'),
+        'estudiante_enabled' => \App\Services\ModuleService::isEnabled('estudiante_tcu'),
+        'dashboard_enabled' => \App\Services\ModuleService::isEnabled('dashboard'),
+        'env_inventario' => env('MODULE_INVENTARIO', 'NOT_SET'),
+        'env_planilla' => env('MODULE_PLANILLA', 'NOT_SET'),
     ]);
 });
 
