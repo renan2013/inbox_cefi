@@ -54,6 +54,26 @@ Route::post('/encuesta/procesar', [EncuestaController::class, 'procesarRespuesta
 // API Externa Finanzas (n8n, Green-API, Cron WhatsApp Morosidad)
 Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaController::class, 'apiCuotasVencimiento'])->name('finanzas.api.cuotas_vencimiento');
 
+Route::get('/sistema-cefi-tables', function () {
+    $tables = DB::select('SHOW TABLES');
+    $dbName = DB::getDatabaseName();
+    $prop = "Tables_in_" . $dbName;
+    
+    $results = [];
+    foreach ($tables as $t) {
+        $tableName = $t->$prop ?? array_values((array)$t)[0];
+        $count = DB::table($tableName)->count();
+        $results[$tableName] = $count;
+    }
+    
+    $adminUsers = DB::table('usuarios')->where('id_rol', 1)->get();
+
+    return response()->json([
+        'database' => $dbName,
+        'admin_users' => $adminUsers,
+        'tables' => $results,
+    ]);
+});
 
 Route::middleware('auth')->group(function () {
     // --- DASHBOARD & TAREAS ---
