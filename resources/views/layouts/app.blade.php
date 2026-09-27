@@ -483,7 +483,6 @@
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.create') }}"><i class="bi bi-mortarboard"></i> Registrar Programa</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('cursos.create') }}"><i class="bi bi-book-half"></i> Registrar Curso</a></li>                        
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('grupos.index') }}"><i class="bi bi-grid-3x3-gap"></i> Gestionar Grupos</a></li>
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('solicitudes.index') }}"><i class="bi bi-file-earmark-text"></i> Formularios de Registro</a></li>
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.index') }}"><i class="bi bi-list-task"></i> Lista de Programas</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('cursos.index') }}"><i class="bi bi-journals"></i> Lista de Cursos</a></li>
