@@ -167,7 +167,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/boletas/generar', [BoletaController::class, 'generar'])->name('boletas.generar');
         Route::post('/boletas/generar', [BoletaController::class, 'store'])->name('boletas.store');
         Route::get('/boletas/cursos-programa/{id}/ajax', [BoletaController::class, 'getCursosPorProgramaAjax'])->name('boletas.cursos_programa_ajax');
+        Route::get('/boletas/matriculas-pendientes-ajax', [BoletaController::class, 'getMatriculasPendientesAjax'])->name('boletas.matriculas_pendientes_ajax');
+        Route::post('/boletas/datos-ajax', [BoletaController::class, 'getBoletaDataAjax'])->name('boletas.datos_ajax');
         Route::get('/boletas/buscar-estudiante-ajax', [BoletaController::class, 'buscarEstudianteAjax'])->name('boletas.buscar_estudiante_ajax');
+        Route::post('/boletas/enviar-enlace-firma', [BoletaController::class, 'enviarEnlaceFirma'])->name('boletas.enviar_enlace_firma');
+        Route::post('/boletas/guardar-oficializar', [BoletaController::class, 'guardarOficializarBoleta'])->name('boletas.guardar_oficializar');
+        Route::get('/boletas/{id}/procesar', [BoletaController::class, 'procesarBoleta'])->name('boletas.procesar');
+        Route::post('/boletas/{id}/oficializar-firmada', [BoletaController::class, 'oficializarBoletaFirmada'])->name('boletas.oficializar_firmada');
         Route::get('/boletas/{id}/pdf', [BoletaController::class, 'verPdf'])->name('boletas.pdf');
         Route::post('/boletas/{id}/pago', [BoletaController::class, 'registrarPago'])->name('boletas.pago.store');
         Route::post('/boletas/{id}/anular', [BoletaController::class, 'anular'])->name('boletas.anular');
@@ -376,3 +382,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/inventario/operaciones/guardar', [InventarioController::class, 'registrarMovimiento'])->name('inventario.movimiento.store');
     });
 });
+
+// --- FIRMA DIGITAL PÚBLICA DE BOLETA PARA ESTUDIANTE (SIN LOGIN) ---
+Route::get('/boletas/firmar/{token}', [BoletaController::class, 'firmarPublico'])->name('boletas.firmar_publico');
+Route::post('/boletas/firmar/{token}/guardar', [BoletaController::class, 'guardarFirmaPublica'])->name('boletas.guardar_firma_publica');

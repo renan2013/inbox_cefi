@@ -191,6 +191,22 @@
             </div>
         </div>
 
+        <!-- Alerta destacada de boletas firmadas esperando oficialización -->
+        @if (isset($count_firmadas) && $count_firmadas > 0)
+            <div class="alert alert-success d-flex flex-wrap align-items-center justify-content-between p-3 rounded-4 shadow-sm mb-4 border-2 border-success">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-pen-fill fs-2 text-success"></i>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-success">Tiene {{ $count_firmadas }} boleta(s) firmada(s) por estudiantes</h5>
+                        <p class="mb-0 text-muted small">Los estudiantes completaron su firma digital y están a la espera de que la administración oficialice el trámite.</p>
+                    </div>
+                </div>
+                <a href="{{ route('boletas.index', ['estado' => 'firmada']) }}" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="bi bi-filter me-1"></i> Ver Firmadas ({{ $count_firmadas }})
+                </a>
+            </div>
+        @endif
+
         <!-- Filter Form -->
         <div class="filter-section">
             <form action="{{ route('boletas.index') }}" method="GET" class="row g-3 align-items-end">
@@ -208,9 +224,11 @@
                     <label for="estado" class="form-label text-white-50 fw-semibold mb-2">Estado de Boleta</label>
                     <select name="estado" id="estado" class="form-select form-control-custom">
                         <option value="">Todos los Estados</option>
+                        <option value="firmada" {{ request('estado') == 'firmada' ? 'selected' : '' }}>Firmada (Lista para Oficializar)</option>
+                        <option value="pendiente_firma" {{ request('estado') == 'pendiente_firma' ? 'selected' : '' }}>Pendiente de Firma</option>
                         <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                        <option value="pagada" {{ request('estado') == 'pagada' ? 'selected' : '' }}>Pagada</option>
                         <option value="pago_parcial" {{ request('estado') == 'pago_parcial' ? 'selected' : '' }}>Pago Parcial</option>
+                        <option value="pagada" {{ request('estado') == 'pagada' ? 'selected' : '' }}>Pagada</option>
                         <option value="anulada" {{ request('estado') == 'anulada' ? 'selected' : '' }}>Anulada</option>
                     </select>
                 </div>
@@ -268,7 +286,11 @@
                                 <td>
                                     @php
                                         $statusClass = 'status-badge';
-                                        if ($boleta->estado == 'pendiente') {
+                                        if ($boleta->estado == 'firmada') {
+                                            $statusClass .= ' bg-success text-white border border-success';
+                                        } elseif ($boleta->estado == 'pendiente_firma') {
+                                            $statusClass .= ' bg-warning text-dark border border-warning';
+                                        } elseif ($boleta->estado == 'pendiente') {
                                             $statusClass .= ' status-pendiente';
                                         } elseif ($boleta->estado == 'pagada') {
                                             $statusClass .= ' status-pagada';
@@ -278,16 +300,42 @@
                                             $statusClass .= ' status-parcial';
                                         }
                                     @endphp
-                                    <span class="{{ $statusClass }}">{{ ucfirst(str_replace('_', ' ', $boleta->estado)) }}</span>
+                                    <span class="{{ $statusClass }}">
+                                        @if ($boleta->estado == 'firmada')
+                                            <i class="bi bi-pen me-1"></i> Firmada
+                                        @elseif ($boleta->estado == 'pendiente_firma')
+                                            <i class="bi bi-hourglass-split me-1"></i> Pendiente Firma
+                                        @else
+                                            {{ ucfirst(str_replace('_', ' ', $boleta->estado)) }}
+                                        @endif
+                                    </span>
                                 </td>
                                 <td>
-                                    <span class="text-white-50">{{ $boleta->fecha_creacion->format('Y-m-d H:i') }}</span>
+                                    <span class="text-white-50">{{ $boleta->fecha_creacion ? $boleta->fecha_creacion->format('Y-m-d H:i') : 'N/D' }}</span>
                                 </td>
                                 <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-1">
+                                    <div class="d-flex justify-content-end gap-1 flex-wrap">
+                                        @if ($boleta->estado == 'firmada')
+                                            <a href="{{ route('boletas.procesar', $boleta->id) }}" class="btn btn-sm btn-success fw-bold px-2" title="Procesar y Oficializar Boleta Firmada">
+                                                <i class="bi bi-patch-check-fill me-1"></i> Oficializar
+                                            </a>
+                                        @elseif ($boleta->estado == 'pendiente_firma')
+                                            <a href="{{ route('boletas.procesar', $boleta->id) }}" class="btn btn-sm btn-outline-warning" title="Ver Detalles">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            @if (!empty($boleta->token_firma))
+                                                <button type="button" class="btn btn-sm btn-outline-light btn-copy-firma" 
+                                                    data-link="{{ route('boletas.firmar_publico', $boleta->token_firma) }}" 
+                                                    title="Copiar Enlace de Firma Digital">
+                                                    <i class="bi bi-link-45deg"></i>
+                                                </button>
+                                            @endif
+                                        @endif
+
                                         <a href="{{ route('boletas.pdf', $boleta->id) }}" target="_blank" class="btn btn-sm btn-outline-success" title="Ver Boleta Oficial en PDF">
                                             <i class="bi bi-file-earmark-pdf"></i>
                                         </a>
+
                                         @if ($boleta->estado !== 'anulada')
                                             <button type="button" class="btn btn-sm btn-outline-info btn-enviar-wa-boleta" 
                                                 data-id="{{ $boleta->id }}" 
@@ -297,7 +345,8 @@
                                                 <i class="bi bi-whatsapp"></i>
                                             </button>
                                         @endif
-                                        @if ($boleta->estado !== 'anulada' && $boleta->saldo_pendiente > 0)
+
+                                        @if ($boleta->estado !== 'anulada' && $boleta->saldo_pendiente > 0 && $boleta->estado !== 'pendiente_firma')
                                             <button type="button" class="btn btn-sm btn-outline-primary btn-pago" 
                                                 data-id="{{ $boleta->id }}" 
                                                 data-numero="{{ $boleta->numero_boleta }}" 
@@ -306,6 +355,7 @@
                                                 <i class="bi bi-cash-stack"></i>
                                             </button>
                                         @endif
+
                                         @if ($boleta->estado !== 'anulada')
                                             <button type="button" class="btn btn-sm btn-outline-danger btn-anular" 
                                                 data-id="{{ $boleta->id }}" 
@@ -602,6 +652,28 @@
                             }
                         }
                     });
+                });
+            });
+
+            // Copiar enlace de firma digital
+            document.querySelectorAll('.btn-copy-firma').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const link = this.dataset.link;
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(link).then(() => {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Enlace Copiado!',
+                                text: 'El enlace de firma digital fue copiado al portapapeles.',
+                                timer: 2000,
+                                showConfirmButton: false,
+                                toast: true,
+                                position: 'top-end'
+                            });
+                        });
+                    } else {
+                        prompt('Copie el siguiente enlace para que el estudiante firme la boleta:', link);
+                    }
                 });
             });
         });

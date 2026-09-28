@@ -174,6 +174,36 @@ class BoletaPdfService
         $pdf->SetFont('Arial', '', 8.5);
         $subtotal_materias = 0.0;
 
+        $max_mat = 0;
+        $max_bib = 0;
+        $max_ins = 0;
+        foreach ($cursos as $c) {
+            if (floatval($c->costo_matricula ?? 0) > $max_mat) $max_mat = floatval($c->costo_matricula);
+            if (floatval($c->costo_biblioteca ?? 0) > $max_bib) $max_bib = floatval($c->costo_biblioteca);
+            if (floatval($c->costo_inscripcion_unica ?? 0) > $max_ins) $max_ins = floatval($c->costo_inscripcion_unica);
+        }
+        if ($boleta->cobrar_biblioteca && $max_bib == 0) $max_bib = 5000;
+        if ($boleta->cobrar_inscripcion && $max_ins == 0) $max_ins = 8000;
+
+        if ($boleta->cobrar_inscripcion && $max_ins > 0) {
+            $pdf->Cell(25, 5.5, 'INS-01', 1, 0, 'C');
+            $pdf->Cell(115, 5.5, $pdf->toPdf(" INSCRIPCIÓN ÚNICA"), 1, 0, 'L');
+            $pdf->Cell(40, 5.5, 'CRC ' . number_format($max_ins, 2) . ' ', 1, 1, 'R');
+            $subtotal_materias += $max_ins;
+        }
+        if ($boleta->cobrar_biblioteca && $max_bib > 0) {
+            $pdf->Cell(25, 5.5, 'BIB-01', 1, 0, 'C');
+            $pdf->Cell(115, 5.5, $pdf->toPdf(" USO DE BIBLIOTECA"), 1, 0, 'L');
+            $pdf->Cell(40, 5.5, 'CRC ' . number_format($max_bib, 2) . ' ', 1, 1, 'R');
+            $subtotal_materias += $max_bib;
+        }
+        if ($boleta->cobrar_matricula && $max_mat > 0) {
+            $pdf->Cell(25, 5.5, 'ADM-01', 1, 0, 'C');
+            $pdf->Cell(115, 5.5, $pdf->toPdf(" MATRÍCULA DEL PERÍODO"), 1, 0, 'L');
+            $pdf->Cell(40, 5.5, 'CRC ' . number_format($max_mat, 2) . ' ', 1, 1, 'R');
+            $subtotal_materias += $max_mat;
+        }
+
         if ($cursos->count() > 0) {
             foreach ($cursos as $c) {
                 $precio = floatval($c->precio > 0 ? $c->precio : ($c->costo_materia ?? 0));
@@ -220,7 +250,7 @@ class BoletaPdfService
             }
         } else {
             $pdf->Cell(20, 5.5, '#1', 1, 0, 'C');
-            $pdf->Cell(45, 5.5, $boleta->fecha_creacion->format('d/m/Y'), 1, 0, 'C');
+            $pdf->Cell(45, 5.5, $boleta->fecha_creacion ? $boleta->fecha_creacion->format('d/m/Y') : date('d/m/Y'), 1, 0, 'C');
             $pdf->Cell(40, 5.5, 'CRC ' . number_format($boleta->total, 2) . ' ', 1, 0, 'R');
             $pdf->Cell(35, 5.5, '- ', 1, 0, 'R');
             $pdf->Cell(40, 5.5, 'CRC ' . number_format($boleta->total, 2) . ' ', 1, 1, 'R');
@@ -231,10 +261,24 @@ class BoletaPdfService
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetFillColor(241, 245, 249);
 
+        if ($boleta->descuento > 0) {
+            $pdf->Cell(140, 6, $pdf->toPdf('DESCUENTO ESPECIAL APLICADO:'), 1, 0, 'R', true);
+            $pdf->SetTextColor(16, 185, 129);
+            $pdf->Cell(40, 6, '- CRC ' . number_format($boleta->descuento, 2) . ' ', 1, 1, 'R');
+            $pdf->SetTextColor(0, 0, 0);
+        }
+
         $pdf->Cell(140, 6, $pdf->toPdf('TOTAL ARANCEL MATRÍCULA:'), 1, 0, 'R', true);
         $pdf->Cell(40, 6, 'CRC ' . number_format($boleta->total, 2) . ' ', 1, 1, 'R');
 
-        $pdf->Cell(140, 6, $pdf->toPdf('MONTO PAGADO HASTA LA FECHA:'), 1, 0, 'R', true);
+        if ($boleta->pago_inicial > 0) {
+            $pdf->Cell(140, 6, $pdf->toPdf('ABONO / PAGO INICIAL REGISTRADO:'), 1, 0, 'R', true);
+            $pdf->SetTextColor(239, 68, 68);
+            $pdf->Cell(40, 6, '- CRC ' . number_format($boleta->pago_inicial, 2) . ' ', 1, 1, 'R');
+            $pdf->SetTextColor(0, 0, 0);
+        }
+
+        $pdf->Cell(140, 6, $pdf->toPdf('MONTO TOTAL PAGADO HASTA LA FECHA:'), 1, 0, 'R', true);
         $pdf->SetTextColor(16, 185, 129);
         $pdf->Cell(40, 6, 'CRC ' . number_format($boleta->monto_pagado, 2) . ' ', 1, 1, 'R');
         $pdf->SetTextColor(0, 0, 0);
@@ -265,10 +309,19 @@ class BoletaPdfService
         $w_linea = 75;
         // Firma Estudiante (Izquierda)
         $x_est = 20;
+
+        // Estampar firma digital manuscrita si existe
+        if (!empty($boleta->ruta_firma)) {
+            $ruta_img_firma = public_path(ltrim($boleta->ruta_firma, '/'));
+            if (file_exists($ruta_img_firma)) {
+                $pdf->Image($ruta_img_firma, $x_est + 15, $y_firma - 18, 45, 16);
+            }
+        }
+
         $pdf->Line($x_est, $y_firma, $x_est + $w_linea, $y_firma);
         $pdf->SetXY($x_est, $y_firma + 2);
         $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell($w_linea, 4, $pdf->toPdf('Firma del Estudiante / Aceptación'), 0, 1, 'C');
+        $pdf->Cell($w_linea, 4, $pdf->toPdf('Firma del Estudiante / Aceptación Digital'), 0, 1, 'C');
         $pdf->SetX($x_est);
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->Cell($w_linea, 4, $pdf->toPdf($nombre_completo), 0, 0, 'C');
