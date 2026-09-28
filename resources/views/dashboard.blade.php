@@ -869,19 +869,6 @@
                                             </td>
                                         </tr>
                                     @endforelse
-
-                                    <!-- Fila de Creación Rápida Estilo Monday.com -->
-                                    <tr class="monday-quick-row">
-                                        <td class="ps-4 text-primary text-center"><i class="bi bi-plus-lg fw-bold"></i></td>
-                                        <td colspan="6" class="py-2 pe-4">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <input type="text" id="monday-inline-task-title" class="form-control form-control-sm monday-quick-input flex-grow-1" placeholder="+ Añadir una nueva tarea y presiona Enter..." autocomplete="off">
-                                                <button class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-bold" type="button" id="btn-quick-add-task" onclick="ejecutarCreacionRapida()">
-                                                    <i class="bi bi-arrow-return-left me-1"></i>Añadir
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1478,14 +1465,6 @@
 
     $(document).ready(function() {
         recalcularProgresoMonday();
-
-        // Enviar con tecla Enter en el campo rápido
-        $('#monday-inline-task-title').on('keypress', function(e) {
-            if (e.which === 13) {
-                e.preventDefault();
-                ejecutarCreacionRapida();
-            }
-        });
     });
 </script>
 @endsection
