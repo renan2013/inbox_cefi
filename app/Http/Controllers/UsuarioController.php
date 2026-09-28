@@ -196,4 +196,62 @@ class UsuarioController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Muestra el formulario para editar un usuario.
+     */
+    public function edit($id)
+    {
+        $usuario = Usuario::with('rol')->findOrFail($id);
+        $roles = Rol::all();
+        return view('usuarios.edit', compact('usuario', 'roles'));
+    }
+
+    /**
+     * Actualiza la información del usuario en la base de datos.
+     */
+    public function update(Request $request, $id)
+    {
+        $usuario = Usuario::findOrFail($id);
+
+        $request->validate([
+            'nombre' => 'required|string|max:100',
+            'apellidos' => 'required|string|max:255',
+            'cedula' => 'nullable|string|max:50',
+            'email' => 'required|email|unique:usuarios,email,' . $usuario->id,
+            'telefono' => 'nullable|string|max:20',
+            'password' => 'nullable|string|min:6',
+            'id_rol' => 'required|integer|exists:roles,id'
+        ], [
+            'nombre.required' => 'El nombre es obligatorio.',
+            'apellidos.required' => 'Los apellidos son obligatorios.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.unique' => 'Este correo electrónico ya está registrado por otro usuario.',
+            'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
+            'id_rol.exists' => 'El rol seleccionado no es válido.',
+        ]);
+
+        $usuario->nombre = $request->nombre;
+        $usuario->apellidos = $request->apellidos;
+        $usuario->cedula = $request->cedula;
+        $usuario->email = $request->email;
+        $usuario->telefono = $request->telefono;
+        $usuario->id_rol = $request->id_rol;
+
+        if ($request->filled('password')) {
+            $usuario->password = Hash::make($request->password);
+        }
+
+        $usuario->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Usuario '{$usuario->nombre} {$usuario->apellidos}' actualizado exitosamente.",
+                'usuario' => $usuario->load('rol')
+            ]);
+        }
+
+        return redirect()->route('usuarios.index')->with('success', "Usuario '{$usuario->nombre} {$usuario->apellidos}' actualizado exitosamente.");
+    }
 }

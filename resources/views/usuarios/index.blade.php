@@ -227,6 +227,54 @@
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
             transform: translateY(-1px);
         }
+
+        .btn-action-edit {
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            color: #3b82f6;
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.65rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-action-edit:hover {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        [data-theme="light"] .btn-action-edit {
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #2563eb;
+        }
+
+        [data-theme="light"] .btn-action-edit:hover {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        [data-theme="light"] .modal-content.glass-card {
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        [data-theme="light"] #modalEditarUsuario .modal-header,
+        [data-theme="light"] #modalEditarUsuario .modal-footer {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        [data-theme="light"] #modalEditarUsuario .btn-close {
+            filter: none !important;
+        }
     </style>
 @endsection
 
@@ -447,6 +495,19 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-1">
+                                        <a href="{{ route('usuarios.edit', $usuario->id) }}" 
+                                            class="btn btn-sm btn-action-edit btn-editar-usuario" 
+                                            data-id="{{ $usuario->id }}"
+                                            data-nombre="{{ $usuario->nombre }}"
+                                            data-apellidos="{{ $usuario->apellidos }}"
+                                            data-cedula="{{ $usuario->cedula }}"
+                                            data-email="{{ $usuario->email }}"
+                                            data-telefono="{{ $usuario->telefono }}"
+                                            data-rol-id="{{ $usuario->id_rol }}"
+                                            data-origen="{{ strtolower($usuario->origen) }}"
+                                            title="Editar datos de {{ $nombreCompleto }}">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
                                         @if (!$isSelf && !$isMoodle)
                                             <button type="button" class="btn btn-sm btn-action-delete btn-eliminar-usuario" 
                                                 data-id="{{ $usuario->id }}" 
@@ -455,12 +516,12 @@
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         @elseif ($isMoodle)
-                                            <span class="badge bg-secondary bg-opacity-10 text-white-50 py-2 px-2" title="Los usuarios de Moodle se gestionan desde el aula virtual">
-                                                <i class="bi bi-lock-fill"></i> Moodle
+                                            <span class="badge bg-secondary bg-opacity-10 text-white-50 py-2 px-2" title="Usuario sincronizado vía Moodle">
+                                                <i class="bi bi-mortarboard-fill"></i>
                                             </span>
                                         @else
                                             <span class="badge bg-secondary bg-opacity-10 text-white-50 py-2 px-2" title="Tu propia cuenta en sesión">
-                                                <i class="bi bi-person-check"></i> Activo
+                                                <i class="bi bi-person-check"></i>
                                             </span>
                                         @endif
                                     </div>
@@ -499,6 +560,84 @@
                     </div>
                 </div>
             @endif
+        </div>
+
+        <!-- Modal de Edición Rápida de Usuario -->
+        <div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-labelledby="modalEditarUsuarioLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content glass-card shadow-lg border-0">
+                    <div class="modal-header border-bottom px-4 py-3" style="border-color: var(--border-dark) !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary rounded-pill px-3 py-1 font-monospace" id="modal-user-badge">ID #0000</span>
+                            <h5 class="modal-title fw-bold text-white mb-0" id="modalEditarUsuarioLabel">
+                                <i class="bi bi-person-gear text-primary me-1"></i> Editar Usuario
+                            </h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <form id="form-editar-usuario" onsubmit="guardarEdicionUsuario(event)">
+                        @csrf
+                        <input type="hidden" id="edit-user-id" name="id">
+                        <div class="modal-body px-4 py-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit-user-nombre" class="form-label form-label-custom small fw-bold">Nombres</label>
+                                    <input type="text" class="form-control form-control-custom" id="edit-user-nombre" name="nombre" required placeholder="Ej: Juan">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit-user-apellidos" class="form-label form-label-custom small fw-bold">Apellidos</label>
+                                    <input type="text" class="form-control form-control-custom" id="edit-user-apellidos" name="apellidos" required placeholder="Ej: Pérez García">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit-user-cedula" class="form-label form-label-custom small fw-bold">Cédula / Identificación</label>
+                                    <input type="text" class="form-control form-control-custom" id="edit-user-cedula" name="cedula" placeholder="Formato nacional o pasaporte">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit-user-email" class="form-label form-label-custom small fw-bold">Correo Electrónico</label>
+                                    <input type="email" class="form-control form-control-custom" id="edit-user-email" name="email" required placeholder="nombre@ejemplo.com">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit-user-telefono" class="form-label form-label-custom small fw-bold">Teléfono / WhatsApp</label>
+                                    <input type="text" class="form-control form-control-custom" id="edit-user-telefono" name="telefono" placeholder="Ej: 50688889999">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit-user-rol" class="form-label form-label-custom small fw-bold">Rol Institucional</label>
+                                    <select class="form-select form-control-custom" id="edit-user-rol" name="id_rol" required>
+                                        @foreach ($roles as $rol)
+                                            <option value="{{ $rol->id }}">{{ $rol->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label for="edit-user-password" class="form-label form-label-custom small fw-bold">Nueva Contraseña (Opcional)</label>
+                                <input type="password" class="form-control form-control-custom" id="edit-user-password" name="password" placeholder="Dejar en blanco para conservar la actual">
+                                <small class="text-white-50 d-block mt-1">Escriba una contraseña solo si desea cambiarla (mínimo 6 caracteres).</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between" style="border-color: var(--border-dark) !important;">
+                            <div>
+                                <a href="#" id="modal-link-full-edit" class="small text-decoration-none text-primary fw-semibold">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> Abrir formulario completo
+                                </a>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" id="btn-guardar-usuario">
+                                    <i class="bi bi-check-lg me-1"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -698,9 +837,146 @@
                                 });
                             }
                         }
-                    });
+            // --- MODAL DE EDICIÓN DE USUARIO ---
+            const modalUserEl = document.getElementById('modalEditarUsuario');
+            const modalUser = modalUserEl ? new bootstrap.Modal(modalUserEl) : null;
+
+            document.querySelectorAll('.btn-editar-usuario').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (e.ctrlKey || e.metaKey || e.button === 1) return;
+
+                    e.preventDefault();
+                    const id = this.getAttribute('data-id');
+                    const nombre = this.getAttribute('data-nombre') || '';
+                    const apellidos = this.getAttribute('data-apellidos') || '';
+                    const cedula = this.getAttribute('data-cedula') || '';
+                    const email = this.getAttribute('data-email') || '';
+                    const telefono = this.getAttribute('data-telefono') || '';
+                    const rolId = this.getAttribute('data-rol-id') || '';
+
+                    document.getElementById('edit-user-id').value = id;
+                    document.getElementById('edit-user-nombre').value = nombre;
+                    document.getElementById('edit-user-apellidos').value = apellidos;
+                    document.getElementById('edit-user-cedula').value = cedula;
+                    document.getElementById('edit-user-email').value = email;
+                    document.getElementById('edit-user-telefono').value = telefono;
+                    document.getElementById('edit-user-rol').value = rolId;
+                    document.getElementById('edit-user-password').value = '';
+                    document.getElementById('modal-user-badge').textContent = 'ID #' + String(id).padStart(4, '0');
+                    document.getElementById('modal-link-full-edit').href = `/usuarios/${id}/editar`;
+
+                    if (modalUser) modalUser.show();
                 });
             });
+
+            window.guardarEdicionUsuario = async function(e) {
+                e.preventDefault();
+                const form = document.getElementById('form-editar-usuario');
+                const id = document.getElementById('edit-user-id').value;
+                const btn = document.getElementById('btn-guardar-usuario');
+                const originalHtml = btn.innerHTML;
+
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
+
+                const formData = new FormData(form);
+
+                try {
+                    const res = await fetch(`/usuarios/${id}/actualizar`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+
+                    const data = await res.json();
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+
+                    if (res.ok && data.success) {
+                        if (modalUser) modalUser.hide();
+
+                        // Actualizar la fila en vivo
+                        const u = data.usuario;
+                        const row = document.querySelector(`.user-row[data-id="${id}"]`);
+                        if (row) {
+                            row.setAttribute('data-nombre', u.nombre + ' ' + (u.apellidos || ''));
+                            row.setAttribute('data-apellidos', u.apellidos || '');
+                            row.setAttribute('data-email', u.email);
+                            row.setAttribute('data-cedula', u.cedula || '');
+                            row.setAttribute('data-telefono', u.telefono || '');
+                            row.setAttribute('data-rol-id', u.id_rol);
+
+                            // Actualizar nombre
+                            const nameEl = row.querySelector('.user-name-primary');
+                            if (nameEl) {
+                                nameEl.innerHTML = (u.apellidos ? `<strong class="text-white">${u.apellidos}</strong>, ${u.nombre}` : `<strong class="text-white">${u.nombre}</strong>`);
+                            }
+                            // Actualizar email y teléfono
+                            const emailCell = row.cells[1];
+                            if (emailCell) {
+                                emailCell.innerHTML = `<div class="text-white">${u.email}</div>` + (u.telefono ? `<small class="text-white-50"><i class="bi bi-telephone me-1"></i>${u.telefono}</small>` : '');
+                            }
+                            // Actualizar cédula
+                            const cedulaCell = row.cells[2];
+                            if (cedulaCell) {
+                                cedulaCell.innerHTML = u.cedula ? `<span class="badge bg-dark border border-secondary border-opacity-25 text-light font-monospace">${u.cedula}</span>` : `<span class="text-white-50 small">No registrada</span>`;
+                            }
+                            // Actualizar rol badge
+                            const rolCell = row.cells[3];
+                            if (rolCell && u.rol) {
+                                let rClass = 'badge-role';
+                                if (u.id_rol == 1) rClass += ' role-admin';
+                                else if (u.id_rol == 2) rClass += ' role-teacher';
+                                else rClass += ' role-student';
+                                rolCell.innerHTML = `<span class="${rClass}">${u.rol.nombre}</span>`;
+                            }
+
+                            // Actualizar datos del botón de editar
+                            const editBtn = row.querySelector('.btn-editar-usuario');
+                            if (editBtn) {
+                                editBtn.setAttribute('data-nombre', u.nombre);
+                                editBtn.setAttribute('data-apellidos', u.apellidos || '');
+                                editBtn.setAttribute('data-cedula', u.cedula || '');
+                                editBtn.setAttribute('data-email', u.email);
+                                editBtn.setAttribute('data-telefono', u.telefono || '');
+                                editBtn.setAttribute('data-rol-id', u.id_rol);
+                            }
+                        }
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Usuario Actualizado!',
+                            text: data.message,
+                            timer: 2000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
+                    } else {
+                        let errorMsg = data.message || 'Error al actualizar el usuario.';
+                        if (data.errors) {
+                            const errList = Object.values(data.errors).flat().join('<br>');
+                            errorMsg = errList;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'No se pudo guardar',
+                            html: errorMsg
+                        });
+                    }
+                } catch (err) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Red',
+                        text: err.message
+                    });
+                }
+            };
         });
     </script>
 @endsection
