@@ -147,17 +147,39 @@
         border-color: var(--primary-color) !important;
     }
 
+    .form-control-dash,
     .form-select-dash {
         background-color: rgba(15, 23, 42, 0.4) !important;
         border: 1px solid var(--border-color) !important;
         color: #f8fafc !important;
-        border-radius: 0.5rem !important;
+        border-radius: 0.6rem !important;
+        padding: 0.55rem 0.85rem !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
+    .form-control-dash:focus,
+    .form-select-dash:focus {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(95, 178, 48, 0.2) !important;
+        color: #f8fafc !important;
+        outline: none;
+    }
+
+    [data-theme="light"] .form-control-dash,
     [data-theme="light"] .form-select-dash {
         background-color: #ffffff !important;
         color: #0f172a !important;
         border-color: #cbd5e1 !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    [data-theme="light"] .form-control-dash:focus,
+    [data-theme="light"] .form-select-dash:focus {
+        background-color: #ffffff !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(95, 178, 48, 0.2) !important;
+        color: #0f172a !important;
     }
 
     /* --- MONDAY.COM STYLED ELEMENTS --- */
@@ -228,6 +250,21 @@
         background-color: rgba(255, 255, 255, 0.08) !important;
     }
 
+    [data-theme="light"] .monday-dropdown-menu {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    [data-theme="light"] .monday-dropdown-item {
+        color: #1e293b !important;
+    }
+
+    [data-theme="light"] .monday-dropdown-item:hover {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+    }
+
     .monday-color-dot {
         width: 12px;
         height: 12px;
@@ -258,6 +295,12 @@
         border: 1px dashed var(--border-color);
     }
 
+    [data-theme="light"] .monday-avatar-empty {
+        background: rgba(0, 0, 0, 0.04);
+        color: #64748b;
+        border: 1px dashed #cbd5e1;
+    }
+
     /* Monday Quick-Add Row */
     .monday-quick-row {
         background: rgba(255, 255, 255, 0.015);
@@ -267,6 +310,15 @@
 
     .monday-quick-row:hover {
         background: rgba(255, 255, 255, 0.04);
+    }
+
+    [data-theme="light"] .monday-quick-row {
+        background: rgba(0, 0, 0, 0.015);
+        border-top: 1px dashed #cbd5e1 !important;
+    }
+
+    [data-theme="light"] .monday-quick-row:hover {
+        background: rgba(0, 0, 0, 0.035);
     }
 
     .monday-quick-input {
@@ -286,6 +338,16 @@
         outline: none;
     }
 
+    [data-theme="light"] .monday-quick-input {
+        color: #0f172a !important;
+    }
+
+    [data-theme="light"] .monday-quick-input:focus {
+        background: #ffffff !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(95, 178, 48, 0.15) !important;
+    }
+
     .monday-progress-strip {
         height: 8px;
         border-radius: 4px;
@@ -294,8 +356,214 @@
         display: flex;
     }
 
+    [data-theme="light"] .monday-progress-strip {
+        background: #e2e8f0;
+    }
+
     .monday-progress-seg {
         transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .monday-summary-box {
+        background-color: rgba(15, 23, 42, 0.35);
+        border: 1px solid #334155 !important;
+    }
+
+    [data-theme="light"] .monday-summary-box {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+
+    .dash-card-header-bar {
+        background-color: rgba(15, 23, 42, 0.35);
+        border-bottom: 1px solid #334155 !important;
+    }
+
+    [data-theme="light"] .dash-card-header-bar {
+        background-color: #f8fafc !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+
+    .task-actions-group,
+    .task-view-group {
+        border-color: #334155 !important;
+    }
+
+    [data-theme="light"] .task-actions-group,
+    [data-theme="light"] .task-view-group {
+        border-color: #cbd5e1 !important;
+    }
+
+    /* --- MODAL DE EDICIÓN DE TAREAS (DARK & LIGHT THEME) --- */
+    .modal-task-container {
+        background-color: #1e293b !important;
+        border: 1px solid #334155 !important;
+        border-radius: 1.25rem !important;
+        color: #f8fafc !important;
+        overflow: hidden;
+    }
+
+    .modal-task-header {
+        border-bottom: 1px solid #334155 !important;
+        background-color: rgba(15, 23, 42, 0.4) !important;
+    }
+
+    .modal-task-title {
+        color: #f8fafc !important;
+        font-weight: 700;
+    }
+
+    .modal-task-close {
+        filter: invert(1) grayscale(100%);
+    }
+
+    .form-label-task {
+        color: #94a3b8 !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .task-modal-help {
+        color: #94a3b8 !important;
+        font-size: 0.72rem !important;
+    }
+
+    .modal-task-footer {
+        border-top: 1px solid #334155 !important;
+        background-color: rgba(15, 23, 42, 0.4) !important;
+    }
+
+    .btn-task-cancel {
+        background: transparent;
+        border: 1px solid #475569;
+        color: #cbd5e1;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .btn-task-cancel:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+    }
+
+    .btn-task-delete {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #f87171;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .btn-task-delete:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #ffffff;
+    }
+
+    #modalEditarTarea input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+    }
+
+    #modalEditarTarea select[multiple] option {
+        color: #f1f5f9;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+
+    #modalEditarTarea select[multiple] option:hover,
+    #modalEditarTarea select[multiple] option:focus,
+    #modalEditarTarea select[multiple] option:checked {
+        background: rgba(95, 178, 48, 0.35) linear-gradient(0deg, rgba(95, 178, 48, 0.35) 0%, rgba(95, 178, 48, 0.35) 100%);
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    /* Reglas para Modo Claro en Modal */
+    [data-theme="light"] .modal-task-container {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.18) !important;
+    }
+
+    [data-theme="light"] .modal-task-header {
+        background-color: #f8fafc !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+
+    [data-theme="light"] .modal-task-title {
+        color: #0f172a !important;
+        font-weight: 800;
+    }
+
+    [data-theme="light"] .modal-task-close {
+        filter: none !important;
+        opacity: 0.7;
+    }
+
+    [data-theme="light"] .modal-task-close:hover {
+        opacity: 1;
+    }
+
+    [data-theme="light"] .form-label-task {
+        color: #475569 !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="light"] .task-modal-help {
+        color: #64748b !important;
+    }
+
+    [data-theme="light"] .modal-task-footer {
+        background-color: #f8fafc !important;
+        border-top: 1px solid #e2e8f0 !important;
+    }
+
+    [data-theme="light"] .btn-task-cancel {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+    }
+
+    [data-theme="light"] .btn-task-cancel:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    [data-theme="light"] .btn-task-delete {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+    }
+
+    [data-theme="light"] .btn-task-delete:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #ffffff;
+    }
+
+    [data-theme="light"] #modalEditarTarea input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: none;
+    }
+
+    [data-theme="light"] #modalEditarTarea select[multiple] option {
+        color: #0f172a;
+        padding: 6px 10px;
+        border-radius: 4px;
+    }
+
+    [data-theme="light"] #modalEditarTarea select[multiple] option:hover,
+    [data-theme="light"] #modalEditarTarea select[multiple] option:focus,
+    [data-theme="light"] #modalEditarTarea select[multiple] option:checked {
+        background: rgba(95, 178, 48, 0.15) linear-gradient(0deg, rgba(95, 178, 48, 0.15) 0%, rgba(95, 178, 48, 0.15) 100%);
+        color: #166534;
+        font-weight: 600;
     }
 </style>
 @endsection
@@ -445,13 +713,13 @@
 
             <div class="dash-card p-0 overflow-hidden">
                 <!-- Header de la Tarjeta de Tareas -->
-                <div class="px-4 py-3 border-bottom border-secondary d-flex justify-content-between align-items-center bg-dark bg-opacity-25">
-                    <h5 class="mb-0 fw-bold text-white">
+                <div class="px-4 py-3 border-bottom d-flex justify-content-between align-items-center dash-card-header-bar">
+                    <h5 class="mb-0 fw-bold task-title-text">
                         <i class="bi bi-list-task me-2 text-primary"></i>
                         {{ $es_admin ? 'Listado General de Tareas' : 'Mis Tareas Asignadas' }}
                     </h5>
                     <div class="d-flex align-items-center gap-3">
-                        <div class="btn-group rounded-pill p-1 border border-secondary" role="group" aria-label="Vista de Tareas">
+                        <div class="btn-group rounded-pill p-1 border task-view-group" role="group" aria-label="Vista de Tareas">
                             <button type="button" class="btn btn-view-toggle rounded-pill px-3 active" id="btn-view-table" onclick="switchView('table')">
                                 <i class="bi bi-table me-1"></i> Tabla
                             </button>
@@ -597,7 +865,7 @@
                                                 @endif
                                             </td>
                                             <td class="text-end pe-4">
-                                                <div class="btn-group rounded-pill overflow-hidden border border-secondary shadow-sm">
+                                                <div class="btn-group rounded-pill overflow-hidden border task-actions-group shadow-sm">
                                                     <button type="button" class="btn btn-sm btn-outline-primary border-0" onclick="abrirModalEditarTarea({{ $tarea->id }})" title="Editar Tarea">
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
@@ -635,9 +903,9 @@
                         </div>
 
                         <!-- Barra de Resumen de Progreso Estilo Monday -->
-                        <div class="mt-3 p-3 rounded-4 bg-dark bg-opacity-25 border border-secondary">
+                        <div class="mt-3 p-3 rounded-4 border monday-summary-box">
                             <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
-                                <span class="small fw-bold text-white"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Distribución del Tablero</span>
+                                <span class="small fw-bold task-title-text"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Distribución del Tablero</span>
                                 <div class="d-flex align-items-center gap-3 small" id="monday-legend-stats">
                                     <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #00c875;"></span> <strong id="count-completada">0</strong> Listo</span>
                                     <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #fdab3d;"></span> <strong id="count-en_proceso">0</strong> En Proceso</span>
@@ -817,13 +1085,13 @@
 <!-- MODAL DE EDICIÓN COMPLETA DE TAREA (ESTILO MONDAY / ASANA) -->
 <div class="modal fade" id="modalEditarTarea" tabindex="-1" aria-labelledby="modalEditarTareaLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content dash-card border-secondary text-white shadow-lg" style="background-color: #1e293b;">
-            <div class="modal-header border-secondary px-4 py-3">
+        <div class="modal-content modal-task-container shadow-lg">
+            <div class="modal-header modal-task-header px-4 py-3">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary rounded-pill px-3 py-1" id="modal-task-badge">Tarea #</span>
-                    <h5 class="modal-title fw-bold mb-0 text-white" id="modalEditarTareaLabel">Detalle y Edición de Tarea</h5>
+                    <span class="badge bg-primary rounded-pill px-3 py-1 shadow-sm" id="modal-task-badge">Tarea #</span>
+                    <h5 class="modal-title modal-task-title fw-bold mb-0" id="modalEditarTareaLabel">Detalle y Edición de Tarea</h5>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <button type="button" class="btn-close modal-task-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <form id="form-editar-tarea" onsubmit="guardarEdicionTarea(event)">
                 @csrf
@@ -831,20 +1099,20 @@
                 <div class="modal-body px-4 py-4">
                     <!-- Título -->
                     <div class="mb-3">
-                        <label for="edit-task-titulo" class="form-label small fw-bold text-white-50"><i class="bi bi-fonts me-1"></i> Título de la Tarea</label>
-                        <input type="text" class="form-control form-control-dash fw-bold text-white fs-6" id="edit-task-titulo" name="titulo" required placeholder="Ej: Revisión de Acta Final">
+                        <label for="edit-task-titulo" class="form-label form-label-task"><i class="bi bi-fonts me-1"></i> Título de la Tarea</label>
+                        <input type="text" class="form-control form-control-dash fw-bold fs-6" id="edit-task-titulo" name="titulo" required placeholder="Ej: Revisión de Acta Final">
                     </div>
 
                     <!-- Descripción Detallada -->
                     <div class="mb-3">
-                        <label for="edit-task-descripcion" class="form-label small fw-bold text-white-50"><i class="bi bi-text-paragraph me-1"></i> Descripción Detallada</label>
-                        <textarea class="form-control form-control-dash text-white" id="edit-task-descripcion" name="descripcion" rows="4" placeholder="Escriba aquí los detalles y requerimientos de la tarea..."></textarea>
+                        <label for="edit-task-descripcion" class="form-label form-label-task"><i class="bi bi-text-paragraph me-1"></i> Descripción Detallada</label>
+                        <textarea class="form-control form-control-dash" id="edit-task-descripcion" name="descripcion" rows="4" placeholder="Escriba aquí los detalles y requerimientos de la tarea..."></textarea>
                     </div>
 
                     <!-- Fila: Estado, Prioridad, Vencimiento -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label for="edit-task-estado" class="form-label small fw-bold text-white-50"><i class="bi bi-check2-circle me-1"></i> Estado</label>
+                            <label for="edit-task-estado" class="form-label form-label-task"><i class="bi bi-check2-circle me-1"></i> Estado</label>
                             <select class="form-select form-select-dash" id="edit-task-estado" name="estado" required>
                                 <option value="pendiente">🔵 Pendiente</option>
                                 <option value="en_proceso">🟠 En Proceso</option>
@@ -853,7 +1121,7 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="edit-task-prioridad" class="form-label small fw-bold text-white-50"><i class="bi bi-flag-fill me-1"></i> Prioridad</label>
+                            <label for="edit-task-prioridad" class="form-label form-label-task"><i class="bi bi-flag-fill me-1"></i> Prioridad</label>
                             <select class="form-select form-select-dash" id="edit-task-prioridad" name="prioridad" required>
                                 <option value="baja">Baja (Verde)</option>
                                 <option value="media">Media (Normal)</option>
@@ -861,37 +1129,37 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="edit-task-vencimiento" class="form-label small fw-bold text-white-50"><i class="bi bi-calendar-event me-1"></i> Fecha de Vencimiento</label>
-                            <input type="date" class="form-control form-control-dash text-white" id="edit-task-vencimiento" name="fecha_vencimiento">
+                            <label for="edit-task-vencimiento" class="form-label form-label-task"><i class="bi bi-calendar-event me-1"></i> Fecha de Vencimiento</label>
+                            <input type="date" class="form-control form-control-dash" id="edit-task-vencimiento" name="fecha_vencimiento">
                         </div>
                     </div>
 
                     <!-- Fila: Asignar Responsables y Categorías / Etiquetas -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label for="edit-task-asignados" class="form-label small fw-bold text-white-50"><i class="bi bi-people me-1"></i> Responsables Asignados</label>
+                            <label for="edit-task-asignados" class="form-label form-label-task"><i class="bi bi-people me-1"></i> Responsables Asignados</label>
                             <select class="form-select form-select-dash" id="edit-task-asignados" name="id_asignado[]" multiple style="min-height: 120px;">
                                 @foreach ($usuarios_disponibles as $u)
                                     <option value="{{ $u->id }}">{{ $u->nombre }} {{ $u->apellidos ?? '' }}</option>
                                 @endforeach
                             </select>
-                            <small class="text-white-50 mt-1 d-block" style="font-size: 0.7rem;"><i class="bi bi-info-circle me-1"></i> Mantén presionado Ctrl (Cmd en Mac) para elegir varios.</small>
+                            <small class="task-modal-help mt-1 d-block"><i class="bi bi-info-circle me-1"></i> Mantén presionado Ctrl (Cmd en Mac) para elegir varios.</small>
                         </div>
                         <div class="col-md-6">
-                            <label for="edit-task-etiquetas" class="form-label small fw-bold text-white-50"><i class="bi bi-tags me-1"></i> Categorías / Etiquetas</label>
+                            <label for="edit-task-etiquetas" class="form-label form-label-task"><i class="bi bi-tags me-1"></i> Categorías / Etiquetas</label>
                             <select class="form-select form-select-dash" id="edit-task-etiquetas" name="etiquetas[]" multiple style="min-height: 120px;">
                                 @foreach ($etiquetas_disponibles as $et)
                                     <option value="{{ $et->id }}">{{ $et->nombre }}</option>
                                 @endforeach
                             </select>
-                            <small class="text-white-50 mt-1 d-block" style="font-size: 0.7rem;"><i class="bi bi-info-circle me-1"></i> Filtra o agrupa tareas por temática.</small>
+                            <small class="task-modal-help mt-1 d-block"><i class="bi bi-info-circle me-1"></i> Filtra o agrupa tareas por temática.</small>
                         </div>
                     </div>
 
                     <!-- Curso Vinculado (Opcional) -->
                     @if (count($cursos_activos_disponibles) > 0)
                         <div class="mb-2">
-                            <label for="edit-task-curso" class="form-label small fw-bold text-white-50"><i class="bi bi-mortarboard me-1"></i> Vinculado a Curso Activo (Opcional)</label>
+                            <label for="edit-task-curso" class="form-label form-label-task"><i class="bi bi-mortarboard me-1"></i> Vinculado a Curso Activo (Opcional)</label>
                             <select class="form-select form-select-dash" id="edit-task-curso" name="id_curso_activo">
                                 <option value="">Ninguno (Tarea General / Administrativa)</option>
                                 @foreach ($cursos_activos_disponibles as $c)
@@ -901,17 +1169,17 @@
                         </div>
                     @endif
                 </div>
-                <div class="modal-footer border-secondary px-4 py-3 d-flex justify-content-between">
+                <div class="modal-footer modal-task-footer px-4 py-3 d-flex justify-content-between">
                     <div>
                         @if($es_admin)
-                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="eliminarTareaDesdeModal()">
+                            <button type="button" class="btn btn-task-delete btn-sm rounded-pill px-3" onclick="eliminarTareaDesdeModal()">
                                 <i class="bi bi-trash me-1"></i> Eliminar Tarea
                             </button>
                         @endif
                     </div>
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold" id="btn-guardar-edicion">
+                        <button type="button" class="btn btn-task-cancel btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm" id="btn-guardar-edicion">
                             <i class="bi bi-check-lg me-1"></i> Guardar Cambios
                         </button>
                     </div>
