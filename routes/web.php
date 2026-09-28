@@ -64,6 +64,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/configuracion/seguridad/acceder', [ConfiguracionController::class, 'acceder'])->name('configuracion.acceder');
     Route::post('/configuracion/seguridad/salir', [ConfiguracionController::class, 'salir'])->name('configuracion.salir');
 
+    // Parámetros de Pagos, Morosidad y Firmas Oficiales (Estilo UNELA)
+    Route::get('/configuracion/pagos', [ConfiguracionController::class, 'parametrosPagos'])->name('configuracion.pagos');
+    Route::post('/configuracion/pagos', [ConfiguracionController::class, 'guardarParametrosPagos'])->name('configuracion.pagos.guardar');
+    Route::post('/configuracion/pagos/reset-pruebas', [ConfiguracionController::class, 'resetearPruebasBoletas'])->name('configuracion.pagos.reset_pruebas');
+
     // Rutas protegidas exclusivamente para Administrador General con Clave Superior
     Route::middleware('admin.config')->prefix('configuracion')->name('configuracion.')->group(function () {
         // Hub Central de Configuración

@@ -6,6 +6,7 @@ require_once __DIR__ . '/FPDF/fpdf.php';
 
 use FPDF;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Models\Boleta;
 use Carbon\Carbon;
 
@@ -283,8 +284,31 @@ class BoletaPdfService
         $pdf->Cell(40, 6, 'CRC ' . number_format($boleta->monto_pagado, 2) . ' ', 1, 1, 'R');
         $pdf->SetTextColor(0, 0, 0);
 
+        $tasa_label = '2.0';
+        $firma_nombre = 'Merlin Silva';
+        $firma_cargo = 'Administradora General - UNELA';
+        $firma_img = '';
+
+        if (Schema::hasTable('configuracion_sistema_pagos')) {
+            $confPagos = DB::table('configuracion_sistema_pagos')
+                ->whereIn('clave', ['tasa_interes_mora', 'firma_oficial_nombre', 'firma_oficial_cargo', 'firma_oficial_imagen'])
+                ->pluck('valor', 'clave');
+            if (isset($confPagos['tasa_interes_mora']) && $confPagos['tasa_interes_mora'] !== '') {
+                $tasa_label = $confPagos['tasa_interes_mora'];
+            }
+            if (!empty($confPagos['firma_oficial_nombre'])) {
+                $firma_nombre = $confPagos['firma_oficial_nombre'];
+            }
+            if (!empty($confPagos['firma_oficial_cargo'])) {
+                $firma_cargo = $confPagos['firma_oficial_cargo'];
+            }
+            if (!empty($confPagos['firma_oficial_imagen'])) {
+                $firma_img = $confPagos['firma_oficial_imagen'];
+            }
+        }
+
         if ($boleta->interes_acumulado > 0) {
-            $pdf->Cell(140, 6, $pdf->toPdf('INTERÉS POR MORA ACUMULADO (2% diario):'), 1, 0, 'R', true);
+            $pdf->Cell(140, 6, $pdf->toPdf("INTERÉS POR MORA ACUMULADO ({$tasa_label}%):"), 1, 0, 'R', true);
             $pdf->SetTextColor(239, 68, 68);
             $pdf->Cell(40, 6, 'CRC ' . number_format($boleta->interes_acumulado, 2) . ' ', 1, 1, 'R');
             $pdf->SetTextColor(0, 0, 0);
@@ -326,15 +350,24 @@ class BoletaPdfService
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->Cell($w_linea, 4, $pdf->toPdf($nombre_completo), 0, 0, 'C');
 
-        // Sello y Firma Finanzas (Derecha)
+        // Sello y Firma Oficial Institucional (Derecha)
         $x_fin = 105;
+
+        // Estampar imagen de firma institucional si fue cargada en configuración
+        if (!empty($firma_img)) {
+            $ruta_img_oficial = public_path(ltrim($firma_img, '/'));
+            if (file_exists($ruta_img_oficial)) {
+                $pdf->Image($ruta_img_oficial, $x_fin + 15, $y_firma - 18, 45, 16);
+            }
+        }
+
         $pdf->Line($x_fin, $y_firma, $x_fin + $w_linea, $y_firma);
         $pdf->SetXY($x_fin, $y_firma + 2);
         $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell($w_linea, 4, $pdf->toPdf('Sello y Firma - Departamento Financiero'), 0, 1, 'C');
+        $pdf->Cell($w_linea, 4, $pdf->toPdf($firma_cargo), 0, 1, 'C');
         $pdf->SetX($x_fin);
         $pdf->SetFont('Arial', 'B', 8);
-        $pdf->Cell($w_linea, 4, $pdf->toPdf(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'))), 0, 0, 'C');
+        $pdf->Cell($w_linea, 4, $pdf->toPdf($firma_nombre), 0, 0, 'C');
 
         // Guardar copia física en uploads/boletas si no existe
         $dir = public_path('uploads/boletas');

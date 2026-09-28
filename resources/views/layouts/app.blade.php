@@ -489,6 +489,7 @@
                             @module('finanzas')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('boletas.estado_cuenta') }}"><i class="bi bi-wallet2"></i> Estado de Cuenta</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('boletas.morosidad') }}"><i class="bi bi-exclamation-triangle"></i> Control de Morosidad</a></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.pagos') }}"><i class="bi bi-cash-coin"></i> Parámetros de Pagos e Intereses</a></li>
                             @endmodule
 
                             @module('registro_academico')
@@ -528,6 +529,7 @@
                         <ul class="dropdown-menu dropdown-menu-dark-custom dropdown-menu-end">
                             <li><h6 class="dropdown-header-custom"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Administración General</h6></li>
                             <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('configuracion.index') }}"><i class="bi bi-speedometer2 text-info me-2"></i> Panel de Configuración</a></li>
+                            <li><a class="dropdown-item dropdown-item-custom fw-bold text-success" href="{{ route('configuracion.pagos') }}"><i class="bi bi-cash-coin text-success me-2"></i> Pagos, Morosidad e Intereses</a></li>
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'parametros']) }}"><i class="bi bi-buildings text-primary me-2"></i> Parámetros del Sistema</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'identidad']) }}"><i class="bi bi-palette text-warning me-2"></i> Logotipo e Identidad</a></li>

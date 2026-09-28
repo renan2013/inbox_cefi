@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('plan_estudios', function (Blueprint $table) {
+        if (Schema::hasTable('plan_estudios')) {
+            Schema::table('plan_estudios', function (Blueprint $table) {
             if (!Schema::hasColumn('plan_estudios', 'duracion')) {
                 $table->string('duracion', 100)->nullable()->default('15 semanas')->after('creditos');
             }
@@ -76,6 +77,7 @@ return new class extends Migration
                 $table->dateTime('fecha_descriptor_pdf')->nullable()->after('bibliografia');
             }
         });
+        }
     }
 
     /**
