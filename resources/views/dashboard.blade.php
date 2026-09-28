@@ -159,6 +159,144 @@
         color: #0f172a !important;
         border-color: #cbd5e1 !important;
     }
+
+    /* --- MONDAY.COM STYLED ELEMENTS --- */
+    .monday-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        min-width: 120px;
+        padding: 0.35rem 0.85rem;
+        border-radius: 0.35rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        text-transform: capitalize;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        border: none;
+    }
+
+    .monday-pill:hover {
+        transform: translateY(-1px) scale(1.02);
+        filter: brightness(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .monday-pill:active {
+        transform: scale(0.98);
+    }
+
+    /* Monday Official Color Palette */
+    .status-completada { background-color: #00c875 !important; color: #ffffff !important; }
+    .status-en_proceso { background-color: #fdab3d !important; color: #ffffff !important; }
+    .status-pendiente { background-color: #579bfc !important; color: #ffffff !important; }
+    .status-cancelada { background-color: #df2f4a !important; color: #ffffff !important; }
+
+    .priority-alta { background-color: #e2445c !important; color: #ffffff !important; }
+    .priority-media { background-color: #579bfc !important; color: #ffffff !important; }
+    .priority-baja { background-color: #00c875 !important; color: #ffffff !important; }
+
+    /* Monday Dropdown Menu */
+    .monday-dropdown-menu {
+        background-color: #1e293b !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 0.65rem !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+        padding: 0.4rem !important;
+        min-width: 160px;
+        z-index: 1050;
+    }
+
+    .monday-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #f1f5f9 !important;
+        border-radius: 0.4rem;
+        transition: background-color 0.15s ease;
+        cursor: pointer;
+    }
+
+    .monday-dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .monday-color-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        flex-shrink: 0;
+    }
+
+    /* Monday Avatars */
+    .monday-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        cursor: default;
+    }
+
+    .monday-avatar-empty {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-muted);
+        border: 1px dashed var(--border-color);
+    }
+
+    /* Monday Quick-Add Row */
+    .monday-quick-row {
+        background: rgba(255, 255, 255, 0.015);
+        border-top: 1px dashed var(--border-color) !important;
+        transition: background-color 0.2s ease;
+    }
+
+    .monday-quick-row:hover {
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .monday-quick-input {
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        color: var(--text-light) !important;
+        font-size: 0.85rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .monday-quick-input:focus {
+        background: rgba(15, 23, 42, 0.4) !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(95, 178, 48, 0.15) !important;
+        outline: none;
+    }
+
+    .monday-progress-strip {
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.06);
+        display: flex;
+    }
+
+    .monday-progress-seg {
+        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 </style>
 @endsection
 
@@ -329,20 +467,21 @@
                     <!-- 1. Vista de Tabla -->
                     <div id="view-table-container">
                         <div class="table-responsive">
-                            <table class="table table-custom table-hover align-middle">
+                            <table class="table table-custom table-hover align-middle mb-0" id="monday-tasks-table">
                                 <thead>
                                     <tr class="table-header-row">
                                         <th class="ps-4" style="width: 50px;">#</th>
-                                        <th>Título / Asignado</th>
-                                        <th>Prioridad</th>
-                                        <th>Estado</th>
-                                        <th>Días Restantes</th>
-                                        <th class="text-end pe-4">Acciones</th>
+                                        <th>Tarea</th>
+                                        <th style="width: 130px;">Responsable</th>
+                                        <th style="width: 140px;">Prioridad</th>
+                                        <th style="width: 160px;">Estado</th>
+                                        <th style="width: 140px;">Vencimiento</th>
+                                        <th class="text-end pe-4" style="width: 90px;">Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="monday-tasks-tbody">
                                     @forelse ($tareas as $index => $tarea)
-                                        <tr>
+                                        <tr id="task-row-{{ $tarea->id }}" data-task-id="{{ $tarea->id }}">
                                             <td class="ps-4 task-subtitle-text small">{{ $tareas->firstItem() + $index }}</td>
                                             <td>
                                                 <div class="task-title-text mb-1">
@@ -353,35 +492,86 @@
                                                         </span>
                                                     @endif
                                                 </div>
-                                                <div class="small task-subtitle-text">
-                                                    @if(isset($asignaciones[$tarea->id]))
-                                                        <i class="bi bi-person me-1"></i>
+                                                @if(!empty($tarea->descripcion))
+                                                    <div class="small task-subtitle-text text-truncate" style="max-width: 320px;">
+                                                        {{ $tarea->descripcion }}
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    @if(isset($asignaciones[$tarea->id]) && count($asignaciones[$tarea->id]) > 0)
                                                         @foreach($asignaciones[$tarea->id] as $asig)
-                                                            <span class="fw-bold {{ $asig->user_id == Auth::id() ? 'text-primary' : 'task-title-text' }}">
-                                                                {{ $asig->nombre }} {{ $asig->apellidos }}
-                                                            </span>{{ !$loop->last ? ', ' : '' }}
+                                                            @php
+                                                                $initials = strtoupper(substr($asig->nombre, 0, 1) . substr($asig->apellidos, 0, 1));
+                                                            @endphp
+                                                            <span class="monday-avatar" title="{{ $asig->nombre }} {{ $asig->apellidos }}" data-bs-toggle="tooltip">
+                                                                {{ $initials }}
+                                                            </span>
                                                         @endforeach
                                                     @else
-                                                        <span class="task-subtitle-text">Sin asignar</span>
+                                                        <span class="monday-avatar monday-avatar-empty" title="Sin Asignar" data-bs-toggle="tooltip">
+                                                            <i class="bi bi-person"></i>
+                                                        </span>
                                                     @endif
                                                 </div>
                                             </td>
                                             <td>
-                                                @php
-                                                    $p = $tarea->prioridad;
-                                                    $p_class = $p == 'alta' ? 'danger' : ($p == 'media' ? 'info' : 'success');
-                                                    $p_icon = $p == 'alta' ? 'exclamation-triangle' : ($p == 'media' ? 'dash-circle' : 'arrow-down-circle');
-                                                @endphp
-                                                <span class="badge bg-{{ $p_class }} bg-opacity-20 text-{{ $p_class }} border border-{{ $p_class }} border-opacity-25 px-2 py-1">
-                                                    <i class="bi bi-{{ $p_icon }} me-1"></i>{{ ucfirst($p) }}
-                                                </span>
+                                                <!-- Píldora de Prioridad Estilo Monday -->
+                                                <div class="dropdown">
+                                                    <button class="monday-pill priority-{{ $tarea->prioridad ?? 'media' }}" id="priority-pill-{{ $tarea->id }}" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 95px;" title="Cambiar prioridad">
+                                                        <span class="priority-label">{{ ucfirst($tarea->prioridad ?? 'media') }}</span>
+                                                        <i class="bi bi-chevron-down" style="font-size: 0.6rem; opacity: 0.8;"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu monday-dropdown-menu">
+                                                        <li>
+                                                            <a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarPrioridadAjax({{ $tarea->id }}, 'alta')">
+                                                                <span class="monday-color-dot" style="background-color: #e2445c;"></span> Alta
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarPrioridadAjax({{ $tarea->id }}, 'media')">
+                                                                <span class="monday-color-dot" style="background-color: #579bfc;"></span> Media
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarPrioridadAjax({{ $tarea->id }}, 'baja')">
+                                                                <span class="monday-color-dot" style="background-color: #00c875;"></span> Baja
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </td>
                                             <td>
-                                                @php
-                                                    $e = $tarea->estado;
-                                                    $e_class = $e == 'completada' ? 'success' : ($e == 'en_proceso' ? 'info' : ($e == 'pendiente' ? 'warning' : 'secondary'));
-                                                @endphp
-                                                <span class="badge bg-{{ $e_class }} rounded-pill px-3">{{ ucfirst(str_replace('_', ' ', $e)) }}</span>
+                                                <!-- Píldora de Estado Estilo Monday -->
+                                                <div class="dropdown">
+                                                    <button class="monday-pill status-{{ $tarea->estado }}" id="status-pill-{{ $tarea->id }}" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Cambiar estado">
+                                                        <span class="status-label">{{ ucfirst(str_replace('_', ' ', $tarea->estado)) }}</span>
+                                                        <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.8;"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu monday-dropdown-menu">
+                                                        <li>
+                                                            <a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarEstadoAjax({{ $tarea->id }}, 'completada')">
+                                                                <span class="monday-color-dot" style="background-color: #00c875;"></span> Listo / Completada
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarEstadoAjax({{ $tarea->id }}, 'en_proceso')">
+                                                                <span class="monday-color-dot" style="background-color: #fdab3d;"></span> En Proceso
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarEstadoAjax({{ $tarea->id }}, 'pendiente')">
+                                                                <span class="monday-color-dot" style="background-color: #579bfc;"></span> Pendiente
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarEstadoAjax({{ $tarea->id }}, 'cancelada')">
+                                                                <span class="monday-color-dot" style="background-color: #df2f4a;"></span> Detenida / Cancelada
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </td>
                                             <td>
                                                 @if (!empty($tarea->fecha_vencimiento) && $tarea->fecha_vencimiento !== '0000-00-00')
@@ -392,7 +582,7 @@
                                                     @endphp
 
                                                     @if ($tarea->estado == 'completada')
-                                                        <span class="task-subtitle-text small"><i class="bi bi-check-all me-1"></i>Finalizada</span>
+                                                        <span class="task-subtitle-text small"><i class="bi bi-check-all me-1 text-success"></i>Finalizada</span>
                                                     @elseif ($dias < 0)
                                                         <span class="text-danger fw-bold small"><i class="bi bi-exclamation-octagon me-1"></i>Atrasada ({{ abs($dias) }} d)</span>
                                                     @elseif ($dias == 0)
@@ -403,37 +593,65 @@
                                                         <span class="{{ $dias <= 3 ? 'text-warning' : 'task-subtitle-text' }} small"><i class="bi bi-calendar3 me-1"></i>{{ $dias }} días</span>
                                                     @endif
                                                 @else
-                                                    <span class="task-subtitle-text small">N/A</span>
+                                                    <span class="task-subtitle-text small">Sin fecha</span>
                                                 @endif
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="btn-group rounded-pill overflow-hidden border border-secondary shadow-sm">
-                                                    <button type="button" class="btn btn-sm btn-outline-info border-0" onclick="alert('Ver tarea ID: {{ $tarea->id }}')" title="Ver Detalle">
+                                                    <button type="button" class="btn btn-sm btn-outline-info border-0" onclick="alert('Tarea: {{ addslashes($tarea->titulo) }}')" title="Ver Detalle">
                                                         <i class="bi bi-eye"></i>
                                                     </button>
-                                                    @if($es_admin)
-                                                        <button type="button" class="btn btn-sm btn-outline-primary border-0" onclick="alert('Editar tarea ID: {{ $tarea->id }}')" title="Editar">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </button>
-                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr>
-                                            <td colspan="6" class="text-center py-5 task-subtitle-text">
+                                        <tr id="empty-row-placeholder">
+                                            <td colspan="7" class="text-center py-5 task-subtitle-text">
                                                 <i class="bi bi-emoji-smile fs-1 d-block mb-2 text-muted"></i>
                                                 <p class="mb-0">No hay tareas que coincidan con los filtros seleccionados.</p>
                                             </td>
                                         </tr>
                                     @endforelse
+
+                                    <!-- Fila de Creación Rápida Estilo Monday.com -->
+                                    <tr class="monday-quick-row">
+                                        <td class="ps-4 text-primary text-center"><i class="bi bi-plus-lg fw-bold"></i></td>
+                                        <td colspan="6" class="py-2 pe-4">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="text" id="monday-inline-task-title" class="form-control form-control-sm monday-quick-input flex-grow-1" placeholder="+ Añadir una nueva tarea y presiona Enter..." autocomplete="off">
+                                                <button class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-bold" type="button" id="btn-quick-add-task" onclick="ejecutarCreacionRapida()">
+                                                    <i class="bi bi-arrow-return-left me-1"></i>Añadir
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Barra de Resumen de Progreso Estilo Monday -->
+                        <div class="mt-3 p-3 rounded-4 bg-dark bg-opacity-25 border border-secondary">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+                                <span class="small fw-bold text-white"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Distribución del Tablero</span>
+                                <div class="d-flex align-items-center gap-3 small" id="monday-legend-stats">
+                                    <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #00c875;"></span> <strong id="count-completada">0</strong> Listo</span>
+                                    <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #fdab3d;"></span> <strong id="count-en_proceso">0</strong> En Proceso</span>
+                                    <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #579bfc;"></span> <strong id="count-pendiente">0</strong> Pendiente</span>
+                                    <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #df2f4a;"></span> <strong id="count-cancelada">0</strong> Cancelada</span>
+                                </div>
+                            </div>
+                            <div class="monday-progress-strip">
+                                <div id="m-prog-completada" class="monday-progress-seg status-completada" style="width: 0%;" title="Completadas"></div>
+                                <div id="m-prog-en_proceso" class="monday-progress-seg status-en_proceso" style="width: 0%;" title="En Proceso"></div>
+                                <div id="m-prog-pendiente" class="monday-progress-seg status-pendiente" style="width: 0%;" title="Pendientes"></div>
+                                <div id="m-prog-cancelada" class="monday-progress-seg status-cancelada" style="width: 0%;" title="Canceladas"></div>
+                            </div>
                         </div>
 
                         <!-- Paginación -->
                         <div class="d-flex justify-content-center mt-4">
                             {{ $tareas->links() }}
+                        </div>
                         </div>
                     </div>
 
@@ -595,6 +813,19 @@
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    const STATUS_MAP = {
+        'completada': { label: 'Listo / Completada', class: 'status-completada' },
+        'en_proceso': { label: 'En Proceso', class: 'status-en_proceso' },
+        'pendiente': { label: 'Pendiente', class: 'status-pendiente' },
+        'cancelada': { label: 'Detenida / Cancelada', class: 'status-cancelada' }
+    };
+
+    const PRIORITY_MAP = {
+        'alta': { label: 'Alta', class: 'priority-alta' },
+        'media': { label: 'Media', class: 'priority-media' },
+        'baja': { label: 'Baja', class: 'priority-baja' }
+    };
+
     function switchView(view) {
         if (view === 'table') {
             $('#view-table-container').show();
@@ -609,16 +840,190 @@
         }
     }
 
+    // --- MONDAY RECEPTIVE AJAX: CAMBIO DE ESTADO SIN RECARGAR PÁGINA ---
     function cambiarEstadoAjax(idTarea, nuevoEstado) {
+        const pill = $(`#status-pill-${idTarea}`);
+        if (!pill.length) return;
+
+        // 1. Actualización Optimista de la interfaz (Efecto Monday instantáneo)
+        pill.removeClass('status-completada status-en_proceso status-pendiente status-cancelada');
+        pill.addClass(STATUS_MAP[nuevoEstado].class);
+        pill.find('.status-label').text(STATUS_MAP[nuevoEstado].label);
+
+        // Micro-animación de rebote sutil
+        pill.css('transform', 'scale(1.1)');
+        setTimeout(() => pill.css('transform', ''), 200);
+
+        // 2. Mover la tarjeta si la vista Kanban está activa
+        const kanbanCard = $(`#task-row-${idTarea}`).length ? $(`#kanban-card-${idTarea}`) : null;
+        if (kanbanCard && kanbanCard.length) {
+            $(`#col-${nuevoEstado} .kanban-cards-container`).prepend(kanbanCard);
+        }
+
+        // 3. Petición en segundo plano al servidor
         $.post("{{ route('tareas.cambiar_estado') }}", {
             _token: "{{ csrf_token() }}",
             id: idTarea,
             estado: nuevoEstado
         }, function(res) {
             if (res.success) {
-                location.reload();
+                recalcularProgresoMonday();
             }
+        }).fail(function() {
+            alert('No se pudo actualizar el estado. Revisa tu conexión.');
         });
     }
+
+    // --- MONDAY RECEPTIVE AJAX: CAMBIO DE PRIORIDAD ---
+    function cambiarPrioridadAjax(idTarea, nuevaPrioridad) {
+        const pill = $(`#priority-pill-${idTarea}`);
+        if (!pill.length) return;
+
+        pill.removeClass('priority-alta priority-media priority-baja');
+        pill.addClass(PRIORITY_MAP[nuevaPrioridad].class);
+        pill.find('.priority-label').text(PRIORITY_MAP[nuevaPrioridad].label);
+
+        pill.css('transform', 'scale(1.1)');
+        setTimeout(() => pill.css('transform', ''), 200);
+
+        $.post("{{ route('tareas.cambiar_prioridad') }}", {
+            _token: "{{ csrf_token() }}",
+            id: idTarea,
+            prioridad: nuevaPrioridad
+        });
+    }
+
+    // --- CREACIÓN RÁPIDA DE TAREA EN LÍNEA (+ AÑADIR TAREA) ---
+    function ejecutarCreacionRapida() {
+        const input = $('#monday-inline-task-title');
+        const titulo = input.val().trim();
+
+        if (!titulo) {
+            input.focus();
+            input.css('border-color', '#df2f4a');
+            setTimeout(() => input.css('border-color', 'transparent'), 1500);
+            return;
+        }
+
+        const btn = $('#btn-quick-add-task');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+        $.post("{{ route('tareas.crear_rapida') }}", {
+            _token: "{{ csrf_token() }}",
+            titulo: titulo
+        }, function(res) {
+            btn.prop('disabled', false).html('<i class="bi bi-arrow-return-left me-1"></i>Añadir');
+            if (res.success && res.tarea) {
+                input.val('');
+                $('#empty-row-placeholder').remove();
+
+                const t = res.tarea;
+                const newRowHtml = `
+                    <tr id="task-row-${t.id}" data-task-id="${t.id}" style="animation: fadeIn 0.4s ease;">
+                        <td class="ps-4 task-subtitle-text small"><i class="bi bi-stars text-primary"></i></td>
+                        <td>
+                            <div class="task-title-text mb-1">${escapeHtml(t.titulo)}</div>
+                        </td>
+                        <td>
+                            <span class="monday-avatar monday-avatar-empty" title="Sin Asignar">
+                                <i class="bi bi-person"></i>
+                            </span>
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="monday-pill priority-media" id="priority-pill-${t.id}" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 95px;">
+                                    <span class="priority-label">Media</span>
+                                    <i class="bi bi-chevron-down" style="font-size: 0.6rem; opacity: 0.8;"></i>
+                                </button>
+                                <ul class="dropdown-menu monday-dropdown-menu">
+                                    <li><a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarPrioridadAjax(${t.id}, 'alta')"><span class="monday-color-dot" style="background-color: #e2445c;"></span> Alta</a></li>
+                                    <li><a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarPrioridadAjax(${t.id}, 'media')"><span class="monday-color-dot" style="background-color: #579bfc;"></span> Media</a></li>
+                                    <li><a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarPrioridadAjax(${t.id}, 'baja')"><span class="monday-color-dot" style="background-color: #00c875;"></span> Baja</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="monday-pill status-pendiente" id="status-pill-${t.id}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="status-label">Pendiente</span>
+                                    <i class="bi bi-chevron-down" style="font-size: 0.65rem; opacity: 0.8;"></i>
+                                </button>
+                                <ul class="dropdown-menu monday-dropdown-menu">
+                                    <li><a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarEstadoAjax(${t.id}, 'completada')"><span class="monday-color-dot" style="background-color: #00c875;"></span> Listo / Completada</a></li>
+                                    <li><a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarEstadoAjax(${t.id}, 'en_proceso')"><span class="monday-color-dot" style="background-color: #fdab3d;"></span> En Proceso</a></li>
+                                    <li><a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarEstadoAjax(${t.id}, 'pendiente')"><span class="monday-color-dot" style="background-color: #579bfc;"></span> Pendiente</a></li>
+                                    <li><a class="dropdown-item monday-dropdown-item" href="javascript:void(0)" onclick="cambiarEstadoAjax(${t.id}, 'cancelada')"><span class="monday-color-dot" style="background-color: #df2f4a;"></span> Detenida / Cancelada</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td><span class="task-subtitle-text small">Sin fecha</span></td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group rounded-pill overflow-hidden border border-secondary shadow-sm">
+                                <button type="button" class="btn btn-sm btn-outline-info border-0" onclick="alert('Tarea: ${escapeHtml(t.titulo)}')" title="Ver Detalle">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                // Insertar al inicio de la tabla (arriba de las existentes)
+                $('#monday-tasks-tbody tr.monday-quick-row').before(newRowHtml);
+                recalcularProgresoMonday();
+            }
+        }).fail(function() {
+            btn.prop('disabled', false).html('<i class="bi bi-arrow-return-left me-1"></i>Añadir');
+            alert('Error al crear la tarea.');
+        });
+    }
+
+    // --- RECALCULAR BARRA DE PROGRESO SEGMENTADA ESTILO MONDAY ---
+    function recalcularProgresoMonday() {
+        const rows = $('#monday-tasks-tbody tr[data-task-id]');
+        const total = rows.length;
+
+        if (total === 0) {
+            $('#m-prog-completada, #m-prog-en_proceso, #m-prog-pendiente, #m-prog-cancelada').css('width', '0%');
+            return;
+        }
+
+        let counts = { completada: 0, en_proceso: 0, pendiente: 0, cancelada: 0 };
+
+        rows.each(function() {
+            const pill = $(this).find('[id^="status-pill-"]');
+            if (pill.hasClass('status-completada')) counts.completada++;
+            else if (pill.hasClass('status-en_proceso')) counts.en_proceso++;
+            else if (pill.hasClass('status-cancelada')) counts.cancelada++;
+            else counts.pendiente++;
+        });
+
+        // Actualizar números en leyenda
+        $('#count-completada').text(counts.completada);
+        $('#count-en_proceso').text(counts.en_proceso);
+        $('#count-pendiente').text(counts.pendiente);
+        $('#count-cancelada').text(counts.cancelada);
+
+        // Actualizar porcentaje de las barras
+        $('#m-prog-completada').css('width', `${(counts.completada / total) * 100}%`);
+        $('#m-prog-en_proceso').css('width', `${(counts.en_proceso / total) * 100}%`);
+        $('#m-prog-pendiente').css('width', `${(counts.pendiente / total) * 100}%`);
+        $('#m-prog-cancelada').css('width', `${(counts.cancelada / total) * 100}%`);
+    }
+
+    function escapeHtml(text) {
+        return $('<div>').text(text).html();
+    }
+
+    $(document).ready(function() {
+        recalcularProgresoMonday();
+
+        // Enviar con tecla Enter en el campo rápido
+        $('#monday-inline-task-title').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                ejecutarCreacionRapida();
+            }
+        });
+    });
 </script>
 @endsection

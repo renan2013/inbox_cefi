@@ -144,6 +144,62 @@ class DashboardController extends Controller
             ->where('id', $request->id)
             ->update(['estado' => $request->estado]);
 
-        return response()->json(['success' => (bool)$updated]);
+        return response()->json([
+            'success' => (bool)$updated,
+            'id' => $request->id,
+            'estado' => $request->estado
+        ]);
+    }
+
+    /**
+     * Cambiar prioridad de una tarea vía AJAX estilo Monday.
+     */
+    public function cambiarPrioridad(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'prioridad' => 'required|string|in:baja,media,alta'
+        ]);
+
+        $updated = DB::table('tareas')
+            ->where('id', $request->id)
+            ->update(['prioridad' => $request->prioridad]);
+
+        return response()->json([
+            'success' => (bool)$updated,
+            'id' => $request->id,
+            'prioridad' => $request->prioridad
+        ]);
+    }
+
+    /**
+     * Creación rápida de tarea en línea estilo Monday.com.
+     */
+    public function crearTareaRapida(Request $request)
+    {
+        $request->validate([
+            'titulo' => 'required|string|max:255'
+        ]);
+
+        $id = DB::table('tareas')->insertGetId([
+            'titulo' => trim($request->titulo),
+            'descripcion' => '',
+            'prioridad' => 'media',
+            'estado' => 'pendiente',
+            'fecha_creacion' => now(),
+            'id_creador' => Auth::id()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'tarea' => [
+                'id' => $id,
+                'titulo' => trim($request->titulo),
+                'prioridad' => 'media',
+                'estado' => 'pendiente',
+                'fecha_creacion' => now()->format('Y-m-d H:i:s'),
+                'fecha_vencimiento' => null,
+            ]
+        ]);
     }
 }
