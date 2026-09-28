@@ -17,16 +17,42 @@ class PlanEstudio extends Model
         'codigo',
         'materia',
         'creditos',
+        'duracion',
+        'distribucion_horas',
+        'horas_teoricas',
+        'horas_practicas',
+        'horas_independientes',
+        'horas_totales',
+        'modalidad',
+        'naturaleza',
+        'nivel',
         'requisitos',
+        'correquisitos',
+        'profesor',
+        'precio',
         'adjunto_pdf',
+        'descripcion_curso',
         'objetivo_general',
         'objetivos_especificos',
-        'precio'
+        'contenidos_tematicos',
+        'metodologia_ensenanza',
+        'estrategias_aprendizaje',
+        'evaluacion_aprendizajes',
+        'recursos_didacticos',
+        'cronograma',
+        'guias_evaluacion',
+        'bibliografia',
+        'fecha_descriptor_pdf'
     ];
 
     protected $casts = [
         'precio' => 'decimal:2',
-        'creditos' => 'integer'
+        'creditos' => 'integer',
+        'horas_teoricas' => 'integer',
+        'horas_practicas' => 'integer',
+        'horas_independientes' => 'integer',
+        'horas_totales' => 'integer',
+        'fecha_descriptor_pdf' => 'datetime'
     ];
 
     public function programa()
