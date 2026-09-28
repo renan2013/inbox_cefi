@@ -484,7 +484,7 @@
                                         <tr id="task-row-{{ $tarea->id }}" data-task-id="{{ $tarea->id }}">
                                             <td class="ps-4 task-subtitle-text small">{{ $tareas->firstItem() + $index }}</td>
                                             <td>
-                                                <div class="task-title-text mb-1">
+                                                <div class="task-title-text mb-1 cursor-pointer" onclick="abrirModalEditarTarea({{ $tarea->id }})" style="cursor: pointer;" title="Haz clic para ver o editar detalles completos">
                                                     {{ $tarea->titulo }}
                                                     @if(!empty($tarea->id_curso_activo))
                                                         <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 ms-2">
@@ -598,9 +598,14 @@
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="btn-group rounded-pill overflow-hidden border border-secondary shadow-sm">
-                                                    <button type="button" class="btn btn-sm btn-outline-info border-0" onclick="alert('Tarea: {{ addslashes($tarea->titulo) }}')" title="Ver Detalle">
-                                                        <i class="bi bi-eye"></i>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary border-0" onclick="abrirModalEditarTarea({{ $tarea->id }})" title="Editar Tarea">
+                                                        <i class="bi bi-pencil"></i>
                                                     </button>
+                                                    @if($es_admin)
+                                                        <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="confirmarEliminarTarea({{ $tarea->id }})" title="Eliminar Tarea">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -808,6 +813,113 @@
     </div>
 
 </div>
+
+<!-- MODAL DE EDICIÓN COMPLETA DE TAREA (ESTILO MONDAY / ASANA) -->
+<div class="modal fade" id="modalEditarTarea" tabindex="-1" aria-labelledby="modalEditarTareaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content dash-card border-secondary text-white shadow-lg" style="background-color: #1e293b;">
+            <div class="modal-header border-secondary px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary rounded-pill px-3 py-1" id="modal-task-badge">Tarea #</span>
+                    <h5 class="modal-title fw-bold mb-0 text-white" id="modalEditarTareaLabel">Detalle y Edición de Tarea</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form id="form-editar-tarea" onsubmit="guardarEdicionTarea(event)">
+                @csrf
+                <input type="hidden" id="edit-task-id" name="id">
+                <div class="modal-body px-4 py-4">
+                    <!-- Título -->
+                    <div class="mb-3">
+                        <label for="edit-task-titulo" class="form-label small fw-bold text-white-50"><i class="bi bi-fonts me-1"></i> Título de la Tarea</label>
+                        <input type="text" class="form-control form-control-dash fw-bold text-white fs-6" id="edit-task-titulo" name="titulo" required placeholder="Ej: Revisión de Acta Final">
+                    </div>
+
+                    <!-- Descripción Detallada -->
+                    <div class="mb-3">
+                        <label for="edit-task-descripcion" class="form-label small fw-bold text-white-50"><i class="bi bi-text-paragraph me-1"></i> Descripción Detallada</label>
+                        <textarea class="form-control form-control-dash text-white" id="edit-task-descripcion" name="descripcion" rows="4" placeholder="Escriba aquí los detalles y requerimientos de la tarea..."></textarea>
+                    </div>
+
+                    <!-- Fila: Estado, Prioridad, Vencimiento -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label for="edit-task-estado" class="form-label small fw-bold text-white-50"><i class="bi bi-check2-circle me-1"></i> Estado</label>
+                            <select class="form-select form-select-dash" id="edit-task-estado" name="estado" required>
+                                <option value="pendiente">🔵 Pendiente</option>
+                                <option value="en_proceso">🟠 En Proceso</option>
+                                <option value="completada">🟢 Listo / Completada</option>
+                                <option value="cancelada">🔴 Detenida / Cancelada</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit-task-prioridad" class="form-label small fw-bold text-white-50"><i class="bi bi-flag-fill me-1"></i> Prioridad</label>
+                            <select class="form-select form-select-dash" id="edit-task-prioridad" name="prioridad" required>
+                                <option value="baja">Baja (Verde)</option>
+                                <option value="media">Media (Normal)</option>
+                                <option value="alta">Alta (Urgente)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit-task-vencimiento" class="form-label small fw-bold text-white-50"><i class="bi bi-calendar-event me-1"></i> Fecha de Vencimiento</label>
+                            <input type="date" class="form-control form-control-dash text-white" id="edit-task-vencimiento" name="fecha_vencimiento">
+                        </div>
+                    </div>
+
+                    <!-- Fila: Asignar Responsables y Categorías / Etiquetas -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="edit-task-asignados" class="form-label small fw-bold text-white-50"><i class="bi bi-people me-1"></i> Responsables Asignados</label>
+                            <select class="form-select form-select-dash" id="edit-task-asignados" name="id_asignado[]" multiple style="min-height: 120px;">
+                                @foreach ($usuarios_disponibles as $u)
+                                    <option value="{{ $u->id }}">{{ $u->nombre }} {{ $u->apellidos ?? '' }}</option>
+                                @endforeach
+                            </select>
+                            <small class="text-white-50 mt-1 d-block" style="font-size: 0.7rem;"><i class="bi bi-info-circle me-1"></i> Mantén presionado Ctrl (Cmd en Mac) para elegir varios.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit-task-etiquetas" class="form-label small fw-bold text-white-50"><i class="bi bi-tags me-1"></i> Categorías / Etiquetas</label>
+                            <select class="form-select form-select-dash" id="edit-task-etiquetas" name="etiquetas[]" multiple style="min-height: 120px;">
+                                @foreach ($etiquetas_disponibles as $et)
+                                    <option value="{{ $et->id }}">{{ $et->nombre }}</option>
+                                @endforeach
+                            </select>
+                            <small class="text-white-50 mt-1 d-block" style="font-size: 0.7rem;"><i class="bi bi-info-circle me-1"></i> Filtra o agrupa tareas por temática.</small>
+                        </div>
+                    </div>
+
+                    <!-- Curso Vinculado (Opcional) -->
+                    @if (count($cursos_activos_disponibles) > 0)
+                        <div class="mb-2">
+                            <label for="edit-task-curso" class="form-label small fw-bold text-white-50"><i class="bi bi-mortarboard me-1"></i> Vinculado a Curso Activo (Opcional)</label>
+                            <select class="form-select form-select-dash" id="edit-task-curso" name="id_curso_activo">
+                                <option value="">Ninguno (Tarea General / Administrativa)</option>
+                                @foreach ($cursos_activos_disponibles as $c)
+                                    <option value="{{ $c->id_curso_activo }}">{{ $c->codigo }} - {{ $c->materia }} ({{ $c->periodo }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer border-secondary px-4 py-3 d-flex justify-content-between">
+                    <div>
+                        @if($es_admin)
+                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="eliminarTareaDesdeModal()">
+                                <i class="bi bi-trash me-1"></i> Eliminar Tarea
+                            </button>
+                        @endif
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold" id="btn-guardar-edicion">
+                            <i class="bi bi-check-lg me-1"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -1008,6 +1120,123 @@
         $('#m-prog-en_proceso').css('width', `${(counts.en_proceso / total) * 100}%`);
         $('#m-prog-pendiente').css('width', `${(counts.pendiente / total) * 100}%`);
         $('#m-prog-cancelada').css('width', `${(counts.cancelada / total) * 100}%`);
+    }
+
+    // --- MODAL DE EDICIÓN COMPLETA (MONDAY STYLE) ---
+    function abrirModalEditarTarea(id) {
+        $('#form-editar-tarea')[0].reset();
+        $('#edit-task-id').val(id);
+        $('#modal-task-badge').text('Tarea #' + id);
+
+        $.get(`/tareas/${id}/detalle`, function(res) {
+            if (res.tarea) {
+                const t = res.tarea;
+                $('#edit-task-titulo').val(t.titulo || '');
+                $('#edit-task-descripcion').val(t.descripcion || '');
+                $('#edit-task-estado').val(t.estado || 'pendiente');
+                $('#edit-task-prioridad').val(t.prioridad || 'media');
+                
+                if (t.fecha_vencimiento && t.fecha_vencimiento !== '0000-00-00') {
+                    $('#edit-task-vencimiento').val(t.fecha_vencimiento.substring(0, 10));
+                } else {
+                    $('#edit-task-vencimiento').val('');
+                }
+
+                if (t.id_curso_activo) {
+                    $('#edit-task-curso').val(t.id_curso_activo);
+                } else {
+                    $('#edit-task-curso').val('');
+                }
+
+                // Asignados
+                const asignados = res.asignados || [];
+                $('#edit-task-asignados').val(asignados);
+
+                // Etiquetas
+                const etiquetas = res.etiquetas || [];
+                $('#edit-task-etiquetas').val(etiquetas);
+
+                // Mostrar Modal
+                const modal = new bootstrap.Modal(document.getElementById('modalEditarTarea'));
+                modal.show();
+            }
+        }).fail(function() {
+            alert('No se pudo cargar la información de la tarea.');
+        });
+    }
+
+    function guardarEdicionTarea(e) {
+        e.preventDefault();
+        const id = $('#edit-task-id').val();
+        const btn = $('#btn-guardar-edicion');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Guardando...');
+
+        const formData = $('#form-editar-tarea').serialize();
+
+        $.post(`/tareas/${id}/actualizar`, formData, function(res) {
+            btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i> Guardar Cambios');
+            if (res.success) {
+                const modalEl = document.getElementById('modalEditarTarea');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+
+                const row = $(`#task-row-${id}`);
+                const nuevoTitulo = $('#edit-task-titulo').val();
+                const nuevaPrioridad = $('#edit-task-prioridad').val();
+                const nuevoEstado = $('#edit-task-estado').val();
+                const nuevaDesc = $('#edit-task-descripcion').val();
+
+                if (row.length) {
+                    row.find('.task-title-text').first().text(nuevoTitulo);
+                    row.find('.small.task-subtitle-text.text-truncate').text(nuevaDesc);
+                    
+                    cambiarEstadoAjax(id, nuevoEstado);
+                    cambiarPrioridadAjax(id, nuevaPrioridad);
+                } else {
+                    location.reload();
+                }
+            }
+        }).fail(function() {
+            btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i> Guardar Cambios');
+            alert('Ocurrió un error al guardar los cambios.');
+        });
+    }
+
+    function eliminarTareaDesdeModal() {
+        const id = $('#edit-task-id').val();
+        confirmarEliminarTarea(id);
+    }
+
+    function confirmarEliminarTarea(id) {
+        if (!confirm('¿Estás seguro de que deseas eliminar permanentemente esta tarea?')) {
+            return;
+        }
+
+        $.ajax({
+            url: `/tareas/${id}/eliminar`,
+            type: 'DELETE',
+            data: {
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(res) {
+                if (res.success) {
+                    const modalEl = document.getElementById('modalEditarTarea');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    $(`#task-row-${id}`).fadeOut(300, function() {
+                        $(this).remove();
+                        recalcularProgresoMonday();
+                    });
+                    $(`#kanban-card-${id}`).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                }
+            },
+            error: function() {
+                alert('No se pudo eliminar la tarea. Asegúrate de tener permisos de administrador.');
+            }
+        });
     }
 
     function escapeHtml(text) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -115,6 +116,14 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
+        // 8. Listas de apoyo para modal de edición completa
+        $usuarios_disponibles = DB::table('usuarios')->orderBy('nombre', 'asc')->get();
+        $cursos_activos_disponibles = Schema::hasTable('cursos_activos') ? DB::table('cursos_activos as ca')
+            ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+            ->select('ca.id_curso_activo', 'pe.materia', 'pe.codigo', 'ca.periodo')
+            ->orderBy('pe.materia', 'asc')
+            ->get() : [];
+
         return view('dashboard', compact(
             'stats',
             'tareas_pendientes_count',
@@ -122,6 +131,8 @@ class DashboardController extends Controller
             'anio_seleccionado',
             'etiqueta_seleccionada',
             'etiquetas_disponibles',
+            'usuarios_disponibles',
+            'cursos_activos_disponibles',
             'tareas',
             'asignaciones',
             'cumpleaneros',
@@ -201,5 +212,99 @@ class DashboardController extends Controller
                 'fecha_vencimiento' => null,
             ]
         ]);
+    }
+
+    /**
+     * Obtener el detalle completo de una tarea para el modal de edición.
+     */
+    public function obtenerTarea($id)
+    {
+        $tarea = DB::table('tareas as t')
+            ->leftJoin('cursos_activos as ca', 't.id_curso_activo', '=', 'ca.id_curso_activo')
+            ->leftJoin('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+            ->where('t.id', $id)
+            ->select('t.*', 'pe.materia as curso_nombre', 'ca.periodo as curso_periodo')
+            ->first();
+
+        if (!$tarea) {
+            return response()->json(['error' => 'Tarea no encontrada'], 404);
+        }
+
+        $asignados = DB::table('tarea_asignaciones')->where('id_tarea', $id)->pluck('id_usuario')->toArray();
+        $etiquetas = DB::table('tarea_etiquetas')->where('id_tarea', $id)->pluck('id_etiqueta')->toArray();
+
+        return response()->json([
+            'tarea' => $tarea,
+            'asignados' => $asignados,
+            'etiquetas' => $etiquetas
+        ]);
+    }
+
+    /**
+     * Actualizar una tarea con todos sus campos completos.
+     */
+    public function actualizarTarea(Request $request, $id)
+    {
+        $request->validate([
+            'titulo' => 'required|string|max:255',
+            'prioridad' => 'required|string|in:baja,media,alta',
+            'estado' => 'required|string|in:pendiente,en_proceso,completada,cancelada',
+        ]);
+
+        $updateData = [
+            'titulo' => trim($request->titulo),
+            'descripcion' => $request->descripcion ?? '',
+            'prioridad' => $request->prioridad,
+            'estado' => $request->estado,
+            'fecha_vencimiento' => $request->fecha_vencimiento ?: null,
+            'id_curso_activo' => $request->id_curso_activo ?: null,
+        ];
+
+        DB::table('tareas')->where('id', $id)->update($updateData);
+
+        // Sincronizar asignados
+        DB::table('tarea_asignaciones')->where('id_tarea', $id)->delete();
+        if ($request->has('id_asignado')) {
+            foreach ((array)$request->input('id_asignado') as $userId) {
+                if (!empty($userId)) {
+                    DB::table('tarea_asignaciones')->insert([
+                        'id_tarea' => $id,
+                        'id_usuario' => $userId
+                    ]);
+                }
+            }
+        }
+
+        // Sincronizar etiquetas
+        DB::table('tarea_etiquetas')->where('id_tarea', $id)->delete();
+        if ($request->has('etiquetas')) {
+            foreach ((array)$request->input('etiquetas') as $tagId) {
+                if (!empty($tagId)) {
+                    DB::table('tarea_etiquetas')->insert([
+                        'id_tarea' => $id,
+                        'id_etiqueta' => $tagId
+                    ]);
+                }
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Eliminar tarea (solo administradores).
+     */
+    public function eliminarTarea($id)
+    {
+        $user = Auth::user();
+        if ($user->id_rol != 1) {
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
+
+        DB::table('tarea_asignaciones')->where('id_tarea', $id)->delete();
+        DB::table('tarea_etiquetas')->where('id_tarea', $id)->delete();
+        DB::table('tareas')->where('id', $id)->delete();
+
+        return response()->json(['success' => true]);
     }
 }

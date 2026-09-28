@@ -98,6 +98,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/tareas/cambiar-estado', [DashboardController::class, 'cambiarEstado'])->name('tareas.cambiar_estado');
         Route::post('/tareas/cambiar-prioridad', [DashboardController::class, 'cambiarPrioridad'])->name('tareas.cambiar_prioridad');
         Route::post('/tareas/crear-rapida', [DashboardController::class, 'crearTareaRapida'])->name('tareas.crear_rapida');
+        Route::get('/tareas/{id}/detalle', [DashboardController::class, 'obtenerTarea'])->name('tareas.obtener');
+        Route::post('/tareas/{id}/actualizar', [DashboardController::class, 'actualizarTarea'])->name('tareas.actualizar');
+        Route::delete('/tareas/{id}/eliminar', [DashboardController::class, 'eliminarTarea'])->name('tareas.eliminar');
     });
 
     Route::middleware('module:tareas_gantt')->group(function () {
