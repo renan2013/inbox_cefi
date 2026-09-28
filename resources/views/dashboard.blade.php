@@ -1381,7 +1381,11 @@
                 modal.show();
             }
         }).fail(function() {
-            alert('No se pudo cargar la información de la tarea.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo cargar la información de la tarea.'
+            });
         });
     }
 
@@ -1415,10 +1419,24 @@
                 } else {
                     location.reload();
                 }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Cambios guardados!',
+                    text: 'La tarea se actualizó con éxito.',
+                    timer: 1800,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
             }
         }).fail(function() {
             btn.prop('disabled', false).html('<i class="bi bi-check-lg me-1"></i> Guardar Cambios');
-            alert('Ocurrió un error al guardar los cambios.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error al guardar los cambios de la tarea.'
+            });
         });
     }
 
@@ -1428,33 +1446,71 @@
     }
 
     function confirmarEliminarTarea(id) {
-        if (!confirm('¿Estás seguro de que deseas eliminar permanentemente esta tarea?')) {
-            return;
-        }
+        Swal.fire({
+            title: '¿Eliminar tarea?',
+            text: 'Esta acción no se puede deshacer y la tarea será borrada permanentemente.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e2445c',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="bi bi-trash me-1"></i> Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Eliminando tarea...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
-        $.ajax({
-            url: `/tareas/${id}/eliminar`,
-            type: 'DELETE',
-            data: {
-                _token: "{{ csrf_token() }}"
-            },
-            success: function(res) {
-                if (res.success) {
-                    const modalEl = document.getElementById('modalEditarTarea');
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    if (modal) modal.hide();
+                $.ajax({
+                    url: `/tareas/${id}/eliminar`,
+                    type: 'DELETE',
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            const modalEl = document.getElementById('modalEditarTarea');
+                            const modal = bootstrap.Modal.getInstance(modalEl);
+                            if (modal) modal.hide();
 
-                    $(`#task-row-${id}`).fadeOut(300, function() {
-                        $(this).remove();
-                        recalcularProgresoMonday();
-                    });
-                    $(`#kanban-card-${id}`).fadeOut(300, function() {
-                        $(this).remove();
-                    });
-                }
-            },
-            error: function() {
-                alert('No se pudo eliminar la tarea. Asegúrate de tener permisos de administrador.');
+                            $(`#task-row-${id}`).fadeOut(300, function() {
+                                $(this).remove();
+                                recalcularProgresoMonday();
+                            });
+                            $(`#kanban-card-${id}`).fadeOut(300, function() {
+                                $(this).remove();
+                            });
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Tarea eliminada!',
+                                text: 'La tarea ha sido eliminada permanentemente.',
+                                timer: 2000,
+                                showConfirmButton: false,
+                                toast: true,
+                                position: 'top-end'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: res.message || 'No se pudo eliminar la tarea.'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error de permisos',
+                            text: 'No se pudo eliminar la tarea. Asegúrate de tener permisos de administrador.'
+                        });
+                    }
+                });
             }
         });
     }
