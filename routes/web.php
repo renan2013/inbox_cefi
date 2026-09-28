@@ -64,16 +64,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/configuracion/seguridad/acceder', [ConfiguracionController::class, 'acceder'])->name('configuracion.acceder');
     Route::post('/configuracion/seguridad/salir', [ConfiguracionController::class, 'salir'])->name('configuracion.salir');
 
-    // Parámetros de Pagos, Morosidad y Firmas Oficiales (Estilo UNELA)
-    Route::get('/configuracion/pagos', [ConfiguracionController::class, 'parametrosPagos'])->name('configuracion.pagos');
-    Route::post('/configuracion/pagos', [ConfiguracionController::class, 'guardarParametrosPagos'])->name('configuracion.pagos.guardar');
-    Route::post('/configuracion/pagos/reset-pruebas', [ConfiguracionController::class, 'resetearPruebasBoletas'])->name('configuracion.pagos.reset_pruebas');
-
     // Rutas protegidas exclusivamente para Administrador General con Clave Superior
     Route::middleware('admin.config')->prefix('configuracion')->name('configuracion.')->group(function () {
         // Hub Central de Configuración
         Route::get('/', [ConfiguracionController::class, 'index'])->name('index');
         Route::post('/guardar', [ConfiguracionController::class, 'guardar'])->name('guardar');
+
+        // Parámetros de Pagos, Morosidad y Firmas Oficiales (Estilo UNELA)
+        Route::get('/pagos', [ConfiguracionController::class, 'parametrosPagos'])->name('pagos');
+        Route::post('/pagos', [ConfiguracionController::class, 'guardarParametrosPagos'])->name('pagos.guardar');
+        Route::post('/pagos/reset-pruebas', [ConfiguracionController::class, 'resetearPruebasBoletas'])->name('pagos.reset_pruebas');
 
         // Test de conectividad
         Route::post('/test-n8n', [ConfiguracionController::class, 'testN8n'])->name('test_n8n');

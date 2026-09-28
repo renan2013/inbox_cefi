@@ -4,22 +4,36 @@
 
 @section('content')
 <div class="container py-4" style="max-width: 1050px;">
-    <!-- Encabezado Estilo UNELA -->
+    <!-- Encabezado Estilo UNELA con Seguridad Superior -->
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
         <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1 font-monospace small">
+                    <i class="bi bi-shield-check me-1"></i> CONTROL ADMINISTRADOR GENERAL
+                </span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 font-monospace small">
+                    <i class="bi bi-lock-fill me-1"></i> SESIÓN SEGURA ACTIVA
+                </span>
+            </div>
             <h3 class="fw-bold mb-1 d-flex align-items-center gap-2" style="letter-spacing: -0.5px;">
                 <i class="bi bi-gear-fill text-primary fs-3"></i> 
                 <span>Configuración de Pagos y Firmas Oficiales</span>
             </h3>
             <p class="text-muted small mb-0">Gestione la firma institucional en boletas, cálculo de morosidad y valores fijos predeterminados.</p>
         </div>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm fw-bold d-flex align-items-center gap-2" onclick="resetearPruebasBoletas()">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm fw-bold d-flex align-items-center gap-1" onclick="resetearPruebasBoletas()">
                 <i class="bi bi-radioactive"></i> Resetear Pruebas a 0
             </button>
-            <a href="{{ route('boletas.index') }}" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm fw-bold d-flex align-items-center gap-2">
+            <a href="{{ route('boletas.index') }}" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm fw-bold d-flex align-items-center gap-1">
                 <i class="bi bi-arrow-left"></i> Ir a Boletas
             </a>
+            <form action="{{ route('configuracion.salir') }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-outline-danger rounded-pill px-3 shadow-sm fw-bold d-flex align-items-center gap-1" title="Bloquear inmediatamente la sesión segura">
+                    <i class="bi bi-lock-fill"></i> Bloquear Acceso
+                </button>
+            </form>
         </div>
     </div>
 

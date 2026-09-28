@@ -526,8 +526,8 @@ class ConfiguracionController extends Controller
      */
     public function parametrosPagos()
     {
-        if (!Auth::check() || !in_array(Auth::user()->id_rol, [1, 2])) {
-            abort(403, 'Acceso denegado: Solo el Administrador puede gestionar los parámetros de pagos.');
+        if (!Auth::check() || Auth::user()->id_rol != 1) {
+            abort(403, 'Acceso denegado: Solo el Administrador General puede gestionar los parámetros de pagos.');
         }
 
         self::asegurarTablaConfiguracionPagos();
@@ -541,8 +541,8 @@ class ConfiguracionController extends Controller
      */
     public function guardarParametrosPagos(Request $request)
     {
-        if (!Auth::check() || !in_array(Auth::user()->id_rol, [1, 2])) {
-            return response()->json(['success' => false, 'message' => 'Acceso denegado.'], 403);
+        if (!Auth::check() || Auth::user()->id_rol != 1) {
+            return response()->json(['success' => false, 'message' => 'Acceso restringido al Administrador General.'], 403);
         }
 
         self::asegurarTablaConfiguracionPagos();
@@ -618,8 +618,8 @@ class ConfiguracionController extends Controller
      */
     public function resetearPruebasBoletas(Request $request)
     {
-        if (!Auth::check() || !in_array(Auth::user()->id_rol, [1, 2])) {
-            return response()->json(['success' => false, 'message' => 'Acceso no autorizado.'], 403);
+        if (!Auth::check() || Auth::user()->id_rol != 1) {
+            return response()->json(['success' => false, 'message' => 'Acceso no autorizado. Reservado al Administrador General.'], 403);
         }
 
         $password = trim($request->input('password', ''));
