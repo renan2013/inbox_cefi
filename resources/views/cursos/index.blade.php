@@ -163,7 +163,7 @@
                 <p class="text-white-50 mb-0">Gestiona y consulta las materias, códigos y créditos correspondientes a los planes de estudio.</p>
             </div>
             <div>
-                <a href="#" class="btn btn-search">
+                <a href="{{ route('cursos.create') }}" class="btn btn-search">
                     <i class="bi bi-plus-circle me-1"></i> Registrar Nuevo Curso
                 </a>
             </div>
@@ -242,13 +242,19 @@
                                     <span class="text-success fw-bold">₡{{ number_format($curso->precio, 2) }}</span>
                                 </td>
                                 <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <a href="#" class="btn btn-sm btn-outline-success" title="Editar">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver Descriptor PDF">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                        </a>
+                                        <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" class="btn btn-sm btn-outline-primary" title="Descargar Descriptor Word (.doc)">
+                                            <i class="bi bi-file-earmark-word"></i>
+                                        </a>
+                                        <a href="{{ route('cursos.edit', $curso->id_plan) }}" class="btn btn-sm btn-outline-success" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a href="#" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-curso" data-id="{{ $curso->id_plan }}" data-materia="{{ $curso->materia }}" title="Eliminar">
                                             <i class="bi bi-trash"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -256,7 +262,10 @@
                             <tr>
                                 <td colspan="7" class="text-center py-5 text-white-50">
                                     <i class="bi bi-journal-x display-4 d-block mb-3 text-muted"></i>
-                                    No se encontraron cursos con los criterios de búsqueda especificados.
+                                    <p class="mb-3">No se encontraron cursos con los criterios de búsqueda especificados.</p>
+                                    <a href="{{ route('cursos.create') }}" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-plus-circle me-1"></i> Registrar Nuevo Curso
+                                    </a>
                                 </td>
                             </tr>
                         @endforelse
@@ -278,4 +287,60 @@
         </div>
 
     </div>
+
+    <!-- Hidden Form for deletion -->
+    <form id="form-delete-curso" method="POST" style="display: none;">
+        @csrf
+    </form>
+@endsection
+
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Operación Exitosa!',
+                    text: "{{ session('success') }}",
+                    timer: 2500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Atención',
+                    text: "{{ session('error') }}"
+                });
+            @endif
+
+            document.querySelectorAll('.btn-eliminar-curso').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const id = this.getAttribute('data-id');
+                    const materia = this.getAttribute('data-materia');
+
+                    Swal.fire({
+                        title: '¿Eliminar Materia?',
+                        text: `¿Seguro que deseas eliminar "${materia}" del plan de estudios?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.getElementById('form-delete-curso');
+                            form.action = `/cursos/${id}/eliminar`;
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @endsection

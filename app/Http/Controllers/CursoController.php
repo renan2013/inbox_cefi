@@ -71,7 +71,11 @@ class CursoController extends Controller
         if ($request->hasFile('adjunto_pdf')) {
             $file = $request->file('adjunto_pdf');
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/planes_estudio'), $filename);
+            $dest = public_path('uploads/planes_estudio');
+            if (!file_exists($dest)) {
+                mkdir($dest, 0755, true);
+            }
+            $file->move($dest, $filename);
             $data['adjunto_pdf'] = $filename;
         } else {
             $data['adjunto_pdf'] = '';
@@ -80,6 +84,77 @@ class CursoController extends Controller
         PlanEstudio::create($data);
 
         return redirect()->route('cursos.index')->with('success', 'Curso/materia añadido exitosamente al plan de estudios.');
+    }
+
+    /**
+     * Muestra el formulario para editar una materia del plan de estudios.
+     */
+    public function edit($id)
+    {
+        $curso = PlanEstudio::findOrFail($id);
+        $programas = Programa::orderBy('nombre_programa', 'asc')->get();
+        return view('cursos.edit', compact('curso', 'programas'));
+    }
+
+    /**
+     * Actualiza una materia del plan de estudios.
+     */
+    public function update(Request $request, $id)
+    {
+        $curso = PlanEstudio::findOrFail($id);
+
+        $request->validate([
+            'id_programa' => 'required|exists:programas,id_programa',
+            'cuatrimestre' => 'required|string|max:100',
+            'codigo' => 'required|string|max:50',
+            'materia' => 'required|string|max:255',
+            'creditos' => 'nullable|integer|min:0',
+            'requisitos' => 'nullable|string',
+            'objetivo_general' => 'nullable|string',
+            'objetivos_especificos' => 'nullable|string',
+            'adjunto_pdf' => 'nullable|file|mimes:pdf|max:5120',
+        ]);
+
+        $data = $request->except(['adjunto_pdf']);
+
+        if ($request->filled('precio')) {
+            $data['precio'] = $request->precio;
+        } else {
+            $programa = Programa::find($request->id_programa);
+            $data['precio'] = $programa ? $programa->costo_materia : $curso->precio;
+        }
+
+        if ($request->hasFile('adjunto_pdf')) {
+            $file = $request->file('adjunto_pdf');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $dest = public_path('uploads/planes_estudio');
+            if (!file_exists($dest)) {
+                mkdir($dest, 0755, true);
+            }
+            $file->move($dest, $filename);
+            $data['adjunto_pdf'] = $filename;
+        }
+
+        $curso->update($data);
+
+        return redirect()->route('cursos.index')->with('success', 'Curso/materia actualizado exitosamente.');
+    }
+
+    /**
+     * Elimina una materia del plan de estudios si no tiene cursos activos.
+     */
+    public function destroy($id)
+    {
+        $curso = PlanEstudio::findOrFail($id);
+
+        $activosCount = \App\Models\CursoActivo::where('id_plan', $id)->count();
+        if ($activosCount > 0) {
+            return redirect()->route('cursos.index')->with('error', "No se puede eliminar '{$curso->materia}' porque tiene {$activosCount} grupo(s) o curso(s) activo(s) vinculados.");
+        }
+
+        $curso->delete();
+
+        return redirect()->route('cursos.index')->with('success', 'Materia eliminada del plan de estudios exitosamente.');
     }
 
     /**
