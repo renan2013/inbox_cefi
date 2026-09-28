@@ -565,6 +565,13 @@
         color: #166534;
         font-weight: 600;
     }
+
+    @media (min-width: 992px) {
+        .border-start-lg {
+            border-left: 1px solid var(--border-color) !important;
+            padding-left: 1.5rem !important;
+        }
+    }
 </style>
 @endsection
 
@@ -599,81 +606,60 @@
         @endif
     </div>
 
-    <!-- Widgets Superiores de Estadísticas y Filtros -->
-    <div class="row g-3 mb-4">
-        <!-- Estadísticas -->
-        <div class="col-xl-9 col-lg-8">
-            <div class="row g-3">
-                <div class="col-md-3 col-6">
-                    <div class="stat-card-item border-start border-4 border-warning">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <small class="text-white-50 fw-bold text-uppercase d-block" style="font-size: 0.7rem;">PENDIENTES</small>
-                                <h3 class="mb-0 fw-bold text-warning">{{ $stats['pendiente'] }}</h3>
-                            </div>
-                            <div class="p-2 rounded-circle style-icon-box" style="background: rgba(255, 193, 7, 0.15);">
-                                <i class="bi bi-clock-history text-warning fs-3"></i>
-                            </div>
-                        </div>
+    <!-- Barra Superior Minimalista de Distribución y Filtros Rápidos -->
+    @php
+        $total_t = $stats['total'] > 0 ? $stats['total'] : 1;
+        $pct_comp = round(($stats['completada'] / $total_t) * 100, 1);
+        $pct_proc = round(($stats['en_proceso'] / $total_t) * 100, 1);
+        $pct_pend = round(($stats['pendiente'] / $total_t) * 100, 1);
+        $pct_canc = round((($stats['cancelada'] ?? 0) / $total_t) * 100, 1);
+    @endphp
+    <div class="dash-card p-3 mb-4 shadow-sm">
+        <div class="row align-items-center g-3">
+            <!-- Línea Minimalista de Distribución del Tablero (Reemplaza los bloques pesados) -->
+            <div class="col-lg-7 col-xl-8">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+                    <span class="small fw-bold task-title-text">
+                        <i class="bi bi-bar-chart-fill text-primary me-2"></i>Distribución del Tablero
+                    </span>
+                    <div class="d-flex align-items-center gap-3 small flex-wrap" id="monday-legend-stats">
+                        <span class="d-inline-flex align-items-center">
+                            <span class="monday-color-dot me-1" style="background-color: #00c875;"></span>
+                            <strong id="count-completada" class="me-1">{{ $stats['completada'] }}</strong> Listo
+                        </span>
+                        <span class="d-inline-flex align-items-center">
+                            <span class="monday-color-dot me-1" style="background-color: #fdab3d;"></span>
+                            <strong id="count-en_proceso" class="me-1">{{ $stats['en_proceso'] }}</strong> En Proceso
+                        </span>
+                        <span class="d-inline-flex align-items-center">
+                            <span class="monday-color-dot me-1" style="background-color: #579bfc;"></span>
+                            <strong id="count-pendiente" class="me-1">{{ $stats['pendiente'] }}</strong> Pendiente
+                        </span>
+                        <span class="d-inline-flex align-items-center">
+                            <span class="monday-color-dot me-1" style="background-color: #df2f4a;"></span>
+                            <strong id="count-cancelada" class="me-1">{{ $stats['cancelada'] ?? 0 }}</strong> Cancelada
+                        </span>
                     </div>
                 </div>
-
-                <div class="col-md-3 col-6">
-                    <div class="stat-card-item border-start border-4 border-info">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <small class="text-white-50 fw-bold text-uppercase d-block" style="font-size: 0.7rem;">EN PROCESO</small>
-                                <h3 class="mb-0 fw-bold text-info">{{ $stats['en_proceso'] }}</h3>
-                            </div>
-                            <div class="p-2 rounded-circle style-icon-box" style="background: rgba(13, 202, 240, 0.15);">
-                                <i class="bi bi-person-workspace text-info fs-3"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3 col-6">
-                    <div class="stat-card-item border-start border-4 border-success">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <small class="text-white-50 fw-bold text-uppercase d-block" style="font-size: 0.7rem;">COMPLETADAS</small>
-                                <h3 class="mb-0 fw-bold text-success">{{ $stats['completada'] }}</h3>
-                            </div>
-                            <div class="p-2 rounded-circle style-icon-box" style="background: rgba(25, 135, 84, 0.15);">
-                                <i class="bi bi-check2-circle text-success fs-3"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3 col-6">
-                    <div class="stat-card-item border-start border-4 border-primary">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <small class="text-white-50 fw-bold text-uppercase d-block" style="font-size: 0.7rem;">TOTAL TAREAS</small>
-                                <h3 class="mb-0 fw-bold text-primary">{{ $stats['total'] }}</h3>
-                            </div>
-                            <div class="p-2 rounded-circle style-icon-box" style="background: rgba(95, 178, 48, 0.15);">
-                                <i class="bi bi-journal-check text-primary fs-3"></i>
-                            </div>
-                        </div>
-                    </div>
+                <div class="monday-progress-strip" style="height: 9px; border-radius: 5px;">
+                    <div id="m-prog-completada" class="monday-progress-seg status-completada" style="width: {{ $pct_comp }}%;" title="Completadas"></div>
+                    <div id="m-prog-en_proceso" class="monday-progress-seg status-en_proceso" style="width: {{ $pct_proc }}%;" title="En Proceso"></div>
+                    <div id="m-prog-pendiente" class="monday-progress-seg status-pendiente" style="width: {{ $pct_pend }}%;" title="Pendientes"></div>
+                    <div id="m-prog-cancelada" class="monday-progress-seg status-cancelada" style="width: {{ $pct_canc }}%;" title="Canceladas"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- Filtros Rápidos -->
-        <div class="col-xl-3 col-lg-4">
-            <div class="dash-card p-3 h-100 d-flex align-items-center">
+            <!-- Filtros Rápidos (Año y Etiqueta) -->
+            <div class="col-lg-5 col-xl-4 border-start-lg">
                 <form action="{{ route('dashboard') }}" method="GET" class="w-100">
-                    <div class="d-flex gap-2">
-                        <select name="anio" class="form-select form-select-dash form-select-sm" title="Año">
+                    <div class="d-flex align-items-center gap-2">
+                        <select name="anio" class="form-select form-select-dash form-select-sm" title="Año" style="max-width: 95px;">
                             @php $year_current = date('Y'); @endphp
                             @for ($y = 2024; $y <= $year_current + 1; $y++)
                                 <option value="{{ $y }}" {{ $anio_seleccionado == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
                         </select>
-                        <select name="etiqueta" class="form-select form-select-dash form-select-sm">
+                        <select name="etiqueta" class="form-select form-select-dash form-select-sm flex-grow-1">
                             <option value="">Todas las Etiquetas...</option>
                             @foreach ($etiquetas_disponibles as $etiqueta_item)
                                 <option value="{{ $etiqueta_item->id }}" {{ $etiqueta_seleccionada == $etiqueta_item->id ? 'selected' : '' }}>
@@ -681,13 +667,11 @@
                                 </option>
                             @endforeach
                         </select>
-                        <button class="btn btn-primary btn-sm px-3 rounded-3" type="submit"><i class="bi bi-search"></i></button>
+                        <button class="btn btn-primary btn-sm px-3 rounded-3" type="submit" title="Buscar"><i class="bi bi-search"></i></button>
+                        @if ($etiqueta_seleccionada || $anio_seleccionado != date('Y'))
+                            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm px-2 rounded-3" title="Limpiar filtros"><i class="bi bi-x-lg"></i></a>
+                        @endif
                     </div>
-                    @if ($etiqueta_seleccionada || $anio_seleccionado != date('Y'))
-                        <div class="text-center mt-2">
-                            <a href="{{ route('dashboard') }}" class="text-decoration-none small text-white-50"><i class="bi bi-x-circle me-1"></i>Limpiar filtros</a>
-                        </div>
-                    @endif
                 </form>
             </div>
         </div>
@@ -900,25 +884,6 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-
-                        <!-- Barra de Resumen de Progreso Estilo Monday -->
-                        <div class="mt-3 p-3 rounded-4 border monday-summary-box">
-                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
-                                <span class="small fw-bold task-title-text"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Distribución del Tablero</span>
-                                <div class="d-flex align-items-center gap-3 small" id="monday-legend-stats">
-                                    <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #00c875;"></span> <strong id="count-completada">0</strong> Listo</span>
-                                    <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #fdab3d;"></span> <strong id="count-en_proceso">0</strong> En Proceso</span>
-                                    <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #579bfc;"></span> <strong id="count-pendiente">0</strong> Pendiente</span>
-                                    <span><span class="monday-color-dot d-inline-block me-1" style="background-color: #df2f4a;"></span> <strong id="count-cancelada">0</strong> Cancelada</span>
-                                </div>
-                            </div>
-                            <div class="monday-progress-strip">
-                                <div id="m-prog-completada" class="monday-progress-seg status-completada" style="width: 0%;" title="Completadas"></div>
-                                <div id="m-prog-en_proceso" class="monday-progress-seg status-en_proceso" style="width: 0%;" title="En Proceso"></div>
-                                <div id="m-prog-pendiente" class="monday-progress-seg status-pendiente" style="width: 0%;" title="Pendientes"></div>
-                                <div id="m-prog-cancelada" class="monday-progress-seg status-cancelada" style="width: 0%;" title="Canceladas"></div>
-                            </div>
                         </div>
 
                         <!-- Paginación -->
@@ -1338,9 +1303,9 @@
                         </td>
                         <td><span class="task-subtitle-text small">Sin fecha</span></td>
                         <td class="text-end pe-4">
-                            <div class="btn-group rounded-pill overflow-hidden border border-secondary shadow-sm">
-                                <button type="button" class="btn btn-sm btn-outline-info border-0" onclick="alert('Tarea: ${escapeHtml(t.titulo)}')" title="Ver Detalle">
-                                    <i class="bi bi-eye"></i>
+                            <div class="btn-group rounded-pill overflow-hidden border task-actions-group shadow-sm">
+                                <button type="button" class="btn btn-sm btn-outline-primary border-0" onclick="abrirModalEditarTarea(${t.id})" title="Editar Tarea">
+                                    <i class="bi bi-pencil"></i>
                                 </button>
                             </div>
                         </td>
