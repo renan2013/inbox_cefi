@@ -1510,21 +1510,46 @@ class BoletaController extends Controller
         $totalFmt = number_format($boleta->total, 2);
         $cuotas = $boleta->cuotas ?? 1;
 
-        // Cursos vinculados
-        $cursos = DB::table('matriculas as m')
-            ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
-            ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
-            ->where('m.id_boleta', $boleta->id)
-            ->select('pe.nombre_curso', 'pe.codigo_curso')
-            ->get();
+        // Cursos vinculados (con verificación dinámica de columnas en plan_estudios)
+        try {
+            $selectCols = [];
+            if (Schema::hasColumn('plan_estudios', 'materia')) {
+                $selectCols[] = 'pe.materia as nombre_curso';
+            } elseif (Schema::hasColumn('plan_estudios', 'nombre_curso')) {
+                $selectCols[] = 'pe.nombre_curso';
+            } elseif (Schema::hasColumn('plan_estudios', 'nombre')) {
+                $selectCols[] = 'pe.nombre as nombre_curso';
+            }
+
+            if (Schema::hasColumn('plan_estudios', 'codigo')) {
+                $selectCols[] = 'pe.codigo as codigo_curso';
+            } elseif (Schema::hasColumn('plan_estudios', 'codigo_curso')) {
+                $selectCols[] = 'pe.codigo_curso';
+            }
+
+            if (empty($selectCols)) {
+                $selectCols = ['pe.*'];
+            }
+
+            $cursos = DB::table('matriculas as m')
+                ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
+                ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+                ->where('m.id_boleta', $boleta->id)
+                ->select($selectCols)
+                ->get();
+        } catch (\Throwable $eCursos) {
+            $cursos = collect([]);
+        }
 
         $cursosHtml = '';
         if ($cursos->isNotEmpty()) {
             $cursosHtml = '<div style="margin: 15px 0; background: #f8fafc; border-radius: 8px; padding: 12px 16px; border: 1px solid #e2e8f0;">';
             $cursosHtml .= '<p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #475569; text-transform: uppercase;">Cursos Registrados:</p><ul style="margin: 0; padding-left: 20px; color: #1e293b; font-size: 14px;">';
             foreach ($cursos as $c) {
-                $cod = !empty($c->codigo_curso) ? "<strong>{$c->codigo_curso}</strong> - " : "";
-                $cursosHtml .= "<li style='margin-bottom: 4px;'>{$cod}{$c->nombre_curso}</li>";
+                $nombre = $c->nombre_curso ?? $c->materia ?? $c->nombre ?? 'Curso';
+                $codigo = $c->codigo_curso ?? $c->codigo ?? '';
+                $cod = !empty($codigo) ? "<strong>{$codigo}</strong> - " : "";
+                $cursosHtml .= "<li style='margin-bottom: 4px;'>{$cod}{$nombre}</li>";
             }
             $cursosHtml .= '</ul></div>';
         }
@@ -1663,21 +1688,46 @@ class BoletaController extends Controller
             }
         }
 
-        // Cursos vinculados
-        $cursos = DB::table('matriculas as m')
-            ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
-            ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
-            ->where('m.id_boleta', $boleta->id)
-            ->select('pe.nombre_curso', 'pe.codigo_curso')
-            ->get();
+        // Cursos vinculados (con verificación dinámica de columnas en plan_estudios)
+        try {
+            $selectCols = [];
+            if (Schema::hasColumn('plan_estudios', 'materia')) {
+                $selectCols[] = 'pe.materia as nombre_curso';
+            } elseif (Schema::hasColumn('plan_estudios', 'nombre_curso')) {
+                $selectCols[] = 'pe.nombre_curso';
+            } elseif (Schema::hasColumn('plan_estudios', 'nombre')) {
+                $selectCols[] = 'pe.nombre as nombre_curso';
+            }
+
+            if (Schema::hasColumn('plan_estudios', 'codigo')) {
+                $selectCols[] = 'pe.codigo as codigo_curso';
+            } elseif (Schema::hasColumn('plan_estudios', 'codigo_curso')) {
+                $selectCols[] = 'pe.codigo_curso';
+            }
+
+            if (empty($selectCols)) {
+                $selectCols = ['pe.*'];
+            }
+
+            $cursos = DB::table('matriculas as m')
+                ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
+                ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+                ->where('m.id_boleta', $boleta->id)
+                ->select($selectCols)
+                ->get();
+        } catch (\Throwable $eCursos) {
+            $cursos = collect([]);
+        }
 
         $cursosHtml = '';
         if ($cursos->isNotEmpty()) {
             $cursosHtml = '<div style="margin: 15px 0; background: #f8fafc; border-radius: 8px; padding: 12px 16px; border: 1px solid #e2e8f0;">';
             $cursosHtml .= '<p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #475569; text-transform: uppercase;">Cursos Matriculados:</p><ul style="margin: 0; padding-left: 20px; color: #1e293b; font-size: 14px;">';
             foreach ($cursos as $c) {
-                $cod = !empty($c->codigo_curso) ? "<strong>{$c->codigo_curso}</strong> - " : "";
-                $cursosHtml .= "<li style='margin-bottom: 4px;'>{$cod}{$c->nombre_curso}</li>";
+                $nombre = $c->nombre_curso ?? $c->materia ?? $c->nombre ?? 'Curso';
+                $codigo = $c->codigo_curso ?? $c->codigo ?? '';
+                $cod = !empty($codigo) ? "<strong>{$codigo}</strong> - " : "";
+                $cursosHtml .= "<li style='margin-bottom: 4px;'>{$cod}{$nombre}</li>";
             }
             $cursosHtml .= '</ul></div>';
         }
