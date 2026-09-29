@@ -31,7 +31,16 @@ class BoletaController extends Controller
                 return;
             }
             $columns = [
+                'numero_boleta' => "ALTER TABLE `boletas` ADD COLUMN `numero_boleta` VARCHAR(50) NULL AFTER `id`",
+                'periodo' => "ALTER TABLE `boletas` ADD COLUMN `periodo` VARCHAR(100) NULL AFTER `numero_boleta`",
+                'id_creador' => "ALTER TABLE `boletas` ADD COLUMN `id_creador` INT(11) NULL DEFAULT 1 AFTER `id_estudiante`",
+                'total' => "ALTER TABLE `boletas` ADD COLUMN `total` DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER `id_creador`",
                 'descuento' => "ALTER TABLE `boletas` ADD COLUMN `descuento` DECIMAL(10,2) NOT NULL DEFAULT 0.00",
+                'interes_acumulado' => "ALTER TABLE `boletas` ADD COLUMN `interes_acumulado` DECIMAL(10,2) NOT NULL DEFAULT 0.00",
+                'saldo_pendiente' => "ALTER TABLE `boletas` ADD COLUMN `saldo_pendiente` DECIMAL(10,2) NOT NULL DEFAULT 0.00",
+                'monto_pagado' => "ALTER TABLE `boletas` ADD COLUMN `monto_pagado` DECIMAL(10,2) NOT NULL DEFAULT 0.00",
+                'cuotas' => "ALTER TABLE `boletas` ADD COLUMN `cuotas` INT(11) NOT NULL DEFAULT 1",
+                'aplicar_cargos_fijos' => "ALTER TABLE `boletas` ADD COLUMN `aplicar_cargos_fijos` TINYINT(1) NOT NULL DEFAULT 0",
                 'cobrar_inscripcion' => "ALTER TABLE `boletas` ADD COLUMN `cobrar_inscripcion` TINYINT(1) NOT NULL DEFAULT 0",
                 'cobrar_biblioteca' => "ALTER TABLE `boletas` ADD COLUMN `cobrar_biblioteca` TINYINT(1) NOT NULL DEFAULT 0",
                 'cobrar_matricula' => "ALTER TABLE `boletas` ADD COLUMN `cobrar_matricula` TINYINT(1) NOT NULL DEFAULT 1",
@@ -39,14 +48,26 @@ class BoletaController extends Controller
                 'pago_inicial_metodo' => "ALTER TABLE `boletas` ADD COLUMN `pago_inicial_metodo` VARCHAR(50) NULL",
                 'pago_inicial_referencia' => "ALTER TABLE `boletas` ADD COLUMN `pago_inicial_referencia` VARCHAR(255) NULL",
                 'fechas_vencimiento_json' => "ALTER TABLE `boletas` ADD COLUMN `fechas_vencimiento_json` TEXT NULL",
+                'ruta_firma' => "ALTER TABLE `boletas` ADD COLUMN `ruta_firma` VARCHAR(255) NULL",
                 'fecha_firma' => "ALTER TABLE `boletas` ADD COLUMN `fecha_firma` DATETIME NULL",
                 'token_firma' => "ALTER TABLE `boletas` ADD COLUMN `token_firma` VARCHAR(100) NULL",
                 'token_expiracion' => "ALTER TABLE `boletas` ADD COLUMN `token_expiracion` DATETIME NULL",
+                'enviado_email' => "ALTER TABLE `boletas` ADD COLUMN `enviado_email` TINYINT(1) NOT NULL DEFAULT 0",
             ];
             foreach ($columns as $col => $sql) {
                 if (!Schema::hasColumn('boletas', $col)) {
                     DB::statement($sql);
                 }
+            }
+
+            // Asegurar que el campo estado acepte los estados 'pendiente_firma' y 'firmada'
+            try {
+                DB::statement("ALTER TABLE `boletas` MODIFY COLUMN `estado` VARCHAR(50) NOT NULL DEFAULT 'pendiente_firma'");
+            } catch (\Throwable $eEstado) {}
+
+            // Asegurar que matriculas tenga id_boleta
+            if (Schema::hasTable('matriculas') && !Schema::hasColumn('matriculas', 'id_boleta')) {
+                DB::statement("ALTER TABLE `matriculas` ADD COLUMN `id_boleta` INT(11) NULL DEFAULT NULL AFTER `id_curso_activo`");
             }
         } catch (\Throwable $e) {
             // Ignorar excepciones de dialecto si se ejecuta bajo SQLite local
@@ -526,48 +547,62 @@ class BoletaController extends Controller
         foreach ($cursos_ids as $id_plan) {
             $id_plan = (int)$id_plan;
 
-            // 1. Buscar o crear curso activo para el periodo
-            $cursoActivo = DB::table('cursos_activos')
-                ->where('id_plan', $id_plan)
-                ->where('periodo', $periodo)
-                ->first();
+            try {
+                // 1. Buscar o crear curso activo para el periodo
+                $cursoActivo = DB::table('cursos_activos')
+                    ->where('id_plan', $id_plan)
+                    ->where('periodo', $periodo)
+                    ->first();
 
-            $id_curso_activo = null;
-            if ($cursoActivo) {
-                $id_curso_activo = $cursoActivo->id_curso_activo;
-            } else {
-                $id_curso_activo = DB::table('cursos_activos')->insertGetId([
-                    'id_plan' => $id_plan,
-                    'periodo' => $periodo,
-                    'id_profesor' => null,
-                    'fecha_inicio' => Carbon::now()->toDateString()
-                ]);
-            }
-
-            // 2. Buscar o crear matrícula
-            $matricula = DB::table('matriculas')
-                ->where('id_estudiante', $id_estudiante)
-                ->where('id_curso_activo', $id_curso_activo)
-                ->first();
-
-            if ($matricula) {
-                if ($id_boleta) {
-                    DB::table('matriculas')
-                        ->where('id_matricula', $matricula->id_matricula)
-                        ->update(['id_boleta' => $id_boleta]);
+                $id_curso_activo = null;
+                if ($cursoActivo) {
+                    $id_curso_activo = $cursoActivo->id_curso_activo;
+                } else {
+                    $dataCurso = [
+                        'id_plan' => $id_plan,
+                        'periodo' => $periodo,
+                        'id_profesor' => null,
+                    ];
+                    if (Schema::hasColumn('cursos_activos', 'fecha_inicio')) {
+                        $dataCurso['fecha_inicio'] = Carbon::now()->toDateString();
+                    }
+                    $id_curso_activo = DB::table('cursos_activos')->insertGetId($dataCurso, 'id_curso_activo');
                 }
-                $matriculas_creadas[] = $matricula->id_matricula;
-            } else {
-                $insertData = [
-                    'id_estudiante' => $id_estudiante,
-                    'id_curso_activo' => $id_curso_activo,
-                    'fecha_matricula' => Carbon::now()
-                ];
-                if ($id_boleta) {
-                    $insertData['id_boleta'] = $id_boleta;
+
+                if (!$id_curso_activo) {
+                    continue;
                 }
-                $id_mat = DB::table('matriculas')->insertGetId($insertData);
-                $matriculas_creadas[] = $id_mat;
+
+                // 2. Buscar o crear matrícula
+                $matricula = DB::table('matriculas')
+                    ->where('id_estudiante', $id_estudiante)
+                    ->where('id_curso_activo', $id_curso_activo)
+                    ->first();
+
+                if ($matricula) {
+                    if ($id_boleta && Schema::hasColumn('matriculas', 'id_boleta')) {
+                        DB::table('matriculas')
+                            ->where('id_matricula', $matricula->id_matricula)
+                            ->update(['id_boleta' => $id_boleta]);
+                    }
+                    $matriculas_creadas[] = $matricula->id_matricula;
+                } else {
+                    $insertData = [
+                        'id_estudiante' => $id_estudiante,
+                        'id_curso_activo' => $id_curso_activo,
+                    ];
+                    if ($id_boleta && Schema::hasColumn('matriculas', 'id_boleta')) {
+                        $insertData['id_boleta'] = $id_boleta;
+                    }
+                    if (Schema::hasColumn('matriculas', 'fecha_matricula')) {
+                        $insertData['fecha_matricula'] = Carbon::now();
+                    }
+                    $id_mat = DB::table('matriculas')->insertGetId($insertData, 'id_matricula');
+                    $matriculas_creadas[] = $id_mat;
+                }
+            } catch (\Throwable $eMat) {
+                // Registrar log pero no interrumpir la transacción general
+                \Illuminate\Support\Facades\Log::warning('Aviso matricularEstudianteEnCursos: ' . $eMat->getMessage());
             }
         }
 
@@ -595,8 +630,11 @@ class BoletaController extends Controller
             $id_estudiante = (int)$request->id_estudiante;
             $cursos_ids = $request->cursos_ids;
             $periodo = trim($request->periodo);
-            $total_raw = $request->total;
-            $total = floatval(preg_replace('/[^\d.]/', '', str_replace(',', '.', str_replace('.', '', $total_raw))));
+            $total_raw = (string)$request->total;
+            $total = floatval(preg_replace('/[^\d.]/', '', str_replace(',', '.', str_replace(['.', ' '], ['', ''], $total_raw))));
+            if ($total <= 0 && is_numeric($request->total)) {
+                $total = floatval($request->total);
+            }
             $descuento = floatval($request->descuento ?? 0);
             $cuotas = intval($request->cuotas ?? 1);
             $cobrar_inscripcion = (bool)($request->cobrar_inscripcion ?? false);
@@ -636,7 +674,7 @@ class BoletaController extends Controller
 
             DB::commit();
 
-            $enlace_firma = route('boletas.firmar_publico', ['token' => $token_firma]);
+            $enlace_firma = url('/boletas/firmar/' . $token_firma);
 
             // Intento seguro de envío de correo al estudiante
             $estudiante = Usuario::find($id_estudiante);
@@ -653,6 +691,7 @@ class BoletaController extends Controller
                 }
             } catch (\Throwable $eMail) {
                 // El enlace siempre se genera y puede compartirse manualmente
+                \Illuminate\Support\Facades\Log::info('Aviso envio correo boleta: ' . $eMail->getMessage());
             }
 
             return response()->json([
@@ -664,9 +703,10 @@ class BoletaController extends Controller
 
         } catch (\Throwable $e) {
             DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Error enviarEnlaceFirma: ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
             return response()->json([
                 'success' => false,
-                'message' => 'Error al enviar boleta para firma: ' . $e->getMessage()
+                'message' => 'Error al procesar la boleta: ' . $e->getMessage()
             ], 500);
         }
     }

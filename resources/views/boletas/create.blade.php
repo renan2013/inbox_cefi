@@ -1080,15 +1080,27 @@
             return;
         }
 
+        const cursos_seleccionados = (dataActual && dataActual.cursos) ? dataActual.cursos.map(c => c.id_plan) : [];
+        const studentId = (dataActual && dataActual.usuario ? dataActual.usuario.id : $('#boleta_id_estudiante').val()) || autoEstudiante;
+
+        if (!studentId) {
+            Swal.fire('Atención', 'No se ha detectado el estudiante seleccionado.', 'warning');
+            return;
+        }
+
+        if (cursos_seleccionados.length === 0) {
+            Swal.fire('Atención', 'Debe seleccionar al menos un curso para generar la boleta.', 'warning');
+            return;
+        }
+
         btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Enviando al Estudiante...');
-        const cursos_seleccionados = dataActual.cursos.map(c => c.id_plan);
 
         $.ajax({
             url: '{{ route('boletas.enviar_enlace_firma') }}',
             type: 'POST',
             data: {
                 _token: '{{ csrf_token() }}',
-                id_estudiante: $('#boleta_id_estudiante').val(),
+                id_estudiante: studentId,
                 total: $('#boleta-total').text(),
                 periodo: $('#boleta-cuatrimestre').text(),
                 descuento: $('#boleta-descuento').val(),
@@ -1104,8 +1116,15 @@
                 if (res.success) {
                     Swal.fire({
                         title: '¡Boleta Enviada para Firma!',
-                        html: `Se ha enviado la boleta al correo del estudiante.<br><br>
-                               <span class="text-muted small">El estudiante recibirá un enlace seguro para firmar el documento. Una vez firmado, aparecerá en su <b>Bandeja de Boletas</b> para procesarla y oficializarla.</span>`,
+                        html: `Se ha generado el borrador de matrícula y el enlace de firma.<br><br>
+                               <div class="p-3 bg-light rounded-3 border text-start mb-3">
+                                   <label class="small text-muted fw-bold d-block mb-1">Enlace de firma digital para el estudiante:</label>
+                                   <div class="input-group input-group-sm">
+                                       <input type="text" id="swal_link_firma" class="form-control" value="${res.enlace_firma}" readonly>
+                                       <button class="btn btn-outline-primary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('swal_link_firma').value); this.innerHTML='¡Copiado!';">Copiar</button>
+                                   </div>
+                               </div>
+                               <span class="text-muted small">Una vez que el estudiante estampe su firma digital, aparecerá en su <b>Bandeja de Boletas</b> para procesarla y oficializarla.</span>`,
                         icon: 'success',
                         confirmButtonColor: '#5fb230',
                         confirmButtonText: '<i class="bi bi-receipt me-1"></i> Ir a Bandeja de Boletas'
@@ -1113,12 +1132,16 @@
                         window.location.href = '{{ route('boletas.index') }}';
                     });
                 } else {
-                    Swal.fire('Error', res.message, 'error');
+                    Swal.fire('Error', res.message || 'Error al enviar la boleta.', 'error');
                     btn.prop('disabled', false).html('<i class="bi bi-send-fill me-2 fs-5"></i> Enviar al Estudiante para Firma');
                 }
             },
-            error: function() {
-                Swal.fire('Error', 'Ocurrió un error al enviar la boleta al estudiante.', 'error');
+            error: function(xhr) {
+                let msg = 'Ocurrió un error al enviar la boleta al estudiante.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    msg = xhr.responseJSON.message;
+                }
+                Swal.fire('Error', msg, 'error');
                 btn.prop('disabled', false).html('<i class="bi bi-send-fill me-2 fs-5"></i> Enviar al Estudiante para Firma');
             }
         });
@@ -1139,7 +1162,19 @@
             return;
         }
 
-        const cursos_seleccionados = dataActual.cursos.map(c => c.id_plan);
+        const cursos_seleccionados = (dataActual && dataActual.cursos) ? dataActual.cursos.map(c => c.id_plan) : [];
+        const studentId = (dataActual && dataActual.usuario ? dataActual.usuario.id : $('#boleta_id_estudiante').val()) || autoEstudiante;
+
+        if (!studentId) {
+            Swal.fire('Atención', 'No se ha detectado el estudiante seleccionado.', 'warning');
+            return;
+        }
+
+        if (cursos_seleccionados.length === 0) {
+            Swal.fire('Atención', 'Debe seleccionar al menos un curso para generar la boleta.', 'warning');
+            return;
+        }
+
         const signatureBase64 = window.isCanvasEmpty && !window.isCanvasEmpty() ? document.getElementById('signature-canvas').toDataURL() : '';
 
         Swal.fire({
@@ -1159,7 +1194,7 @@
                     type: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
-                        id_estudiante: $('#boleta_id_estudiante').val(),
+                        id_estudiante: studentId,
                         total: $('#boleta-total').text(),
                         periodo: $('#boleta-cuatrimestre').text(),
                         descuento: $('#boleta-descuento').val(),
@@ -1190,12 +1225,16 @@
                                 window.location.href = '{{ route('boletas.index') }}';
                             });
                         } else {
-                            Swal.fire('Error', res.message, 'error');
+                            Swal.fire('Error', res.message || 'Error al oficializar.', 'error');
                             btn.prop('disabled', false).html('<i class="bi bi-check-circle-fill me-2 fs-5"></i> Oficializar Directamente');
                         }
                     },
-                    error: function() {
-                        Swal.fire('Error', 'Ocurrió un error al oficializar la boleta.', 'error');
+                    error: function(xhr) {
+                        let msg = 'Ocurrió un error al oficializar la boleta.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        Swal.fire('Error', msg, 'error');
                         btn.prop('disabled', false).html('<i class="bi bi-check-circle-fill me-2 fs-5"></i> Oficializar Directamente');
                     }
                 });
