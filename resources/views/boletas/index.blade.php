@@ -550,27 +550,54 @@
                 btn.addEventListener('click', function() {
                     const id = this.dataset.id;
                     const numero = this.dataset.numero;
+                    const isLight = (document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme')) === 'light';
 
                     Swal.fire({
                         title: '¿Eliminar Boleta ' + numero + '?',
                         html: `
                             <div class="text-start">
-                                <div class="alert alert-danger py-2 px-3 small fw-bold mb-3">
-                                    <i class="bi bi-exclamation-octagon-fill me-1"></i> Esta acción eliminará permanentemente la boleta <u>${numero}</u>, sus cuotas de pago, comprobantes y firmas asociadas.
+                                <div class="alert alert-danger py-2 px-3 small fw-bold mb-3" style="border-radius: 0.5rem;">
+                                    <i class="bi bi-exclamation-octagon-fill me-1"></i> Esta acción es <strong>irreversible</strong> y eliminará permanentemente la boleta <u>${numero}</u>, sus cuotas de pago, comprobantes y firmas asociadas.
                                 </div>
-                                <p class="text-muted small mb-0">¿Está seguro de que desea eliminar definitivamente esta boleta de prueba?</p>
+                                <label class="form-label small fw-bold mb-1" style="color: ${isLight ? '#0f172a' : '#f8fafc'};">
+                                    Ingrese clave de administrador para autorizar:
+                                </label>
+                                <input type="password" id="swal_admin_pwd_boleta" class="form-control text-center" placeholder="Clave de administrador" autocomplete="new-password" style="background-color: ${isLight ? '#ffffff' : '#0f172a'}; color: ${isLight ? '#0f172a' : '#f8fafc'}; border: 2px solid ${isLight ? '#cbd5e1' : '#334155'}; border-radius: 0.75rem; padding: 0.65rem 1rem; font-size: 1rem;">
                             </div>
                         `,
                         icon: 'warning',
+                        iconColor: '#ef4444',
                         showCancelButton: true,
                         confirmButtonColor: '#dc3545',
                         cancelButtonColor: '#6c757d',
-                        confirmButtonText: '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar',
-                        cancelButtonText: 'Cancelar'
+                        confirmButtonText: '<i class="bi bi-trash-fill me-1"></i> Sí, autorizar y eliminar',
+                        cancelButtonText: 'Cancelar',
+                        background: isLight ? '#ffffff' : '#1e293b',
+                        color: isLight ? '#0f172a' : '#f8fafc',
+                        didOpen: () => {
+                            const input = document.getElementById('swal_admin_pwd_boleta');
+                            if (input) {
+                                input.focus();
+                                input.addEventListener('keyup', (ev) => {
+                                    if (ev.key === 'Enter') {
+                                        Swal.clickConfirm();
+                                    }
+                                });
+                            }
+                        },
+                        preConfirm: () => {
+                            const pwd = document.getElementById('swal_admin_pwd_boleta').value.trim();
+                            if (!pwd) {
+                                Swal.showValidationMessage('Debe ingresar la clave de administrador para confirmar');
+                                return false;
+                            }
+                            return pwd;
+                        }
                     }).then(async (result) => {
-                        if (result.isConfirmed) {
+                        if (result.isConfirmed && result.value) {
                             Swal.fire({
                                 title: 'Eliminando boleta...',
+                                text: 'Limpiando registros contables y desvinculando datos...',
                                 allowOutsideClick: false,
                                 didOpen: () => Swal.showLoading()
                             });
@@ -580,11 +607,20 @@
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                    }
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify({ password: result.value })
                                 });
-                                const data = await res.json();
-                                if (data.success) {
+
+                                let data;
+                                try {
+                                    data = await res.json();
+                                } catch (e) {
+                                    data = { success: false, message: 'Respuesta del servidor (HTTP ' + res.status + ')' };
+                                }
+
+                                if (res.ok && data.success) {
                                     Swal.fire({
                                         icon: 'success',
                                         title: '¡Boleta Eliminada!',
@@ -594,8 +630,8 @@
                                 } else {
                                     Swal.fire({
                                         icon: 'error',
-                                        title: 'Error',
-                                        text: data.message || 'No se pudo eliminar la boleta'
+                                        title: 'Error al Eliminar',
+                                        text: data.message || ('Error ' + res.status + ': No se pudo eliminar la boleta')
                                     });
                                 }
                             } catch (err) {
