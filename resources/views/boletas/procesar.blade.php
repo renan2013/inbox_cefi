@@ -314,7 +314,7 @@
 
             <!-- Acciones -->
             <div class="row mt-4 g-3 justify-content-center">
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <button type="button" id="btn-oficializar-boleta" class="btn btn-success btn-lg w-100 shadow fw-bold rounded-pill" style="background-color: #5fb230; border-color: #5fb230;">
                         <i class="bi bi-patch-check-fill me-2 fs-5"></i> Oficializar Boleta y Emitir PDF
                     </button>
@@ -323,6 +323,11 @@
                     <a href="{{ route('boletas.pdf', $boleta->id) }}" target="_blank" class="btn btn-outline-primary btn-lg w-100 rounded-pill fw-bold">
                         <i class="bi bi-eye me-1"></i> Previsualizar PDF
                     </a>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" id="btn-eliminar-boleta-procesar" class="btn btn-outline-danger btn-lg w-100 rounded-pill fw-bold" title="Eliminar Boleta de Prueba">
+                        <i class="bi bi-trash-fill me-1"></i> Borrar Boleta
+                    </button>
                 </div>
             </div>
         @else
@@ -432,6 +437,59 @@
                         error: function() {
                             Swal.fire('Error', 'Ocurrió un error al oficializar la boleta.', 'error');
                             btn.prop('disabled', false).html('<i class="bi bi-patch-check-fill me-2 fs-5"></i> Oficializar Boleta y Emitir PDF');
+                        }
+                    });
+                }
+            });
+        });
+
+        // Eliminar Boleta desde la pantalla de procesar
+        $('#btn-eliminar-boleta-procesar').click(function() {
+            Swal.fire({
+                title: '¿Eliminar Boleta {{ $boleta->numero_boleta }}?',
+                text: 'Esta boleta de prueba será eliminada permanentemente del sistema con todos sus registros.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-trash-fill me-1"></i> Sí, eliminar boleta',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Eliminando boleta...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    $.ajax({
+                        url: '{{ route('boletas.eliminar', $boleta->id) }}',
+                        type: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        success: function(res) {
+                            if (res.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '¡Boleta Eliminada!',
+                                    text: res.message,
+                                    confirmButtonColor: '#5fb230'
+                                }).then(() => {
+                                    window.location.href = '{{ route('boletas.index') }}';
+                                });
+                            } else {
+                                Swal.fire('Error', res.message || 'No se pudo eliminar la boleta', 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            let msg = 'No se pudo eliminar la boleta.';
+                            try {
+                                const err = JSON.parse(xhr.responseText);
+                                if (err.message) msg = err.message;
+                            } catch(e) {}
+                            Swal.fire('Error', msg, 'error');
                         }
                     });
                 }

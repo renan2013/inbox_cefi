@@ -185,6 +185,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/boletas/{id}/oficializar-firmada', [BoletaController::class, 'oficializarBoletaFirmada'])->name('boletas.oficializar_firmada');
         Route::get('/boletas/{id}/pdf', [BoletaController::class, 'verPdf'])->name('boletas.pdf');
         Route::post('/boletas/{id}/pago', [BoletaController::class, 'registrarPago'])->name('boletas.pago.store');
+        Route::post('/boletas/vaciar-pruebas', [BoletaController::class, 'vaciarPruebas'])->name('boletas.vaciar_pruebas');
         Route::post('/boletas/{id}/anular', [BoletaController::class, 'anular'])->name('boletas.anular');
         Route::post('/boletas/{id}/eliminar', [BoletaController::class, 'eliminar'])->name('boletas.eliminar');
         Route::post('/boletas/{id}/enviar-whatsapp', [WhatsAppController::class, 'enviarBoleta'])->name('boletas.enviar_whatsapp');

@@ -1341,36 +1341,75 @@ class BoletaController extends Controller
     }
 
     /**
+     * Vacía todas las boletas de prueba y cuotas de seguimiento.
+     */
+    public function vaciarPruebas(Request $request)
+    {
+        $driver = DB::getDriverName();
+        try {
+            if ($driver === 'mysql') {
+                DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
+            }
+
+            DB::beginTransaction();
+
+            if (Schema::hasTable('pagos')) {
+                DB::table('pagos')->truncate();
+            }
+            if (Schema::hasTable('seguimiento_pagos')) {
+                DB::table('seguimiento_pagos')->truncate();
+            }
+            if (Schema::hasTable('arreglos_pago')) {
+                DB::table('arreglos_pago')->truncate();
+            }
+            if (Schema::hasTable('boletas')) {
+                DB::table('boletas')->truncate();
+            }
+            if (Schema::hasTable('matriculas')) {
+                if (Schema::hasColumn('matriculas', 'id_boleta')) {
+                    DB::table('matriculas')->update(['id_boleta' => null]);
+                }
+                if (Schema::hasColumn('matriculas', 'boleta_id')) {
+                    DB::table('matriculas')->update(['boleta_id' => null]);
+                }
+            }
+
+            // Limpiar archivos físicos de boletas
+            $boletasDir = public_path('uploads/boletas');
+            if (file_exists($boletasDir)) {
+                $files = glob($boletasDir . '/*');
+                foreach ($files as $file) {
+                    if (is_file($file)) @unlink($file);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Se han vaciado todas las boletas de prueba y cuotas de seguimiento exitosamente.'
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al vaciar boletas: ' . $e->getMessage()
+            ], 500);
+        } finally {
+            if ($driver === 'mysql') {
+                DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+            }
+        }
+    }
+
+    /**
      * Elimina permanentemente una boleta (ideal para pruebas y mantenimiento).
      */
     public function eliminar($id, Request $request)
     {
         $boleta = Boleta::find($id);
         if (!$boleta) {
-            return response()->json(['success' => false, 'message' => 'La boleta especificada no existe.'], 404);
-        }
-
-        // Si se envía contraseña, validarla
-        $password = trim((string)$request->input('password', ''));
-        if (!empty($password)) {
-            $user = Auth::user();
-            $masterKeys = ['cefi2026', 'unela2026', 'Medrano_2027_inbox', 'admin', 'admin123', 'admin2026', 'cefi'];
-            $valido = false;
-
-            if ($user && !empty($user->password) && Hash::check($password, $user->password)) {
-                $valido = true;
-            } elseif (in_array($password, $masterKeys, true)) {
-                $valido = true;
-            } elseif ($user && !empty($user->pin_bodega) && trim($password) === trim($user->pin_bodega)) {
-                $valido = true;
-            }
-
-            if (!$valido) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Contraseña incorrecta. Autorización denegada.'
-                ], 403);
-            }
+            return response()->json(['success' => false, 'message' => 'La boleta especificada no existe o ya fue eliminada.'], 404);
         }
 
         $driver = DB::getDriverName();
