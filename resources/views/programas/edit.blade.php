@@ -103,6 +103,95 @@
             margin-bottom: 0.75rem;
             border: 1px solid var(--border-dark);
         }
+
+        .btn-outline-custom {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #f8fafc;
+            border-radius: 50rem;
+            padding: 0.5rem 1.25rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-outline-custom:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        /* Soporte para Modo Día (Light Theme) */
+        [data-theme="light"] .page-header {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .page-header h1 {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .page-header p {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .glass-card {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .form-label-custom {
+            color: #334155 !important;
+        }
+
+        [data-theme="light"] .form-control-custom,
+        [data-theme="light"] .form-select-custom {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .form-control-custom:focus,
+        [data-theme="light"] .form-select-custom:focus {
+            background-color: #ffffff !important;
+            border-color: var(--primary) !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .form-control-custom::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="light"] .cost-card {
+            background-color: rgba(95, 178, 48, 0.04) !important;
+            border-color: #16a34a !important;
+        }
+
+        [data-theme="light"] .img-upload-box {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        [data-theme="light"] .img-upload-box:hover {
+            border-color: var(--primary) !important;
+            background-color: rgba(95, 178, 48, 0.05) !important;
+        }
+
+        [data-theme="light"] .section-divider {
+            border-bottom-color: #e2e8f0 !important;
+            color: #15803d !important;
+        }
+
+        [data-theme="light"] .btn-outline-custom {
+            border-color: #cbd5e1;
+            color: #334155;
+        }
+
+        [data-theme="light"] .btn-outline-custom:hover {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
     </style>
 @endsection
 
@@ -125,7 +214,7 @@
                 <p class="text-white-50 mb-0">Actualice la información general, aranceles de cobro y recursos multimedia del programa.</p>
             </div>
             <div>
-                <a href="{{ route('programas.index') }}" class="btn btn-outline-light rounded-pill px-4">
+                <a href="{{ route('programas.index') }}" class="btn btn-outline-custom">
                     <i class="bi bi-arrow-left me-1"></i> Volver a Programas
                 </a>
             </div>

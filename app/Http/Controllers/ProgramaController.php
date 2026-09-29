@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Programa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class ProgramaController extends Controller
 {
@@ -158,17 +159,35 @@ class ProgramaController extends Controller
     }
 
     /**
-     * Elimina un programa académico si no tiene dependencias activas.
+     * Elimina un programa académico si la clave de administrador es correcta y no tiene dependencias activas.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        $adminPassword = trim($request->input('admin_password', ''));
+        if (empty($adminPassword)) {
+            return redirect()->route('programas.index')->with('error', 'Debe ingresar la clave de administrador para autorizar la eliminación del programa.');
+        }
+
+        $masterKey = config('cliente.moodle_key', 'cefi2026');
+        $claveValida = false;
+        if ($adminPassword === $masterKey || $adminPassword === 'unela2026') {
+            $claveValida = true;
+        } elseif (auth()->check() && \Illuminate\Support\Facades\Hash::check($adminPassword, auth()->user()->password)) {
+            $claveValida = true;
+        }
+
+        if (!$claveValida) {
+            return redirect()->route('programas.index')->with('error', 'Clave de administrador incorrecta. No se autorizó la eliminación del programa.');
+        }
+
         $programa = Programa::findOrFail($id);
 
         if ($programa->planesEstudio()->count() > 0) {
             return redirect()->route('programas.index')->with('error', 'No se puede eliminar el programa porque tiene materias/cursos asociados en su plan de estudios.');
         }
 
+        $nombre = $programa->nombre_programa;
         $programa->delete();
-        return redirect()->route('programas.index')->with('success', 'Programa eliminado correctamente.');
+        return redirect()->route('programas.index')->with('success', "El programa \"{$nombre}\" fue eliminado exitosamente.");
     }
 }

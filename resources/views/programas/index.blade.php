@@ -143,10 +143,118 @@
             border-color: var(--primary);
         }
 
-        .page-item.active .page-link {
-            background-color: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
+        .prog-title {
+            color: #f8fafc;
+            font-size: 1.05rem;
+        }
+
+        /* Soporte y optimizaciones para Modo Día (Light Theme) */
+        [data-theme="light"] .page-header {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .page-header h1 {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .page-header p {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .filter-section,
+        [data-theme="light"] .table-container {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .form-label {
+            color: #334155 !important;
+        }
+
+        [data-theme="light"] .input-group-text-custom {
+            border-color: #cbd5e1 !important;
+            color: #64748b !important;
+            background-color: #f8fafc !important;
+        }
+
+        [data-theme="light"] .form-control-custom {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .form-control-custom:focus {
+            background-color: #ffffff !important;
+            border-color: var(--primary) !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .form-control-custom::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="light"] .btn-clear {
+            border-color: #cbd5e1;
+            color: #64748b;
+        }
+
+        [data-theme="light"] .btn-clear:hover {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+
+        [data-theme="light"] .table-custom thead th {
+            background-color: #f8fafc !important;
+            color: #475569 !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+        }
+
+        [data-theme="light"] .table-custom tbody tr {
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+
+        [data-theme="light"] .table-custom tbody tr:hover {
+            background-color: rgba(95, 178, 48, 0.04) !important;
+        }
+
+        [data-theme="light"] .table-custom td {
+            color: #1e293b !important;
+        }
+
+        [data-theme="light"] .prog-title {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .badge-count {
+            background-color: rgba(95, 178, 48, 0.12) !important;
+            color: #15803d !important;
+            border-color: rgba(95, 178, 48, 0.3) !important;
+        }
+
+        [data-theme="light"] .page-link {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #475569 !important;
+        }
+
+        [data-theme="light"] .page-link:hover {
+            background-color: var(--primary) !important;
+            color: #ffffff !important;
+            border-color: var(--primary) !important;
+        }
+
+        [data-theme="light"] .page-item.active .page-link {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: #ffffff !important;
+        }
+
+        [data-theme="light"] .pagination-footer {
+            border-color: #e2e8f0 !important;
         }
     </style>
 @endsection
@@ -185,9 +293,9 @@
         <div class="filter-section">
             <form action="{{ route('programas.index') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-md-8">
-                    <label for="search" class="form-label text-white-50 fw-semibold mb-2">Buscar Programa o Categoría</label>
+                    <label for="search" class="form-label fw-semibold mb-2">Buscar Programa o Categoría</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 border-2" style="border-color: var(--border-dark); border-top-left-radius: 0.75rem; border-bottom-left-radius: 0.75rem; color: var(--text-muted);">
+                        <span class="input-group-text input-group-text-custom bg-transparent border-end-0 border-2" style="border-top-left-radius: 0.75rem; border-bottom-left-radius: 0.75rem;">
                             <i class="bi bi-search"></i>
                         </span>
                         <input type="text" name="search" id="search" class="form-control form-control-custom border-start-0 ps-0" placeholder="Nombre de programa o categoría..." value="{{ request('search') }}">
@@ -222,7 +330,7 @@
                         @forelse ($programas as $prog)
                             <tr>
                                 <td>
-                                    <div class="fw-bold" style="color: #f8fafc; font-size: 1.05rem;">{{ $prog->nombre_programa }}</div>
+                                    <div class="fw-bold prog-title">{{ $prog->nombre_programa }}</div>
                                     <small class="text-white-50">ID Programa: {{ $prog->id_programa }}</small>
                                 </td>
                                 <td>
@@ -265,7 +373,7 @@
 
             <!-- Pagination Footer -->
             @if ($programas->hasPages())
-                <div class="d-flex justify-content-between align-items-center p-4 border-top" style="border-color: var(--border-dark) !important;">
+                <div class="d-flex justify-content-between align-items-center p-4 border-top pagination-footer" style="border-color: var(--border-dark) !important;">
                     <div class="text-white-50" style="font-size: 0.9rem;">
                         Mostrando registros del <strong>{{ $programas->firstItem() }}</strong> al <strong>{{ $programas->lastItem() }}</strong> de un total de <strong>{{ $programas->total() }}</strong>
                     </div>
@@ -288,20 +396,59 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             const form = this.closest('form');
             const nombre = this.getAttribute('data-nombre') || 'este programa';
+            const isLight = (document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme')) === 'light';
 
             Swal.fire({
                 title: '¿Eliminar Programa?',
-                text: `¿Estás seguro de que deseas eliminar "${nombre}"? Esta acción no se puede deshacer.`,
+                html: `
+                    <div class="text-start">
+                        <div class="alert alert-warning py-2 px-3 mb-3 small" style="background: ${isLight ? '#fef3c7' : 'rgba(245, 158, 11, 0.15)'}; border: 1px solid ${isLight ? '#fde68a' : 'rgba(245, 158, 11, 0.3)'}; color: ${isLight ? '#92400e' : '#fbbf24'}; border-radius: 0.5rem;">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Esta acción es <strong>irreversible</strong> y eliminará el programa <strong>"${nombre}"</strong>.
+                        </div>
+                        <label class="form-label small fw-bold mb-1" style="color: ${isLight ? '#0f172a' : '#f8fafc'};">
+                            Ingrese clave de administrador para autorizar:
+                        </label>
+                        <input type="password" id="swal_admin_pwd" class="form-control text-center" placeholder="Clave de administrador" autocomplete="new-password" style="background-color: ${isLight ? '#ffffff' : '#0f172a'}; color: ${isLight ? '#0f172a' : '#f8fafc'}; border: 2px solid ${isLight ? '#cbd5e1' : '#334155'}; border-radius: 0.75rem; padding: 0.65rem 1rem; font-size: 1rem;">
+                    </div>
+                `,
                 icon: 'warning',
+                iconColor: '#f59e0b',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#64748b',
-                confirmButtonText: 'Sí, eliminar',
+                confirmButtonText: '<i class="bi bi-trash-fill me-1"></i> Sí, autorizar y eliminar',
                 cancelButtonText: 'Cancelar',
-                background: '#1e293b',
-                color: '#f8fafc'
+                background: isLight ? '#ffffff' : '#1e293b',
+                color: isLight ? '#0f172a' : '#f8fafc',
+                didOpen: () => {
+                    const input = document.getElementById('swal_admin_pwd');
+                    if (input) {
+                        input.focus();
+                        input.addEventListener('keyup', (ev) => {
+                            if (ev.key === 'Enter') {
+                                Swal.clickConfirm();
+                            }
+                        });
+                    }
+                },
+                preConfirm: () => {
+                    const pwd = document.getElementById('swal_admin_pwd').value.trim();
+                    if (!pwd) {
+                        Swal.showValidationMessage('Debe ingresar la clave de administrador para confirmar');
+                        return false;
+                    }
+                    return pwd;
+                }
             }).then((result) => {
-                if (result.isConfirmed) {
+                if (result.isConfirmed && result.value) {
+                    let inputPwd = form.querySelector('input[name="admin_password"]');
+                    if (!inputPwd) {
+                        inputPwd = document.createElement('input');
+                        inputPwd.type = 'hidden';
+                        inputPwd.name = 'admin_password';
+                        form.appendChild(inputPwd);
+                    }
+                    inputPwd.value = result.value;
                     form.submit();
                 }
             });
