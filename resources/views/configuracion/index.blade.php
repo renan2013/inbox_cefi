@@ -421,6 +421,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link {{ $activeTab === 'smtp' ? 'active' : '' }}" id="tab-btn-smtp" data-bs-toggle="pill" data-bs-target="#pane-smtp" type="button" role="tab">
+                <i class="bi bi-envelope-at-fill"></i> Correo Saliente (SMTP)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link {{ $activeTab === 'modulos' ? 'active' : '' }}" id="tab-btn-modulos" data-bs-toggle="pill" data-bs-target="#pane-modulos" type="button" role="tab">
                 <i class="bi bi-toggles2"></i> Módulos y Personalización
             </button>
@@ -672,6 +677,17 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <label class="form-label-custom">Webhook: Notificaciones de Boletas & Firma Digital</label>
+                                    <div class="input-group">
+                                        <input type="url" name="n8n_webhook_boleta_url" id="n8n_boleta_url" class="form-control form-control-custom font-monospace" value="{{ old('n8n_webhook_boleta_url', $configDb['n8n_webhook_boleta_url'] ?? ($cliente['n8n']['webhook_boleta'] ?? '')) }}" placeholder="https://n8n.tudominio.com/webhook/cefi-boleta">
+                                        <button type="button" class="btn btn-outline-info" onclick="probarN8n('n8n_boleta_url', 'res-boleta')">
+                                            <i class="bi bi-lightning-charge"></i> Probar
+                                        </button>
+                                    </div>
+                                    <div id="res-boleta" class="test-result-box"></div>
+                                </div>
+
+                                <div class="mb-3">
                                     <label class="form-label-custom">Webhook: Notificaciones de Morosidad & Cobros</label>
                                     <div class="input-group">
                                         <input type="url" name="n8n_webhook_morosidad_url" id="n8n_morosidad_url" class="form-control form-control-custom font-monospace" value="{{ old('n8n_webhook_morosidad_url', $configDb['n8n_webhook_morosidad_url'] ?? ($cliente['n8n']['webhook_morosidad'] ?? '')) }}" placeholder="https://n8n.tudominio.com/webhook/cefi-morosidad">
@@ -756,6 +772,164 @@
                             <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2">
                                 <i class="bi bi-check-circle-fill"></i> Guardar Parámetros de n8n & WhatsApp
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- PESTAÑA: CORREO SALIENTE (SMTP)                                     -->
+        <!-- =================================================================== -->
+        <div class="tab-pane fade {{ $activeTab === 'smtp' ? 'show active' : '' }}" id="pane-smtp" role="tabpanel">
+            <form action="{{ route('configuracion.guardar') }}" method="POST">
+                @csrf
+                <input type="hidden" name="active_tab" value="smtp">
+
+                <div class="row g-4">
+                    <!-- Formulario de Configuración SMTP -->
+                    <div class="col-lg-7">
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-envelope-at-fill text-warning fs-5"></i>
+                                    <h5 class="fw-bold mb-0 text-white">Servidor de Correo Saliente (SMTP)</h5>
+                                </div>
+                                <span class="badge bg-warning bg-opacity-25 text-warning">Boletas & Notificaciones</span>
+                            </div>
+                            <div class="config-card-body">
+                                <p class="text-white-50 small mb-4">
+                                    Configure la cuenta y el servidor SMTP que el sistema utilizará para despachar las boletas oficiales de matrícula, enlaces de firma digital y recordatorios a los estudiantes.
+                                </p>
+
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label-custom">Servidor SMTP (Host)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-hdd-network"></i></span>
+                                            <input type="text" name="mail_host" id="mail_host" class="form-control form-control-custom" value="{{ old('mail_host', $smtpConfig['host'] ?? 'smtp.gmail.com') }}" placeholder="smtp.gmail.com o mail.tudominio.com" required>
+                                        </div>
+                                        <small class="text-white-50">Para Gmail use <code>smtp.gmail.com</code>. Para hosting propio use <code>mail.tudominio.com</code>.</small>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom">Puerto</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-plug"></i></span>
+                                            <input type="number" name="mail_port" id="mail_port" class="form-control form-control-custom" value="{{ old('mail_port', $smtpConfig['port'] ?? 465) }}" placeholder="465" required>
+                                        </div>
+                                        <small class="text-white-50">465 (SSL) o 587 (TLS)</small>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Seguridad / Encriptación</label>
+                                        <select name="mail_encryption" id="mail_encryption" class="form-select form-select-custom">
+                                            <option value="ssl" {{ ($smtpConfig['encryption'] ?? 'ssl') === 'ssl' ? 'selected' : '' }}>SSL (Recomendado para puerto 465)</option>
+                                            <option value="tls" {{ ($smtpConfig['encryption'] ?? '') === 'tls' ? 'selected' : '' }}>TLS (Recomendado para puerto 587)</option>
+                                            <option value="null" {{ ($smtpConfig['encryption'] ?? '') === 'null' ? 'selected' : '' }}>Sin Encriptación (Puerto 25 / Local)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Nombre Mostrado del Remitente</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                            <input type="text" name="mail_from_name" id="mail_from_name" class="form-control form-control-custom" value="{{ old('mail_from_name', $smtpConfig['from_name'] ?? 'Inbox CEFI') }}" placeholder="Ej: Inbox CEFI" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Usuario / Correo Saliente</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                            <input type="email" name="mail_username" id="mail_username" class="form-control form-control-custom" value="{{ old('mail_username', $smtpConfig['username'] ?? '') }}" placeholder="usuario@dominio.com" required>
+                                        </div>
+                                        <small class="text-white-50">La cuenta que autentica en el servidor de correo.</small>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Contraseña / Clave de Aplicación</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                            <input type="password" name="mail_password" id="mail_password" class="form-control form-control-custom" value="{{ old('mail_password', $smtpConfig['password'] ?? '') }}" placeholder="Contraseña o app password">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="toggleSmtpPass()" title="Mostrar u ocultar contraseña">
+                                                <i class="bi bi-eye" id="mail_password_icon"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-white-50">En Gmail use una Contraseña de Aplicación de 16 caracteres.</small>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label-custom">Dirección "De" (From Address)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-reply"></i></span>
+                                            <input type="email" name="mail_from_address" id="mail_from_address" class="form-control form-control-custom" value="{{ old('mail_from_address', $smtpConfig['from_address'] ?? $smtpConfig['username'] ?? '') }}" placeholder="notificaciones@dominio.com">
+                                        </div>
+                                        <small class="text-white-50">Dirección que verán los estudiantes como remitente del mensaje.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="config-card-footer text-end p-3">
+                                <button type="submit" class="btn btn-primary px-4 py-2 fw-bold rounded-pill shadow-sm">
+                                    <i class="bi bi-save me-1"></i> Guardar Configuración de Correo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel Lateral: Prueba de Envío y Guía Rápida -->
+                    <div class="col-lg-5">
+                        <!-- Tarjeta Prueba de Envío -->
+                        <div class="config-card mb-4">
+                            <div class="config-card-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-send-check text-success fs-5"></i>
+                                    <h5 class="fw-bold mb-0 text-white">Comprobación en Vivo</h5>
+                                </div>
+                                <span class="badge bg-success bg-opacity-25 text-success">Test Directo</span>
+                            </div>
+                            <div class="config-card-body">
+                                <p class="text-white-50 small mb-3">
+                                    Pruebe de inmediato la conexión con el servidor. Se enviará un correo electrónico de diagnóstico con los parámetros ingresados.
+                                </p>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Enviar Correo de Prueba a:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-at"></i></span>
+                                        <input type="email" id="test_smtp_email" class="form-control form-control-custom" value="{{ auth()->user()->email ?? 'renangalvan@gmail.com' }}" placeholder="ejemplo@correo.com">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline-info w-100 py-2 fw-semibold rounded-pill d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="probarSmtp()">
+                                    <i class="bi bi-send-fill"></i> Despachar Correo de Prueba
+                                </button>
+                                <div id="res-smtp" class="test-result-box mt-3" style="display: none; padding: 12px; border-radius: 8px; font-size: 13px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta de Instrucciones y Proveedores -->
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-info-circle text-info fs-5"></i>
+                                    <h5 class="fw-bold mb-0 text-white">Guía de Configuración</h5>
+                                </div>
+                            </div>
+                            <div class="config-card-body small text-white-50">
+                                <div class="mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                                    <strong class="text-white d-block mb-1"><i class="bi bi-google text-danger me-1"></i> Google / Gmail / Workspace:</strong>
+                                    <span>Servidor: <code>smtp.gmail.com</code> | Puerto: <code>465</code> (SSL)<br>
+                                    Requiere activar "Verificación en 2 pasos" en la cuenta de Google y generar una <strong>Contraseña de Aplicación</strong> de 16 caracteres.</span>
+                                </div>
+                                <div class="mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                                    <strong class="text-white d-block mb-1"><i class="bi bi-globe text-primary me-1"></i> Correo de Dominio Propio (cPanel / Webmail):</strong>
+                                    <span>Servidor: <code>mail.sudominio.com</code> | Puerto: <code>465</code> (SSL) o <code>587</code> (TLS)<br>
+                                    Utilice el correo y contraseña completos creados en su hosting cPanel.</span>
+                                </div>
+                                <div>
+                                    <strong class="text-white d-block mb-1"><i class="bi bi-microsoft text-info me-1"></i> Microsoft 365 / Outlook:</strong>
+                                    <span>Servidor: <code>smtp.office365.com</code> | Puerto: <code>587</code> (TLS).</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1097,6 +1271,84 @@
             resBox.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
             resBox.style.color = '#f87171';
             resBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Error al contactar servicio WhatsApp: ' + err;
+        });
+    }
+
+    function toggleSmtpPass() {
+        const input = document.getElementById('mail_password');
+        const icon = document.getElementById('mail_password_icon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+
+    function probarSmtp() {
+        const email = document.getElementById('test_smtp_email').value;
+        const resBox = document.getElementById('res-smtp');
+
+        if (!email) {
+            Swal.fire('Atención', 'Por favor ingrese el correo electrónico destinatario para la prueba.', 'warning');
+            return;
+        }
+
+        resBox.style.display = 'block';
+        resBox.style.backgroundColor = 'rgba(59, 130, 246, 0.15)';
+        resBox.style.color = '#93c5fd';
+        resBox.innerHTML = '<i class="bi bi-arrow-repeat spin me-1"></i> Conectando con el servidor SMTP y despachando correo de prueba...';
+
+        const payload = {
+            email: email,
+            host: document.getElementById('mail_host').value,
+            port: document.getElementById('mail_port').value,
+            encryption: document.getElementById('mail_encryption').value,
+            username: document.getElementById('mail_username').value,
+            password: document.getElementById('mail_password').value,
+            from_address: document.getElementById('mail_from_address').value,
+            from_name: document.getElementById('mail_from_name').value
+        };
+
+        fetch('{{ route("configuracion.test_smtp") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                resBox.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+                resBox.style.color = '#34d399';
+                resBox.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ' + data.message;
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Prueba SMTP Exitosa!',
+                    text: data.message,
+                    confirmButtonColor: '#1066ad'
+                });
+            } else {
+                resBox.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+                resBox.style.color = '#f87171';
+                resBox.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i> ' + data.message;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Fallo de Conexión SMTP',
+                    text: data.message
+                });
+            }
+        })
+        .catch(err => {
+            resBox.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+            resBox.style.color = '#f87171';
+            resBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Error al conectar: ' + err;
+            Swal.fire('Error de Red', err.message, 'error');
         });
     }
 </script>

@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
         // Test de conectividad
         Route::post('/test-n8n', [ConfiguracionController::class, 'testN8n'])->name('test_n8n');
         Route::post('/test-whatsapp', [ConfiguracionController::class, 'testWhatsApp'])->name('test_whatsapp');
+        Route::post('/test-smtp', [ConfiguracionController::class, 'testSmtp'])->name('test_smtp');
 
         // Licenciamiento de módulos (Fabricante / Desarrollador)
         Route::post('/dev-desbloquear', [ConfiguracionController::class, 'desbloquearModulos'])->name('dev_desbloquear');
@@ -187,6 +188,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/boletas/{id}/anular', [BoletaController::class, 'anular'])->name('boletas.anular');
         Route::post('/boletas/{id}/eliminar', [BoletaController::class, 'eliminar'])->name('boletas.eliminar');
         Route::post('/boletas/{id}/enviar-whatsapp', [WhatsAppController::class, 'enviarBoleta'])->name('boletas.enviar_whatsapp');
+        Route::post('/boletas/{id}/enviar-email', [BoletaController::class, 'enviarEmail'])->name('boletas.enviar_email');
     });
 
     // --- FINANZAS, MOROSIDAD Y ESTADO DE CUENTA ---

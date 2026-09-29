@@ -533,6 +533,7 @@
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'parametros']) }}"><i class="bi bi-buildings text-primary me-2"></i> Parámetros del Sistema</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'identidad']) }}"><i class="bi bi-palette text-warning me-2"></i> Logotipo e Identidad</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'n8n']) }}"><i class="bi bi-diagram-3-fill text-success me-2"></i> Parámetros n8n & WhatsApp</a></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'smtp']) }}"><i class="bi bi-envelope-at-fill text-warning me-2"></i> Correo Saliente (SMTP)</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'modulos']) }}"><i class="bi bi-toggles2 text-danger me-2"></i> Módulos y Personalización</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'seguridad']) }}"><i class="bi bi-key-fill text-info me-2"></i> Clave Maestra Superior</a></li>
                             <li><hr class="dropdown-divider-custom"></li>

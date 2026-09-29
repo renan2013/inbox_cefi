@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Mail;
 use App\Services\InteresesService;
 
 class ConfiguracionController extends Controller
@@ -81,7 +82,18 @@ class ConfiguracionController extends Controller
         $waConfig = WhatsAppService::getConfig();
         $devUnlocked = session('dev_modules_unlocked', false);
 
-        return view('configuracion.index', compact('cliente', 'configDb', 'modulos', 'activeTab', 'waConfig', 'devUnlocked'));
+        // Configuración activa de Correo Saliente (SMTP)
+        $smtpConfig = [
+            'host'         => $configDb['mail_host'] ?? env('MAIL_HOST', 'smtp.gmail.com'),
+            'port'         => $configDb['mail_port'] ?? env('MAIL_PORT', 465),
+            'encryption'   => $configDb['mail_encryption'] ?? env('MAIL_ENCRYPTION', 'ssl'),
+            'username'     => $configDb['mail_username'] ?? env('MAIL_USERNAME', ''),
+            'password'     => $configDb['mail_password'] ?? env('MAIL_PASSWORD', ''),
+            'from_address' => $configDb['mail_from_address'] ?? env('MAIL_FROM_ADDRESS', ''),
+            'from_name'    => $configDb['mail_from_name'] ?? env('MAIL_FROM_NAME', config('cliente.nombre', 'Inbox CEFI')),
+        ];
+
+        return view('configuracion.index', compact('cliente', 'configDb', 'modulos', 'activeTab', 'waConfig', 'devUnlocked', 'smtpConfig'));
     }
 
     /**
@@ -158,6 +170,9 @@ class ConfiguracionController extends Controller
         if ($request->has('n8n_webhook_base_url')) {
             $fields['n8n_webhook_base_url'] = trim((string)$request->input('n8n_webhook_base_url'));
         }
+        if ($request->has('n8n_webhook_boleta_url')) {
+            $fields['n8n_webhook_boleta_url'] = trim((string)$request->input('n8n_webhook_boleta_url'));
+        }
         if ($request->has('n8n_webhook_morosidad_url')) {
             $fields['n8n_webhook_morosidad_url'] = trim((string)$request->input('n8n_webhook_morosidad_url'));
         }
@@ -183,6 +198,30 @@ class ConfiguracionController extends Controller
         }
         if ($request->has('whatsapp_api_key')) {
             $fields['whatsapp_api_key'] = trim((string)$request->input('whatsapp_api_key'));
+        }
+
+        // 3.1 Parámetros de Correo Saliente (SMTP)
+        if ($request->has('mail_host')) {
+            $fields['mail_host'] = trim((string)$request->input('mail_host'));
+        }
+        if ($request->has('mail_port')) {
+            $fields['mail_port'] = (int)$request->input('mail_port');
+        }
+        if ($request->has('mail_encryption')) {
+            $fields['mail_encryption'] = trim((string)$request->input('mail_encryption'));
+            $fields['mail_scheme'] = ($fields['mail_encryption'] === 'ssl' || ($fields['mail_port'] ?? 465) == 465) ? 'smtps' : null;
+        }
+        if ($request->has('mail_username')) {
+            $fields['mail_username'] = trim((string)$request->input('mail_username'));
+        }
+        if ($request->filled('mail_password')) {
+            $fields['mail_password'] = trim((string)$request->input('mail_password'));
+        }
+        if ($request->has('mail_from_address')) {
+            $fields['mail_from_address'] = trim((string)$request->input('mail_from_address'));
+        }
+        if ($request->has('mail_from_name')) {
+            $fields['mail_from_name'] = trim((string)$request->input('mail_from_name'));
         }
 
         // 4. Subida de Archivos Gráficos (Logo, Banner, Favicon)
@@ -253,6 +292,22 @@ class ConfiguracionController extends Controller
             }
         }
 
+        // Sincronizar parámetros SMTP en el archivo .env si fueron enviados
+        $envMail = [];
+        if (isset($fields['mail_host'])) $envMail['MAIL_HOST'] = $fields['mail_host'];
+        if (isset($fields['mail_port'])) $envMail['MAIL_PORT'] = $fields['mail_port'];
+        if (isset($fields['mail_encryption'])) $envMail['MAIL_ENCRYPTION'] = $fields['mail_encryption'];
+        if (isset($fields['mail_scheme'])) $envMail['MAIL_SCHEME'] = $fields['mail_scheme'] ?? '';
+        if (isset($fields['mail_username'])) $envMail['MAIL_USERNAME'] = $fields['mail_username'];
+        if (isset($fields['mail_password'])) $envMail['MAIL_PASSWORD'] = $fields['mail_password'];
+        if (isset($fields['mail_from_address'])) $envMail['MAIL_FROM_ADDRESS'] = $fields['mail_from_address'];
+        if (isset($fields['mail_from_name'])) $envMail['MAIL_FROM_NAME'] = $fields['mail_from_name'];
+
+        if (!empty($envMail)) {
+            $envMail['MAIL_MAILER'] = 'smtp';
+            $this->updateEnvFile($envMail);
+        }
+
         return redirect()->route('configuracion.index', ['tab' => $activeTab])
             ->with('success', '¡Configuraciones de la plataforma actualizadas exitosamente!');
     }
@@ -315,6 +370,92 @@ class ConfiguracionController extends Controller
 
         $res = WhatsAppService::sendTo($request->destinatario, $request->mensaje);
         return response()->json($res);
+    }
+
+    /**
+     * Prueba de envío en vivo de correo SMTP con configuración actual o del formulario.
+     */
+    public function testSmtp(Request $request)
+    {
+        $emailPrueba = trim($request->input('email', Auth::user()->email ?? ''));
+        if (empty($emailPrueba) || !filter_var($emailPrueba, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Por favor ingrese un correo electrónico destinatario válido para la prueba.'
+            ], 422);
+        }
+
+        // Si se enviaron parámetros temporales desde el formulario, probar con esos valores
+        if ($request->filled('host')) {
+            $port = (int)$request->input('port', 465);
+            $enc = strtolower($request->input('encryption', 'ssl'));
+            config([
+                'mail.default' => 'smtp',
+                'mail.mailers.smtp.host' => $request->input('host'),
+                'mail.mailers.smtp.port' => $port,
+                'mail.mailers.smtp.username' => $request->input('username'),
+                'mail.mailers.smtp.password' => $request->input('password'),
+                'mail.mailers.smtp.scheme' => ($enc === 'ssl' || $port == 465) ? 'smtps' : null,
+                'mail.from.address' => $request->input('from_address', $request->input('username')),
+                'mail.from.name' => $request->input('from_name', config('cliente.nombre', 'Inbox CEFI')),
+            ]);
+            app('mail.manager')->purge('smtp');
+        }
+
+        try {
+            $nombreInstitucion = config('cliente.nombre', 'CEFI');
+            Mail::html("
+                <div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; padding: 25px; color: #1e293b; max-width: 550px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;'>
+                    <div style='background: #1066ad; color: #ffffff; padding: 16px 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;'>
+                        <h2 style='margin: 0; font-size: 18px;'>¡Conexión SMTP Exitosa!</h2>
+                        <small style='color: #93c5fd; text-transform: uppercase;'>{$nombreInstitucion} - Panel de Control</small>
+                    </div>
+                    <p style='font-size: 14px; margin-bottom: 12px;'>Estimado/a Administrador/a,</p>
+                    <p style='font-size: 14px; color: #475569;'>Este es un mensaje de verificación generado desde el formulario de <strong>Configuración de Correo Saliente</strong>.</p>
+                    <div style='background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; padding: 12px 16px; border-radius: 6px; margin: 15px 0;'>
+                        <strong style='color: #16a34a;'>✓ Estado del Servidor: Operativo</strong>
+                        <p style='margin: 4px 0 0 0; font-size: 13px; color: #15803d;'>Su servidor de correo saliente está correctamente autenticado y listo para emitir boletas de matrícula, enlaces de firma y notificaciones a los estudiantes.</p>
+                    </div>
+                    <hr style='border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;'>
+                    <small style='color: #94a3b8; display: block; text-align: center;'>Despachado automáticamente el " . date('d/m/Y H:i:s') . "</small>
+                </div>
+            ", function($message) use ($emailPrueba, $nombreInstitucion) {
+                $message->to($emailPrueba)->subject("Prueba de Conexión SMTP Exitosa | {$nombreInstitucion}");
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => "Correo de prueba enviado satisfactoriamente a {$emailPrueba}. ¡La conexión SMTP funciona a la perfección!"
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error al probar SMTP en testSmtp: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al conectar con el servidor SMTP: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualiza variables de entorno en el archivo .env de forma segura.
+     */
+    protected function updateEnvFile(array $values)
+    {
+        $envPath = base_path('.env');
+        if (!file_exists($envPath)) return;
+
+        $content = file_get_contents($envPath);
+        foreach ($values as $key => $value) {
+            $valStr = (string)$value;
+            $safeValue = (str_contains($valStr, ' ') && !str_starts_with($valStr, '"')) ? '"' . $valStr . '"' : $valStr;
+            $pattern = "/^{$key}=.*/m";
+            if (preg_match($pattern, $content)) {
+                $content = preg_replace($pattern, "{$key}={$safeValue}", $content);
+            } else {
+                $content .= "\n{$key}={$safeValue}";
+            }
+        }
+        @file_put_contents($envPath, $content);
     }
 
     // =========================================================================

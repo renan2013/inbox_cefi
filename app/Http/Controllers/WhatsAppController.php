@@ -19,27 +19,29 @@ class WhatsAppController extends Controller
     }
 
     /**
-     * Guarda los parámetros de conexión de Green-API, logos y webhooks.
+     * Guarda los parámetros de conexión de n8n, logos y webhooks.
      */
     public function guardarConfiguracion(Request $request)
     {
         $request->validate([
-            'green_api_instance' => 'nullable|string',
-            'green_api_token' => 'nullable|string',
-            'green_api_url' => 'nullable|url',
+            'n8n_webhook_boleta_url' => 'nullable|url',
+            'n8n_webhook_morosidad_url' => 'nullable|url',
+            'n8n_webhook_recordatorio_url' => 'nullable|url',
+            'n8n_webhook_campana_url' => 'nullable|url',
+            'n8n_webhook_base_url' => 'nullable|url',
             'whatsapp_phone' => 'nullable|string',
             'whatsapp_logo_url' => 'nullable|url',
-            'n8n_webhook_recordatorio_url' => 'nullable|url',
             'logo_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072'
         ]);
 
         $updates = [
-            'green_api_instance' => trim($request->input('green_api_instance', '')),
-            'green_api_token' => trim($request->input('green_api_token', '')),
-            'green_api_url' => trim($request->input('green_api_url', 'https://7107.api.greenapi.com')),
+            'n8n_webhook_boleta_url' => trim($request->input('n8n_webhook_boleta_url', '')),
+            'n8n_webhook_morosidad_url' => trim($request->input('n8n_webhook_morosidad_url', '')),
+            'n8n_webhook_recordatorio_url' => trim($request->input('n8n_webhook_recordatorio_url', '')),
+            'n8n_webhook_campana_url' => trim($request->input('n8n_webhook_campana_url', '')),
+            'n8n_webhook_base_url' => trim($request->input('n8n_webhook_base_url', '')),
             'whatsapp_phone' => preg_replace('/[^0-9]/', '', (string)$request->input('whatsapp_phone', '')),
             'whatsapp_adjuntar_logo' => $request->has('whatsapp_adjuntar_logo') ? '1' : '0',
-            'n8n_webhook_recordatorio_url' => trim($request->input('n8n_webhook_recordatorio_url', ''))
         ];
 
         if ($request->filled('whatsapp_logo_url')) {
@@ -48,9 +50,13 @@ class WhatsAppController extends Controller
 
         // Si se subió un nuevo archivo de logo institucional
         if ($request->hasFile('logo_file') && $request->file('logo_file')->isValid()) {
+            $destPath = public_path('uploads/logos');
+            if (!file_exists($destPath)) {
+                @mkdir($destPath, 0755, true);
+            }
             $file = $request->file('logo_file');
             $filename = 'logo_whatsapp_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/logos'), $filename);
+            $file->move($destPath, $filename);
             $updates['whatsapp_logo_url'] = asset('uploads/logos/' . $filename);
         }
 
@@ -61,7 +67,7 @@ class WhatsAppController extends Controller
             );
         }
 
-        return redirect()->route('configuracion.whatsapp')->with('success', 'Configuración de WhatsApp guardada exitosamente.');
+        return redirect()->route('configuracion.whatsapp')->with('success', 'Configuración de automatizaciones n8n para WhatsApp guardada exitosamente.');
     }
 
     /**

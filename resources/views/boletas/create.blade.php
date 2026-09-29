@@ -1114,9 +1114,19 @@
             dataType: 'json',
             success: function(res) {
                 if (res.success) {
+                    const emailBadge = res.correo_enviado 
+                        ? `<div class="alert alert-success d-flex align-items-center gap-2 p-2 mb-3 text-start small border border-success">
+                             <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                             <div><strong>Correo Notificado:</strong> Se envió el enlace de firma institucional a <b>${res.correo_destinatario || 'el estudiante'}</b>.</div>
+                           </div>`
+                        : `<div class="alert alert-warning d-flex align-items-center gap-2 p-2 mb-3 text-start small border border-warning">
+                             <i class="bi bi-info-circle-fill text-warning fs-5"></i>
+                             <div>No se detectó correo o no se pudo despachar automáticamente. Puede compartir el enlace directo copiado abajo.</div>
+                           </div>`;
+
                     Swal.fire({
-                        title: '¡Boleta Enviada para Firma!',
-                        html: `Se ha generado el borrador de matrícula y el enlace de firma.<br><br>
+                        title: '¡Boleta Registrada para Firma!',
+                        html: `${emailBadge}
                                <div class="p-3 bg-light rounded-3 border text-start mb-3">
                                    <label class="small text-muted fw-bold d-block mb-1">Enlace de firma digital para el estudiante:</label>
                                    <div class="input-group input-group-sm">
@@ -1124,9 +1134,9 @@
                                        <button class="btn btn-outline-primary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('swal_link_firma').value); this.innerHTML='¡Copiado!';">Copiar</button>
                                    </div>
                                </div>
-                               <span class="text-muted small">Una vez que el estudiante estampe su firma digital, aparecerá en su <b>Bandeja de Boletas</b> para procesarla y oficializarla.</span>`,
+                               <span class="text-muted small">Una vez que el estudiante complete su firma digital, aparecerá en la <b>Bandeja de Boletas</b> para su oficialización.</span>`,
                         icon: 'success',
-                        confirmButtonColor: '#5fb230',
+                        confirmButtonColor: '#1066ad',
                         confirmButtonText: '<i class="bi bi-receipt me-1"></i> Ir a Bandeja de Boletas'
                     }).then(() => {
                         window.location.href = '{{ route('boletas.index') }}';

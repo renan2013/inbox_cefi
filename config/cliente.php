@@ -57,10 +57,11 @@ return [
     |
     */
     'n8n' => [
-        'webhook_base_url' => env('N8N_WEBHOOK_BASE_URL', ''),
-        'webhook_morosidad' => env('N8N_WEBHOOK_MOROSIDAD_URL', ''),
-        'webhook_recordatorio' => env('N8N_WEBHOOK_RECORDATORIO_URL', ''),
-        'webhook_campana' => env('N8N_WEBHOOK_CAMPANA_URL', ''),
+        'webhook_base_url' => env('N8N_WEBHOOK_BASE_URL', 'https://n8n.renangalvan.net'),
+        'webhook_boleta' => env('N8N_WEBHOOK_BOLETA_URL', 'https://n8n.renangalvan.net/webhook/cefi-boleta'),
+        'webhook_morosidad' => env('N8N_WEBHOOK_MOROSIDAD_URL', 'https://n8n.renangalvan.net/webhook/cefi-morosidad'),
+        'webhook_recordatorio' => env('N8N_WEBHOOK_RECORDATORIO_URL', 'https://n8n.renangalvan.net/webhook/cefi-recordatorio'),
+        'webhook_campana' => env('N8N_WEBHOOK_CAMPANA_URL', 'https://n8n.renangalvan.net/webhook/cefi-campana'),
     ],
 
     /*

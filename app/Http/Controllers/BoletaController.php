@@ -676,29 +676,21 @@ class BoletaController extends Controller
 
             $enlace_firma = url('/boletas/firmar/' . $token_firma);
 
-            // Intento seguro de envío de correo al estudiante
-            $estudiante = Usuario::find($id_estudiante);
-            try {
-                if ($estudiante && !empty($estudiante->email)) {
-                    $nombreEst = trim($estudiante->nombre . ' ' . ($estudiante->apellidos ?? ''));
-                    $nombreInst = config('cliente.nombre', 'CEFI');
-                    $asunto = "Firma Digital Requerida: Boleta de Matrícula {$numero_boleta} - {$nombreInst}";
-                    $cuerpo = "Hola {$nombreEst},\n\nSe ha generado su boleta de matrícula para el período {$periodo}.\nPor favor ingrese al siguiente enlace para revisar y estampar su firma digital:\n\n{$enlace_firma}\n\nGracias por formar parte de {$nombreInst}.";
+            // Envío institucional de correo electrónico con enlace de firma digital
+            $correoEnviado = $this->enviarCorreoFirma($boleta);
 
-                    Mail::raw($cuerpo, function($message) use ($estudiante, $asunto) {
-                        $message->to($estudiante->email)->subject($asunto);
-                    });
-                }
-            } catch (\Throwable $eMail) {
-                // El enlace siempre se genera y puede compartirse manualmente
-                \Illuminate\Support\Facades\Log::info('Aviso envio correo boleta: ' . $eMail->getMessage());
+            $msgSuccess = 'Boleta generada y enviada al correo del estudiante para su firma digital.';
+            if (!$correoEnviado && $boleta->estudiante && !empty($boleta->estudiante->email)) {
+                $msgSuccess = 'Borrador de boleta guardado. Se generó el enlace de firma para compartir manualmente.';
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Boleta enviada al estudiante para firma digital.',
+                'message' => $msgSuccess,
                 'boleta_id' => $boleta->id,
-                'enlace_firma' => $enlace_firma
+                'enlace_firma' => $enlace_firma,
+                'correo_enviado' => $correoEnviado,
+                'correo_destinatario' => $boleta->estudiante?->email ?? null
             ]);
 
         } catch (\Throwable $e) {
@@ -834,9 +826,12 @@ class BoletaController extends Controller
                 // PDF fallback
             }
 
+            // Enviar correo con comprobante PDF oficial al estudiante
+            $this->enviarCorreoBoletaOficial($boleta);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Boleta oficializada con éxito.',
+                'message' => 'Boleta oficializada con éxito y enviada por correo al estudiante.',
                 'boleta_id' => $boleta->id,
                 'pdf_url' => route('boletas.pdf', ['id' => $boleta->id])
             ]);
@@ -960,9 +955,12 @@ class BoletaController extends Controller
                 // PDF fallback
             }
 
+            // Enviar correo con comprobante PDF oficial al estudiante
+            $this->enviarCorreoBoletaOficial($boleta);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Boleta oficializada con éxito.',
+                'message' => 'Boleta oficializada con éxito y enviada por correo al estudiante.',
                 'boleta_id' => $boleta->id,
                 'pdf_url' => route('boletas.pdf', ['id' => $boleta->id])
             ]);
@@ -1433,6 +1431,366 @@ class BoletaController extends Controller
                 'success' => false,
                 'message' => 'Error al eliminar la boleta: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Re-envía el correo de la boleta (firma o boleta oficial) a solicitud del usuario.
+     */
+    public function enviarEmail(Request $request, $id)
+    {
+        $boleta = Boleta::with(['estudiante', 'seguimientoPagos'])->findOrFail($id);
+        $estudiante = $boleta->estudiante;
+
+        if (!$estudiante || empty($estudiante->email)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El estudiante asociado no tiene una dirección de correo electrónico registrada.'
+            ], 422);
+        }
+
+        $tipo = $request->input('tipo');
+        if (!$tipo) {
+            $tipo = ($boleta->estado === 'pendiente_firma') ? 'firma' : 'oficial';
+        }
+
+        try {
+            if ($tipo === 'firma') {
+                $enviado = $this->enviarCorreoFirma($boleta);
+            } else {
+                $enviado = $this->enviarCorreoBoletaOficial($boleta);
+            }
+
+            if ($enviado) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Correo enviado exitosamente a ' . $estudiante->email
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pudo enviar el correo. Por favor revise el log del sistema.'
+                ], 500);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error en enviarEmail: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar correo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Envía correo con plantilla HTML moderna y enlace para la firma digital de la boleta.
+     */
+    public function enviarCorreoFirma(Boleta $boleta): bool
+    {
+        $boleta->loadMissing('estudiante');
+        $estudiante = $boleta->estudiante;
+
+        if (!$estudiante || empty($estudiante->email)) {
+            \Illuminate\Support\Facades\Log::warning("No se pudo enviar correo de firma: Boleta #{$boleta->id} no tiene email de estudiante.");
+            return false;
+        }
+
+        // Si la boleta no tiene token de firma, generarlo
+        if (empty($boleta->token_firma)) {
+            $boleta->update([
+                'token_firma' => bin2hex(random_bytes(32)),
+                'token_expiracion' => Carbon::now()->addDays(7)
+            ]);
+        }
+
+        $enlace_firma = url('/boletas/firmar/' . $boleta->token_firma);
+        $institucion = config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'));
+        $nombreEstudiante = trim($estudiante->nombre . ' ' . ($estudiante->apellidos ?? ''));
+        $numeroBoleta = $boleta->numero_boleta ?? ('B-' . str_pad($boleta->id, 6, '0', STR_PAD_LEFT));
+        $periodo = $boleta->periodo ?? 'Vigente';
+        $totalFmt = number_format($boleta->total, 2);
+        $cuotas = $boleta->cuotas ?? 1;
+
+        // Cursos vinculados
+        $cursos = DB::table('matriculas as m')
+            ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
+            ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+            ->where('m.id_boleta', $boleta->id)
+            ->select('pe.nombre_curso', 'pe.codigo_curso')
+            ->get();
+
+        $cursosHtml = '';
+        if ($cursos->isNotEmpty()) {
+            $cursosHtml = '<div style="margin: 15px 0; background: #f8fafc; border-radius: 8px; padding: 12px 16px; border: 1px solid #e2e8f0;">';
+            $cursosHtml .= '<p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #475569; text-transform: uppercase;">Cursos Registrados:</p><ul style="margin: 0; padding-left: 20px; color: #1e293b; font-size: 14px;">';
+            foreach ($cursos as $c) {
+                $cod = !empty($c->codigo_curso) ? "<strong>{$c->codigo_curso}</strong> - " : "";
+                $cursosHtml .= "<li style='margin-bottom: 4px;'>{$cod}{$c->nombre_curso}</li>";
+            }
+            $cursosHtml .= '</ul></div>';
+        }
+
+        $asunto = "Solicitud de Firma Digital - Boleta {$numeroBoleta} | {$institucion}";
+
+        $html = "
+        <!DOCTYPE html>
+        <html lang='es'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>{$asunto}</title>
+        </head>
+        <body style='margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; color: #334155; line-height: 1.6;'>
+            <table border='0' cellpadding='0' cellspacing='0' width='100%' style='background-color: #f1f5f9; padding: 30px 10px;'>
+                <tr>
+                    <td align='center'>
+                        <table border='0' cellpadding='0' cellspacing='0' width='100%' style='max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.07); border: 1px solid #e2e8f0;'>
+                            <!-- Header Institucional -->
+                            <tr>
+                                <td style='background: linear-gradient(135deg, #1066ad 0%, #0d4b81 100%); padding: 30px 25px; text-align: center;'>
+                                    <h1 style='color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px;'>{$institucion}</h1>
+                                    <p style='color: #93c5fd; margin: 6px 0 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;'>Departamento de Registro y Finanzas</p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Contenido -->
+                            <tr>
+                                <td style='padding: 30px 30px 20px 30px;'>
+                                    <h2 style='color: #0f172a; font-size: 18px; margin-top: 0; margin-bottom: 12px;'>Estimado/a {$nombreEstudiante},</h2>
+                                    <p style='font-size: 14px; color: #475569; margin-bottom: 20px;'>
+                                        Le saludamos cordialmente. Se ha generado una nueva <strong>Boleta Oficial de Matrícula</strong> a su nombre y requiere de su formalización mediante <strong>Firma Digital</strong>.
+                                    </p>
+                                    
+                                    <!-- Tarjeta Resumen -->
+                                    <div style='background-color: #f8fafc; border-left: 4px solid #1066ad; border-radius: 6px; padding: 16px; margin-bottom: 20px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;'>
+                                        <table width='100%' style='font-size: 14px; border-collapse: collapse;'>
+                                            <tr>
+                                                <td style='padding: 4px 0; color: #64748b;'>N° Boleta:</td>
+                                                <td style='padding: 4px 0; font-weight: 700; color: #0f172a; text-align: right;'>{$numeroBoleta}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 4px 0; color: #64748b;'>Periodo Lectivo:</td>
+                                                <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>{$periodo}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 4px 0; color: #64748b;'>Plan de Financiamiento:</td>
+                                                <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>{$cuotas} cuota(s)</td>
+                                            </tr>
+                                            <tr style='border-top: 1px dashed #cbd5e1;'>
+                                                <td style='padding: 8px 0 4px 0; color: #1e293b; font-weight: bold; font-size: 15px;'>Monto Total:</td>
+                                                <td style='padding: 8px 0 4px 0; font-weight: bold; color: #1066ad; font-size: 16px; text-align: right;'>¢{$totalFmt}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    {$cursosHtml}
+
+                                    <p style='font-size: 14px; color: #475569; margin-bottom: 25px;'>
+                                        Para revisar las condiciones del compromiso de pago y estampar su firma digital, por favor haga clic en el siguiente botón:
+                                    </p>
+
+                                    <!-- Botón CTA -->
+                                    <div style='text-align: center; margin: 30px 0;'>
+                                        <a href='{$enlace_firma}' target='_blank' style='display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35); text-align: center;'>
+                                            Firmar Boleta Digitalmente
+                                        </a>
+                                    </div>
+
+                                    <p style='font-size: 12px; color: #64748b; background: #fffbeb; border: 1px solid #fef3c7; padding: 10px; border-radius: 6px; text-align: center;'>
+                                        Este enlace es de uso personal y confidencial. Válido durante 7 días. Si no puede hacer clic en el botón, copie y pegue esta dirección en su navegador:<br>
+                                        <a href='{$enlace_firma}' style='color: #2563eb; word-break: break-all; font-size: 11px;'>{$enlace_firma}</a>
+                                    </p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Footer -->
+                            <tr>
+                                <td style='background-color: #f8fafc; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0;'>
+                                    <p style='margin: 0; font-size: 12px; color: #94a3b8;'>
+                                        © " . date('Y') . " {$institucion}. Todos los derechos reservados.<br>
+                                        Este es un mensaje institucional automatizado generado por la plataforma académica.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>";
+
+        try {
+            Mail::html($html, function($message) use ($estudiante, $nombreEstudiante, $asunto) {
+                $message->to($estudiante->email, $nombreEstudiante)
+                        ->subject($asunto);
+            });
+            \Illuminate\Support\Facades\Log::info("Correo de solicitud de firma enviado exitosamente a {$estudiante->email} para Boleta #{$boleta->id}");
+            return true;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Fallo al enviar correo de firma para Boleta #{$boleta->id}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Envía correo con la boleta oficializada y adjunta el archivo PDF correspondiente.
+     */
+    public function enviarCorreoBoletaOficial(Boleta $boleta): bool
+    {
+        $boleta->loadMissing(['estudiante', 'seguimientoPagos']);
+        $estudiante = $boleta->estudiante;
+
+        if (!$estudiante || empty($estudiante->email)) {
+            \Illuminate\Support\Facades\Log::warning("No se pudo enviar boleta oficial: Boleta #{$boleta->id} no tiene email de estudiante.");
+            return false;
+        }
+
+        $institucion = config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'));
+        $nombreEstudiante = trim($estudiante->nombre . ' ' . ($estudiante->apellidos ?? ''));
+        $numeroBoleta = $boleta->numero_boleta ?? ('B-' . str_pad($boleta->id, 6, '0', STR_PAD_LEFT));
+        $periodo = $boleta->periodo ?? 'Vigente';
+        $totalFmt = number_format($boleta->total, 2);
+        $saldoFmt = number_format($boleta->saldo_pendiente, 2);
+        $pagadoFmt = number_format($boleta->monto_pagado, 2);
+        $estadoTexto = ucfirst(str_replace('_', ' ', $boleta->estado));
+
+        // Asegurar que el PDF físico esté generado
+        $pdfPath = public_path("uploads/boletas/boleta_{$boleta->id}.pdf");
+        if (!file_exists($pdfPath)) {
+            try {
+                $pdfPath = BoletaPdfService::generar($boleta->id, 'F');
+            } catch (\Throwable $ePdf) {
+                \Illuminate\Support\Facades\Log::error("Error generando PDF para adjuntar a correo boleta #{$boleta->id}: " . $ePdf->getMessage());
+            }
+        }
+
+        // Cursos vinculados
+        $cursos = DB::table('matriculas as m')
+            ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
+            ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+            ->where('m.id_boleta', $boleta->id)
+            ->select('pe.nombre_curso', 'pe.codigo_curso')
+            ->get();
+
+        $cursosHtml = '';
+        if ($cursos->isNotEmpty()) {
+            $cursosHtml = '<div style="margin: 15px 0; background: #f8fafc; border-radius: 8px; padding: 12px 16px; border: 1px solid #e2e8f0;">';
+            $cursosHtml .= '<p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #475569; text-transform: uppercase;">Cursos Matriculados:</p><ul style="margin: 0; padding-left: 20px; color: #1e293b; font-size: 14px;">';
+            foreach ($cursos as $c) {
+                $cod = !empty($c->codigo_curso) ? "<strong>{$c->codigo_curso}</strong> - " : "";
+                $cursosHtml .= "<li style='margin-bottom: 4px;'>{$cod}{$c->nombre_curso}</li>";
+            }
+            $cursosHtml .= '</ul></div>';
+        }
+
+        $enlacePdf = route('boletas.pdf', ['id' => $boleta->id]);
+        $asunto = "Boleta Oficial de Matrícula - {$numeroBoleta} | {$institucion}";
+
+        $html = "
+        <!DOCTYPE html>
+        <html lang='es'>
+        <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>{$asunto}</title>
+        </head>
+        <body style='margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; color: #334155; line-height: 1.6;'>
+            <table border='0' cellpadding='0' cellspacing='0' width='100%' style='background-color: #f1f5f9; padding: 30px 10px;'>
+                <tr>
+                    <td align='center'>
+                        <table border='0' cellpadding='0' cellspacing='0' width='100%' style='max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.07); border: 1px solid #e2e8f0;'>
+                            <!-- Header Institucional -->
+                            <tr>
+                                <td style='background: linear-gradient(135deg, #1066ad 0%, #0d4b81 100%); padding: 30px 25px; text-align: center;'>
+                                    <h1 style='color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px;'>{$institucion}</h1>
+                                    <p style='color: #93c5fd; margin: 6px 0 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;'>Departamento de Registro y Finanzas</p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Contenido -->
+                            <tr>
+                                <td style='padding: 30px 30px 20px 30px;'>
+                                    <h2 style='color: #0f172a; font-size: 18px; margin-top: 0; margin-bottom: 12px;'>Estimado/a {$nombreEstudiante},</h2>
+                                    <p style='font-size: 14px; color: #475569; margin-bottom: 20px;'>
+                                        Nos complace informarle que su proceso de matrícula ha sido <strong>registrado y formalizado satisfactoriamente</strong>. Adjunto a este mensaje encontrará su documento oficial en formato PDF.
+                                    </p>
+                                    
+                                    <!-- Tarjeta Resumen -->
+                                    <div style='background-color: #f8fafc; border-left: 4px solid #16a34a; border-radius: 6px; padding: 16px; margin-bottom: 20px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;'>
+                                        <table width='100%' style='font-size: 14px; border-collapse: collapse;'>
+                                            <tr>
+                                                <td style='padding: 4px 0; color: #64748b;'>N° Boleta:</td>
+                                                <td style='padding: 4px 0; font-weight: 700; color: #0f172a; text-align: right;'>{$numeroBoleta}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 4px 0; color: #64748b;'>Estado:</td>
+                                                <td style='padding: 4px 0; font-weight: 600; color: #16a34a; text-align: right;'>{$estadoTexto}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 4px 0; color: #64748b;'>Periodo:</td>
+                                                <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>{$periodo}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 4px 0; color: #64748b;'>Total Inversión:</td>
+                                                <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>¢{$totalFmt}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style='padding: 4px 0; color: #64748b;'>Monto Cancelado:</td>
+                                                <td style='padding: 4px 0; font-weight: 600; color: #16a34a; text-align: right;'>¢{$pagadoFmt}</td>
+                                            </tr>
+                                            <tr style='border-top: 1px dashed #cbd5e1;'>
+                                                <td style='padding: 8px 0 4px 0; color: #1e293b; font-weight: bold; font-size: 15px;'>Saldo Restante:</td>
+                                                <td style='padding: 8px 0 4px 0; font-weight: bold; color: " . ($boleta->saldo_pendiente > 0 ? '#b91c1c' : '#16a34a') . "; font-size: 16px; text-align: right;'>¢{$saldoFmt}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    {$cursosHtml}
+
+                                    <div style='text-align: center; margin: 25px 0;'>
+                                        <a href='{$enlacePdf}' target='_blank' style='display: inline-block; background: linear-gradient(135deg, #1066ad 0%, #0d4b81 100%); color: #ffffff; text-decoration: none; padding: 13px 28px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 14px rgba(16, 102, 173, 0.3);'>
+                                            Ver Documento en Línea
+                                        </a>
+                                    </div>
+
+                                    <p style='font-size: 13px; color: #64748b; text-align: center; margin-bottom: 0;'>
+                                        Conserve este comprobante y el archivo adjunto para cualquier trámite o consulta con Registro Académico.
+                                    </p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Footer -->
+                            <tr>
+                                <td style='background-color: #f8fafc; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0;'>
+                                    <p style='margin: 0; font-size: 12px; color: #94a3b8;'>
+                                        © " . date('Y') . " {$institucion}. Todos los derechos reservados.<br>
+                                        Este es un comprobante oficial generado por el sistema institucional.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>";
+
+        try {
+            Mail::html($html, function($message) use ($estudiante, $nombreEstudiante, $asunto, $pdfPath, $numeroBoleta) {
+                $message->to($estudiante->email, $nombreEstudiante)
+                        ->subject($asunto);
+
+                if (file_exists($pdfPath)) {
+                    $message->attach($pdfPath, [
+                        'as' => "Boleta_Matricula_{$numeroBoleta}.pdf",
+                        'mime' => 'application/pdf',
+                    ]);
+                }
+            });
+            \Illuminate\Support\Facades\Log::info("Boleta oficial enviada exitosamente por correo a {$estudiante->email} para Boleta #{$boleta->id}");
+            return true;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Fallo al enviar boleta oficial por correo para Boleta #{$boleta->id}: " . $e->getMessage());
+            return false;
         }
     }
 }

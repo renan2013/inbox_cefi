@@ -346,6 +346,17 @@
                                             </button>
                                         @endif
 
+                                        @if ($boleta->estado !== 'anulada' && !empty($boleta->estudiante?->email))
+                                            <button type="button" class="btn btn-sm btn-outline-warning btn-enviar-email-boleta" 
+                                                data-id="{{ $boleta->id }}" 
+                                                data-numero="{{ $boleta->numero_boleta }}" 
+                                                data-email="{{ $boleta->estudiante->email }}" 
+                                                data-estado="{{ $boleta->estado }}"
+                                                title="Enviar Boleta por Correo Electrónico ({{ $boleta->estudiante->email }})">
+                                                <i class="bi bi-envelope"></i>
+                                            </button>
+                                        @endif
+
                                         @if ($boleta->estado !== 'anulada' && $boleta->saldo_pendiente > 0 && $boleta->estado !== 'pendiente_firma')
                                             <button type="button" class="btn btn-sm btn-outline-primary btn-pago" 
                                                 data-id="{{ $boleta->id }}" 
@@ -615,10 +626,9 @@
                         confirmButtonText: '<i class="bi bi-send-fill me-1"></i> Sí, enviar',
                         cancelButtonText: 'Cancelar'
                     }).then(async (result) => {
-                        if (result.isConfirmed) {
                             Swal.fire({
                                 title: 'Enviando WhatsApp...',
-                                text: 'Despachando vía Green-API',
+                                text: 'Despachando notificación vía n8n...',
                                 allowOutsideClick: false,
                                 didOpen: () => Swal.showLoading()
                             });
@@ -656,6 +666,72 @@
                                 }
                             } catch (err) {
                                 Swal.fire('Error de Red', err.message, 'error');
+                            }
+                        }
+                    });
+                });
+            });
+
+            // Enviar Boleta por Correo Electrónico
+            document.querySelectorAll('.btn-enviar-email-boleta').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const numero = this.dataset.numero;
+                    const email = this.dataset.email;
+                    const estado = this.dataset.estado;
+                    const esFirma = (estado === 'pendiente_firma');
+
+                    Swal.fire({
+                        title: 'Enviar por Correo Electrónico',
+                        html: `
+                            <div class="text-start">
+                                <p class="mb-2">¿Desea enviar la boleta <strong>${numero}</strong> por correo electrónico?</p>
+                                <div class="p-3 rounded bg-light text-dark mb-2 small border">
+                                    <div class="mb-1"><strong>Destinatario:</strong> <span class="text-primary">${email}</span></div>
+                                    <div><strong>Modalidad:</strong> ${esFirma ? '<span class="badge bg-warning text-dark">Enlace de Firma Digital</span>' : '<span class="badge bg-success">Boleta Oficial (PDF Adjunto)</span>'}</div>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1066ad',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="bi bi-envelope-fill me-1"></i> Sí, Enviar Correo',
+                        cancelButtonText: 'Cancelar'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                title: 'Enviando correo...',
+                                text: `Conectando con el servidor de correo institucional para enviar a ${email}...`,
+                                allowOutsideClick: false,
+                                didOpen: () => Swal.showLoading()
+                            });
+
+                            try {
+                                const res = await fetch(`/boletas/${id}/enviar-email`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    }
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: '¡Correo Enviado!',
+                                        text: data.message,
+                                        confirmButtonColor: '#1066ad'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error de Envío',
+                                        text: data.message || 'No se pudo enviar el correo'
+                                    });
+                                }
+                            } catch (err) {
+                                Swal.fire('Error de Conexión', err.message, 'error');
                             }
                         }
                     });
