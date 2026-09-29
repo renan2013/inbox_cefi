@@ -1334,24 +1334,40 @@ class BoletaController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Eliminar pagos
+            // 1. Eliminar pagos asociados a esta boleta
             if (Schema::hasTable('pagos')) {
-                DB::table('pagos')->where('boleta_id', $id)->delete();
+                if (Schema::hasColumn('pagos', 'boleta_id')) {
+                    DB::table('pagos')->where('boleta_id', $id)->delete();
+                } elseif (Schema::hasColumn('pagos', 'id_boleta')) {
+                    DB::table('pagos')->where('id_boleta', $id)->delete();
+                }
             }
 
-            // 2. Eliminar cuotas
+            // 2. Eliminar cuotas de seguimiento asociadas
             if (Schema::hasTable('seguimiento_pagos')) {
-                DB::table('seguimiento_pagos')->where('id_boleta', $id)->delete();
+                if (Schema::hasColumn('seguimiento_pagos', 'id_boleta')) {
+                    DB::table('seguimiento_pagos')->where('id_boleta', $id)->delete();
+                } elseif (Schema::hasColumn('seguimiento_pagos', 'boleta_id')) {
+                    DB::table('seguimiento_pagos')->where('boleta_id', $id)->delete();
+                }
             }
 
-            // 3. Eliminar arreglos de pago
+            // 3. Eliminar arreglos de pago únicamente si la columna existe
             if (Schema::hasTable('arreglos_pago')) {
-                DB::table('arreglos_pago')->where('id_boleta', $id)->delete();
+                if (Schema::hasColumn('arreglos_pago', 'id_boleta')) {
+                    DB::table('arreglos_pago')->where('id_boleta', $id)->delete();
+                } elseif (Schema::hasColumn('arreglos_pago', 'boleta_id')) {
+                    DB::table('arreglos_pago')->where('boleta_id', $id)->delete();
+                }
             }
 
             // 4. Desvincular matrículas
-            if (Schema::hasTable('matriculas') && Schema::hasColumn('matriculas', 'id_boleta')) {
-                DB::table('matriculas')->where('id_boleta', $id)->update(['id_boleta' => null]);
+            if (Schema::hasTable('matriculas')) {
+                if (Schema::hasColumn('matriculas', 'id_boleta')) {
+                    DB::table('matriculas')->where('id_boleta', $id)->update(['id_boleta' => null]);
+                } elseif (Schema::hasColumn('matriculas', 'boleta_id')) {
+                    DB::table('matriculas')->where('boleta_id', $id)->update(['boleta_id' => null]);
+                }
             }
 
             // 5. Eliminar archivos de disco (PDFs y firmas)
