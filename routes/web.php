@@ -140,6 +140,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/programas', [ProgramaController::class, 'index'])->name('programas.index');
         Route::get('/programas/crear', [ProgramaController::class, 'create'])->name('programas.create');
         Route::post('/programas/crear', [ProgramaController::class, 'store'])->name('programas.store');
+        Route::get('/programas/{id}/editar', [ProgramaController::class, 'edit'])->name('programas.edit');
+        Route::post('/programas/{id}/actualizar', [ProgramaController::class, 'update'])->name('programas.update');
+        Route::post('/programas/{id}/eliminar', [ProgramaController::class, 'destroy'])->name('programas.destroy');
         Route::get('/programas-completos', [ProgramaController::class, 'programasCompletos'])->name('programas.completos');
 
         // Grupos

@@ -161,11 +161,25 @@
                 <p class="text-white-50 mb-0">Gestiona y consulta los programas académicos, bachilleratos, licenciaturas y maestrías de la universidad.</p>
             </div>
             <div>
-                <a href="#" class="btn btn-search">
+                <a href="{{ route('programas.create') }}" class="btn btn-search">
                     <i class="bi bi-plus-circle me-1"></i> Registrar Nuevo Programa
                 </a>
             </div>
         </div>
+
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3) !important; color: #4ade80;">
+                <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3) !important; color: #f87171;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
         <!-- Filter Form -->
         <div class="filter-section">
@@ -225,12 +239,15 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="#" class="btn btn-sm btn-outline-success" title="Editar">
+                                        <a href="{{ route('programas.edit', $prog->id_programa) }}" class="btn btn-sm btn-outline-success" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a href="#" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
+                                        <form action="{{ route('programas.destroy', $prog->id_programa) }}" method="POST" class="d-inline form-eliminar-programa">
+                                            @csrf
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-programa" title="Eliminar" data-nombre="{{ $prog->nombre_programa }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -260,4 +277,36 @@
         </div>
 
     </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deleteButtons = document.querySelectorAll('.btn-delete-programa');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            const form = this.closest('form');
+            const nombre = this.getAttribute('data-nombre') || 'este programa';
+
+            Swal.fire({
+                title: '¿Eliminar Programa?',
+                text: `¿Estás seguro de que deseas eliminar "${nombre}"? Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                background: '#1e293b',
+                color: '#f8fafc'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+</script>
 @endsection
