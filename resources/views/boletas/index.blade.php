@@ -723,6 +723,7 @@
                         confirmButtonText: '<i class="bi bi-send-fill me-1"></i> Sí, enviar',
                         cancelButtonText: 'Cancelar'
                     }).then(async (result) => {
+                        if (result.isConfirmed) {
                             Swal.fire({
                                 title: 'Enviando WhatsApp...',
                                 text: 'Despachando notificación vía n8n...',
