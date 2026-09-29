@@ -489,7 +489,6 @@
                             @module('finanzas')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('boletas.estado_cuenta') }}"><i class="bi bi-wallet2"></i> Estado de Cuenta</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('boletas.morosidad') }}"><i class="bi bi-exclamation-triangle"></i> Control de Morosidad</a></li>
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.pagos') }}"><i class="bi bi-cash-coin"></i> Parámetros de Pagos e Intereses</a></li>
                             @endmodule
 
                             @module('registro_academico')
