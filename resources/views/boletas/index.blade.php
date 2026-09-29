@@ -356,14 +356,12 @@
                                             </button>
                                         @endif
 
-                                        @if ($boleta->estado !== 'anulada')
-                                            <button type="button" class="btn btn-sm btn-outline-danger btn-anular" 
-                                                data-id="{{ $boleta->id }}" 
-                                                data-numero="{{ $boleta->numero_boleta }}" 
-                                                title="Anular Boleta">
-                                                <i class="bi bi-x-circle"></i>
-                                            </button>
-                                        @endif
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-boleta" 
+                                            data-id="{{ $boleta->id }}" 
+                                            data-numero="{{ $boleta->numero_boleta }}" 
+                                            title="Eliminar Boleta de Prueba">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -536,30 +534,38 @@
                 }
             });
 
-            document.querySelectorAll('.btn-anular').forEach(btn => {
+            // Eliminar Boleta de Prueba / Mantenimiento
+            document.querySelectorAll('.btn-eliminar-boleta, .btn-anular').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = this.dataset.id;
                     const numero = this.dataset.numero;
 
                     Swal.fire({
-                        title: '¿Anular Boleta ' + numero + '?',
-                        text: 'Esta acción eliminará las cuotas pendientes y pagos registrados, desvinculando las matrículas asociadas.',
+                        title: '¿Eliminar Boleta ' + numero + '?',
+                        html: `
+                            <div class="text-start">
+                                <div class="alert alert-danger py-2 px-3 small fw-bold mb-3">
+                                    <i class="bi bi-exclamation-octagon-fill me-1"></i> Esta acción eliminará permanentemente la boleta <u>${numero}</u>, sus cuotas de pago, comprobantes y firmas asociadas.
+                                </div>
+                                <p class="text-muted small mb-0">¿Está seguro de que desea eliminar definitivamente esta boleta de prueba?</p>
+                            </div>
+                        `,
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Sí, anular boleta',
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar',
                         cancelButtonText: 'Cancelar'
                     }).then(async (result) => {
                         if (result.isConfirmed) {
                             Swal.fire({
-                                title: 'Anulando...',
+                                title: 'Eliminando boleta...',
                                 allowOutsideClick: false,
                                 didOpen: () => Swal.showLoading()
                             });
 
                             try {
-                                const res = await fetch(`/boletas/${id}/anular`, {
+                                const res = await fetch(`/boletas/${id}/eliminar`, {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
@@ -570,7 +576,7 @@
                                 if (data.success) {
                                     Swal.fire({
                                         icon: 'success',
-                                        title: '¡Anulada!',
+                                        title: '¡Boleta Eliminada!',
                                         text: data.message,
                                         confirmButtonColor: '#5fb230'
                                     }).then(() => window.location.reload());
@@ -578,7 +584,7 @@
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Error',
-                                        text: data.message || 'No se pudo anular la boleta'
+                                        text: data.message || 'No se pudo eliminar la boleta'
                                     });
                                 }
                             } catch (err) {
@@ -591,6 +597,7 @@
                         }
                     });
                 });
+            });
             // Enviar Boleta por WhatsApp
             document.querySelectorAll('.btn-enviar-wa-boleta').forEach(btn => {
                 btn.addEventListener('click', function() {
