@@ -7,14 +7,14 @@
 
     <!-- Meta etiquetas para previsualización en WhatsApp (Open Graph) -->
     <meta property="og:title" content="{{ config('cliente.nombre', 'CEFI') }} - Inbox BPM">
-    <meta property="og:image" content="{{ asset(config('cliente.logo_url', 'imgs/logo.png')) }}">
-    <meta property="og:image:secure_url" content="{{ asset(config('cliente.logo_url', 'imgs/logo.png')) }}">
+    <meta property="og:image" content="{{ \App\Services\ClienteService::logoUrl() }}">
+    <meta property="og:image:secure_url" content="{{ \App\Services\ClienteService::logoUrl() }}">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="600">
     <meta property="og:image:height" content="600">
     <meta property="og:url" content="{{ url('/') }}">
     <meta property="og:type" content="website">
-    <link rel="image_src" href="{{ asset(config('cliente.logo_url', 'imgs/logo.png')) }}">
+    <link rel="image_src" href="{{ \App\Services\ClienteService::logoUrl() }}">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">

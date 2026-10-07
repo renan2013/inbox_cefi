@@ -15,10 +15,7 @@ class BoletaPDFEngine extends FPDF
     function Header()
     {
         // Logo institucional del cliente
-        $logo_cliente = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
-        if (!file_exists($logo_cliente)) {
-            $logo_cliente = public_path('imgs/logo.png');
-        }
+        $logo_cliente = ClienteService::logoPath();
         if (file_exists($logo_cliente)) {
             $this->Image($logo_cliente, 15, 12, 42);
         }

@@ -13,10 +13,7 @@ class ActaPDF extends FPDF
     function Header()
     {
         // Logo oficial del cliente (Superior Izquierda)
-        $logo_cliente = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
-        if (!file_exists($logo_cliente)) {
-            $logo_cliente = public_path('imgs/logo.png');
-        }
+        $logo_cliente = ClienteService::logoPath();
         if (file_exists($logo_cliente)) {
             $this->Image($logo_cliente, 10, 10, 45);
         }

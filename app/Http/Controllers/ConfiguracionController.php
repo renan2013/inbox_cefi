@@ -237,6 +237,7 @@ class ConfiguracionController extends Controller
             $file->move($destPath, $filename);
             $fields['cliente_logo_url'] = '/uploads/logos/' . $filename;
             $fields['whatsapp_logo_url'] = asset('uploads/logos/' . $filename);
+            @copy($destPath . '/' . $filename, public_path('imgs/logo.png'));
         } elseif ($request->filled('logo_url')) {
             $fields['cliente_logo_url'] = $request->input('logo_url');
         }

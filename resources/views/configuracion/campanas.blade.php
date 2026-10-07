@@ -506,7 +506,7 @@
                         <label class="form-label-styled">O ingresar URL directa de la imagen (Opcional)</label>
                         <input type="url" name="flyer_url" id="flyer_url" class="form-control-custom w-100" 
                                placeholder="https://ejemplo.com/afiche-oferta-academica.jpg"
-                               value="{{ $config['logo_url'] ?? asset(config('cliente.logo_url', 'imgs/logo.png')) }}">
+                               value="{{ $config['logo_url'] ?? \App\Services\ClienteService::bannerWhatsappUrl() }}">
                     </div>
                 </div>
 

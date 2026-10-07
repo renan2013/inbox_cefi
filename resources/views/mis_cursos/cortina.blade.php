@@ -129,7 +129,7 @@
     <div class="content-container">
         
         <!-- Logo -->
-        <img src="{{ asset(config('cliente.logo_url', 'imgs/logo.png')) }}" alt="{{ config('cliente.nombre', 'CEFI') }}" class="pulse-logo">
+        <img src="{{ \App\Services\ClienteService::logoUrl() }}" alt="{{ config('cliente.nombre', 'CEFI') }}" class="pulse-logo">
 
         <div class="welcome-title">Bienvenido a la clase virtual</div>
         

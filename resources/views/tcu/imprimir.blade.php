@@ -116,7 +116,7 @@
     <div class="header">
         <h1>BITÁCORA</h1>
         <h2>DEL TRABAJO COMUNAL UNIVERSITARIO</h2>
-        <img class="logo" src="{{ asset(config('cliente.logo_url', 'imgs/logo.png')) }}" alt="Logo {{ config('cliente.nombre', 'CEFI') }}">
+        <img class="logo" src="{{ \App\Services\ClienteService::logoUrl() }}" alt="Logo {{ config('cliente.nombre', 'CEFI') }}">
     </div>
 
     <div class="section-title">PROYECTO</div>

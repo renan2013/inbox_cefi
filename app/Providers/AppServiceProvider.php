@@ -35,6 +35,14 @@ class AppServiceProvider extends ServiceProvider
         // Compartir el servicio de cliente para fácil uso en Blade: {{ $cliente::nombre() }}
         \Illuminate\Support\Facades\View::share('cliente', \App\Services\ClienteService::class);
 
+        // Cargar identidad dinámica del cliente desde la base de datos para que config('cliente.*') siempre esté actualizado
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
+                $clienteConfig = \App\Services\ClienteService::all();
+                config(['cliente' => array_merge(config('cliente', []), $clienteConfig)]);
+            }
+        } catch (\Throwable $e) {}
+
         // Cargar configuración dinámica de correo saliente si existe en la base de datos
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {

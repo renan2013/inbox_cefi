@@ -126,12 +126,43 @@ class ClienteService
 
     public static function logoUrl(): string
     {
-        return self::all()['logo_url'] ?? asset('imgs/logo.png');
+        $val = self::all()['logo_url'] ?? '';
+        if (empty($val)) {
+            $val = config('cliente.logo_url', 'imgs/logo.png');
+        }
+        if (str_starts_with($val, 'http://') || str_starts_with($val, 'https://')) {
+            return $val;
+        }
+        return asset(ltrim($val, '/\\'));
+    }
+
+    public static function logoPath(): string
+    {
+        $val = self::all()['logo_url'] ?? '';
+        if (empty($val)) {
+            $val = config('cliente.logo_url', 'imgs/logo.png');
+        }
+        $rel = ltrim($val, '/\\');
+        $p = public_path($rel);
+        if (file_exists($p)) {
+            return $p;
+        }
+        if (file_exists(public_path('imgs/logo.png'))) {
+            return public_path('imgs/logo.png');
+        }
+        return $p;
     }
 
     public static function bannerWhatsappUrl(): string
     {
-        return self::all()['logo_banner_whatsapp'] ?? asset('imgs/fondo_defecto_notificacion.png');
+        $val = self::all()['logo_banner_whatsapp'] ?? '';
+        if (empty($val)) {
+            $val = config('cliente.logo_banner_whatsapp', 'imgs/fondo_defecto_notificacion.png');
+        }
+        if (str_starts_with($val, 'http://') || str_starts_with($val, 'https://')) {
+            return $val;
+        }
+        return asset(ltrim($val, '/\\'));
     }
 
     /**

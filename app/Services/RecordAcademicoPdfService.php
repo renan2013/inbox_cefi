@@ -11,11 +11,7 @@ class RecordPDF extends FPDF
     function Header()
     {
         // Logo oficial del cliente
-        $logoPath = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
-        if (!file_exists($logoPath)) {
-            $logoPath = public_path('imgs/logo.png');
-        }
-
+        $logoPath = ClienteService::logoPath();
         if (file_exists($logoPath)) {
             $this->Image($logoPath, 15, 12, 38);
         }

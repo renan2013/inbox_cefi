@@ -304,7 +304,7 @@
             <!-- Encabezado Estilo Oficial -->
             <div class="row border-bottom pb-4 mb-4 align-items-center">
                 <div class="col-md-7 text-center text-md-start mb-4 mb-md-0">
-                    <img src="{{ asset(config('cliente.logo_url', 'imgs/logo.png')) }}" onerror="this.onerror=null; this.src='{{ asset('imgs/logo.png') }}';" alt="Logo Institucional CEFI" style="max-height: 80px;" class="mb-3">
+                    <img src="{{ \App\Services\ClienteService::logoUrl() }}" alt="Logo Institucional CEFI" style="max-height: 80px;" class="mb-3">
                     <h5 class="fw-bold mb-1" style="font-size: 1.15rem; color: #1e293b;">{{ config('cliente.nombre_legal', config('cliente.nombre', 'CENTRO DE FORMACIÓN INTEGRAL CEFI')) }}</h5>
                     <p class="mb-0 text-muted small">Cédula Jurídica: 3-002-066646</p>
                     <p class="mb-0 text-muted small">Tel: 2211-1200 | www.ceficr.com</p>

@@ -25,10 +25,7 @@ class DescriptorDocService
         }
 
         // Convertir logo a base64 para que Word lo renderice offline
-        $logo_path = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
-        if (!file_exists($logo_path)) {
-            $logo_path = public_path('imgs/logo.png');
-        }
+        $logo_path = ClienteService::logoPath();
 
         $logo_base64 = '';
         if (file_exists($logo_path)) {

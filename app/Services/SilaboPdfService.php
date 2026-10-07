@@ -280,10 +280,7 @@ class SilaboPdfService
         $pdf->Rect(0, 0, 8, 297, 'F');
 
         // Logo oficial del cliente
-        $logo_cliente = public_path(ltrim(config('cliente.logo_url', 'imgs/logo.png'), '/'));
-        if (!file_exists($logo_cliente)) {
-            $logo_cliente = public_path('imgs/logo.png');
-        }
+        $logo_cliente = ClienteService::logoPath();
         if (file_exists($logo_cliente)) {
             $pdf->Image($logo_cliente, 15, 12, 45);
         }
