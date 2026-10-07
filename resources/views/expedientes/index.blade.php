@@ -150,6 +150,52 @@
         border-color: #2563eb !important;
         color: #ffffff !important;
     }
+
+    /* Badges de Estado del Expediente con Alto Contraste */
+    .badge-estado-aprobado {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        color: #34d399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.4) !important;
+        font-weight: 600 !important;
+        font-size: 0.8rem;
+    }
+
+    .badge-estado-pendiente {
+        background-color: rgba(245, 158, 11, 0.2) !important;
+        color: #fbbf24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.4) !important;
+        font-weight: 600 !important;
+        font-size: 0.8rem;
+    }
+
+    .badge-estado-rechazado {
+        background-color: rgba(239, 68, 68, 0.2) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.4) !important;
+        font-weight: 600 !important;
+        font-size: 0.8rem;
+    }
+
+    [data-theme="light"] .badge-estado-aprobado {
+        background-color: #dcfce7 !important;
+        color: #15803d !important;
+        border: 1px solid #86efac !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="light"] .badge-estado-pendiente {
+        background-color: #fef3c7 !important;
+        color: #b45309 !important;
+        border: 1px solid #fcd34d !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="light"] .badge-estado-rechazado {
+        background-color: #fee2e2 !important;
+        color: #b91c1c !important;
+        border: 1px solid #fca5a5 !important;
+        font-weight: 700 !important;
+    }
 </style>
 @endsection
 
@@ -321,15 +367,15 @@
                         </td>
                         <td class="text-center">
                             @if($exp->estado === 'Aprobado')
-                                <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-3 py-1">
+                                <span class="badge badge-estado-aprobado rounded-pill px-3 py-1">
                                     <i class="bi bi-check-circle-fill me-1"></i> Aprobado
                                 </span>
                             @elseif($exp->estado === 'Rechazado')
-                                <span class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-1">
+                                <span class="badge badge-estado-rechazado rounded-pill px-3 py-1">
                                     <i class="bi bi-x-circle-fill me-1"></i> Rechazado
                                 </span>
                             @else
-                                <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1">
+                                <span class="badge badge-estado-pendiente rounded-pill px-3 py-1">
                                     <i class="bi bi-clock-fill me-1"></i> Pendiente
                                 </span>
                             @endif

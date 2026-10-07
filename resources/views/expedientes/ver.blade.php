@@ -22,6 +22,49 @@
         border: 1px solid #cbd5e1 !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
     }
+
+    /* Badges de Estado del Expediente con Alto Contraste */
+    .badge-estado-aprobado {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        color: #34d399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.4) !important;
+        font-weight: 600 !important;
+    }
+
+    .badge-estado-pendiente {
+        background-color: rgba(245, 158, 11, 0.2) !important;
+        color: #fbbf24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.4) !important;
+        font-weight: 600 !important;
+    }
+
+    .badge-estado-rechazado {
+        background-color: rgba(239, 68, 68, 0.2) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.4) !important;
+        font-weight: 600 !important;
+    }
+
+    [data-theme="light"] .badge-estado-aprobado {
+        background-color: #dcfce7 !important;
+        color: #15803d !important;
+        border: 1px solid #86efac !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="light"] .badge-estado-pendiente {
+        background-color: #fef3c7 !important;
+        color: #b45309 !important;
+        border: 1px solid #fcd34d !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="light"] .badge-estado-rechazado {
+        background-color: #fee2e2 !important;
+        color: #b91c1c !important;
+        border: 1px solid #fca5a5 !important;
+        font-weight: 700 !important;
+    }
 </style>
 @endsection
 
@@ -70,15 +113,15 @@
                         
                         <!-- Badge Estado Expediente -->
                         @if($expediente->estado === 'Aprobado')
-                            <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 rounded-pill px-3 py-1 fw-semibold">
+                            <span class="badge badge-estado-aprobado rounded-pill px-3 py-1 fw-semibold">
                                 <i class="bi bi-check-circle-fill me-1"></i> Expediente Formalizado
                             </span>
                         @elseif($expediente->estado === 'Rechazado')
-                            <span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-30 rounded-pill px-3 py-1 fw-semibold">
+                            <span class="badge badge-estado-rechazado rounded-pill px-3 py-1 fw-semibold">
                                 <i class="bi bi-x-circle-fill me-1"></i> Expediente Rechazado
                             </span>
                         @else
-                            <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-1 fw-semibold">
+                            <span class="badge badge-estado-pendiente rounded-pill px-3 py-1 fw-semibold">
                                 <i class="bi bi-clock-fill me-1"></i> En Revisión
                             </span>
                         @endif
@@ -137,6 +180,14 @@
                                         @csrf
                                         <input type="hidden" name="action_expediente" value="rechazar">
                                         <button type="submit" class="dropdown-item text-danger"><i class="bi bi-x-lg me-2"></i>Rechazar Expediente</button>
+                                    </form>
+                                </li>
+                                <li><hr class="dropdown-divider border-secondary"></li>
+                                <li>
+                                    <form action="{{ route('expedientes.destroy', $expediente->id_expediente) }}" method="POST" onsubmit="return confirm('¿Está seguro de eliminar este expediente? Se borrarán todos los documentos físicos de la bóveda del servidor.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger fw-semibold"><i class="bi bi-trash-fill me-2"></i>Eliminar Expediente</button>
                                     </form>
                                 </li>
                             </ul>

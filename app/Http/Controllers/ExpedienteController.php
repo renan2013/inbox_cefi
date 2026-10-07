@@ -255,6 +255,27 @@ class ExpedienteController extends Controller
     }
 
     /**
+     * Elimina el expediente digital y su carpeta física completa de la bóveda en el servidor.
+     */
+    public function destroy($id)
+    {
+        $expediente = ExpedienteDigital::with(['usuario', 'archivos', 'observaciones'])->findOrFail($id);
+
+        // 1. Eliminar físicamente la carpeta física del estudiante en el disco con todos sus archivos
+        ExpedienteStorageService::eliminarCarpetaExpediente($expediente);
+
+        // 2. Eliminar registros hijos en la base de datos
+        $expediente->archivos()->delete();
+        $expediente->observaciones()->delete();
+
+        // 3. Eliminar el expediente
+        $expediente->delete();
+
+        return redirect()->route('expedientes.index')
+            ->with('success', 'El expediente y su carpeta de documentos físicos fueron eliminados de la bóveda exitosamente.');
+    }
+
+    /**
      * Guarda o actualiza el expediente en la base de datos junto con los documentos adjuntos.
      */
     public function store(Request $request)

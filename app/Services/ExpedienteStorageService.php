@@ -218,4 +218,46 @@ class ExpedienteStorageService
 
         return ($archivosAgregados > 0 && file_exists($zipFilePath)) ? $zipFilePath : null;
     }
+
+    /**
+     * Elimina físicamente la carpeta del estudiante y todos sus archivos del disco.
+     */
+    public static function eliminarCarpetaExpediente($expediente): bool
+    {
+        $usuario = $expediente->usuario;
+        $nombreEstudiante = $usuario ? "{$usuario->nombre} {$usuario->apellidos}" : "Estudiante_{$expediente->id_expediente}";
+        $folderName = self::getStudentFolderName($expediente->id_expediente, $nombreEstudiante);
+        $fullPath = self::getBasePath() . DIRECTORY_SEPARATOR . $folderName;
+
+        return self::eliminarDirectorioRecursivo($fullPath);
+    }
+
+    /**
+     * Elimina recursivamente un directorio y todos sus subdirectorios/archivos.
+     */
+    private static function eliminarDirectorioRecursivo(string $dir): bool
+    {
+        if (!is_dir($dir)) {
+            return false;
+        }
+
+        $items = @scandir($dir);
+        if ($items === false) {
+            return false;
+        }
+
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            $itemPath = $dir . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($itemPath)) {
+                self::eliminarDirectorioRecursivo($itemPath);
+            } else {
+                @unlink($itemPath);
+            }
+        }
+
+        return @rmdir($dir);
+    }
 }
