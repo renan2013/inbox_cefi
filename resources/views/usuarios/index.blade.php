@@ -212,51 +212,194 @@
             border-color: #f8fafc;
         }
 
-        .btn-action-delete {
-            background-color: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.25);
-            color: #ef4444;
-            border-radius: 0.5rem;
-            padding: 0.35rem 0.65rem;
-            transition: all 0.2s;
-        }
-
-        .btn-action-delete:hover {
-            background-color: #ef4444;
-            color: white;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .btn-action-edit {
-            background-color: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.25);
-            color: #3b82f6;
-            border-radius: 0.5rem;
-            padding: 0.35rem 0.65rem;
-            transition: all 0.2s;
-            text-decoration: none;
+        /* Action Icon Buttons */
+        .btn-action-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 0.6rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            font-size: 0.95rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            text-decoration: none;
+            flex-shrink: 0;
+            cursor: pointer;
         }
 
-        .btn-action-edit:hover {
+        .btn-action-icon:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-action-icon.btn-action-expediente {
+            background-color: rgba(95, 178, 48, 0.12);
+            border-color: rgba(95, 178, 48, 0.3);
+            color: #5fb230;
+        }
+
+        .btn-action-icon.btn-action-expediente:hover {
+            background-color: #5fb230;
+            color: white;
+            box-shadow: 0 4px 12px rgba(95, 178, 48, 0.35);
+        }
+
+        .btn-action-icon.btn-action-edit {
+            background-color: rgba(59, 130, 246, 0.12);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+
+        .btn-action-icon.btn-action-edit:hover {
             background-color: #3b82f6;
             color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-action-icon.btn-action-delete {
+            background-color: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .btn-action-icon.btn-action-delete:hover {
+            background-color: #ef4444;
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+        }
+
+        /* Expediente Digital Column Badges & Elements */
+        .badge-sin-expediente {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(248, 113, 113, 0.12);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 2rem;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-crear-expediente-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(95, 178, 48, 0.14);
+            color: #5fb230;
+            border: 1px solid rgba(95, 178, 48, 0.35);
+            border-radius: 2rem;
+            padding: 0.28rem 0.7rem;
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 0.35rem;
+        }
+
+        .btn-crear-expediente-pill:hover {
+            background: #5fb230;
+            color: white;
+            box-shadow: 0 4px 12px rgba(95, 178, 48, 0.35);
             transform: translateY(-1px);
         }
 
-        [data-theme="light"] .btn-action-edit {
+        .progress-expediente {
+            height: 7px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .badge-exp-estado {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 1rem;
+            border: 1px solid;
+            font-family: monospace;
+        }
+
+        .badge-exp-aprobado {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-exp-pendiente {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-exp-rechazado {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .exp-carrera-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            max-width: 145px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+        }
+
+        .exp-link-icon {
+            color: var(--primary);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            padding: 0.1rem 0.25rem;
+            text-decoration: none;
+        }
+
+        .exp-link-icon:hover {
+            color: #ffffff;
+            transform: scale(1.15);
+        }
+
+        [data-theme="light"] .badge-sin-expediente {
+            background: #fef2f2;
+            color: #dc2626;
+            border-color: #fecaca;
+        }
+
+        [data-theme="light"] .btn-crear-expediente-pill {
+            background: rgba(95, 178, 48, 0.1);
+            color: #3d8b18;
+            border-color: rgba(95, 178, 48, 0.4);
+        }
+
+        [data-theme="light"] .btn-crear-expediente-pill:hover {
+            background: #5fb230;
+            color: #ffffff;
+        }
+
+        [data-theme="light"] .progress-expediente {
+            background-color: #e2e8f0;
+        }
+
+        [data-theme="light"] .btn-action-icon.btn-action-expediente {
+            background-color: rgba(95, 178, 48, 0.1);
+            border-color: rgba(95, 178, 48, 0.35);
+            color: #3d8b18;
+        }
+
+        [data-theme="light"] .btn-action-icon.btn-action-edit {
             background-color: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.3);
             color: #2563eb;
         }
 
-        [data-theme="light"] .btn-action-edit:hover {
-            background-color: #2563eb;
-            color: white;
+        [data-theme="light"] .btn-action-icon.btn-action-delete {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #dc2626;
         }
 
         [data-theme="light"] .modal-content.glass-card {
@@ -359,15 +502,15 @@
 
         <!-- KPI Interactive Cards: Expedientes Digitales 360° -->
         <div class="row g-3 mb-4">
-            <!-- Expedientes Completos (100%) -->
+            <!-- Expedientes Completos -->
             <div class="col-sm-6 col-lg-4">
-                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-success" id="kpi-exp-completo" onclick="filtrarPorExpedienteKpi('completo')" title="Click para filtrar usuarios con expediente 100% completado">
+                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-success" id="kpi-exp-completo" onclick="filtrarPorExpedienteKpi('completo')" title="Click para filtrar usuarios con expediente digital completado">
                     <div>
-                        <div class="kpi-lbl text-success d-flex align-items-center gap-1">
-                            <i class="bi bi-check-circle-fill"></i> Expedientes 100% Completos
+                        <div class="kpi-lbl text-success d-flex align-items-center gap-2">
+                            <i class="bi bi-patch-check-fill fs-6"></i> Expedientes Completos
                         </div>
                         <div class="kpi-val text-success">{{ $kpis['expedientes_completos'] ?? 0 }}</div>
-                        <small class="text-white-50" style="font-size: 0.72rem;">Requisitos y datos al día</small>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Requisitos completos y aprobados</small>
                     </div>
                     <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
                         <i class="bi bi-folder-check"></i>
@@ -377,32 +520,32 @@
 
             <!-- Expedientes En Progreso / Incompletos -->
             <div class="col-sm-6 col-lg-4">
-                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-warning" id="kpi-exp-progreso" onclick="filtrarPorExpedienteKpi('en_progreso')" title="Click para filtrar usuarios con expediente incompleto">
+                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-warning" id="kpi-exp-progreso" onclick="filtrarPorExpedienteKpi('en_progreso')" title="Click para filtrar usuarios con expediente en proceso">
                     <div>
-                        <div class="kpi-lbl text-warning d-flex align-items-center gap-1">
-                            <i class="bi bi-hourglass-split"></i> En Progreso (Incompletos)
+                        <div class="kpi-lbl text-warning d-flex align-items-center gap-2">
+                            <i class="bi bi-pie-chart-fill fs-6"></i> En Progreso (Incompletos)
                         </div>
                         <div class="kpi-val text-warning">{{ $kpis['expedientes_en_progreso'] ?? 0 }}</div>
                         <small class="text-white-50" style="font-size: 0.72rem;">Con requisitos pendientes de completar</small>
                     </div>
                     <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
-                        <i class="bi bi-folder-symlink"></i>
+                        <i class="bi bi-hourglass-split"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Sin Expediente Iniciado -->
+            <!-- Sin Expediente Digital -->
             <div class="col-sm-6 col-lg-4">
                 <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-danger" id="kpi-exp-sin" onclick="filtrarPorExpedienteKpi('sin_expediente')" title="Click para filtrar usuarios que aún no tienen expediente">
                     <div>
-                        <div class="kpi-lbl d-flex align-items-center gap-1" style="color: #f87171;">
-                            <i class="bi bi-exclamation-circle-fill"></i> Sin Expediente (0%)
+                        <div class="kpi-lbl d-flex align-items-center gap-2" style="color: #f87171;">
+                            <i class="bi bi-folder-x fs-6"></i> Sin Expediente Digital
                         </div>
                         <div class="kpi-val" style="color: #f87171;">{{ $kpis['sin_expediente'] ?? 0 }}</div>
-                        <small class="text-white-50" style="font-size: 0.72rem;">Falta iniciar su expediente digital</small>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Usuarios pendientes de crear su expediente</small>
                     </div>
                     <div class="kpi-icon-box" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
-                        <i class="bi bi-folder-x"></i>
+                        <i class="bi bi-file-earmark-x"></i>
                     </div>
                 </div>
             </div>
@@ -428,9 +571,9 @@
                     <label for="expedienteFilter" class="form-label text-white-50 fw-semibold mb-2">Expediente Digital</label>
                     <select name="expediente_status" id="expedienteFilter" class="form-select form-control-custom">
                         <option value="">Todos los Estados</option>
-                        <option value="completo" {{ request('expediente_status') == 'completo' ? 'selected' : '' }}>✅ 100% Completos (Aprobados)</option>
+                        <option value="completo" {{ request('expediente_status') == 'completo' ? 'selected' : '' }}>✅ Expedientes Completos</option>
                         <option value="en_progreso" {{ request('expediente_status') == 'en_progreso' ? 'selected' : '' }}>⏳ En Progreso / Incompletos</option>
-                        <option value="sin_expediente" {{ request('expediente_status') == 'sin_expediente' ? 'selected' : '' }}>⚠️ Sin Expediente (0%)</option>
+                        <option value="sin_expediente" {{ request('expediente_status') == 'sin_expediente' ? 'selected' : '' }}>📁 Sin Expediente Digital</option>
                     </select>
                 </div>
 
@@ -560,46 +703,48 @@
                                         @php
                                             $colorBar = $porcExp >= 80 ? 'bg-success' : ($porcExp >= 50 ? 'bg-warning' : 'bg-danger');
                                             $colorText = $porcExp >= 80 ? 'text-success' : ($porcExp >= 50 ? 'text-warning' : 'text-danger');
+                                            $badgeEstadoClass = $exp->estado === 'Aprobado' ? 'badge-exp-aprobado' : ($exp->estado === 'Rechazado' ? 'badge-exp-rechazado' : 'badge-exp-pendiente');
                                             $tooltipText = $exp->campos_pendientes_texto;
                                         @endphp
-                                        <div style="min-width: 170px;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $tooltipText }}">
+                                        <div style="min-width: 175px;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $tooltipText }}">
                                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" class="text-decoration-none fw-bold small {{ $colorText }} d-inline-flex align-items-center gap-1">
+                                                <span class="fw-bold small {{ $colorText }} d-inline-flex align-items-center gap-1">
                                                     @if ($exp->estado === 'Aprobado')
                                                         <i class="bi bi-patch-check-fill"></i> 100% Completo
                                                     @else
-                                                        <i class="bi bi-hourglass-split"></i> {{ $porcExp }}% Avance
+                                                        <i class="bi bi-pie-chart-fill"></i> {{ $porcExp }}% Avance
                                                     @endif
-                                                </a>
-                                                <span class="badge bg-dark border border-secondary border-opacity-25 font-monospace py-0 px-1" style="font-size: 0.68rem; color: #cbd5e1;">
+                                                </span>
+                                                <span class="badge-exp-estado {{ $badgeEstadoClass }}">
                                                     {{ $exp->estado ?: 'Pendiente' }}
                                                 </span>
                                             </div>
-                                            <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.08); border-radius: 4px;">
+                                            <div class="progress progress-expediente">
                                                 <div class="progress-bar {{ $colorBar }}" role="progressbar" style="width: {{ $porcExp }}%;" aria-valuenow="{{ $porcExp }}" aria-valuemin="0" aria-valuemax="100"></div>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center mt-1">
-                                                <small class="text-white-50" style="font-size: 0.7rem; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $exp->especialidad_deseada ?: 'Programa General' }}">
-                                                    {{ $exp->especialidad_deseada ?: 'Programa General' }}
-                                                </small>
-                                                <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" class="text-primary small text-decoration-none" title="Abrir expediente 360°">
-                                                    <i class="bi bi-box-arrow-up-right" style="font-size: 0.72rem;"></i>
+                                                <span class="exp-carrera-sub" title="{{ $exp->especialidad_deseada ?: 'Expediente Institucional' }}">
+                                                    <i class="bi bi-mortarboard me-1 opacity-75"></i>{{ $exp->especialidad_deseada ?: 'Expediente Digital' }}
+                                                </span>
+                                                <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" class="exp-link-icon" title="Abrir expediente digital 360°">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
                                                 </a>
                                             </div>
                                         </div>
                                     @else
-                                        <div style="min-width: 160px;">
-                                            <div class="d-flex align-items-center gap-2 mb-1">
-                                                <span class="badge bg-secondary bg-opacity-20 text-white-50 border border-secondary border-opacity-25 rounded-pill px-2 py-0" style="font-size: 0.7rem;">
-                                                    <i class="bi bi-dash-circle me-1"></i> Sin Expediente (0%)
+                                        <div style="min-width: 165px;">
+                                            <div>
+                                                <span class="badge-sin-expediente" title="Este usuario aún no tiene expediente digital creado">
+                                                    <i class="bi bi-folder-x"></i> Sin Expediente
                                                 </span>
                                             </div>
-                                            <a href="{{ route('expedientes.create', ['id_usuario' => $usuario->id]) }}" 
-                                               class="btn btn-sm btn-outline-success rounded-pill px-2 py-0 d-inline-flex align-items-center gap-1" 
-                                               style="font-size: 0.72rem; line-height: 1.6;"
-                                               title="Iniciar expediente digital para {{ $nombreCompleto }}">
-                                                <i class="bi bi-plus-lg"></i> Iniciar Expediente
-                                            </a>
+                                            <div>
+                                                <a href="{{ route('expedientes.create', ['id_usuario' => $usuario->id]) }}" 
+                                                   class="btn-crear-expediente-pill" 
+                                                   title="Crear expediente digital para {{ $nombreCompleto }}">
+                                                    <i class="bi bi-plus-circle-fill"></i> Crear Expediente
+                                                </a>
+                                            </div>
                                         </div>
                                     @endif
                                 </td>
@@ -611,24 +756,16 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-1">
+                                    <div class="d-flex justify-content-end align-items-center gap-1">
                                         @if ($hasExpediente)
                                             <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" 
-                                                class="btn btn-sm btn-action-edit" 
-                                                style="background-color: rgba(95, 178, 48, 0.1); border-color: rgba(95, 178, 48, 0.3); color: #5fb230;"
-                                                title="Ver Expediente 360° ({{ $porcExp }}%)">
+                                                class="btn-action-icon btn-action-expediente" 
+                                                title="Ver Expediente Digital 360° ({{ $porcExp }}%)">
                                                 <i class="bi bi-folder2-open"></i>
-                                            </a>
-                                        @else
-                                            <a href="{{ route('expedientes.create', ['id_usuario' => $usuario->id]) }}" 
-                                                class="btn btn-sm btn-action-edit" 
-                                                style="background-color: rgba(95, 178, 48, 0.1); border-color: rgba(95, 178, 48, 0.3); color: #5fb230;"
-                                                title="Iniciar Expediente Digital">
-                                                <i class="bi bi-folder-plus"></i>
                                             </a>
                                         @endif
                                         <a href="{{ route('usuarios.edit', $usuario->id) }}" 
-                                            class="btn btn-sm btn-action-edit btn-editar-usuario" 
+                                            class="btn-action-icon btn-action-edit btn-editar-usuario" 
                                             data-id="{{ $usuario->id }}"
                                             data-nombre="{{ $usuario->nombre }}"
                                             data-apellidos="{{ $usuario->apellidos }}"
@@ -641,11 +778,11 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
                                         @if (!$isSelf && !$isMoodle)
-                                            <button type="button" class="btn btn-sm btn-action-delete btn-eliminar-usuario" 
+                                            <button type="button" class="btn-action-icon btn-action-delete btn-eliminar-usuario" 
                                                 data-id="{{ $usuario->id }}" 
                                                 data-nombre="{{ $nombreCompleto }}"
-                                                title="Eliminar usuario con clave de confirmación">
-                                                <i class="bi bi-trash"></i>
+                                                title="Eliminar usuario">
+                                                <i class="bi bi-trash3"></i>
                                             </button>
                                         @elseif ($isMoodle)
                                             <span class="badge bg-secondary bg-opacity-10 text-white-50 py-2 px-2" title="Usuario sincronizado vía Moodle">
