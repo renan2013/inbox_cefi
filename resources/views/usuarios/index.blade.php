@@ -302,8 +302,8 @@
             </div>
         </div>
 
-        <!-- KPI Interactive Cards -->
-        <div class="row g-3 mb-4">
+        <!-- KPI Interactive Cards: Roles -->
+        <div class="row g-3 mb-3">
             <!-- Total Usuarios -->
             <div class="col-sm-6 col-lg-3">
                 <div class="kpi-card d-flex justify-content-between align-items-center" id="kpi-total" onclick="filtrarPorKpi('')" title="Ver todos los usuarios">
@@ -357,10 +357,61 @@
             </div>
         </div>
 
+        <!-- KPI Interactive Cards: Expedientes Digitales 360° -->
+        <div class="row g-3 mb-4">
+            <!-- Expedientes Completos (100%) -->
+            <div class="col-sm-6 col-lg-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-success" id="kpi-exp-completo" onclick="filtrarPorExpedienteKpi('completo')" title="Click para filtrar usuarios con expediente 100% completado">
+                    <div>
+                        <div class="kpi-lbl text-success d-flex align-items-center gap-1">
+                            <i class="bi bi-check-circle-fill"></i> Expedientes 100% Completos
+                        </div>
+                        <div class="kpi-val text-success">{{ $kpis['expedientes_completos'] ?? 0 }}</div>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Requisitos y datos al día</small>
+                    </div>
+                    <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                        <i class="bi bi-folder-check"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expedientes En Progreso / Incompletos -->
+            <div class="col-sm-6 col-lg-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-warning" id="kpi-exp-progreso" onclick="filtrarPorExpedienteKpi('en_progreso')" title="Click para filtrar usuarios con expediente incompleto">
+                    <div>
+                        <div class="kpi-lbl text-warning d-flex align-items-center gap-1">
+                            <i class="bi bi-hourglass-split"></i> En Progreso (Incompletos)
+                        </div>
+                        <div class="kpi-val text-warning">{{ $kpis['expedientes_en_progreso'] ?? 0 }}</div>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Con requisitos pendientes de completar</small>
+                    </div>
+                    <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+                        <i class="bi bi-folder-symlink"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sin Expediente Iniciado -->
+            <div class="col-sm-6 col-lg-4">
+                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-danger" id="kpi-exp-sin" onclick="filtrarPorExpedienteKpi('sin_expediente')" title="Click para filtrar usuarios que aún no tienen expediente">
+                    <div>
+                        <div class="kpi-lbl d-flex align-items-center gap-1" style="color: #f87171;">
+                            <i class="bi bi-exclamation-circle-fill"></i> Sin Expediente (0%)
+                        </div>
+                        <div class="kpi-val" style="color: #f87171;">{{ $kpis['sin_expediente'] ?? 0 }}</div>
+                        <small class="text-white-50" style="font-size: 0.72rem;">Falta iniciar su expediente digital</small>
+                    </div>
+                    <div class="kpi-icon-box" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+                        <i class="bi bi-folder-x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Filter Form & Instant Search -->
         <div class="filter-section">
             <form action="{{ route('usuarios.index') }}" method="GET" id="filterForm" class="row g-3 align-items-end">
-                <div class="col-md-5">
+                <div class="col-lg-4 col-md-6">
                     <label for="liveSearch" class="form-label text-white-50 fw-semibold mb-2 d-flex justify-content-between">
                         <span>Búsqueda Universal en Tiempo Real</span>
                         <span class="badge bg-secondary bg-opacity-25 text-white-50 font-monospace">Atajo: /</span>
@@ -373,7 +424,17 @@
                     </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-lg-3 col-md-6">
+                    <label for="expedienteFilter" class="form-label text-white-50 fw-semibold mb-2">Expediente Digital</label>
+                    <select name="expediente_status" id="expedienteFilter" class="form-select form-control-custom">
+                        <option value="">Todos los Estados</option>
+                        <option value="completo" {{ request('expediente_status') == 'completo' ? 'selected' : '' }}>✅ 100% Completos (Aprobados)</option>
+                        <option value="en_progreso" {{ request('expediente_status') == 'en_progreso' ? 'selected' : '' }}>⏳ En Progreso / Incompletos</option>
+                        <option value="sin_expediente" {{ request('expediente_status') == 'sin_expediente' ? 'selected' : '' }}>⚠️ Sin Expediente (0%)</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-4">
                     <label for="rolFilter" class="form-label text-white-50 fw-semibold mb-2">Filtrar por Rol</label>
                     <select name="rol_id" id="rolFilter" class="form-select form-control-custom">
                         <option value="">Todos los Roles</option>
@@ -383,16 +444,16 @@
                     </select>
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-lg-1 col-md-4">
                     <label for="origenFilter" class="form-label text-white-50 fw-semibold mb-2">Origen</label>
                     <select name="origen" id="origenFilter" class="form-select form-control-custom">
                         <option value="">Todos</option>
-                        <option value="inbox" {{ request('origen') == 'inbox' ? 'selected' : '' }}>Inbox BPM</option>
+                        <option value="inbox" {{ request('origen') == 'inbox' ? 'selected' : '' }}>Inbox</option>
                         <option value="moodle" {{ request('origen') == 'moodle' ? 'selected' : '' }}>Moodle</option>
                     </select>
                 </div>
 
-                <div class="col-md-2 d-flex gap-2">
+                <div class="col-lg-2 col-md-4 d-flex gap-2">
                     <button type="submit" class="btn btn-search flex-grow-1" title="Búsqueda profunda en servidor">
                         <i class="bi bi-funnel"></i>
                     </button>
@@ -418,6 +479,7 @@
                             <th>Contacto</th>
                             <th>Identificación</th>
                             <th>Rol</th>
+                            <th>Expediente Digital</th>
                             <th>Origen</th>
                             <th class="text-end">Acciones</th>
                         </tr>
@@ -430,6 +492,11 @@
                                 $initial = strtoupper(substr($usuario->apellidos ?: $usuario->nombre, 0, 1));
                                 $isSelf = auth()->check() && auth()->id() === $usuario->id;
                                 $isMoodle = strtolower((string)$usuario->origen) === 'moodle' || !empty($usuario->id_moodle);
+
+                                $hasExpediente = !is_null($usuario->expediente);
+                                $exp = $usuario->expediente;
+                                $porcExp = $hasExpediente ? $exp->porcentaje_completitud : 0;
+                                $statusExp = $hasExpediente ? ($exp->estado === 'Aprobado' ? 'completo' : 'en_progreso') : 'sin_expediente';
                             @endphp
                             <tr class="user-row" 
                                 data-id="{{ $usuario->id }}"
@@ -439,7 +506,9 @@
                                 data-cedula="{{ $usuario->cedula }}"
                                 data-telefono="{{ $usuario->telefono }}"
                                 data-rol-id="{{ $usuario->id_rol }}"
-                                data-origen="{{ strtolower($usuario->origen) }}">
+                                data-origen="{{ strtolower($usuario->origen) }}"
+                                data-expediente-status="{{ $statusExp }}"
+                                data-expediente-porc="{{ $porcExp }}">
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 42px; height: 42px; background: rgba(255, 255, 255, 0.06); border: 1.5px solid var(--border-dark);">
@@ -487,6 +556,54 @@
                                     <span class="{{ $roleClass }}">{{ $usuario->rol->nombre ?? 'Sin Rol' }}</span>
                                 </td>
                                 <td>
+                                    @if ($hasExpediente)
+                                        @php
+                                            $colorBar = $porcExp >= 80 ? 'bg-success' : ($porcExp >= 50 ? 'bg-warning' : 'bg-danger');
+                                            $colorText = $porcExp >= 80 ? 'text-success' : ($porcExp >= 50 ? 'text-warning' : 'text-danger');
+                                            $tooltipText = $exp->campos_pendientes_texto;
+                                        @endphp
+                                        <div style="min-width: 170px;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $tooltipText }}">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" class="text-decoration-none fw-bold small {{ $colorText }} d-inline-flex align-items-center gap-1">
+                                                    @if ($exp->estado === 'Aprobado')
+                                                        <i class="bi bi-patch-check-fill"></i> 100% Completo
+                                                    @else
+                                                        <i class="bi bi-hourglass-split"></i> {{ $porcExp }}% Avance
+                                                    @endif
+                                                </a>
+                                                <span class="badge bg-dark border border-secondary border-opacity-25 font-monospace py-0 px-1" style="font-size: 0.68rem; color: #cbd5e1;">
+                                                    {{ $exp->estado ?: 'Pendiente' }}
+                                                </span>
+                                            </div>
+                                            <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.08); border-radius: 4px;">
+                                                <div class="progress-bar {{ $colorBar }}" role="progressbar" style="width: {{ $porcExp }}%;" aria-valuenow="{{ $porcExp }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                                <small class="text-white-50" style="font-size: 0.7rem; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $exp->especialidad_deseada ?: 'Programa General' }}">
+                                                    {{ $exp->especialidad_deseada ?: 'Programa General' }}
+                                                </small>
+                                                <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" class="text-primary small text-decoration-none" title="Abrir expediente 360°">
+                                                    <i class="bi bi-box-arrow-up-right" style="font-size: 0.72rem;"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div style="min-width: 160px;">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <span class="badge bg-secondary bg-opacity-20 text-white-50 border border-secondary border-opacity-25 rounded-pill px-2 py-0" style="font-size: 0.7rem;">
+                                                    <i class="bi bi-dash-circle me-1"></i> Sin Expediente (0%)
+                                                </span>
+                                            </div>
+                                            <a href="{{ route('expedientes.create', ['id_usuario' => $usuario->id]) }}" 
+                                               class="btn btn-sm btn-outline-success rounded-pill px-2 py-0 d-inline-flex align-items-center gap-1" 
+                                               style="font-size: 0.72rem; line-height: 1.6;"
+                                               title="Iniciar expediente digital para {{ $nombreCompleto }}">
+                                                <i class="bi bi-plus-lg"></i> Iniciar Expediente
+                                            </a>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td>
                                     @if ($isMoodle)
                                         <span class="badge-origen-moodle" title="Sincronizado vía Moodle Bridge"><i class="bi bi-mortarboard-fill me-1"></i> Moodle</span>
                                     @else
@@ -495,6 +612,21 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-1">
+                                        @if ($hasExpediente)
+                                            <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" 
+                                                class="btn btn-sm btn-action-edit" 
+                                                style="background-color: rgba(95, 178, 48, 0.1); border-color: rgba(95, 178, 48, 0.3); color: #5fb230;"
+                                                title="Ver Expediente 360° ({{ $porcExp }}%)">
+                                                <i class="bi bi-folder2-open"></i>
+                                            </a>
+                                        @else
+                                            <a href="{{ route('expedientes.create', ['id_usuario' => $usuario->id]) }}" 
+                                                class="btn btn-sm btn-action-edit" 
+                                                style="background-color: rgba(95, 178, 48, 0.1); border-color: rgba(95, 178, 48, 0.3); color: #5fb230;"
+                                                title="Iniciar Expediente Digital">
+                                                <i class="bi bi-folder-plus"></i>
+                                            </a>
+                                        @endif
                                         <a href="{{ route('usuarios.edit', $usuario->id) }}" 
                                             class="btn btn-sm btn-action-edit btn-editar-usuario" 
                                             data-id="{{ $usuario->id }}"
@@ -529,7 +661,7 @@
                             </tr>
                         @empty
                             <tr id="emptyServerRow">
-                                <td colspan="6" class="text-center py-5 text-white-50">
+                                <td colspan="7" class="text-center py-5 text-white-50">
                                     <i class="bi bi-people display-4 d-block mb-3 text-muted"></i>
                                     No se encontraron usuarios en la base de datos.
                                 </td>
@@ -649,10 +781,19 @@
             const searchInput = document.getElementById('liveSearch');
             const rolSelect = document.getElementById('rolFilter');
             const origenSelect = document.getElementById('origenFilter');
+            const expSelect = document.getElementById('expedienteFilter');
             const btnReset = document.getElementById('btnResetFilter');
             const userRows = document.querySelectorAll('.user-row');
             const visibleCountEl = document.getElementById('visibleCount');
             const noLiveResults = document.getElementById('noLiveResults');
+
+            // Inicializar tooltips de Bootstrap para ver requisitos pendientes
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
 
             // Normalizador de acentos y diacríticos
             function normalizar(texto) {
@@ -682,6 +823,7 @@
                 const terms = normalizar(queryRaw).split(/\s+/).filter(t => t.length > 0);
                 const rolVal = rolSelect.value;
                 const origenVal = origenSelect.value.toLowerCase();
+                const expVal = expSelect ? expSelect.value : '';
 
                 let visibles = 0;
 
@@ -694,6 +836,7 @@
                     const rowTelefono = normalizar(row.dataset.telefono);
                     const rowRolId = row.dataset.rolId;
                     const rowOrigen = (row.dataset.origen || '').toLowerCase();
+                    const rowExpStatus = row.dataset.expedienteStatus || 'sin_expediente';
 
                     const searchBlob = `${rowNombre} ${rowApellidos} ${rowEmail} ${rowCedula} ${rowTelefono} #${rowId}`;
 
@@ -712,7 +855,19 @@
                     // Coincidencia de origen
                     const matchOrigen = !origenVal || rowOrigen === origenVal;
 
-                    if (matchSearch && matchRol && matchOrigen) {
+                    // Coincidencia de estado de expediente digital
+                    let matchExp = true;
+                    if (expVal) {
+                        if (expVal === 'completo') {
+                            matchExp = (rowExpStatus === 'completo');
+                        } else if (expVal === 'en_progreso') {
+                            matchExp = (rowExpStatus === 'en_progreso');
+                        } else if (expVal === 'sin_expediente') {
+                            matchExp = (rowExpStatus === 'sin_expediente');
+                        }
+                    }
+
+                    if (matchSearch && matchRol && matchOrigen && matchExp) {
                         row.style.display = '';
                         visibles++;
                     } else {
@@ -734,11 +889,13 @@
             searchInput?.addEventListener('input', aplicarFiltrosEnVivo);
             rolSelect?.addEventListener('change', aplicarFiltrosEnVivo);
             origenSelect?.addEventListener('change', aplicarFiltrosEnVivo);
+            expSelect?.addEventListener('change', aplicarFiltrosEnVivo);
 
             btnReset?.addEventListener('click', function() {
                 searchInput.value = '';
                 rolSelect.value = '';
                 origenSelect.value = '';
+                if (expSelect) expSelect.value = '';
                 document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-kpi'));
                 aplicarFiltrosEnVivo();
                 if (window.location.search) {
@@ -746,7 +903,7 @@
                 }
             });
 
-            // Función global para hacer clic en las tarjetas KPI superiores
+            // Función global para hacer clic en las tarjetas KPI de roles
             window.filtrarPorKpi = function(rolId) {
                 document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-kpi'));
                 if (rolId === '1') document.getElementById('kpi-admins')?.classList.add('active-kpi');
@@ -754,8 +911,23 @@
                 else if (rolId === '3') document.getElementById('kpi-estudiantes')?.classList.add('active-kpi');
                 else document.getElementById('kpi-total')?.classList.add('active-kpi');
 
+                if (expSelect) expSelect.value = '';
                 rolSelect.value = rolId;
                 aplicarFiltrosEnVivo();
+            };
+
+            // Función global para hacer clic en las tarjetas KPI de expedientes digitales
+            window.filtrarPorExpedienteKpi = function(status) {
+                document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-kpi'));
+                if (status === 'completo') document.getElementById('kpi-exp-completo')?.classList.add('active-kpi');
+                else if (status === 'en_progreso') document.getElementById('kpi-exp-progreso')?.classList.add('active-kpi');
+                else if (status === 'sin_expediente') document.getElementById('kpi-exp-sin')?.classList.add('active-kpi');
+
+                rolSelect.value = '';
+                if (expSelect) {
+                    expSelect.value = status;
+                    aplicarFiltrosEnVivo();
+                }
             };
 
             // Eliminación segura de usuario con clave de autorización

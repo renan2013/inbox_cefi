@@ -453,7 +453,26 @@
                         this.submit();
                     }
                 });
-            });
+            // Auto-seleccionar usuario si fue enviado como parámetro (ej. desde /usuarios)
+            @if(isset($usuarioPreseleccionado) && $usuarioPreseleccionado)
+                const preUserId = {{ $usuarioPreseleccionado->id }};
+                const preUserName = @json(trim(($usuarioPreseleccionado->nombre ?? '') . ' ' . ($usuarioPreseleccionado->apellidos ?? '')));
+                const preUserEmail = @json($usuarioPreseleccionado->email ?? '');
+                selectUser(preUserId, preUserName, preUserEmail);
+
+                @if($usuarioPreseleccionado->cedula)
+                    const elCedula = document.querySelector('input[name="cedula_residencia"]');
+                    if (elCedula && !elCedula.value) elCedula.value = @json($usuarioPreseleccionado->cedula);
+                @endif
+                @if($usuarioPreseleccionado->telefono)
+                    const elTel = document.querySelector('input[name="contacto_tel_celular"]');
+                    if (elTel && !elTel.value) elTel.value = @json($usuarioPreseleccionado->telefono);
+                @endif
+                @if($usuarioPreseleccionado->fecha_nacimiento)
+                    const elNac = document.querySelector('input[name="fecha_nacimiento"]');
+                    if (elNac && !elNac.value) elNac.value = @json($usuarioPreseleccionado->fecha_nacimiento->format('Y-m-d'));
+                @endif
+            @endif
         });
     </script>
 @endsection

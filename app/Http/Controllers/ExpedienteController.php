@@ -223,7 +223,7 @@ class ExpedienteController extends Controller
     /**
      * Muestra el formulario para crear un nuevo expediente digital.
      */
-    public function create()
+    public function create(Request $request)
     {
         $programas = Programa::orderBy('nombre_programa', 'asc')->get();
         
@@ -232,7 +232,12 @@ class ExpedienteController extends Controller
             ->orderBy('fecha_registro', 'desc')
             ->get();
 
-        return view('expedientes.create', compact('programas', 'pendientes'));
+        $usuarioPreseleccionado = null;
+        if ($request->filled('id_usuario')) {
+            $usuarioPreseleccionado = Usuario::with('expediente')->find($request->id_usuario);
+        }
+
+        return view('expedientes.create', compact('programas', 'pendientes', 'usuarioPreseleccionado'));
     }
 
     /**

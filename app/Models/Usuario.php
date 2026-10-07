@@ -52,4 +52,12 @@ class Usuario extends Authenticatable
     {
         return $this->belongsTo(Rol::class, 'id_rol', 'id');
     }
+
+    /**
+     * Relación con el Expediente Digital (si existe).
+     */
+    public function expediente()
+    {
+        return $this->hasOne(ExpedienteDigital::class, 'id_usuario', 'id');
+    }
 }

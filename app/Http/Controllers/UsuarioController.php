@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Usuario;
 use App\Models\Rol;
+use App\Models\ExpedienteDigital;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ class UsuarioController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Usuario::with('rol');
+        $query = Usuario::with(['rol', 'expediente']);
 
         // Búsqueda por término
         if ($request->filled('search')) {
@@ -40,6 +41,29 @@ class UsuarioController extends Controller
             $query->where('origen', $request->origen);
         }
 
+        // Filtro por Estado de Expediente Digital
+        if ($request->filled('expediente_status')) {
+            $expStatus = $request->expediente_status;
+            if ($expStatus === 'sin_expediente') {
+                $query->whereDoesntHave('expediente');
+            } elseif ($expStatus === 'completo') {
+                $query->whereHas('expediente', function($q) {
+                    $q->where('estado', 'Aprobado');
+                });
+            } elseif ($expStatus === 'en_progreso') {
+                $query->whereHas('expediente', function($q) {
+                    $q->where('estado', '!=', 'Aprobado');
+                });
+            } elseif ($expStatus === 'incompleto') {
+                $query->where(function($q) {
+                    $q->whereDoesntHave('expediente')
+                      ->orWhereHas('expediente', function($eq) {
+                          $eq->where('estado', '!=', 'Aprobado');
+                      });
+                });
+            }
+        }
+
         // Orden alfabético estricto por Apellidos y Nombre
         $query->orderByRaw("COALESCE(NULLIF(apellidos, ''), 'ZZZ') ASC")
               ->orderBy('nombre', 'asc');
@@ -47,14 +71,44 @@ class UsuarioController extends Controller
         $usuarios = $query->paginate(30)->withQueryString();
         $roles = Rol::all();
 
+        // Conteo seguro para KPIs en tiempo real
+        try {
+            $totalUsuarios = Usuario::count();
+            $adminsCount = Usuario::where('id_rol', 1)->count();
+            $docentesCount = Usuario::where('id_rol', 2)->count();
+            $estudiantesCount = Usuario::where('id_rol', 3)->count();
+            $moodleCount = Usuario::where('origen', 'moodle')->count();
+            $inboxCount = Usuario::where('origen', 'inbox')->count();
+
+            $totalConExpediente = ExpedienteDigital::distinct('id_usuario')->count('id_usuario');
+            $expedientesCompletos = ExpedienteDigital::where('estado', 'Aprobado')->count();
+            $expedientesEnProgreso = ExpedienteDigital::where('estado', '!=', 'Aprobado')->count();
+            $sinExpediente = max(0, $totalUsuarios - $totalConExpediente);
+        } catch (\Throwable $e) {
+            $totalUsuarios = 0;
+            $adminsCount = 0;
+            $docentesCount = 0;
+            $estudiantesCount = 0;
+            $moodleCount = 0;
+            $inboxCount = 0;
+            $totalConExpediente = 0;
+            $expedientesCompletos = 0;
+            $expedientesEnProgreso = 0;
+            $sinExpediente = 0;
+        }
+
         // KPIs en tiempo real para las tarjetas superiores
         $kpis = [
-            'total' => Usuario::count(),
-            'admins' => Usuario::where('id_rol', 1)->count(),
-            'docentes' => Usuario::where('id_rol', 2)->count(),
-            'estudiantes' => Usuario::where('id_rol', 3)->count(),
-            'moodle' => Usuario::where('origen', 'moodle')->count(),
-            'inbox' => Usuario::where('origen', 'inbox')->count(),
+            'total' => $totalUsuarios,
+            'admins' => $adminsCount,
+            'docentes' => $docentesCount,
+            'estudiantes' => $estudiantesCount,
+            'moodle' => $moodleCount,
+            'inbox' => $inboxCount,
+            'con_expediente' => $totalConExpediente,
+            'expedientes_completos' => $expedientesCompletos,
+            'expedientes_en_progreso' => $expedientesEnProgreso,
+            'sin_expediente' => $sinExpediente,
         ];
 
         return view('usuarios.index', compact('usuarios', 'roles', 'kpis'));

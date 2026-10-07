@@ -287,7 +287,7 @@
                             <div class="small" style="color: #cbd5e1;">{{ $exp->grado_a_matricular ?: 'N/D' }}</div>
                         </td>
                         <td class="text-center" style="min-width: 130px;">
-                            <div class="d-flex align-items-center justify-content-center gap-2">
+                            <div class="d-flex align-items-center justify-content-center gap-2" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $exp->campos_pendientes_texto }}">
                                 <div class="progress flex-grow-1" style="height: 6px; background-color: rgba(125,125,125,0.2); border-radius: 4px;">
                                     <div class="progress-bar {{ $colorPorc }}" role="progressbar" style="width: {{ $porc }}%;"></div>
                                 </div>
@@ -341,4 +341,17 @@
         @endif
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+    });
+</script>
 @endsection

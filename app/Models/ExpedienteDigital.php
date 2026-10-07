@@ -105,4 +105,52 @@ class ExpedienteDigital extends Model
 
         return min(100, (int)round(($completados / 12) * 100));
     }
+
+    /**
+     * Retorna la lista de etiquetas de campos pendientes para completar el expediente.
+     */
+    public function getCamposPendientesListAttribute(): array
+    {
+        $etiquetas = [
+            'grado_a_matricular' => 'Grado a matricular',
+            'especialidad_deseada' => 'Especialidad / Carrera',
+            'genero' => 'Género',
+            'fecha_nacimiento' => 'Fecha de nacimiento',
+            'nacionalidad' => 'Nacionalidad',
+            'domicilio_direccion' => 'Dirección de domicilio',
+            'contacto_tel_celular' => 'Teléfono celular',
+            'procedencia_secundaria_institucion' => 'Secundaria de procedencia',
+            'laboral_institucion' => 'Información laboral',
+            'fecha_registro' => 'Fecha de registro',
+        ];
+
+        $pendientes = [];
+        foreach ($etiquetas as $campo => $label) {
+            if (empty($this->{$campo})) {
+                $pendientes[] = $label;
+            }
+        }
+
+        if (empty($this->cedula_residencia) && empty($this->pasaporte)) {
+            $pendientes[] = 'Cédula o Pasaporte';
+        }
+
+        if ($this->estado !== 'Aprobado') {
+            $pendientes[] = 'Aprobación formal';
+        }
+
+        return $pendientes;
+    }
+
+    /**
+     * Retorna un texto formateado con los campos pendientes para tooltips y resúmenes.
+     */
+    public function getCamposPendientesTextoAttribute(): string
+    {
+        $pendientes = $this->campos_pendientes_list;
+        if (empty($pendientes)) {
+            return '¡Expediente 100% completo!';
+        }
+        return 'Pendiente: ' . implode(', ', $pendientes);
+    }
 }
