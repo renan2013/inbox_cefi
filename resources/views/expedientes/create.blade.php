@@ -67,16 +67,215 @@
             outline: none;
         }
 
+        .student-selected-banner {
+            border-radius: 1.5rem;
+            border: 2px solid rgba(95, 178, 48, 0.4);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .student-avatar {
+            width: 54px;
+            height: 54px;
+            background: rgba(95, 178, 48, 0.25);
+            border: 2px solid #5fb230;
+            color: #ffffff;
+            font-size: 1.4rem;
+        }
+
+        .student-title {
+            color: #f8fafc;
+        }
+
+        .student-meta {
+            color: #94a3b8;
+        }
+
+        .student-meta strong {
+            color: #f8fafc;
+        }
+
+        .badge-student-id {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            font-size: 0.75rem;
+        }
+
+        .badge-student-status {
+            background-color: rgba(95, 178, 48, 0.15);
+            color: #5fb230;
+            border: 1px solid rgba(95, 178, 48, 0.3);
+            font-size: 0.75rem;
+        }
+
+        .btn-change-user {
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #f8fafc;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+        }
+
+        .btn-change-user:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .data-form-header {
+            color: #f8fafc;
+        }
+
+        .page-title {
+            color: #ffffff;
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        .breadcrumb-link {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .breadcrumb-active {
+            color: #ffffff;
+        }
+
+        .btn-header-action {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #f8fafc;
+            background: transparent;
+            transition: all 0.2s;
+        }
+
+        .btn-header-action:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .form-check-label {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* ================= LIGHT MODE OVERRIDES ================= */
         [data-theme="light"] .page-header {
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+            border-color: #e2e8f0 !important;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .page-title {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .page-subtitle {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .breadcrumb-link {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .breadcrumb-active {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .btn-header-action {
+            border-color: #cbd5e1 !important;
+            color: #334155 !important;
+            background: #ffffff !important;
+        }
+
+        [data-theme="light"] .btn-header-action:hover {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+            border-color: #94a3b8 !important;
+        }
+
+        [data-theme="light"] .glass-card {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .student-selected-banner {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%) !important;
+            border: 2px solid rgba(95, 178, 48, 0.35) !important;
+            box-shadow: 0 6px 20px rgba(95, 178, 48, 0.08) !important;
+        }
+
+        [data-theme="light"] .student-avatar {
+            background: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+        }
+
+        [data-theme="light"] .student-title {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .student-meta {
+            color: #475569 !important;
+        }
+
+        [data-theme="light"] .student-meta strong {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .badge-student-id {
+            background-color: #eff6ff !important;
+            color: #1d4ed8 !important;
+            border-color: #bfdbfe !important;
+        }
+
+        [data-theme="light"] .badge-student-status {
+            background-color: #ecfdf5 !important;
+            color: #047857 !important;
+            border-color: #a7f3d0 !important;
+        }
+
+        [data-theme="light"] .btn-change-user {
+            border-color: #cbd5e1 !important;
+            color: #334155 !important;
+            background: #ffffff !important;
+        }
+
+        [data-theme="light"] .btn-change-user:hover {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+            border-color: #94a3b8 !important;
+        }
+
+        [data-theme="light"] .data-form-header {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .step-header {
+            background-color: #f8fafc !important;
+            border-bottom: 2px solid rgba(95, 178, 48, 0.2) !important;
+            color: #15803d !important;
+        }
+
+        [data-theme="light"] .legend-custom {
+            color: #15803d !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+
+        [data-theme="light"] .form-label-custom {
+            color: #475569 !important;
         }
 
         [data-theme="light"] .form-control-custom,
         [data-theme="light"] .form-select-custom {
             background-color: #ffffff !important;
-            color: #0f172a !important;
             border-color: #cbd5e1 !important;
+            color: #0f172a !important;
         }
 
         [data-theme="light"] .form-control-custom:focus,
@@ -84,6 +283,20 @@
             background-color: #ffffff !important;
             color: #0f172a !important;
             border-color: var(--primary) !important;
+            box-shadow: 0 0 0 4px rgba(95, 178, 48, 0.15) !important;
+        }
+
+        [data-theme="light"] .form-control-custom::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="light"] .form-check-label {
+            color: #334155 !important;
+        }
+
+        [data-theme="light"] .form-check-input:not(:checked) {
+            background-color: #e2e8f0 !important;
+            border-color: #cbd5e1 !important;
         }
 
         .form-label-custom {
@@ -159,19 +372,19 @@
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none text-white-50"><i class="bi bi-house-door"></i> Inicio</a></li>
-                <li class="breadcrumb-item active text-white" aria-current="page">Nuevo Expediente</li>
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none breadcrumb-link"><i class="bi bi-house-door"></i> Inicio</a></li>
+                <li class="breadcrumb-item active breadcrumb-active" aria-current="page">Nuevo Expediente</li>
             </ol>
         </nav>
 
         <!-- Header -->
         <div class="page-header d-flex justify-content-between align-items-center flex-wrap g-3">
             <div>
-                <h1 class="display-6 fw-bold mb-1">Crear Expediente Digital</h1>
-                <p class="text-white-50 mb-0">Proceso de matriculación y registro de información académica del estudiante.</p>
+                <h1 class="display-6 fw-bold mb-1 page-title">Crear Expediente Digital</h1>
+                <p class="mb-0 page-subtitle">Proceso de matriculación y registro de información académica del estudiante.</p>
             </div>
             <div>
-                <a href="#" class="btn btn-outline-light rounded-pill px-4">
+                <a href="{{ route('expedientes.index') }}" class="btn btn-header-action rounded-pill px-4">
                     <i class="bi bi-folder2-open me-1"></i> Gestionar Expedientes
                 </a>
             </div>
@@ -196,37 +409,37 @@
 
         @if(isset($usuarioPreseleccionado) && $usuarioPreseleccionado)
             <!-- TARJETA DEL ESTUDIANTE PRESELECCIONADO (Sin buscador) -->
-            <div class="glass-card mb-4" style="border: 2px solid rgba(95, 178, 48, 0.4); background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);">
+            <div class="student-selected-banner mb-4">
                 <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm flex-shrink-0" style="width: 54px; height: 54px; background: rgba(95, 178, 48, 0.25); border: 2px solid #5fb230; font-size: 1.4rem;">
+                        <div class="student-avatar rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm flex-shrink-0">
                             {{ strtoupper(substr($usuarioPreseleccionado->apellidos ?: $usuarioPreseleccionado->nombre, 0, 1)) }}
                         </div>
                         <div>
                             <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                                <h3 class="h4 fw-bold text-white mb-0">
+                                <h3 class="h4 fw-bold student-title mb-0">
                                     {{ $usuarioPreseleccionado->nombre }} {{ $usuarioPreseleccionado->apellidos }}
                                 </h3>
-                                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">
+                                <span class="badge badge-student-id">
                                     ID #{{ str_pad($usuarioPreseleccionado->id, 4, '0', STR_PAD_LEFT) }}
                                 </span>
-                                <span class="badge" style="background: rgba(95, 178, 48, 0.15); color: #5fb230; border: 1px solid rgba(95, 178, 48, 0.3);">
+                                <span class="badge badge-student-status">
                                     <i class="bi bi-file-earmark-plus me-1"></i> Creando Expediente
                                 </span>
                             </div>
-                            <div class="text-white-50 small d-flex align-items-center gap-3 flex-wrap">
+                            <div class="student-meta small d-flex align-items-center gap-3 flex-wrap">
                                 <span><i class="bi bi-envelope me-1 text-primary"></i>{{ $usuarioPreseleccionado->email }}</span>
                                 @if(!empty($usuarioPreseleccionado->cedula))
-                                    <span><i class="bi bi-card-text me-1 text-info"></i>Cédula: <strong class="text-white">{{ $usuarioPreseleccionado->cedula }}</strong></span>
+                                    <span><i class="bi bi-card-text me-1 text-info"></i>Cédula: <strong>{{ $usuarioPreseleccionado->cedula }}</strong></span>
                                 @endif
                                 @if(!empty($usuarioPreseleccionado->telefono))
-                                    <span><i class="bi bi-telephone me-1 text-success"></i>Tel: <strong class="text-white">{{ $usuarioPreseleccionado->telefono }}</strong></span>
+                                    <span><i class="bi bi-telephone me-1 text-success"></i>Tel: <strong>{{ $usuarioPreseleccionado->telefono }}</strong></span>
                                 @endif
                             </div>
                         </div>
                     </div>
                     <div>
-                        <a href="{{ route('usuarios.index') }}" class="btn btn-outline-light rounded-pill px-3 py-2 btn-sm">
+                        <a href="{{ route('usuarios.index') }}" class="btn btn-change-user rounded-pill px-3 py-2 btn-sm">
                             <i class="bi bi-arrow-left me-1"></i> Cambiar Usuario
                         </a>
                     </div>
@@ -266,7 +479,7 @@
                 <div class="step-badge"><i class="bi bi-folder-check"></i></div> Datos del Expediente Digital
             </div>
             <div class="card-body p-4 p-md-5">
-                <h4 class="text-white fw-bold mb-4" id="data-form-header">
+                <h4 class="data-form-header fw-bold mb-4" id="data-form-header">
                     @if(isset($usuarioPreseleccionado) && $usuarioPreseleccionado)
                         Expediente para: {{ $usuarioPreseleccionado->nombre }} {{ $usuarioPreseleccionado->apellidos }}
                     @endif
@@ -383,19 +596,19 @@
                             <div class="col-md-4">
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_cedula" name="registro_doc_cedula">
-                                    <label class="form-check-label text-white-50" for="registro_doc_cedula">Copia Cédula</label>
+                                    <label class="form-check-label" for="registro_doc_cedula">Copia Cédula</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_sec" name="registro_doc_titulo_sec">
-                                    <label class="form-check-label text-white-50" for="registro_doc_titulo_sec">Título Secundaria</label>
+                                    <label class="form-check-label" for="registro_doc_titulo_sec">Título Secundaria</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_univ" name="registro_doc_titulo_univ">
-                                    <label class="form-check-label text-white-50" for="registro_doc_titulo_univ">Título Universitario</label>
+                                    <label class="form-check-label" for="registro_doc_titulo_univ">Título Universitario</label>
                                 </div>
                             </div>
                         </div>
