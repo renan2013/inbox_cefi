@@ -987,7 +987,7 @@
                     if (bsModal) bsModal.hide();
 
                     const waUrl = `https://web.whatsapp.com/send?phone=${tel}&text=${encodeURIComponent(msg)}`;
-                    window.open(waUrl, 'whatsapp_web_unela');
+                    window.open(waUrl, 'whatsapp_web_cefi');
                 });
             }
         });

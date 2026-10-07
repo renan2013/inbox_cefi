@@ -100,13 +100,13 @@ class BoletaController extends Controller
             $query->where('estado', $request->estado);
         }
 
-        // Conteo para alertas y filtros rápidos estilo UNELA
+        // Conteo para alertas y filtros rápidos estilo CEFI
         $count_firmadas = Boleta::where('estado', 'firmada')->count();
         $count_pend_firma = Boleta::where('estado', 'pendiente_firma')->count();
         $count_oficiales = Boleta::whereIn('estado', ['pendiente', 'pago_parcial'])->count();
         $count_pagadas = Boleta::where('estado', 'pagada')->count();
 
-        // Orden de prioridad idéntico a UNELA: firmadas primero, luego pendientes de firma, etc.
+        // Orden de prioridad idéntico a CEFI: firmadas primero, luego pendientes de firma, etc.
         $boletas = $query->orderByRaw("
             CASE 
                 WHEN estado = 'firmada' THEN 1 
@@ -334,7 +334,7 @@ class BoletaController extends Controller
     }
 
     /**
-     * Formulario Oficial UNELA para Generar Boleta de Pago y Matrícula (3 Pasos)
+     * Formulario Oficial CEFI para Generar Boleta de Pago y Matrícula (3 Pasos)
      */
     public function generar(Request $request)
     {

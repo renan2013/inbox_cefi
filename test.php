@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-echo "<h1>Diagnóstico de Servidor Hostinger - BPM UNELA 2</h1>";
+echo "<h1>Diagnóstico de Servidor Hostinger - Inbox CEFI</h1>";
 echo "<p><strong>Versión de PHP del Servidor:</strong> " . phpversion() . "</p>";
 echo "<p><strong>Ruta Actual:</strong> " . __DIR__ . "</p>";
 

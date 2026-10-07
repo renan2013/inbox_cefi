@@ -13,8 +13,8 @@ class DescriptorPDF extends FPDF
     public $materia;
     public $programa;
     public $facultad;
-    public $verde_unela = [95, 178, 48];
-    public $oscuro_unela = [30, 41, 59];
+    public $verde_cefi = [0, 160, 77];
+    public $oscuro_cefi = [30, 41, 59];
     public $gris_claro = [241, 245, 249];
 
     var $B = 0;
@@ -41,7 +41,7 @@ class DescriptorPDF extends FPDF
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(100, 116, 139);
         $this->Cell(120, 5, $this->toPdf($this->codigo . ' - ' . $this->materia), 0, 0, 'L');
-        $this->Cell(0, 5, $this->toPdf('Universidad Evangélica de las Américas'), 0, 1, 'R');
+        $this->Cell(0, 5, $this->toPdf(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'))), 0, 1, 'R');
         $this->SetDrawColor(226, 232, 240);
         $this->SetLineWidth(0.3);
         $this->Line(12, 16, 198, 16);
@@ -78,13 +78,13 @@ class DescriptorPDF extends FPDF
         $this->Ln(4);
         $this->SetFont('Arial', 'B', 10);
         $this->SetFillColor($this->gris_claro[0], $this->gris_claro[1], $this->gris_claro[2]);
-        $this->SetTextColor($this->oscuro_unela[0], $this->oscuro_unela[1], $this->oscuro_unela[2]);
+        $this->SetTextColor($this->oscuro_cefi[0], $this->oscuro_cefi[1], $this->oscuro_cefi[2]);
 
         $this->Cell(186, 7, $this->toPdf("  $num. " . mb_strtoupper($titulo, 'UTF-8')), 0, 1, 'L', true);
 
         // Borde lateral verde
         $y = $this->GetY() - 7;
-        $this->SetDrawColor($this->verde_unela[0], $this->verde_unela[1], $this->verde_unela[2]);
+        $this->SetDrawColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
         $this->SetLineWidth(1.2);
         $this->Line(12, $y, 12, $y + 7);
         $this->SetLineWidth(0.2);
@@ -193,9 +193,6 @@ class DescriptorPdfService
         if (!file_exists($logo_cliente)) {
             $logo_cliente = public_path('imgs/logo.png');
         }
-        if (!file_exists($logo_cliente)) {
-            $logo_cliente = public_path('imgs/logo_unela_color.png');
-        }
         if (file_exists($logo_cliente)) {
             $pdf->Image($logo_cliente, 80, 15, 50);
         }
@@ -203,7 +200,7 @@ class DescriptorPdfService
         $pdf->SetY(38);
         $pdf->SetFont('Arial', 'B', 13);
         $pdf->SetTextColor(15, 23, 42);
-        $pdf->Cell(186, 6, $pdf->toPdf('UNIVERSIDAD EVANGÉLICA DE LAS AMÉRICAS'), 0, 1, 'C');
+        $pdf->Cell(186, 6, $pdf->toPdf(mb_strtoupper(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')), 'UTF-8')), 0, 1, 'C');
 
         if (!empty($pdf->facultad)) {
             $pdf->SetFont('Arial', 'B', 10);

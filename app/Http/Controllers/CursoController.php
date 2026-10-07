@@ -79,7 +79,7 @@ class CursoController extends Controller
     }
 
     /**
-     * Muestra el formulario completo oficial (UNELA) para añadir un nuevo curso al plan de estudios.
+     * Muestra el formulario completo oficial (CEFI) para añadir un nuevo curso al plan de estudios.
      */
     public function create()
     {

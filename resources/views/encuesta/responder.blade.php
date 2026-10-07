@@ -35,7 +35,7 @@
             background: var(--bg);
             border-radius: 40px 40px 0 0;
         }
-        .enc-header .badge-unela {
+        .enc-header .badge-cefi {
             background: rgba(255,255,255,0.15); color: #fff;
             border: 1px solid rgba(255,255,255,0.3);
             border-radius: 50px; padding: 4px 14px;
@@ -158,7 +158,7 @@
     <div class="enc-header">
         <div class="container" style="max-width: 780px;">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="badge-unela"><i class="bi bi-mortarboard-fill me-1"></i> {{ config('cliente.nombre', 'CEFI') }} Virtual</span>
+                <span class="badge-cefi"><i class="bi bi-mortarboard-fill me-1"></i> {{ config('cliente.nombre', 'CEFI') }} Virtual</span>
                 <span class="badge" style="background: rgba(0,0,0,0.25); color: #fff; font-size: 11px; border-radius: 50px;">
                     <i class="bi bi-shield-lock-fill me-1"></i> 100% Anónima
                 </span>

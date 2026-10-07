@@ -183,7 +183,7 @@
 
         <!-- Footer -->
         <div class="text-center text-white-50 mt-5 pt-3 border-top border-secondary">
-            <p class="mb-0">&copy; {{ date('Y') }} Universidad Evangélica de las Américas - BPM Intelligence. Todos los derechos reservados.</p>
+            <p class="mb-0">&copy; {{ date('Y') }} {{ config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')) }} - BPM Intelligence. Todos los derechos reservados.</p>
             <p class="mb-0 mt-1" style="font-size: 0.75rem;">Design and developed by renangalvan.net</p>
         </div>
 

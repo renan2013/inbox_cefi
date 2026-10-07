@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
 <style>
-    /* Estilos oficiales del sistema de boletas UNELA adaptados a CEFI */
+    /* Estilos oficiales del sistema de boletas CEFI */
     .boleta-preview {
         max-width: 900px;
         background: #ffffff;
@@ -152,7 +152,7 @@
         </div>
     </div>
 
-    <!-- RESUMEN FINANCIERO COMPACTO EN UNA SOLA LÍNEA (IDÉNTICO A UNELA) -->
+    <!-- RESUMEN FINANCIERO COMPACTO EN UNA SOLA LÍNEA (CEFI) -->
     <div class="card glass-card mb-4 animate__animated animate__fadeIn" id="student-financial-summary-card" style="display: none;">
         <div class="card-body p-3">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -298,13 +298,13 @@
         </div>
     </div>
 
-    <!-- PASO 3: FICHA TÉCNICA OFICIAL DE LA BOLETA (PREVISUALIZACIÓN IDÉNTICA A UNELA) -->
+    <!-- PASO 3: FICHA TÉCNICA OFICIAL DE LA BOLETA (PREVISUALIZACIÓN CEFI) -->
     <div id="boleta-container" style="display: none;" class="animate__animated animate__zoomIn">
         <div class="boleta-preview p-4 p-md-5 mx-auto">
             <!-- Encabezado Estilo Oficial -->
             <div class="row border-bottom pb-4 mb-4 align-items-center">
                 <div class="col-md-7 text-center text-md-start mb-4 mb-md-0">
-                    <img src="{{ asset('imgs/logo.png') }}" onerror="this.onerror=null; this.src='{{ asset('imgs/logo_unela_color.png') }}';" alt="Logo Institucional" style="max-height: 80px;" class="mb-3">
+                    <img src="{{ asset(config('cliente.logo_url', 'imgs/logo.png')) }}" onerror="this.onerror=null; this.src='{{ asset('imgs/logo.png') }}';" alt="Logo Institucional CEFI" style="max-height: 80px;" class="mb-3">
                     <h5 class="fw-bold mb-1" style="font-size: 1.15rem; color: #1e293b;">{{ config('cliente.nombre_legal', config('cliente.nombre', 'CENTRO DE FORMACIÓN INTEGRAL CEFI')) }}</h5>
                     <p class="mb-0 text-muted small">Cédula Jurídica: 3-002-066646</p>
                     <p class="mb-0 text-muted small">Tel: 2211-1200 | www.ceficr.com</p>

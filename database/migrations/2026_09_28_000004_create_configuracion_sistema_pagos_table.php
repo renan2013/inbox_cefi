@@ -22,7 +22,7 @@ return new class extends Migration
                 $table->timestamps();
             });
 
-            // Semillas iniciales por defecto (UNELA / CEFI)
+            // Semillas iniciales por defecto (CEFI)
             $defaults = [
                 ['clave' => 'firma_oficial_nombre', 'valor' => 'Merlin Silva', 'categoria' => 'firmas', 'descripcion' => 'Nombre de la autoridad o administrador firmante'],
                 ['clave' => 'firma_oficial_cargo', 'valor' => 'Administración General', 'categoria' => 'firmas', 'descripcion' => 'Cargo oficial para la firma en documentos'],

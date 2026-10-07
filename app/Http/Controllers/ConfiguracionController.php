@@ -640,7 +640,7 @@ class ConfiguracionController extends Controller
 
             $defaults = [
                 ['clave' => 'firma_oficial_nombre', 'valor' => 'Merlin Silva', 'categoria' => 'firmas', 'descripcion' => 'Nombre de la autoridad o administrador firmante'],
-                ['clave' => 'firma_oficial_cargo', 'valor' => 'Administradora General - UNELA', 'categoria' => 'firmas', 'descripcion' => 'Cargo oficial para la firma en documentos'],
+                ['clave' => 'firma_oficial_cargo', 'valor' => 'Administración General - CEFI', 'categoria' => 'firmas', 'descripcion' => 'Cargo oficial para la firma en documentos'],
                 ['clave' => 'firma_oficial_imagen', 'valor' => '', 'categoria' => 'firmas', 'descripcion' => 'Ruta relativa de la imagen de firma o sello oficial'],
                 ['clave' => 'tasa_interes_mora', 'valor' => '2.0', 'categoria' => 'morosidad', 'descripcion' => 'Porcentaje de interés o recargo por mora (%)'],
                 ['clave' => 'tipo_interes_mora', 'valor' => 'diario_compuesto', 'categoria' => 'morosidad', 'descripcion' => 'Método de cálculo: diario_compuesto, diario_simple, mensual_simple'],
@@ -663,7 +663,7 @@ class ConfiguracionController extends Controller
     }
 
     /**
-     * Muestra la vista de configuración de pagos, morosidad y firmas oficiales (idéntica a UNELA).
+     * Muestra la vista de configuración de pagos, morosidad y firmas oficiales (CEFI).
      */
     public function parametrosPagos()
     {
@@ -691,7 +691,7 @@ class ConfiguracionController extends Controller
         try {
             $datos = [
                 'firma_oficial_nombre'    => trim($request->input('firma_oficial_nombre', 'Merlin Silva')),
-                'firma_oficial_cargo'     => trim($request->input('firma_oficial_cargo', 'Administradora General - UNELA')),
+                'firma_oficial_cargo'     => trim($request->input('firma_oficial_cargo', 'Administración General - CEFI')),
                 'tasa_interes_mora'       => floatval($request->input('tasa_interes_mora', 2.0)),
                 'tipo_interes_mora'       => trim($request->input('tipo_interes_mora', 'diario_compuesto')),
                 'dias_gracia_mora'        => intval($request->input('dias_gracia_mora', 0)),

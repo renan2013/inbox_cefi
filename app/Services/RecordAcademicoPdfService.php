@@ -15,9 +15,6 @@ class RecordPDF extends FPDF
         if (!file_exists($logoPath)) {
             $logoPath = public_path('imgs/logo.png');
         }
-        if (!file_exists($logoPath)) {
-            $logoPath = public_path('imgs/logo_unela_color.png');
-        }
 
         if (file_exists($logoPath)) {
             $this->Image($logoPath, 15, 12, 38);
@@ -257,7 +254,7 @@ class RecordAcademicoPdfService
         $pdf->SetX(25);
         $pdf->SetFont('Arial', '', 7.5);
         $pdf->SetTextColor(100, 116, 139);
-        $pdf->Cell(60, 4, $pdf->toPdf("Universidad Evangélica de las Américas"), 0, 0, 'C');
+        $pdf->Cell(60, 4, $pdf->toPdf(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'))), 0, 0, 'C');
 
         // Sello Secretaría General
         $pdf->Line(125, $yFirmas + 15, 185, $yFirmas + 15);

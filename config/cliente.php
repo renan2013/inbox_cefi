@@ -7,7 +7,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Aquí se definen los datos institucionales del cliente activo para Inbox.
-    | Permite que el sistema se adapte dinámicamente a CEFI, UNELA u otros clientes
+    | Permite que el sistema se adapte dinámicamente a la identidad institucional de CEFI
     | sin tocar el código fuente ni alterar la estética visual del sistema.
     |
     */

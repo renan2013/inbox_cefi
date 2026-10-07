@@ -70,7 +70,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [ConfiguracionController::class, 'index'])->name('index');
         Route::post('/guardar', [ConfiguracionController::class, 'guardar'])->name('guardar');
 
-        // Parámetros de Pagos, Morosidad y Firmas Oficiales (Estilo UNELA)
+        // Parámetros de Pagos, Morosidad y Firmas Oficiales (Estilo CEFI)
         Route::get('/pagos', [ConfiguracionController::class, 'parametrosPagos'])->name('pagos');
         Route::post('/pagos', [ConfiguracionController::class, 'guardarParametrosPagos'])->name('pagos.guardar');
         Route::post('/pagos/reset-pruebas', [ConfiguracionController::class, 'resetearPruebasBoletas'])->name('pagos.reset_pruebas');

@@ -29,9 +29,6 @@ class DescriptorDocService
         if (!file_exists($logo_path)) {
             $logo_path = public_path('imgs/logo.png');
         }
-        if (!file_exists($logo_path)) {
-            $logo_path = public_path('imgs/logo_unela_color.png');
-        }
 
         $logo_base64 = '';
         if (file_exists($logo_path)) {
@@ -149,10 +146,11 @@ class DescriptorDocService
     <!-- ENCABEZADO INSTITUCIONAL CON LOGO -->
     <div style='text-align: center; margin-bottom: 16pt;'>";
         if (!empty($logo_base64)) {
-            $doc_html .= "<img src='{$logo_base64}' width='200' style='width: 200px; max-width: 100%; height: auto; margin-bottom: 8pt;' alt='UNELA'><br>";
+            $doc_html .= "<img src='{$logo_base64}' width='200' style='width: 200px; max-width: 100%; height: auto; margin-bottom: 8pt;' alt='" . htmlspecialchars(config('cliente.nombre', 'CEFI')) . "'><br>";
         }
+        $nombre_inst = htmlspecialchars(mb_strtoupper(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')), 'UTF-8'));
         $doc_html .= "
-        <h2 style='font-size: 14pt; font-weight: bold; color: #0f172a; margin-bottom: 2pt; text-transform: uppercase;'>UNIVERSIDAD EVANGÉLICA DE LAS AMÉRICAS</h2>";
+        <h2 style='font-size: 14pt; font-weight: bold; color: #0f172a; margin-bottom: 2pt; text-transform: uppercase;'>{$nombre_inst}</h2>";
         if (!empty($facultad)) {
             $doc_html .= "<h3 style='font-size: 11.5pt; font-weight: bold; color: #475569; margin-bottom: 2pt;'>{$facultad}</h3>";
         }

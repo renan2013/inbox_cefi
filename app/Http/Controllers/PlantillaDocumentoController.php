@@ -57,7 +57,7 @@ class PlantillaDocumentoController extends Controller
         $p2 = public_path($cleanRel);
         if (file_exists($p2)) return $p2;
 
-        // Fallback a la carpeta hermana bpm_unela
+        // Fallback a ruta externa si existe
         $p3 = base_path('../' . $cleanRel);
         if (file_exists($p3)) return $p3;
 

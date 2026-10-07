@@ -19,9 +19,6 @@ class BoletaPDFEngine extends FPDF
         if (!file_exists($logo_cliente)) {
             $logo_cliente = public_path('imgs/logo.png');
         }
-        if (!file_exists($logo_cliente)) {
-            $logo_cliente = public_path('imgs/logo_unela_color.png');
-        }
         if (file_exists($logo_cliente)) {
             $this->Image($logo_cliente, 15, 12, 42);
         }
@@ -286,7 +283,7 @@ class BoletaPdfService
 
         $tasa_label = '2.0';
         $firma_nombre = 'Merlin Silva';
-        $firma_cargo = 'Administradora General - UNELA';
+        $firma_cargo = 'Administración General - CEFI';
         $firma_img = '';
 
         if (Schema::hasTable('configuracion_sistema_pagos')) {

@@ -397,6 +397,6 @@ class CampanaWhatsAppController extends Controller
         }
 
         $cfg = WhatsAppService::getConfig();
-        return $cfg['logo_url'] ?? 'https://unela.org/bpm_unela/imgs/logo_unela_banner.jpg';
+        return $cfg['logo_url'] ?? asset(config('cliente.logo_banner_whatsapp', 'imgs/fondo_defecto_notificacion.png'));
     }
 }

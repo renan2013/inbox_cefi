@@ -17,9 +17,6 @@ class ActaPDF extends FPDF
         if (!file_exists($logo_cliente)) {
             $logo_cliente = public_path('imgs/logo.png');
         }
-        if (!file_exists($logo_cliente)) {
-            $logo_cliente = public_path('imgs/logo_unela_color.png');
-        }
         if (file_exists($logo_cliente)) {
             $this->Image($logo_cliente, 10, 10, 45);
         }
@@ -384,7 +381,7 @@ class ActaOficialPdfService
         $pdf->Cell($w_linea_firma, 4, $pdf->toPdf('Sello y Firma de Registro Académico'), 0, 1, 'C');
         $pdf->SetX($x_reg_start);
         $pdf->SetFont('Arial', 'B', 7.5);
-        $pdf->Cell($w_linea_firma, 4, $pdf->toPdf('Universidad Evangélica de las Américas'), 0, 0, 'C');
+        $pdf->Cell($w_linea_firma, 4, $pdf->toPdf(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'))), 0, 0, 'C');
 
         // Guardar copia de respaldo en disco
         $uploads_dir = public_path('uploads/actas');

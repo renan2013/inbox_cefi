@@ -59,7 +59,7 @@ class SilaboPDFEngine extends FPDF
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(120, 120, 120);
         $this->Cell(120, 5, $this->toPdf($this->codigo . ' - ' . $this->materia), 0, 0, 'L');
-        $this->Cell(0, 5, $this->toPdf('Universidad Evangélica de las Américas'), 0, 1, 'R');
+        $this->Cell(0, 5, $this->toPdf(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'))), 0, 1, 'R');
         $this->SetDrawColor(220, 220, 220);
         $this->SetLineWidth(0.2);
         $this->Line(10, 16, 200, 16);
@@ -284,9 +284,6 @@ class SilaboPdfService
         if (!file_exists($logo_cliente)) {
             $logo_cliente = public_path('imgs/logo.png');
         }
-        if (!file_exists($logo_cliente)) {
-            $logo_cliente = public_path('imgs/logo_unela_color.png');
-        }
         if (file_exists($logo_cliente)) {
             $pdf->Image($logo_cliente, 15, 12, 45);
         }
@@ -298,7 +295,7 @@ class SilaboPdfService
 
         $pdf->SetFont('Arial', 'B', 12);
         $pdf->SetTextColor($pdf->azul_institucional[0], $pdf->azul_institucional[1], $pdf->azul_institucional[2]);
-        $pdf->Cell(0, 6, $pdf->toPdf('UNIVERSIDAD EVANGÉLICA DE LAS AMÉRICAS'), 0, 1, 'R');
+        $pdf->Cell(0, 6, $pdf->toPdf(mb_strtoupper(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')), 'UTF-8')), 0, 1, 'R');
 
         $pdf->SetFont('Arial', 'B', 10);
         $pdf->SetTextColor(70, 70, 70);

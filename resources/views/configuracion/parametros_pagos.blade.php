@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container py-4" style="max-width: 1050px;">
-    <!-- Encabezado Estilo UNELA con Seguridad Superior -->
+    <!-- Encabezado Estilo CEFI con Seguridad Superior -->
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
         <div>
             <div class="d-flex align-items-center gap-2 mb-2">
@@ -72,7 +72,7 @@
                             <label class="form-label fw-bold small text-muted text-uppercase">Puesto / Cargo Oficial</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-2"><i class="bi bi-briefcase"></i></span>
-                                <input type="text" class="form-control border-2" name="firma_oficial_cargo" value="{{ $config['firma_oficial_cargo'] ?? 'Administradora General - UNELA' }}" required placeholder="Ej: Administradora General">
+                                <input type="text" class="form-control border-2" name="firma_oficial_cargo" value="{{ $config['firma_oficial_cargo'] ?? 'Administración General - CEFI' }}" required placeholder="Ej: Administración General">
                             </div>
                         </div>
 
