@@ -163,6 +163,51 @@
             font-weight: 500;
         }
 
+        /* Tarjetas de subida de documentación */
+        .doc-upload-box {
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            transition: all 0.25s ease;
+            height: 100%;
+        }
+
+        .doc-upload-box:hover {
+            border-color: rgba(95, 178, 48, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .doc-upload-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .doc-upload-desc {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .doc-existing-badge {
+            background: rgba(34, 197, 94, 0.12);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            font-size: 0.78rem;
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.65rem;
+        }
+
+        .doc-existing-link {
+            color: #38bdf8;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+
+        .doc-existing-link:hover {
+            color: #7dd3fc;
+        }
+
         /* ================= LIGHT MODE OVERRIDES ================= */
         [data-theme="light"] .page-header {
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
@@ -297,6 +342,35 @@
         [data-theme="light"] .form-check-input:not(:checked) {
             background-color: #e2e8f0 !important;
             border-color: #cbd5e1 !important;
+        }
+
+        [data-theme="light"] .doc-upload-box {
+            background-color: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+        }
+
+        [data-theme="light"] .doc-upload-box:hover {
+            border-color: #22c55e !important;
+            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.12) !important;
+        }
+
+        [data-theme="light"] .doc-upload-title {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .doc-upload-desc {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .doc-existing-badge {
+            background: #dcfce7 !important;
+            color: #15803d !important;
+            border-color: #86efac !important;
+        }
+
+        [data-theme="light"] .doc-existing-link {
+            color: #0284c7 !important;
         }
 
         .form-label-custom {
@@ -481,6 +555,11 @@
             <div class="card-body p-4 p-md-5">
                 @php
                     $exp = $usuarioPreseleccionado ? $usuarioPreseleccionado->expediente : null;
+                    $archCedula = $exp?->archivos?->firstWhere('tipo_documento', 'cedula');
+                    $archTituloSec = $exp?->archivos?->firstWhere('tipo_documento', 'titulo_secundaria');
+                    $archTituloUniv = $exp?->archivos?->firstWhere('tipo_documento', 'titulo_universitario');
+                    $archNotas = $exp?->archivos?->firstWhere('tipo_documento', 'certificacion_notas');
+                    $archFoto = $exp?->archivos?->firstWhere('tipo_documento', 'fotografia');
                 @endphp
 
                 <h4 class="data-form-header fw-bold mb-4" id="data-form-header">
@@ -489,7 +568,7 @@
                     @endif
                 </h4>
                 
-                <form id="expediente-form" method="post" action="{{ route('expedientes.store') }}">
+                <form id="expediente-form" method="post" action="{{ route('expedientes.store') }}" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" id="student_id" name="id_usuario" value="{{ $usuarioPreseleccionado->id ?? '' }}">
 
@@ -705,38 +784,188 @@
                         </div>
                     </fieldset>
 
-                    <!-- 7. DOCUMENTACIÓN ENTREGADA Y OBSERVACIONES -->
+                    <!-- 7. DOCUMENTACIÓN DIGITAL Y OBSERVACIONES (ESTILO OFICIAL UNELA) -->
                     <fieldset class="mb-5">
-                        <div class="legend-custom"><i class="bi bi-file-earmark-check-fill me-2"></i>7. Documentación Entregada y Observaciones</div>
-                        <div class="row g-3 mb-4">
-                            <div class="col-xl-2 col-md-4">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_cedula" name="registro_doc_cedula" {{ old('registro_doc_cedula', $exp->registro_doc_cedula ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="registro_doc_cedula">Copia Cédula</label>
+                        <div class="legend-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span><i class="bi bi-file-earmark-check-fill me-2"></i>7. Documentación Adjunta y Requisitos de Admisión</span>
+                            <span class="badge bg-secondary bg-opacity-25 text-light fw-normal fs-6">
+                                <i class="bi bi-shield-lock me-1"></i> Bóveda Digital Certificada
+                            </span>
+                        </div>
+                        <p class="text-white-50 small mb-4">
+                            Adjunte los documentos oficiales del estudiante en formato digital (PDF, JPG, PNG). Al seleccionar o subir un archivo, el sistema guardará el respaldo en la bóveda documental y verificará automáticamente el requisito correspondiente.
+                        </p>
+
+                        <div class="row g-4 mb-4">
+                            <!-- Documento 1: Cédula / Documento de Identidad -->
+                            <div class="col-xl-6">
+                                <div class="doc-upload-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-person-vcard text-primary fs-4"></i>
+                                            <div>
+                                                <div class="doc-upload-title">Cédula / Documento de Identidad</div>
+                                                <div class="doc-upload-desc">Cédula física, DIMEX de residencia o pasaporte vigente</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_cedula" name="registro_doc_cedula" {{ old('registro_doc_cedula', $exp->registro_doc_cedula ?? false) ? 'checked' : '' }}>
+                                            <label class="form-check-label small" for="registro_doc_cedula">Entregada</label>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label-custom mb-1">Adjuntar Archivo (PDF, JPG, PNG)</label>
+                                        <input type="file" name="archivo_cedula" class="form-control form-control-custom w-100 doc-file-input" data-target-switch="registro_doc_cedula" accept=".pdf,image/*">
+                                    </div>
+                                    @if(isset($archCedula) && $archCedula)
+                                        @php $resDoc = \App\Services\ExpedienteStorageService::resolveFilePath($archCedula->nombre_servidor); @endphp
+                                        <div class="mt-2 doc-existing-badge d-flex align-items-center gap-2">
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            <span class="text-truncate">En bóveda: <a href="{{ $resDoc['web_url'] }}" target="_blank" class="doc-existing-link">{{ $archCedula->nombre_original }}</a></span>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="col-xl-2 col-md-4">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_sec" name="registro_doc_titulo_sec" {{ old('registro_doc_titulo_sec', $exp->registro_doc_titulo_sec ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="registro_doc_titulo_sec">Título Secundaria</label>
+
+                            <!-- Documento 2: Título Bachiller en Secundaria -->
+                            <div class="col-xl-6">
+                                <div class="doc-upload-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-mortarboard text-success fs-4"></i>
+                                            <div>
+                                                <div class="doc-upload-title">Título de Bachiller en Secundaria</div>
+                                                <div class="doc-upload-desc">Título oficial de conclusión de estudios de secundaria</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_sec" name="registro_doc_titulo_sec" {{ old('registro_doc_titulo_sec', $exp->registro_doc_titulo_sec ?? false) ? 'checked' : '' }}>
+                                            <label class="form-check-label small" for="registro_doc_titulo_sec">Entregado</label>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label-custom mb-1">Adjuntar Archivo (PDF, JPG, PNG)</label>
+                                        <input type="file" name="archivo_titulo_sec" class="form-control form-control-custom w-100 doc-file-input" data-target-switch="registro_doc_titulo_sec" accept=".pdf,image/*">
+                                    </div>
+                                    @if(isset($archTituloSec) && $archTituloSec)
+                                        @php $resDoc = \App\Services\ExpedienteStorageService::resolveFilePath($archTituloSec->nombre_servidor); @endphp
+                                        <div class="mt-2 doc-existing-badge d-flex align-items-center gap-2">
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            <span class="text-truncate">En bóveda: <a href="{{ $resDoc['web_url'] }}" target="_blank" class="doc-existing-link">{{ $archTituloSec->nombre_original }}</a></span>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="col-xl-2 col-md-4">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_univ" name="registro_doc_titulo_univ" {{ old('registro_doc_titulo_univ', $exp->registro_doc_titulo_univ ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="registro_doc_titulo_univ">Título Universitario</label>
+
+                            <!-- Documento 3: Título Universitario Previo -->
+                            <div class="col-xl-6">
+                                <div class="doc-upload-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-award text-warning fs-4"></i>
+                                            <div>
+                                                <div class="doc-upload-title">Título Universitario Previo</div>
+                                                <div class="doc-upload-desc">Diplomado, Bachillerato o Licenciatura universitaria previa (si aplica)</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_univ" name="registro_doc_titulo_univ" {{ old('registro_doc_titulo_univ', $exp->registro_doc_titulo_univ ?? false) ? 'checked' : '' }}>
+                                            <label class="form-check-label small" for="registro_doc_titulo_univ">Entregado</label>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label-custom mb-1">Adjuntar Archivo (PDF, JPG, PNG)</label>
+                                        <input type="file" name="archivo_titulo_univ" class="form-control form-control-custom w-100 doc-file-input" data-target-switch="registro_doc_titulo_univ" accept=".pdf,image/*">
+                                    </div>
+                                    @if(isset($archTituloUniv) && $archTituloUniv)
+                                        @php $resDoc = \App\Services\ExpedienteStorageService::resolveFilePath($archTituloUniv->nombre_servidor); @endphp
+                                        <div class="mt-2 doc-existing-badge d-flex align-items-center gap-2">
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            <span class="text-truncate">En bóveda: <a href="{{ $resDoc['web_url'] }}" target="_blank" class="doc-existing-link">{{ $archTituloUniv->nombre_original }}</a></span>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_certificaciones" name="registro_doc_certificaciones" {{ old('registro_doc_certificaciones', $exp->registro_doc_certificaciones ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="registro_doc_certificaciones">Certificaciones de Notas</label>
+
+                            <!-- Documento 4: Certificaciones de Notas / Convalidación -->
+                            <div class="col-xl-6">
+                                <div class="doc-upload-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-file-earmark-spreadsheet text-info fs-4"></i>
+                                            <div>
+                                                <div class="doc-upload-title">Certificaciones de Calificaciones / Notas</div>
+                                                <div class="doc-upload-desc">Historial académico oficial emitido por el centro de origen</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_certificaciones" name="registro_doc_certificaciones" {{ old('registro_doc_certificaciones', $exp->registro_doc_certificaciones ?? false) ? 'checked' : '' }}>
+                                            <label class="form-check-label small" for="registro_doc_certificaciones">Entregadas</label>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label-custom mb-1">Adjuntar Archivo (PDF, JPG, PNG)</label>
+                                        <input type="file" name="archivo_certificaciones" class="form-control form-control-custom w-100 doc-file-input" data-target-switch="registro_doc_certificaciones" accept=".pdf,image/*">
+                                    </div>
+                                    @if(isset($archNotas) && $archNotas)
+                                        @php $resDoc = \App\Services\ExpedienteStorageService::resolveFilePath($archNotas->nombre_servidor); @endphp
+                                        <div class="mt-2 doc-existing-badge d-flex align-items-center gap-2">
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            <span class="text-truncate">En bóveda: <a href="{{ $resDoc['web_url'] }}" target="_blank" class="doc-existing-link">{{ $archNotas->nombre_original }}</a></span>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_fotografia" name="registro_doc_fotografia" {{ old('registro_doc_fotografia', $exp->registro_doc_fotografia ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="registro_doc_fotografia">Fotografía Oficial</label>
+
+                            <!-- Documento 5: Fotografía Oficial de Identificación -->
+                            <div class="col-xl-6">
+                                <div class="doc-upload-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-camera-fill text-danger fs-4"></i>
+                                            <div>
+                                                <div class="doc-upload-title">Fotografía Oficial para Carnet / Ficha</div>
+                                                <div class="doc-upload-desc">Fotografía nítida tipo pasaporte o carnet estudiantil</div>
+                                            </div>
+                                        </div>
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_fotografia" name="registro_doc_fotografia" {{ old('registro_doc_fotografia', $exp->registro_doc_fotografia ?? false) ? 'checked' : '' }}>
+                                            <label class="form-check-label small" for="registro_doc_fotografia">Entregada</label>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label-custom mb-1">Adjuntar Fotografía (JPG, PNG, WebP)</label>
+                                        <input type="file" name="archivo_fotografia" class="form-control form-control-custom w-100 doc-file-input" data-target-switch="registro_doc_fotografia" accept="image/*">
+                                    </div>
+                                    @if(isset($archFoto) && $archFoto)
+                                        @php $resDoc = \App\Services\ExpedienteStorageService::resolveFilePath($archFoto->nombre_servidor); @endphp
+                                        <div class="mt-2 doc-existing-badge d-flex align-items-center gap-2">
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            <span class="text-truncate">En bóveda: <a href="{{ $resDoc['web_url'] }}" target="_blank" class="doc-existing-link">{{ $archFoto->nombre_original }}</a></span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Documento 6: Archivos y Documentación Adicional -->
+                            <div class="col-xl-6">
+                                <div class="doc-upload-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-folder-plus text-info fs-4"></i>
+                                            <div>
+                                                <div class="doc-upload-title">Documentos Complementarios / Otros Anexos</div>
+                                                <div class="doc-upload-desc">Cartas de recomendación, cartas pastorales, comprobantes de pago, etc.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label-custom mb-1">Adjuntar Archivos Múltiples (PDF, Docs, Comprimidos)</label>
+                                        <input type="file" name="archivos_adicionales[]" multiple class="form-control form-control-custom w-100" accept=".pdf,image/*,.doc,.docx,.zip,.rar">
+                                    </div>
+                                    <div class="mt-2">
+                                        <input type="text" name="descripcion_adicional" class="form-control form-control-custom w-100 small" placeholder="Descripción breve de los anexos (opcional)">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -768,6 +997,14 @@
     <script>
         $(document).ready(function() {
             let searchTimeout = null;
+
+            // Auto-activar el switch correspondiente cuando el usuario selecciona un archivo
+            $('.doc-file-input').on('change', function() {
+                let targetSwitch = $(this).data('target-switch');
+                if (targetSwitch && this.files && this.files.length > 0) {
+                    $('#' + targetSwitch).prop('checked', true);
+                }
+            });
 
             // Búsqueda interactiva de estudiante (solo si está disponible el buscador)
             $('#user-search').on('input', function() {
@@ -840,13 +1077,13 @@
             $('#expediente-form').on('submit', function(e) {
                 e.preventDefault();
                 Swal.fire({
-                    title: '¿Crear Expediente?',
-                    text: 'Se procederá a guardar la información provista en el expediente digital.',
+                    title: '¿Guardar Expediente Digital?',
+                    text: 'Se registrará la información y se respaldarán los documentos adjuntos en la bóveda.',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#5fb230',
                     cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Sí, registrar',
+                    confirmButtonText: 'Sí, guardar expediente',
                     cancelButtonText: 'Cancelar'
                 }).then((result) => {
                     if (result.isConfirmed) {

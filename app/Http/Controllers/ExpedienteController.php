@@ -234,30 +234,47 @@ class ExpedienteController extends Controller
 
         $usuarioPreseleccionado = null;
         if ($request->filled('id_usuario')) {
-            $usuarioPreseleccionado = Usuario::with('expediente')->find($request->id_usuario);
+            $usuarioPreseleccionado = Usuario::with(['expediente.archivos'])->find($request->id_usuario);
         }
 
         return view('expedientes.create', compact('programas', 'pendientes', 'usuarioPreseleccionado'));
     }
 
     /**
-     * Guarda o actualiza el expediente en la base de datos.
+     * Guarda o actualiza el expediente en la base de datos junto con los documentos adjuntos.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'id_usuario' => 'required|exists:usuarios,id',
-            'grado_a_matricular' => 'nullable|string|max:50',
-            'especialidad_deseada' => 'nullable|string|max:255',
-            'genero' => 'nullable|string|max:50',
-            'fecha_nacimiento' => 'nullable|date',
-            'domicilio_direccion' => 'nullable|string',
+            'id_usuario'              => 'required|exists:usuarios,id',
+            'grado_a_matricular'      => 'nullable|string|max:50',
+            'especialidad_deseada'    => 'nullable|string|max:255',
+            'genero'                  => 'nullable|string|max:50',
+            'fecha_nacimiento'        => 'nullable|date',
+            'domicilio_direccion'     => 'nullable|string',
+            'archivo_cedula'          => 'nullable|file|max:25600',
+            'archivo_titulo_sec'      => 'nullable|file|max:25600',
+            'archivo_titulo_univ'     => 'nullable|file|max:25600',
+            'archivo_certificaciones' => 'nullable|file|max:25600',
+            'archivo_fotografia'      => 'nullable|file|image|max:10240',
+            'archivos_adicionales.*'  => 'nullable|file|max:25600',
         ]);
 
         $id_usuario = $request->id_usuario;
         $expediente = ExpedienteDigital::where('id_usuario', $id_usuario)->first();
 
-        $data = $request->except(['_token', 'id_usuario']);
+        // Extraer campos de archivo para no pasarlos al modelo ExpedienteDigital
+        $data = $request->except([
+            '_token', 
+            'id_usuario',
+            'archivo_cedula',
+            'archivo_titulo_sec',
+            'archivo_titulo_univ',
+            'archivo_certificaciones',
+            'archivo_fotografia',
+            'archivos_adicionales',
+            'descripcion_adicional'
+        ]);
         
         $docFields = [
             'registro_doc_titulo_sec', 
@@ -287,14 +304,138 @@ class ExpedienteController extends Controller
             $expediente->update($data);
             $message = 'Expediente digital actualizado con éxito.';
             $targetId = $expediente->id_expediente;
+            $expedienteFinal = $expediente;
         } else {
             $data['id_usuario'] = $id_usuario;
-            $nuevo = ExpedienteDigital::create($data);
+            $expedienteFinal = ExpedienteDigital::create($data);
             $message = 'Expediente digital creado con éxito.';
-            $targetId = $nuevo->id_expediente;
+            $targetId = $expedienteFinal->id_expediente;
+        }
+
+        // Procesar subida de documentación adjunta estilo UNELA
+        $archivosMapeados = [
+            'archivo_cedula' => [
+                'tipo'      => 'cedula',
+                'categoria' => '01_Identificacion',
+                'check'     => 'registro_doc_cedula',
+                'desc'      => 'Copia de cédula / documento de identidad',
+            ],
+            'archivo_titulo_sec' => [
+                'tipo'      => 'titulo_secundaria',
+                'categoria' => '02_Titulos_y_Grados',
+                'check'     => 'registro_doc_titulo_sec',
+                'desc'      => 'Título de bachiller en secundaria',
+            ],
+            'archivo_titulo_univ' => [
+                'tipo'      => 'titulo_universitario',
+                'categoria' => '02_Titulos_y_Grados',
+                'check'     => 'registro_doc_titulo_univ',
+                'desc'      => 'Título universitario previo',
+            ],
+            'archivo_certificaciones' => [
+                'tipo'      => 'certificacion_notas',
+                'categoria' => '04_Convalidaciones',
+                'check'     => 'registro_doc_certificaciones',
+                'desc'      => 'Certificaciones de notas / convalidación',
+            ],
+            'archivo_fotografia' => [
+                'tipo'      => 'fotografia',
+                'categoria' => '01_Identificacion',
+                'check'     => 'registro_doc_fotografia',
+                'desc'      => 'Fotografía oficial para carnet o perfil',
+            ],
+        ];
+
+        $checksParaActualizar = [];
+        foreach ($archivosMapeados as $fileKey => $cfg) {
+            if ($request->hasFile($fileKey)) {
+                $archivoGuardado = $this->guardarArchivoExpediente(
+                    $expedienteFinal,
+                    $request->file($fileKey),
+                    $cfg['tipo'],
+                    $cfg['categoria'],
+                    $cfg['desc']
+                );
+                if ($archivoGuardado) {
+                    $checksParaActualizar[$cfg['check']] = 1;
+                }
+            }
+        }
+
+        if (!empty($checksParaActualizar)) {
+            $expedienteFinal->update($checksParaActualizar);
+        }
+
+        // Subir archivos adicionales u otros si se adjuntaron
+        if ($request->hasFile('archivos_adicionales')) {
+            $descOtros = $request->input('descripcion_adicional', 'Documentación complementaria');
+            foreach ($request->file('archivos_adicionales') as $otroFile) {
+                if ($otroFile && $otroFile->isValid()) {
+                    $this->guardarArchivoExpediente(
+                        $expedienteFinal,
+                        $otroFile,
+                        'otro',
+                        '09_General_y_Otros',
+                        $descOtros
+                    );
+                }
+            }
         }
 
         return redirect()->route('expedientes.ver', $targetId)->with('success', $message);
+    }
+
+    /**
+     * Guarda un archivo físico en la bóveda jerárquica y crea su registro en expediente_archivos.
+     */
+    private function guardarArchivoExpediente($expediente, $file, string $tipoDocumento, string $categoria, string $descripcion = '')
+    {
+        if (!$file || !$file->isValid()) {
+            return null;
+        }
+
+        $idExpediente = $expediente->id_expediente;
+        $originalName = $file->getClientOriginalName();
+        $ext = strtolower($file->getClientOriginalExtension());
+        $allowedExts = ['pdf', 'png', 'jpg', 'jpeg', 'webp', 'doc', 'docx', 'xls', 'xlsx', 'zip', 'rar'];
+
+        if (!in_array($ext, $allowedExts)) {
+            return null;
+        }
+
+        // Límite 25MB
+        if ($file->getSize() > 25 * 1024 * 1024) {
+            return null;
+        }
+
+        $nombreEstudiante = $expediente->usuario ? "{$expediente->usuario->nombre} {$expediente->usuario->apellidos}" : "Estudiante_{$idExpediente}";
+
+        $dirInfo = ExpedienteStorageService::getTargetDir($idExpediente, $nombreEstudiante, $tipoDocumento, $categoria);
+        $tipoSlug = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $tipoDocumento);
+        $fileBaseName = "exp_{$idExpediente}_{$tipoSlug}_" . time() . "_" . mt_rand(100, 999) . ".{$ext}";
+        $destPath = $dirInfo['full_dir'] . DIRECTORY_SEPARATOR . $fileBaseName;
+        $serverRelativeName = $dirInfo['relative_dir'] . $fileBaseName;
+
+        try {
+            $file->move($dirInfo['full_dir'], $fileBaseName);
+
+            $subidoPor = Auth::check() ? Auth::user()->nombre . ' ' . (Auth::user()->apellidos ?? '') : 'Admin';
+
+            return ExpedienteArchivo::create([
+                'id_expediente'   => $idExpediente,
+                'tipo_documento'  => $tipoDocumento,
+                'categoria'       => $categoria,
+                'nombre_original' => $originalName,
+                'descripcion'     => $descripcion,
+                'nombre_servidor' => $serverRelativeName,
+                'ruta_archivo'    => $destPath,
+                'subido_por'      => $subidoPor,
+                'fecha_subida'    => now(),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error("Error guardando archivo en expediente {$idExpediente}: " . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -335,62 +476,27 @@ class ExpedienteController extends Controller
 
         $file = $request->file('archivo');
         $originalName = $file->getClientOriginalName();
-        $ext = strtolower($file->getClientOriginalExtension());
-        $allowedExts = ['pdf', 'png', 'jpg', 'jpeg', 'webp', 'doc', 'docx', 'xls', 'xlsx', 'zip', 'rar'];
-
-        if (!in_array($ext, $allowedExts)) {
-            return response()->json(['success' => false, 'message' => 'Formato no permitido. Solo se aceptan PDF, imágenes, Office y comprimidos.'], 422);
-        }
-
-        // Límite 25MB
-        if ($file->getSize() > 25 * 1024 * 1024) {
-            return response()->json(['success' => false, 'message' => 'El archivo supera el tamaño máximo permitido de 25MB.'], 422);
-        }
-
         $tipoDocumento = trim($request->input('tipo_documento', 'otro'));
         $categoria = trim($request->input('categoria', 'General'));
         $descripcion = trim($request->input('descripcion', ''));
-        $nombreEstudiante = $expediente->usuario ? "{$expediente->usuario->nombre} {$expediente->usuario->apellidos}" : "Estudiante_{$idExpediente}";
 
-        // Obtener directorio jerárquico
-        $dirInfo = ExpedienteStorageService::getTargetDir($idExpediente, $nombreEstudiante, $tipoDocumento, $categoria);
+        $archivo = $this->guardarArchivoExpediente($expediente, $file, $tipoDocumento, $categoria, $descripcion);
 
-        $tipoSlug = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $tipoDocumento);
-        $fileBaseName = "exp_{$idExpediente}_{$tipoSlug}_" . time() . "_" . mt_rand(100, 999) . ".{$ext}";
-        $destPath = $dirInfo['full_dir'] . DIRECTORY_SEPARATOR . $fileBaseName;
-        $serverRelativeName = $dirInfo['relative_dir'] . $fileBaseName;
-
-        try {
-            $file->move($dirInfo['full_dir'], $fileBaseName);
-
-            $subidoPor = Auth::check() ? Auth::user()->nombre . ' ' . (Auth::user()->apellidos ?? '') : 'Admin';
-
-            $archivo = ExpedienteArchivo::create([
-                'id_expediente'   => $idExpediente,
-                'tipo_documento'  => $tipoDocumento,
-                'categoria'       => $categoria,
-                'nombre_original' => $originalName,
-                'descripcion'     => $descripcion,
-                'nombre_servidor' => $serverRelativeName,
-                'ruta_archivo'    => $destPath,
-                'subido_por'      => $subidoPor,
-                'fecha_subida'    => now(),
-            ]);
-
-            return response()->json([
-                'success'         => true,
-                'message'         => 'Documento guardado exitosamente en la bóveda digital.',
-                'id_archivo'      => $archivo->id_archivo,
-                'nombre_original' => $originalName,
-                'tipo_documento'  => $tipoDocumento,
-                'categoria'       => $categoria,
-                'descripcion'     => $descripcion,
-                'url'             => ExpedienteStorageService::resolveFilePath($serverRelativeName)['web_url'],
-                'fecha'           => now()->format('d/m/Y g:i a')
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => 'Error al guardar archivo: ' . $e->getMessage()], 500);
+        if (!$archivo) {
+            return response()->json(['success' => false, 'message' => 'Error al guardar el archivo o formato no permitido.'], 500);
         }
+
+        return response()->json([
+            'success'         => true,
+            'message'         => 'Documento guardado exitosamente en la bóveda digital.',
+            'id_archivo'      => $archivo->id_archivo,
+            'nombre_original' => $originalName,
+            'tipo_documento'  => $tipoDocumento,
+            'categoria'       => $categoria,
+            'descripcion'     => $descripcion,
+            'url'             => ExpedienteStorageService::resolveFilePath($archivo->nombre_servidor)['web_url'],
+            'fecha'           => now()->format('d/m/Y g:i a')
+        ]);
     }
 
     /**
