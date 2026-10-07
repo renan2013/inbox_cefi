@@ -41,26 +41,13 @@ class UsuarioController extends Controller
             $query->where('origen', $request->origen);
         }
 
-        // Filtro por Estado de Expediente Digital
+        // Filtro por Estado de Expediente Digital (Con Expediente / Sin Expediente)
         if ($request->filled('expediente_status')) {
             $expStatus = $request->expediente_status;
             if ($expStatus === 'sin_expediente') {
                 $query->whereDoesntHave('expediente');
-            } elseif ($expStatus === 'completo') {
-                $query->whereHas('expediente', function($q) {
-                    $q->where('estado', 'Aprobado');
-                });
-            } elseif ($expStatus === 'en_progreso') {
-                $query->whereHas('expediente', function($q) {
-                    $q->where('estado', '!=', 'Aprobado');
-                });
-            } elseif ($expStatus === 'incompleto') {
-                $query->where(function($q) {
-                    $q->whereDoesntHave('expediente')
-                      ->orWhereHas('expediente', function($eq) {
-                          $eq->where('estado', '!=', 'Aprobado');
-                      });
-                });
+            } elseif ($expStatus === 'con_expediente') {
+                $query->whereHas('expediente');
             }
         }
 
@@ -81,8 +68,6 @@ class UsuarioController extends Controller
             $inboxCount = Usuario::where('origen', 'inbox')->count();
 
             $totalConExpediente = ExpedienteDigital::distinct('id_usuario')->count('id_usuario');
-            $expedientesCompletos = ExpedienteDigital::where('estado', 'Aprobado')->count();
-            $expedientesEnProgreso = ExpedienteDigital::where('estado', '!=', 'Aprobado')->count();
             $sinExpediente = max(0, $totalUsuarios - $totalConExpediente);
         } catch (\Throwable $e) {
             $totalUsuarios = 0;
@@ -92,8 +77,6 @@ class UsuarioController extends Controller
             $moodleCount = 0;
             $inboxCount = 0;
             $totalConExpediente = 0;
-            $expedientesCompletos = 0;
-            $expedientesEnProgreso = 0;
             $sinExpediente = 0;
         }
 
@@ -106,8 +89,6 @@ class UsuarioController extends Controller
             'moodle' => $moodleCount,
             'inbox' => $inboxCount,
             'con_expediente' => $totalConExpediente,
-            'expedientes_completos' => $expedientesCompletos,
-            'expedientes_en_progreso' => $expedientesEnProgreso,
             'sin_expediente' => $sinExpediente,
         ];
 

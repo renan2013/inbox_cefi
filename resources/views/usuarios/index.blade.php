@@ -268,22 +268,38 @@
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
         }
 
-        /* Expediente Digital Column Badges & Elements */
+        /* Expediente Digital Badges & Buttons */
         .badge-sin-expediente {
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            background: rgba(248, 113, 113, 0.12);
+            gap: 0.35rem;
+            background: rgba(239, 68, 68, 0.12);
             color: #f87171;
-            border: 1px solid rgba(248, 113, 113, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             border-radius: 2rem;
-            padding: 0.35rem 0.75rem;
+            padding: 0.3rem 0.65rem;
             font-size: 0.78rem;
             font-weight: 700;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
         }
 
-        .btn-crear-expediente-pill {
+        .badge-con-expediente {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 2rem;
+            padding: 0.3rem 0.65rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
+        .btn-crear-expediente {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
@@ -291,76 +307,42 @@
             color: #5fb230;
             border: 1px solid rgba(95, 178, 48, 0.35);
             border-radius: 2rem;
-            padding: 0.28rem 0.7rem;
-            font-size: 0.74rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.75rem;
             font-weight: 700;
             text-decoration: none;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-top: 0.35rem;
+            white-space: nowrap;
         }
 
-        .btn-crear-expediente-pill:hover {
+        .btn-crear-expediente:hover {
             background: #5fb230;
-            color: white;
+            color: #ffffff;
             box-shadow: 0 4px 12px rgba(95, 178, 48, 0.35);
             transform: translateY(-1px);
         }
 
-        .progress-expediente {
-            height: 7px;
-            background-color: rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .badge-exp-estado {
-            font-size: 0.68rem;
+        .btn-ver-expediente {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(59, 130, 246, 0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 2rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            padding: 0.15rem 0.5rem;
-            border-radius: 1rem;
-            border: 1px solid;
-            font-family: monospace;
-        }
-
-        .badge-exp-aprobado {
-            background: rgba(16, 185, 129, 0.15);
-            color: #34d399;
-            border-color: rgba(16, 185, 129, 0.3);
-        }
-
-        .badge-exp-pendiente {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-            border-color: rgba(245, 158, 11, 0.3);
-        }
-
-        .badge-exp-rechazado {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-
-        .exp-carrera-sub {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            max-width: 145px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: inline-block;
-        }
-
-        .exp-link-icon {
-            color: var(--primary);
-            font-size: 0.8rem;
-            transition: all 0.2s;
-            padding: 0.1rem 0.25rem;
             text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
         }
 
-        .exp-link-icon:hover {
+        .btn-ver-expediente:hover {
+            background: #3b82f6;
             color: #ffffff;
-            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+            transform: translateY(-1px);
         }
 
         [data-theme="light"] .badge-sin-expediente {
@@ -369,25 +351,32 @@
             border-color: #fecaca;
         }
 
-        [data-theme="light"] .btn-crear-expediente-pill {
+        [data-theme="light"] .badge-con-expediente {
+            background: #ecfdf5;
+            color: #059669;
+            border-color: #a7f3d0;
+        }
+
+        [data-theme="light"] .btn-crear-expediente {
             background: rgba(95, 178, 48, 0.1);
             color: #3d8b18;
             border-color: rgba(95, 178, 48, 0.4);
         }
 
-        [data-theme="light"] .btn-crear-expediente-pill:hover {
+        [data-theme="light"] .btn-crear-expediente:hover {
             background: #5fb230;
             color: #ffffff;
         }
 
-        [data-theme="light"] .progress-expediente {
-            background-color: #e2e8f0;
+        [data-theme="light"] .btn-ver-expediente {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #bfdbfe;
         }
 
-        [data-theme="light"] .btn-action-icon.btn-action-expediente {
-            background-color: rgba(95, 178, 48, 0.1);
-            border-color: rgba(95, 178, 48, 0.35);
-            color: #3d8b18;
+        [data-theme="light"] .btn-ver-expediente:hover {
+            background: #2563eb;
+            color: #ffffff;
         }
 
         [data-theme="light"] .btn-action-icon.btn-action-edit {
@@ -445,8 +434,8 @@
             </div>
         </div>
 
-        <!-- KPI Interactive Cards: Roles -->
-        <div class="row g-3 mb-3">
+        <!-- KPI Interactive Cards -->
+        <div class="row g-3 mb-4">
             <!-- Total Usuarios -->
             <div class="col-sm-6 col-lg-3">
                 <div class="kpi-card d-flex justify-content-between align-items-center" id="kpi-total" onclick="filtrarPorKpi('')" title="Ver todos los usuarios">
@@ -460,92 +449,45 @@
                 </div>
             </div>
 
-            <!-- Docentes -->
+            <!-- Con Expediente Digital -->
             <div class="col-sm-6 col-lg-3">
-                <div class="kpi-card d-flex justify-content-between align-items-center" id="kpi-docentes" onclick="filtrarPorKpi('2')" title="Filtrar Docentes">
-                    <div>
-                        <div class="kpi-lbl text-primary">Docentes / Profesores</div>
-                        <div class="kpi-val text-primary">{{ $kpis['docentes'] ?? 0 }}</div>
-                    </div>
-                    <div class="kpi-icon-box" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
-                        <i class="bi bi-mortarboard"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Administradores -->
-            <div class="col-sm-6 col-lg-3">
-                <div class="kpi-card d-flex justify-content-between align-items-center" id="kpi-admins" onclick="filtrarPorKpi('1')" title="Filtrar Administradores">
-                    <div>
-                        <div class="kpi-lbl text-danger">Administradores</div>
-                        <div class="kpi-val text-danger">{{ $kpis['admins'] ?? 0 }}</div>
-                    </div>
-                    <div class="kpi-icon-box" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
-                        <i class="bi bi-shield-lock"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Estudiantes -->
-            <div class="col-sm-6 col-lg-3">
-                <div class="kpi-card d-flex justify-content-between align-items-center" id="kpi-estudiantes" onclick="filtrarPorKpi('3')" title="Filtrar Estudiantes">
-                    <div>
-                        <div class="kpi-lbl text-success">Estudiantes / Miembros</div>
-                        <div class="kpi-val text-success">{{ $kpis['estudiantes'] ?? 0 }}</div>
-                    </div>
-                    <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
-                        <i class="bi bi-person-badge"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- KPI Interactive Cards: Expedientes Digitales 360° -->
-        <div class="row g-3 mb-4">
-            <!-- Expedientes Completos -->
-            <div class="col-sm-6 col-lg-4">
-                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-success" id="kpi-exp-completo" onclick="filtrarPorExpedienteKpi('completo')" title="Click para filtrar usuarios con expediente digital completado">
+                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-success" id="kpi-exp-con" onclick="filtrarPorExpedienteKpi('con_expediente')" title="Filtrar usuarios con expediente digital creado">
                     <div>
                         <div class="kpi-lbl text-success d-flex align-items-center gap-2">
-                            <i class="bi bi-patch-check-fill fs-6"></i> Expedientes Completos
+                            <i class="bi bi-folder-check"></i> Con Expediente
                         </div>
-                        <div class="kpi-val text-success">{{ $kpis['expedientes_completos'] ?? 0 }}</div>
-                        <small class="text-white-50" style="font-size: 0.72rem;">Requisitos completos y aprobados</small>
+                        <div class="kpi-val text-success">{{ $kpis['con_expediente'] ?? 0 }}</div>
                     </div>
                     <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
-                        <i class="bi bi-folder-check"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Expedientes En Progreso / Incompletos -->
-            <div class="col-sm-6 col-lg-4">
-                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-warning" id="kpi-exp-progreso" onclick="filtrarPorExpedienteKpi('en_progreso')" title="Click para filtrar usuarios con expediente en proceso">
-                    <div>
-                        <div class="kpi-lbl text-warning d-flex align-items-center gap-2">
-                            <i class="bi bi-pie-chart-fill fs-6"></i> En Progreso (Incompletos)
-                        </div>
-                        <div class="kpi-val text-warning">{{ $kpis['expedientes_en_progreso'] ?? 0 }}</div>
-                        <small class="text-white-50" style="font-size: 0.72rem;">Con requisitos pendientes de completar</small>
-                    </div>
-                    <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
-                        <i class="bi bi-hourglass-split"></i>
+                        <i class="bi bi-folder2-open"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Sin Expediente Digital -->
-            <div class="col-sm-6 col-lg-4">
-                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-danger" id="kpi-exp-sin" onclick="filtrarPorExpedienteKpi('sin_expediente')" title="Click para filtrar usuarios que aún no tienen expediente">
+            <div class="col-sm-6 col-lg-3">
+                <div class="kpi-card d-flex justify-content-between align-items-center border-start border-4 border-danger" id="kpi-exp-sin" onclick="filtrarPorExpedienteKpi('sin_expediente')" title="Filtrar usuarios sin expediente digital">
                     <div>
                         <div class="kpi-lbl d-flex align-items-center gap-2" style="color: #f87171;">
-                            <i class="bi bi-folder-x fs-6"></i> Sin Expediente Digital
+                            <i class="bi bi-folder-x"></i> Sin Expediente
                         </div>
                         <div class="kpi-val" style="color: #f87171;">{{ $kpis['sin_expediente'] ?? 0 }}</div>
-                        <small class="text-white-50" style="font-size: 0.72rem;">Usuarios pendientes de crear su expediente</small>
                     </div>
                     <div class="kpi-icon-box" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
                         <i class="bi bi-file-earmark-x"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estudiantes / Miembros -->
+            <div class="col-sm-6 col-lg-3">
+                <div class="kpi-card d-flex justify-content-between align-items-center" id="kpi-estudiantes" onclick="filtrarPorKpi('3')" title="Filtrar Estudiantes">
+                    <div>
+                        <div class="kpi-lbl text-info">Estudiantes / Miembros</div>
+                        <div class="kpi-val text-info">{{ $kpis['estudiantes'] ?? 0 }}</div>
+                    </div>
+                    <div class="kpi-icon-box" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+                        <i class="bi bi-person-badge"></i>
                     </div>
                 </div>
             </div>
@@ -570,10 +512,9 @@
                 <div class="col-lg-3 col-md-6">
                     <label for="expedienteFilter" class="form-label text-white-50 fw-semibold mb-2">Expediente Digital</label>
                     <select name="expediente_status" id="expedienteFilter" class="form-select form-control-custom">
-                        <option value="">Todos los Estados</option>
-                        <option value="completo" {{ request('expediente_status') == 'completo' ? 'selected' : '' }}>✅ Expedientes Completos</option>
-                        <option value="en_progreso" {{ request('expediente_status') == 'en_progreso' ? 'selected' : '' }}>⏳ En Progreso / Incompletos</option>
-                        <option value="sin_expediente" {{ request('expediente_status') == 'sin_expediente' ? 'selected' : '' }}>📁 Sin Expediente Digital</option>
+                        <option value="">Todos los Usuarios</option>
+                        <option value="con_expediente" {{ request('expediente_status') == 'con_expediente' ? 'selected' : '' }}>✅ Con Expediente</option>
+                        <option value="sin_expediente" {{ request('expediente_status') == 'sin_expediente' ? 'selected' : '' }}>📁 Sin Expediente</option>
                     </select>
                 </div>
 
@@ -635,11 +576,9 @@
                                 $initial = strtoupper(substr($usuario->apellidos ?: $usuario->nombre, 0, 1));
                                 $isSelf = auth()->check() && auth()->id() === $usuario->id;
                                 $isMoodle = strtolower((string)$usuario->origen) === 'moodle' || !empty($usuario->id_moodle);
-
                                 $hasExpediente = !is_null($usuario->expediente);
                                 $exp = $usuario->expediente;
-                                $porcExp = $hasExpediente ? $exp->porcentaje_completitud : 0;
-                                $statusExp = $hasExpediente ? ($exp->estado === 'Aprobado' ? 'completo' : 'en_progreso') : 'sin_expediente';
+                                $statusExp = $hasExpediente ? 'con_expediente' : 'sin_expediente';
                             @endphp
                             <tr class="user-row" 
                                 data-id="{{ $usuario->id }}"
@@ -650,8 +589,7 @@
                                 data-telefono="{{ $usuario->telefono }}"
                                 data-rol-id="{{ $usuario->id_rol }}"
                                 data-origen="{{ strtolower($usuario->origen) }}"
-                                data-expediente-status="{{ $statusExp }}"
-                                data-expediente-porc="{{ $porcExp }}">
+                                data-expediente-status="{{ $statusExp }}">
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 42px; height: 42px; background: rgba(255, 255, 255, 0.06); border: 1.5px solid var(--border-dark);">
@@ -700,51 +638,26 @@
                                 </td>
                                 <td>
                                     @if ($hasExpediente)
-                                        @php
-                                            $colorBar = $porcExp >= 80 ? 'bg-success' : ($porcExp >= 50 ? 'bg-warning' : 'bg-danger');
-                                            $colorText = $porcExp >= 80 ? 'text-success' : ($porcExp >= 50 ? 'text-warning' : 'text-danger');
-                                            $badgeEstadoClass = $exp->estado === 'Aprobado' ? 'badge-exp-aprobado' : ($exp->estado === 'Rechazado' ? 'badge-exp-rechazado' : 'badge-exp-pendiente');
-                                            $tooltipText = $exp->campos_pendientes_texto;
-                                        @endphp
-                                        <div style="min-width: 175px;" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $tooltipText }}">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <span class="fw-bold small {{ $colorText }} d-inline-flex align-items-center gap-1">
-                                                    @if ($exp->estado === 'Aprobado')
-                                                        <i class="bi bi-patch-check-fill"></i> 100% Completo
-                                                    @else
-                                                        <i class="bi bi-pie-chart-fill"></i> {{ $porcExp }}% Avance
-                                                    @endif
-                                                </span>
-                                                <span class="badge-exp-estado {{ $badgeEstadoClass }}">
-                                                    {{ $exp->estado ?: 'Pendiente' }}
-                                                </span>
-                                            </div>
-                                            <div class="progress progress-expediente">
-                                                <div class="progress-bar {{ $colorBar }}" role="progressbar" style="width: {{ $porcExp }}%;" aria-valuenow="{{ $porcExp }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                            <div class="d-flex justify-content-between align-items-center mt-1">
-                                                <span class="exp-carrera-sub" title="{{ $exp->especialidad_deseada ?: 'Expediente Institucional' }}">
-                                                    <i class="bi bi-mortarboard me-1 opacity-75"></i>{{ $exp->especialidad_deseada ?: 'Expediente Digital' }}
-                                                </span>
-                                                <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" class="exp-link-icon" title="Abrir expediente digital 360°">
-                                                    <i class="bi bi-box-arrow-up-right"></i>
-                                                </a>
-                                            </div>
+                                        <div class="d-inline-flex align-items-center gap-2">
+                                            <span class="badge-con-expediente" title="Expediente digital registrado">
+                                                <i class="bi bi-folder-check"></i> Con Expediente
+                                            </span>
+                                            <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" 
+                                               class="btn-ver-expediente" 
+                                               title="Ver expediente digital de {{ $nombreCompleto }}">
+                                                <i class="bi bi-folder2-open"></i> Ver
+                                            </a>
                                         </div>
                                     @else
-                                        <div style="min-width: 165px;">
-                                            <div>
-                                                <span class="badge-sin-expediente" title="Este usuario aún no tiene expediente digital creado">
-                                                    <i class="bi bi-folder-x"></i> Sin Expediente
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <a href="{{ route('expedientes.create', ['id_usuario' => $usuario->id]) }}" 
-                                                   class="btn-crear-expediente-pill" 
-                                                   title="Crear expediente digital para {{ $nombreCompleto }}">
-                                                    <i class="bi bi-plus-circle-fill"></i> Crear Expediente
-                                                </a>
-                                            </div>
+                                        <div class="d-inline-flex align-items-center gap-2">
+                                            <span class="badge-sin-expediente" title="Aún no se ha creado expediente para este usuario">
+                                                <i class="bi bi-folder-x"></i> Sin Expediente
+                                            </span>
+                                            <a href="{{ route('expedientes.create', ['id_usuario' => $usuario->id]) }}" 
+                                               class="btn-crear-expediente" 
+                                               title="Crear expediente digital para {{ $nombreCompleto }}">
+                                                <i class="bi bi-plus-circle-fill"></i> Crear Expediente
+                                            </a>
                                         </div>
                                     @endif
                                 </td>
@@ -756,14 +669,7 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <div class="d-flex justify-content-end align-items-center gap-1">
-                                        @if ($hasExpediente)
-                                            <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" 
-                                                class="btn-action-icon btn-action-expediente" 
-                                                title="Ver Expediente Digital 360° ({{ $porcExp }}%)">
-                                                <i class="bi bi-folder2-open"></i>
-                                            </a>
-                                        @endif
+                                    <div class="d-flex justify-content-end align-items-center gap-2">
                                         <a href="{{ route('usuarios.edit', $usuario->id) }}" 
                                             class="btn-action-icon btn-action-edit btn-editar-usuario" 
                                             data-id="{{ $usuario->id }}"
@@ -785,11 +691,11 @@
                                                 <i class="bi bi-trash3"></i>
                                             </button>
                                         @elseif ($isMoodle)
-                                            <span class="badge bg-secondary bg-opacity-10 text-white-50 py-2 px-2" title="Usuario sincronizado vía Moodle">
+                                            <span class="btn-action-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted); cursor: not-allowed;" title="Usuario sincronizado vía Moodle">
                                                 <i class="bi bi-mortarboard-fill"></i>
                                             </span>
                                         @else
-                                            <span class="badge bg-secondary bg-opacity-10 text-white-50 py-2 px-2" title="Tu propia cuenta en sesión">
+                                            <span class="btn-action-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted); cursor: not-allowed;" title="Tu propia cuenta en sesión">
                                                 <i class="bi bi-person-check"></i>
                                             </span>
                                         @endif
@@ -993,16 +899,7 @@
                     const matchOrigen = !origenVal || rowOrigen === origenVal;
 
                     // Coincidencia de estado de expediente digital
-                    let matchExp = true;
-                    if (expVal) {
-                        if (expVal === 'completo') {
-                            matchExp = (rowExpStatus === 'completo');
-                        } else if (expVal === 'en_progreso') {
-                            matchExp = (rowExpStatus === 'en_progreso');
-                        } else if (expVal === 'sin_expediente') {
-                            matchExp = (rowExpStatus === 'sin_expediente');
-                        }
-                    }
+                    const matchExp = !expVal || (rowExpStatus === expVal);
 
                     if (matchSearch && matchRol && matchOrigen && matchExp) {
                         row.style.display = '';
@@ -1056,9 +953,11 @@
             // Función global para hacer clic en las tarjetas KPI de expedientes digitales
             window.filtrarPorExpedienteKpi = function(status) {
                 document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-kpi'));
-                if (status === 'completo') document.getElementById('kpi-exp-completo')?.classList.add('active-kpi');
-                else if (status === 'en_progreso') document.getElementById('kpi-exp-progreso')?.classList.add('active-kpi');
-                else if (status === 'sin_expediente') document.getElementById('kpi-exp-sin')?.classList.add('active-kpi');
+                if (status === 'con_expediente') {
+                    document.getElementById('kpi-exp-con')?.classList.add('active-kpi');
+                } else if (status === 'sin_expediente') {
+                    document.getElementById('kpi-exp-sin')?.classList.add('active-kpi');
+                }
 
                 rolSelect.value = '';
                 if (expSelect) {
