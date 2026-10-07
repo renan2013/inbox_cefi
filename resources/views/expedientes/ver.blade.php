@@ -94,6 +94,10 @@
 
                     <!-- Botones de Acción Rápida -->
                     <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
+                        <a href="{{ route('expedientes.create', ['id_usuario' => $expediente->id_usuario]) }}" class="btn btn-primary btn-sm px-3 rounded-pill fw-semibold d-flex align-items-center gap-2">
+                            <i class="bi bi-pencil-square"></i> Editar Expediente
+                        </a>
+
                         @if(!empty($linkWa) && $linkWa !== '#')
                             <a href="{{ $linkWa }}" target="_blank" class="btn btn-success btn-sm px-3 rounded-pill fw-semibold d-flex align-items-center gap-2">
                                 <i class="bi bi-whatsapp"></i> WhatsApp

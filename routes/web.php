@@ -207,6 +207,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/expedientes/crear', [ExpedienteController::class, 'store'])->name('expedientes.store');
         Route::get('/expedientes/buscar-usuario-ajax', [ExpedienteController::class, 'buscarUsuarioAjax'])->name('expedientes.buscar_usuario_ajax');
         Route::get('/expedientes/{id}', [ExpedienteController::class, 'ver'])->name('expedientes.ver');
+        Route::get('/expedientes/{id}/editar', [ExpedienteController::class, 'edit'])->name('expedientes.edit');
         Route::post('/expedientes/{id}/estado', [ExpedienteController::class, 'cambiarEstado'])->name('expedientes.cambiar_estado');
         Route::post('/expedientes/subir-documento', [ExpedienteController::class, 'subirDocumento'])->name('expedientes.subir_documento');
         Route::post('/expedientes/documentos/{id}/eliminar', [ExpedienteController::class, 'eliminarDocumento'])->name('expedientes.documentos.eliminar');

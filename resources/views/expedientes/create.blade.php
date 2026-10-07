@@ -550,7 +550,8 @@
         <!-- FORMULARIO DETALLADO DEL EXPEDIENTE COMPLETO -->
         <div id="expediente-data-section" class="glass-card" style="{{ (isset($usuarioPreseleccionado) && $usuarioPreseleccionado) ? '' : 'display: none;' }}">
             <div class="step-header">
-                <div class="step-badge"><i class="bi bi-folder-check"></i></div> Formulario Oficial de Expediente Digital
+                <div class="step-badge"><i class="bi bi-folder-check"></i></div> 
+                {{ (isset($exp) && $exp && $exp->id_expediente) ? 'Edición Oficial del Expediente Digital' : 'Formulario Oficial de Expediente Digital' }}
             </div>
             <div class="card-body p-4 p-md-5">
                 @php
@@ -564,7 +565,7 @@
 
                 <h4 class="data-form-header fw-bold mb-4" id="data-form-header">
                     @if(isset($usuarioPreseleccionado) && $usuarioPreseleccionado)
-                        Expediente Digital para: {{ $usuarioPreseleccionado->nombre }} {{ $usuarioPreseleccionado->apellidos }}
+                        {{ (isset($exp) && $exp && $exp->id_expediente) ? 'Editar Expediente Digital de:' : 'Expediente Digital para:' }} {{ $usuarioPreseleccionado->nombre }} {{ $usuarioPreseleccionado->apellidos }}
                     @endif
                 </h4>
                 
@@ -980,7 +981,7 @@
 
                     <div class="d-grid mt-5">
                         <button type="submit" class="btn btn-submit py-3 fs-6">
-                            <i class="bi bi-folder-check me-2"></i> Registrar y Guardar Expediente Digital
+                            <i class="bi bi-folder-check me-2"></i> {{ (isset($exp) && $exp && $exp->id_expediente) ? 'Actualizar y Guardar Expediente Digital' : 'Registrar y Guardar Expediente Digital' }}
                         </button>
                     </div>
 

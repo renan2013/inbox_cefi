@@ -125,6 +125,31 @@
     [data-theme="light"] .empty-subtitle {
         color: #64748b !important;
     }
+
+    .btn-edit-exp {
+        border: 1px solid rgba(59, 130, 246, 0.5);
+        color: #60a5fa;
+        background: transparent;
+        transition: all 0.2s;
+    }
+
+    .btn-edit-exp:hover {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        color: #ffffff;
+    }
+
+    [data-theme="light"] .btn-edit-exp {
+        border: 1px solid #2563eb !important;
+        color: #1d4ed8 !important;
+        background: transparent !important;
+    }
+
+    [data-theme="light"] .btn-edit-exp:hover {
+        background-color: #2563eb !important;
+        border-color: #2563eb !important;
+        color: #ffffff !important;
+    }
 </style>
 @endsection
 
@@ -310,10 +335,16 @@
                             @endif
                         </td>
                         <td class="pe-4 text-end">
-                            <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" class="btn btn-sm btn-outline-success px-3 py-1 fw-semibold rounded-pill d-inline-flex align-items-center gap-1">
-                                <span>Ver Expediente 360°</span>
-                                <i class="bi bi-arrow-right"></i>
-                            </a>
+                            <div class="d-inline-flex align-items-center gap-2">
+                                <a href="{{ route('expedientes.create', ['id_usuario' => $exp->id_usuario]) }}" class="btn btn-sm btn-edit-exp px-3 py-1 fw-semibold rounded-pill d-inline-flex align-items-center gap-1" title="Editar datos del expediente">
+                                    <i class="bi bi-pencil-square"></i>
+                                    <span>Editar Expediente</span>
+                                </a>
+                                <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" class="btn btn-sm btn-outline-success px-3 py-1 fw-semibold rounded-pill d-inline-flex align-items-center gap-1">
+                                    <span>Ver Expediente 360°</span>
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     @empty

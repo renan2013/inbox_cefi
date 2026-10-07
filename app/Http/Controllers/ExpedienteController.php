@@ -235,9 +235,23 @@ class ExpedienteController extends Controller
         $usuarioPreseleccionado = null;
         if ($request->filled('id_usuario')) {
             $usuarioPreseleccionado = Usuario::with(['expediente.archivos'])->find($request->id_usuario);
+        } elseif ($request->filled('id_expediente')) {
+            $exp = ExpedienteDigital::find($request->id_expediente);
+            if ($exp) {
+                $usuarioPreseleccionado = Usuario::with(['expediente.archivos'])->find($exp->id_usuario);
+            }
         }
 
         return view('expedientes.create', compact('programas', 'pendientes', 'usuarioPreseleccionado'));
+    }
+
+    /**
+     * Muestra la vista para editar un expediente existente.
+     */
+    public function edit($id)
+    {
+        $expediente = ExpedienteDigital::findOrFail($id);
+        return redirect()->route('expedientes.create', ['id_usuario' => $expediente->id_usuario]);
     }
 
     /**
