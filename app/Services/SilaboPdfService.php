@@ -279,10 +279,31 @@ class SilaboPdfService
         $pdf->SetFillColor($pdf->azul_institucional[0], $pdf->azul_institucional[1], $pdf->azul_institucional[2]);
         $pdf->Rect(0, 0, 8, 297, 'F');
 
-        // Logo oficial del cliente
+        // Logo oficial del cliente (Ajustado proporcionalmente)
         $logo_cliente = ClienteService::logoPath();
         if (file_exists($logo_cliente)) {
-            $pdf->Image($logo_cliente, 15, 12, 45);
+            $imgSize = @getimagesize($logo_cliente);
+            $maxW = 45;
+            $maxH = 22;
+            $imgW = $maxW;
+            $imgH = 0;
+
+            if ($imgSize && $imgSize[0] > 0 && $imgSize[1] > 0) {
+                $ratio = $imgSize[0] / $imgSize[1];
+                if ($ratio < ($maxW / $maxH)) {
+                    $imgH = $maxH;
+                    $imgW = $maxH * $ratio;
+                } else {
+                    $imgW = $maxW;
+                    $imgH = $maxW / $ratio;
+                }
+            } else {
+                $imgH = 22;
+                $imgW = 22;
+            }
+
+            $posY = 12 + (($maxH - $imgH) / 2);
+            $pdf->Image($logo_cliente, 15, $posY, $imgW, $imgH);
         }
 
         $pdf->SetY(14);

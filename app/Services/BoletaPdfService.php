@@ -14,10 +14,31 @@ class BoletaPDFEngine extends FPDF
 {
     function Header()
     {
-        // Logo institucional del cliente
+        // Logo institucional del cliente (Ajustado proporcionalmente para logos cuadrados o rectangulares)
         $logo_cliente = ClienteService::logoPath();
         if (file_exists($logo_cliente)) {
-            $this->Image($logo_cliente, 15, 12, 42);
+            $imgSize = @getimagesize($logo_cliente);
+            $maxW = 40;
+            $maxH = 20;
+            $imgW = $maxW;
+            $imgH = 0;
+
+            if ($imgSize && $imgSize[0] > 0 && $imgSize[1] > 0) {
+                $ratio = $imgSize[0] / $imgSize[1];
+                if ($ratio < ($maxW / $maxH)) {
+                    $imgH = $maxH;
+                    $imgW = $maxH * $ratio;
+                } else {
+                    $imgW = $maxW;
+                    $imgH = $maxW / $ratio;
+                }
+            } else {
+                $imgH = 20;
+                $imgW = 20;
+            }
+
+            $posY = 11 + (($maxH - $imgH) / 2);
+            $this->Image($logo_cliente, 15, $posY, $imgW, $imgH);
         }
 
         // Títulos institucionales
@@ -295,6 +316,9 @@ class BoletaPdfService
             }
             if (!empty($confPagos['firma_oficial_cargo'])) {
                 $firma_cargo = $confPagos['firma_oficial_cargo'];
+            }
+            if (stripos($firma_cargo, 'UNELA') !== false) {
+                $firma_cargo = str_ireplace('UNELA', config('cliente.nombre', 'CEFI'), $firma_cargo);
             }
             if (!empty($confPagos['firma_oficial_imagen'])) {
                 $firma_img = $confPagos['firma_oficial_imagen'];

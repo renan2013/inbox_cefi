@@ -10,10 +10,31 @@ class RecordPDF extends FPDF
 {
     function Header()
     {
-        // Logo oficial del cliente
+        // Logo oficial del cliente (Ajustado proporcionalmente)
         $logoPath = ClienteService::logoPath();
         if (file_exists($logoPath)) {
-            $this->Image($logoPath, 15, 12, 38);
+            $imgSize = @getimagesize($logoPath);
+            $maxW = 38;
+            $maxH = 20;
+            $imgW = $maxW;
+            $imgH = 0;
+
+            if ($imgSize && $imgSize[0] > 0 && $imgSize[1] > 0) {
+                $ratio = $imgSize[0] / $imgSize[1];
+                if ($ratio < ($maxW / $maxH)) {
+                    $imgH = $maxH;
+                    $imgW = $maxH * $ratio;
+                } else {
+                    $imgW = $maxW;
+                    $imgH = $maxW / $ratio;
+                }
+            } else {
+                $imgH = 20;
+                $imgW = 20;
+            }
+
+            $posY = 12 + (($maxH - $imgH) / 2);
+            $this->Image($logoPath, 15, $posY, $imgW, $imgH);
         }
 
         // Títulos institucionales

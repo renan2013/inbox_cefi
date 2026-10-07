@@ -12,10 +12,31 @@ class ActaPDF extends FPDF
 {
     function Header()
     {
-        // Logo oficial del cliente (Superior Izquierda)
+        // Logo oficial del cliente (Superior Izquierda, ajustado proporcionalmente)
         $logo_cliente = ClienteService::logoPath();
         if (file_exists($logo_cliente)) {
-            $this->Image($logo_cliente, 10, 10, 45);
+            $imgSize = @getimagesize($logo_cliente);
+            $maxW = 45;
+            $maxH = 22;
+            $imgW = $maxW;
+            $imgH = 0;
+
+            if ($imgSize && $imgSize[0] > 0 && $imgSize[1] > 0) {
+                $ratio = $imgSize[0] / $imgSize[1];
+                if ($ratio < ($maxW / $maxH)) {
+                    $imgH = $maxH;
+                    $imgW = $maxH * $ratio;
+                } else {
+                    $imgW = $maxW;
+                    $imgH = $maxW / $ratio;
+                }
+            } else {
+                $imgH = 22;
+                $imgW = 22;
+            }
+
+            $posY = 10 + (($maxH - $imgH) / 2);
+            $this->Image($logo_cliente, 10, $posY, $imgW, $imgH);
         }
 
         // Título y Nombre Institución (Derecha del logo)

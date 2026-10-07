@@ -188,10 +188,32 @@ class DescriptorPdfService
         $pdf->SetMargins(12, 12, 12);
         $pdf->AddPage();
 
-        // Logo oficial del cliente
+        // Logo oficial del cliente (Centrado y ajustado proporcionalmente)
         $logo_cliente = ClienteService::logoPath();
         if (file_exists($logo_cliente)) {
-            $pdf->Image($logo_cliente, 80, 15, 50);
+            $imgSize = @getimagesize($logo_cliente);
+            $maxW = 50;
+            $maxH = 22;
+            $imgW = $maxW;
+            $imgH = 0;
+
+            if ($imgSize && $imgSize[0] > 0 && $imgSize[1] > 0) {
+                $ratio = $imgSize[0] / $imgSize[1];
+                if ($ratio < ($maxW / $maxH)) {
+                    $imgH = $maxH;
+                    $imgW = $maxH * $ratio;
+                } else {
+                    $imgW = $maxW;
+                    $imgH = $maxW / $ratio;
+                }
+            } else {
+                $imgH = 22;
+                $imgW = 22;
+            }
+
+            $posX = 12 + ((186 - $imgW) / 2);
+            $posY = 14 + (($maxH - $imgH) / 2);
+            $pdf->Image($logo_cliente, $posX, $posY, $imgW, $imgH);
         }
 
         $pdf->SetY(38);
