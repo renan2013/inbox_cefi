@@ -16,7 +16,7 @@ class ExpedienteStorageService
         '03_Admision_y_Matricula'   => '03. Admisión, Solicitudes & Boletas',
         '04_Convalidaciones'        => '04. Convalidaciones & Homologaciones',
         '05_TCU_y_Practicas'        => '05. TCU & Prácticas Profesionales',
-        '06_Cartas_y_Recomendaciones'=> '06. Cartas Pastorales & Recomendaciones',
+        '06_Cartas_y_Recomendaciones'=> '06. Cartas de Recomendación & Atestados',
         '07_Comprobantes_Financieros'=> '07. Comprobantes de Pago & Financieros',
         '08_Justificaciones'        => '08. Justificaciones Médicas & Laborales',
         '09_General_y_Otros'        => '09. Otros Documentos Generales',
@@ -81,7 +81,7 @@ class ExpedienteStorageService
         if (str_contains($t, 'tcu') || str_contains($t, 'comunitario') || str_contains($t, 'practica')) {
             return '05_TCU_y_Practicas';
         }
-        if (str_contains($t, 'pastoral') || str_contains($t, 'carta') || str_contains($t, 'recomenda')) {
+        if (str_contains($t, 'pastoral') || str_contains($t, 'carta') || str_contains($t, 'recomenda') || str_contains($t, 'atestado')) {
             return '06_Cartas_y_Recomendaciones';
         }
         if (str_contains($t, 'comprobante') || str_contains($t, 'pago') || str_contains($t, 'deposito') || str_contains($t, 'financier') || str_contains($t, 'sinpe') || str_contains($t, 'factura')) {

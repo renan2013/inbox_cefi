@@ -744,7 +744,7 @@
                             </div>
                             <div class="col-xl-3 col-md-6">
                                 <label class="form-label-custom">Especialidad Univ. Previa</label>
-                                <input type="text" name="procedencia_universidad_especialidad" class="form-control form-control-custom w-100" value="{{ old('procedencia_universidad_especialidad', $exp->procedencia_universidad_especialidad ?? '') }}" placeholder="Ej: Teología / Educación">
+                                <input type="text" name="procedencia_universidad_especialidad" class="form-control form-control-custom w-100" value="{{ old('procedencia_universidad_especialidad', $exp->procedencia_universidad_especialidad ?? '') }}" placeholder="Ej: Administración / Informática / Educación">
                             </div>
                         </div>
                     </fieldset>
@@ -754,12 +754,12 @@
                         <div class="legend-custom"><i class="bi bi-briefcase-fill me-2"></i>6. Información Laboral</div>
                         <div class="row g-4 mb-3">
                             <div class="col-xl-4 col-md-6">
-                                <label class="form-label-custom">Empresa / Institución / Iglesia</label>
-                                <input type="text" name="laboral_institucion" class="form-control form-control-custom w-100" value="{{ old('laboral_institucion', $exp->laboral_institucion ?? '') }}" placeholder="Ej: Ministerio Cristiano / Empresa Privada">
+                                <label class="form-label-custom">Empresa / Institución / Organización</label>
+                                <input type="text" name="laboral_institucion" class="form-control form-control-custom w-100" value="{{ old('laboral_institucion', $exp->laboral_institucion ?? '') }}" placeholder="Ej: Empresa Privada / Institución Pública">
                             </div>
                             <div class="col-xl-4 col-md-6">
                                 <label class="form-label-custom">Puesto o Cargo que Desempeña</label>
-                                <input type="text" name="laboral_puesto" class="form-control form-control-custom w-100" value="{{ old('laboral_puesto', $exp->laboral_puesto ?? '') }}" placeholder="Ej: Pastor Asociado / Administrador">
+                                <input type="text" name="laboral_puesto" class="form-control form-control-custom w-100" value="{{ old('laboral_puesto', $exp->laboral_puesto ?? '') }}" placeholder="Ej: Administrador / Especialista / Asistente">
                             </div>
                             <div class="col-xl-4 col-md-6">
                                 <label class="form-label-custom">Fecha de Ingreso Laboral</label>
@@ -785,7 +785,7 @@
                         </div>
                     </fieldset>
 
-                    <!-- 7. DOCUMENTACIÓN DIGITAL Y OBSERVACIONES (ESTILO OFICIAL UNELA) -->
+                    <!-- 7. DOCUMENTACIÓN DIGITAL Y OBSERVACIONES -->
                     <fieldset class="mb-5">
                         <div class="legend-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <span><i class="bi bi-file-earmark-check-fill me-2"></i>7. Documentación Adjunta y Requisitos de Admisión</span>
@@ -956,7 +956,7 @@
                                             <i class="bi bi-folder-plus text-info fs-4"></i>
                                             <div>
                                                 <div class="doc-upload-title">Documentos Complementarios / Otros Anexos</div>
-                                                <div class="doc-upload-desc">Cartas de recomendación, cartas pastorales, comprobantes de pago, etc.</div>
+                                                <div class="doc-upload-desc">Cartas de recomendación, constancias laborales o atestados adicionales.</div>
                                             </div>
                                         </div>
                                     </div>

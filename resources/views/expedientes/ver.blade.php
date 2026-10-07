@@ -319,7 +319,7 @@
                             <div class="p-3 rounded-3 mb-4" style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.05);">
                                 <h5 class="fw-bold text-info mb-3"><i class="bi bi-briefcase-fill me-2"></i>Información Laboral</h5>
                                 <div class="row g-2 small">
-                                    <div class="col-sm-4 text-muted">Empresa / Iglesia:</div>
+                                    <div class="col-sm-4 text-muted">Empresa / Organización:</div>
                                     <div class="col-sm-8 fw-semibold">{{ $expediente->laboral_institucion ?: 'N/D' }}</div>
                                     <div class="col-sm-4 text-muted">Puesto / Cargo:</div>
                                     <div class="col-sm-8">{{ $expediente->laboral_puesto ?: 'N/D' }}</div>
@@ -535,7 +535,7 @@
                                             <option value="General">General</option>
                                             <option value="Académica">Académica / Convalidaciones</option>
                                             <option value="Financiera">Financiera / Arreglo de Pago</option>
-                                            <option value="Conducta">Conducta / Pastoral</option>
+                                            <option value="Conducta">Conducta / Disciplinaria</option>
                                             <option value="Trámite">Trámite de Graduación</option>
                                         </select>
                                     </div>
@@ -602,7 +602,7 @@
                             <option value="certificacion_notas">Certificación de Notas / Convalidación</option>
                             <option value="fotografia">Fotografía Oficial para Carnet</option>
                             <option value="firma">Firma Digitalizada</option>
-                            <option value="carta_pastoral">Carta Pastoral / Recomendación</option>
+                            <option value="carta_recomendacion">Carta de Recomendación / Atestados</option>
                             <option value="comprobante_pago">Comprobante de Pago / Depósito</option>
                             <option value="otro">Otro Documento</option>
                         </select>
