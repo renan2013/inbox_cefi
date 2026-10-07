@@ -275,6 +275,14 @@ class ExpedienteController extends Controller
         }
         $data['estado'] = $request->input('estado', 'Aprobado');
 
+        // Manejar fechas vacías como null
+        $dateFields = ['fecha_nacimiento', 'laboral_fecha_ingreso', 'registro_fecha_matricula', 'fecha_registro'];
+        foreach ($dateFields as $dateField) {
+            if (array_key_exists($dateField, $data) && empty($data[$dateField])) {
+                $data[$dateField] = null;
+            }
+        }
+
         if ($expediente) {
             $expediente->update($data);
             $message = 'Expediente digital actualizado con éxito.';

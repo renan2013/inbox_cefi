@@ -473,15 +473,19 @@
             </div>
         @endif
 
-        <!-- FORMULARIO DETALLADO DEL EXPEDIENTE -->
+        <!-- FORMULARIO DETALLADO DEL EXPEDIENTE COMPLETO -->
         <div id="expediente-data-section" class="glass-card" style="{{ (isset($usuarioPreseleccionado) && $usuarioPreseleccionado) ? '' : 'display: none;' }}">
             <div class="step-header">
-                <div class="step-badge"><i class="bi bi-folder-check"></i></div> Datos del Expediente Digital
+                <div class="step-badge"><i class="bi bi-folder-check"></i></div> Formulario Oficial de Expediente Digital
             </div>
             <div class="card-body p-4 p-md-5">
+                @php
+                    $exp = $usuarioPreseleccionado ? $usuarioPreseleccionado->expediente : null;
+                @endphp
+
                 <h4 class="data-form-header fw-bold mb-4" id="data-form-header">
                     @if(isset($usuarioPreseleccionado) && $usuarioPreseleccionado)
-                        Expediente para: {{ $usuarioPreseleccionado->nombre }} {{ $usuarioPreseleccionado->apellidos }}
+                        Expediente Digital para: {{ $usuarioPreseleccionado->nombre }} {{ $usuarioPreseleccionado->apellidos }}
                     @endif
                 </h4>
                 
@@ -489,134 +493,265 @@
                     @csrf
                     <input type="hidden" id="student_id" name="id_usuario" value="{{ $usuarioPreseleccionado->id ?? '' }}">
 
-                    <!-- GRADO Y ESPECIALIDAD -->
+                    <!-- 1. GRADO E INTERÉS ACADÉMICO -->
                     <fieldset class="mb-5">
-                        <div class="legend-custom">Grado e Interés Académico</div>
+                        <div class="legend-custom"><i class="bi bi-mortarboard-fill me-2"></i>1. Grado e Interés Académico</div>
                         <div class="row g-4">
-                            <div class="col-md-5">
+                            <div class="col-xl-4 col-md-6">
                                 <label for="grado_a_matricular" class="form-label-custom">Grado a Matricular</label>
                                 <select name="grado_a_matricular" id="grado_a_matricular" class="form-select form-select-custom w-100">
-                                    <option value="Bachillerato">Bachillerato</option>
-                                    <option value="Licenciatura">Licenciatura</option>
-                                    <option value="Maestria">Maestría</option>
-                                    <option value="Doctorado">Doctorado</option>
-                                    <option value="Tecnico">Técnico</option>
-                                    <option value="Curso Libre">Curso Libre</option>
+                                    @php $gradoActual = old('grado_a_matricular', $exp->grado_a_matricular ?? 'Bachillerato'); @endphp
+                                    <option value="Bachillerato" {{ $gradoActual == 'Bachillerato' ? 'selected' : '' }}>Bachillerato</option>
+                                    <option value="Licenciatura" {{ $gradoActual == 'Licenciatura' ? 'selected' : '' }}>Licenciatura</option>
+                                    <option value="Maestria" {{ $gradoActual == 'Maestria' ? 'selected' : '' }}>Maestría</option>
+                                    <option value="Doctorado" {{ $gradoActual == 'Doctorado' ? 'selected' : '' }}>Doctorado</option>
+                                    <option value="Tecnico" {{ $gradoActual == 'Tecnico' ? 'selected' : '' }}>Técnico</option>
+                                    <option value="Curso Libre" {{ $gradoActual == 'Curso Libre' ? 'selected' : '' }}>Curso Libre</option>
                                 </select>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-xl-4 col-md-6">
                                 <label for="especialidad_deseada" class="form-label-custom">Especialidad o Carrera Deseada</label>
                                 <select name="especialidad_deseada" id="especialidad_deseada" class="form-select form-select-custom w-100">
+                                    @php $espActual = old('especialidad_deseada', $exp->especialidad_deseada ?? ''); @endphp
                                     @foreach ($programas as $prog)
-                                        <option value="{{ $prog->nombre_programa }}">{{ $prog->nombre_programa }}</option>
+                                        <option value="{{ $prog->nombre_programa }}" {{ $espActual == $prog->nombre_programa ? 'selected' : '' }}>{{ $prog->nombre_programa }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-xl-2 col-md-6">
                                 <label for="fecha_registro" class="form-label-custom">Fecha de Registro</label>
-                                <input type="date" name="fecha_registro" id="fecha_registro" class="form-control form-control-custom w-100" value="{{ date('Y-m-d') }}">
+                                <input type="date" name="fecha_registro" id="fecha_registro" class="form-control form-control-custom w-100" value="{{ old('fecha_registro', ($exp && $exp->fecha_registro) ? $exp->fecha_registro->format('Y-m-d') : date('Y-m-d')) }}">
+                            </div>
+                            <div class="col-xl-2 col-md-6">
+                                <label for="estado" class="form-label-custom">Estado del Expediente</label>
+                                <select name="estado" id="estado" class="form-select form-select-custom w-100">
+                                    @php $estActual = old('estado', $exp->estado ?? 'Aprobado'); @endphp
+                                    <option value="Aprobado" {{ $estActual == 'Aprobado' ? 'selected' : '' }}>✅ Aprobado</option>
+                                    <option value="Pendiente" {{ $estActual == 'Pendiente' ? 'selected' : '' }}>⏳ Pendiente</option>
+                                    <option value="Rechazado" {{ $estActual == 'Rechazado' ? 'selected' : '' }}>❌ Rechazado</option>
+                                </select>
                             </div>
                         </div>
                     </fieldset>
 
-                    <!-- DATOS PERSONALES -->
+                    <!-- 2. DATOS DE IDENTIDAD Y PERSONALES -->
                     <fieldset class="mb-5">
-                        <div class="legend-custom">Datos Personales</div>
+                        <div class="legend-custom"><i class="bi bi-person-badge-fill me-2"></i>2. Datos de Identidad y Personales</div>
                         <div class="row g-4">
-                            <div class="col-md-3">
-                                <label class="form-label-custom">Cédula / Identificación</label>
-                                <input type="text" name="cedula_residencia" class="form-control form-control-custom w-100" value="{{ $usuarioPreseleccionado->cedula ?? '' }}" placeholder="Ej: 1-1234-5678">
+                            <div class="col-xl-3 col-md-6">
+                                <label class="form-label-custom">Cédula o Identificación</label>
+                                <input type="text" name="cedula_residencia" class="form-control form-control-custom w-100" value="{{ old('cedula_residencia', $exp->cedula_residencia ?? ($usuarioPreseleccionado->cedula ?? '')) }}" placeholder="Ej: 1-1234-5678">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-xl-3 col-md-6">
+                                <label class="form-label-custom">Pasaporte (Extranjeros)</label>
+                                <input type="text" name="pasaporte" class="form-control form-control-custom w-100" value="{{ old('pasaporte', $exp->pasaporte ?? '') }}" placeholder="Ej: A12345678">
+                            </div>
+                            <div class="col-xl-3 col-md-6">
                                 <label class="form-label-custom">Género</label>
                                 <select name="genero" class="form-select form-select-custom w-100">
-                                    <option value="Masculino">Masculino</option>
-                                    <option value="Femenino">Femenino</option>
-                                    <option value="No especificado">No especificado</option>
+                                    @php $genActual = old('genero', $exp->genero ?? 'Masculino'); @endphp
+                                    <option value="Masculino" {{ $genActual == 'Masculino' ? 'selected' : '' }}>Masculino</option>
+                                    <option value="Femenino" {{ $genActual == 'Femenino' ? 'selected' : '' }}>Femenino</option>
+                                    <option value="No especificado" {{ $genActual == 'No especificado' ? 'selected' : '' }}>No especificado</option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label-custom">Fecha de Nacimiento</label>
-                                <input type="date" name="fecha_nacimiento" class="form-control form-control-custom w-100" value="{{ ($usuarioPreseleccionado && $usuarioPreseleccionado->fecha_nacimiento) ? $usuarioPreseleccionado->fecha_nacimiento->format('Y-m-d') : '' }}">
+                            <div class="col-xl-3 col-md-6">
+                                <label class="form-label-custom">Nacionalidad</label>
+                                <input type="text" name="nacionalidad" class="form-control form-control-custom w-100" value="{{ old('nacionalidad', $exp->nacionalidad ?? 'Costarricense') }}" placeholder="Ej: Costarricense">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-xl-4 col-md-4">
+                                <label class="form-label-custom">Fecha de Nacimiento</label>
+                                @php
+                                    $fechaNac = old('fecha_nacimiento');
+                                    if (!$fechaNac) {
+                                        if ($exp && $exp->fecha_nacimiento) $fechaNac = $exp->fecha_nacimiento->format('Y-m-d');
+                                        elseif ($usuarioPreseleccionado && $usuarioPreseleccionado->fecha_nacimiento) $fechaNac = $usuarioPreseleccionado->fecha_nacimiento->format('Y-m-d');
+                                    }
+                                @endphp
+                                <input type="date" name="fecha_nacimiento" class="form-control form-control-custom w-100" value="{{ $fechaNac }}">
+                            </div>
+                            <div class="col-xl-4 col-md-4">
+                                <label class="form-label-custom">Lugar de Nacimiento</label>
+                                <input type="text" name="lugar_nacimiento" class="form-control form-control-custom w-100" value="{{ old('lugar_nacimiento', $exp->lugar_nacimiento ?? '') }}" placeholder="Ej: San José, Costa Rica">
+                            </div>
+                            <div class="col-xl-4 col-md-4">
                                 <label class="form-label-custom">Estado Civil</label>
                                 <select name="estado_civil" class="form-select form-select-custom w-100">
-                                    <option value="Soltero(a)">Soltero(a)</option>
-                                    <option value="Casado(a)">Casado(a)</option>
-                                    <option value="Divorciado(a)">Divorciado(a)</option>
-                                    <option value="Unión Libre">Unión Libre</option>
+                                    @php $estCivil = old('estado_civil', $exp->estado_civil ?? 'Soltero(a)'); @endphp
+                                    <option value="Soltero(a)" {{ $estCivil == 'Soltero(a)' ? 'selected' : '' }}>Soltero(a)</option>
+                                    <option value="Casado(a)" {{ $estCivil == 'Casado(a)' ? 'selected' : '' }}>Casado(a)</option>
+                                    <option value="Divorciado(a)" {{ $estCivil == 'Divorciado(a)' ? 'selected' : '' }}>Divorciado(a)</option>
+                                    <option value="Unión Libre" {{ $estCivil == 'Unión Libre' ? 'selected' : '' }}>Unión Libre</option>
+                                    <option value="Viudo(a)" {{ $estCivil == 'Viudo(a)' ? 'selected' : '' }}>Viudo(a)</option>
                                 </select>
                             </div>
                         </div>
                     </fieldset>
 
-                    <!-- DOMICILIO -->
+                    <!-- 3. LUGAR DE DOMICILIO Y DIRECCIÓN -->
                     <fieldset class="mb-5">
-                        <div class="legend-custom">Lugar de Domicilio y Dirección</div>
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-4">
+                        <div class="legend-custom"><i class="bi bi-geo-alt-fill me-2"></i>3. Lugar de Domicilio y Residencia</div>
+                        <div class="row g-4 mb-3">
+                            <div class="col-xl-4 col-md-4">
                                 <label class="form-label-custom">Provincia</label>
-                                <input type="text" name="domicilio_provincia" class="form-control form-control-custom w-100" placeholder="Ej: San José">
+                                <input type="text" name="domicilio_provincia" class="form-control form-control-custom w-100" value="{{ old('domicilio_provincia', $exp->domicilio_provincia ?? '') }}" placeholder="Ej: San José">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-xl-4 col-md-4">
                                 <label class="form-label-custom">Cantón</label>
-                                <input type="text" name="domicilio_canton" class="form-control form-control-custom w-100" placeholder="Ej: Escazú">
+                                <input type="text" name="domicilio_canton" class="form-control form-control-custom w-100" value="{{ old('domicilio_canton', $exp->domicilio_canton ?? '') }}" placeholder="Ej: Escazú">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-xl-4 col-md-4">
                                 <label class="form-label-custom">Distrito</label>
-                                <input type="text" name="domicilio_distrito" class="form-control form-control-custom w-100" placeholder="Ej: San Rafael">
+                                <input type="text" name="domicilio_distrito" class="form-control form-control-custom w-100" value="{{ old('domicilio_distrito', $exp->domicilio_distrito ?? '') }}" placeholder="Ej: San Rafael">
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label-custom">Dirección Exacta</label>
-                            <textarea name="domicilio_direccion" class="form-control form-control-custom w-100" rows="3" placeholder="Dirección detallada..."></textarea>
-                        </div>
-                    </fieldset>
-
-                    <!-- CONTACTO -->
-                    <fieldset class="mb-5">
-                        <div class="legend-custom">Información de Contacto</div>
                         <div class="row g-4">
-                            <div class="col-md-6">
-                                <label class="form-label-custom">Celular / WhatsApp</label>
-                                <input type="text" name="contacto_tel_celular" class="form-control form-control-custom w-100" value="{{ $usuarioPreseleccionado->telefono ?? '' }}" placeholder="Ej: 50688887777">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label-custom">Contacto Emergencia</label>
-                                <input type="text" name="contacto_otro_emergencias" class="form-control form-control-custom w-100" placeholder="Nombre y teléfono de familiar...">
+                            <div class="col-12">
+                                <label class="form-label-custom">Dirección Exacta de Residencia</label>
+                                <textarea name="domicilio_direccion" class="form-control form-control-custom w-100" rows="2" placeholder="Señas exactas, número de casa, calle...">{{ old('domicilio_direccion', $exp->domicilio_direccion ?? '') }}</textarea>
                             </div>
                         </div>
                     </fieldset>
 
-                    <!-- DOCUMENTACIÓN FLAG -->
+                    <!-- 4. INFORMACIÓN DE CONTACTO -->
                     <fieldset class="mb-5">
-                        <div class="legend-custom">Documentación Entregada</div>
-                        <div class="row g-3">
-                            <div class="col-md-4">
+                        <div class="legend-custom"><i class="bi bi-telephone-fill me-2"></i>4. Información de Contacto</div>
+                        <div class="row g-4">
+                            <div class="col-xl-4 col-md-6">
+                                <label class="form-label-custom">Teléfono Celular / WhatsApp</label>
+                                <input type="text" name="contacto_tel_celular" class="form-control form-control-custom w-100" value="{{ old('contacto_tel_celular', $exp->contacto_tel_celular ?? ($usuarioPreseleccionado->telefono ?? '')) }}" placeholder="Ej: 50688887777">
+                            </div>
+                            <div class="col-xl-4 col-md-6">
+                                <label class="form-label-custom">Teléfono Habitación / Fijo</label>
+                                <input type="text" name="contacto_tel_habitacion" class="form-control form-control-custom w-100" value="{{ old('contacto_tel_habitacion', $exp->contacto_tel_habitacion ?? '') }}" placeholder="Ej: 22223333">
+                            </div>
+                            <div class="col-xl-4 col-md-12">
+                                <label class="form-label-custom">Contacto y Teléfono de Emergencia</label>
+                                <input type="text" name="contacto_otro_emergencias" class="form-control form-control-custom w-100" value="{{ old('contacto_otro_emergencias', $exp->contacto_otro_emergencias ?? '') }}" placeholder="Nombre, parentesco y teléfono...">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- 5. PROCEDENCIA ACADÉMICA (ESTUDIOS PREVIOS) -->
+                    <fieldset class="mb-5">
+                        <div class="legend-custom"><i class="bi bi-building-fill me-2"></i>5. Procedencia Académica (Estudios Previos)</div>
+                        <div class="row g-4 mb-3">
+                            <div class="col-xl-5 col-md-6">
+                                <label class="form-label-custom">Institución de Secundaria (Colegio)</label>
+                                <input type="text" name="procedencia_secundaria_institucion" class="form-control form-control-custom w-100" value="{{ old('procedencia_secundaria_institucion', $exp->procedencia_secundaria_institucion ?? '') }}" placeholder="Ej: Liceo de Costa Rica">
+                            </div>
+                            <div class="col-xl-3 col-md-3">
+                                <label class="form-label-custom">Año Graduación Secundaria</label>
+                                <input type="text" name="procedencia_secundaria_ano_graduacion" class="form-control form-control-custom w-100" value="{{ old('procedencia_secundaria_ano_graduacion', $exp->procedencia_secundaria_ano_graduacion ?? '') }}" placeholder="Ej: 2018">
+                            </div>
+                            <div class="col-xl-4 col-md-3">
+                                <label class="form-label-custom">Título Secundaria Obtenido</label>
+                                <input type="text" name="procedencia_secundaria_grado_obtenido" class="form-control form-control-custom w-100" value="{{ old('procedencia_secundaria_grado_obtenido', $exp->procedencia_secundaria_grado_obtenido ?? 'Bachiller en Educación Media') }}" placeholder="Ej: Bachiller en Educación Media">
+                            </div>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-xl-4 col-md-6">
+                                <label class="form-label-custom">Universidad de Procedencia (Opcional)</label>
+                                <input type="text" name="procedencia_universidad" class="form-control form-control-custom w-100" value="{{ old('procedencia_universidad', $exp->procedencia_universidad ?? '') }}" placeholder="Ej: Universidad Nacional">
+                            </div>
+                            <div class="col-xl-2 col-md-3">
+                                <label class="form-label-custom">Año Graduación Univ.</label>
+                                <input type="text" name="procedencia_universidad_ano_graduacion" class="form-control form-control-custom w-100" value="{{ old('procedencia_universidad_ano_graduacion', $exp->procedencia_universidad_ano_graduacion ?? '') }}" placeholder="Ej: 2022">
+                            </div>
+                            <div class="col-xl-3 col-md-3">
+                                <label class="form-label-custom">Grado / Título Univ. Obtenido</label>
+                                <input type="text" name="procedencia_universidad_grado_obtenido" class="form-control form-control-custom w-100" value="{{ old('procedencia_universidad_grado_obtenido', $exp->procedencia_universidad_grado_obtenido ?? '') }}" placeholder="Ej: Diplomado / Bachillerato">
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <label class="form-label-custom">Especialidad Univ. Previa</label>
+                                <input type="text" name="procedencia_universidad_especialidad" class="form-control form-control-custom w-100" value="{{ old('procedencia_universidad_especialidad', $exp->procedencia_universidad_especialidad ?? '') }}" placeholder="Ej: Teología / Educación">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- 6. INFORMACIÓN LABORAL -->
+                    <fieldset class="mb-5">
+                        <div class="legend-custom"><i class="bi bi-briefcase-fill me-2"></i>6. Información Laboral</div>
+                        <div class="row g-4 mb-3">
+                            <div class="col-xl-4 col-md-6">
+                                <label class="form-label-custom">Empresa / Institución / Iglesia</label>
+                                <input type="text" name="laboral_institucion" class="form-control form-control-custom w-100" value="{{ old('laboral_institucion', $exp->laboral_institucion ?? '') }}" placeholder="Ej: Ministerio Cristiano / Empresa Privada">
+                            </div>
+                            <div class="col-xl-4 col-md-6">
+                                <label class="form-label-custom">Puesto o Cargo que Desempeña</label>
+                                <input type="text" name="laboral_puesto" class="form-control form-control-custom w-100" value="{{ old('laboral_puesto', $exp->laboral_puesto ?? '') }}" placeholder="Ej: Pastor Asociado / Administrador">
+                            </div>
+                            <div class="col-xl-4 col-md-6">
+                                <label class="form-label-custom">Fecha de Ingreso Laboral</label>
+                                @php
+                                    $fechaLab = old('laboral_fecha_ingreso', ($exp && $exp->laboral_fecha_ingreso) ? $exp->laboral_fecha_ingreso->format('Y-m-d') : '');
+                                @endphp
+                                <input type="date" name="laboral_fecha_ingreso" class="form-control form-control-custom w-100" value="{{ $fechaLab }}">
+                            </div>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-xl-4 col-md-4">
+                                <label class="form-label-custom">Teléfono Laboral</label>
+                                <input type="text" name="laboral_telefono" class="form-control form-control-custom w-100" value="{{ old('laboral_telefono', $exp->laboral_telefono ?? '') }}" placeholder="Ej: 22220000">
+                            </div>
+                            <div class="col-xl-4 col-md-4">
+                                <label class="form-label-custom">Extensión Telefónica</label>
+                                <input type="text" name="laboral_extension" class="form-control form-control-custom w-100" value="{{ old('laboral_extension', $exp->laboral_extension ?? '') }}" placeholder="Ej: 104">
+                            </div>
+                            <div class="col-xl-4 col-md-4">
+                                <label class="form-label-custom">Correo Electrónico Laboral</label>
+                                <input type="email" name="laboral_correo_electronico" class="form-control form-control-custom w-100" value="{{ old('laboral_correo_electronico', $exp->laboral_correo_electronico ?? '') }}" placeholder="Ej: contacto@empresa.com">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- 7. DOCUMENTACIÓN ENTREGADA Y OBSERVACIONES -->
+                    <fieldset class="mb-5">
+                        <div class="legend-custom"><i class="bi bi-file-earmark-check-fill me-2"></i>7. Documentación Entregada y Observaciones</div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-xl-2 col-md-4">
                                 <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_cedula" name="registro_doc_cedula">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_cedula" name="registro_doc_cedula" {{ old('registro_doc_cedula', $exp->registro_doc_cedula ?? false) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="registro_doc_cedula">Copia Cédula</label>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-xl-2 col-md-4">
                                 <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_sec" name="registro_doc_titulo_sec">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_sec" name="registro_doc_titulo_sec" {{ old('registro_doc_titulo_sec', $exp->registro_doc_titulo_sec ?? false) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="registro_doc_titulo_sec">Título Secundaria</label>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-xl-2 col-md-4">
                                 <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_univ" name="registro_doc_titulo_univ">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_titulo_univ" name="registro_doc_titulo_univ" {{ old('registro_doc_titulo_univ', $exp->registro_doc_titulo_univ ?? false) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="registro_doc_titulo_univ">Título Universitario</label>
                                 </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_certificaciones" name="registro_doc_certificaciones" {{ old('registro_doc_certificaciones', $exp->registro_doc_certificaciones ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="registro_doc_certificaciones">Certificaciones de Notas</label>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="registro_doc_fotografia" name="registro_doc_fotografia" {{ old('registro_doc_fotografia', $exp->registro_doc_fotografia ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="registro_doc_fotografia">Fotografía Oficial</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label-custom">Observaciones y Notas de Admisión / Expediente</label>
+                                <textarea name="registro_observaciones" class="form-control form-control-custom w-100" rows="3" placeholder="Anotaciones administrativas, convalidaciones pendientes, requisitos especiales...">{{ old('registro_observaciones', $exp->registro_observaciones ?? '') }}</textarea>
                             </div>
                         </div>
                     </fieldset>
 
                     <div class="d-grid mt-5">
-                        <button type="submit" class="btn btn-submit py-3">
-                            <i class="bi bi-folder-check me-2"></i> Registrar y Crear Expediente
+                        <button type="submit" class="btn btn-submit py-3 fs-6">
+                            <i class="bi bi-folder-check me-2"></i> Registrar y Guardar Expediente Digital
                         </button>
                     </div>
 
