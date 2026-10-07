@@ -411,7 +411,7 @@
 @endsection
 
 @section('content')
-    <div class="container py-5">
+    <div class="container-fluid px-3 px-md-4 py-4">
         
         <!-- Header -->
         <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
