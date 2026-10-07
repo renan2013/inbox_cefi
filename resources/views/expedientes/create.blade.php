@@ -192,51 +192,93 @@
             </div>
         </div>
 
-        <!-- PASO 1: BUSCADOR -->
-        <div class="glass-card" id="user-search-card">
-            <div class="step-header">
-                <div class="step-badge">1</div> Identificación del Estudiante
-            </div>
-            <div class="card-body p-4 p-md-5">
-                <div class="row align-items-end g-4">
-                    <div class="col-md-7 position-relative">
-                        <label for="user-search" class="form-label-custom"><i class="bi bi-search"></i> Buscar en el sistema:</label>
-                        <div class="input-group">
-                            <input type="text" id="user-search" class="form-control form-control-custom w-100" placeholder="Escriba nombre, email o cédula...">
-                            <button id="reset-user-search" class="btn btn-outline-danger border-2 ms-2 rounded-3" type="button" style="display: none;">
-                                <i class="bi bi-x-circle"></i>
-                            </button>
+        @if(isset($usuarioPreseleccionado) && $usuarioPreseleccionado)
+            <!-- TARJETA DEL ESTUDIANTE PRESELECCIONADO (Sin buscador) -->
+            <div class="glass-card mb-4" style="border: 2px solid rgba(95, 178, 48, 0.4); background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm flex-shrink-0" style="width: 54px; height: 54px; background: rgba(95, 178, 48, 0.25); border: 2px solid #5fb230; font-size: 1.4rem;">
+                            {{ strtoupper(substr($usuarioPreseleccionado->apellidos ?: $usuarioPreseleccionado->nombre, 0, 1)) }}
                         </div>
-                        <div id="user-search-results" class="list-group position-absolute w-100 shadow" style="z-index: 1000; max-height: 200px; overflow-y: auto; display: none;"></div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                <h3 class="h4 fw-bold text-white mb-0">
+                                    {{ $usuarioPreseleccionado->nombre }} {{ $usuarioPreseleccionado->apellidos }}
+                                </h3>
+                                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">
+                                    ID #{{ str_pad($usuarioPreseleccionado->id, 4, '0', STR_PAD_LEFT) }}
+                                </span>
+                                <span class="badge" style="background: rgba(95, 178, 48, 0.15); color: #5fb230; border: 1px solid rgba(95, 178, 48, 0.3);">
+                                    <i class="bi bi-file-earmark-plus me-1"></i> Creando Expediente
+                                </span>
+                            </div>
+                            <div class="text-white-50 small d-flex align-items-center gap-3 flex-wrap">
+                                <span><i class="bi bi-envelope me-1 text-primary"></i>{{ $usuarioPreseleccionado->email }}</span>
+                                @if(!empty($usuarioPreseleccionado->cedula))
+                                    <span><i class="bi bi-card-text me-1 text-info"></i>Cédula: <strong class="text-white">{{ $usuarioPreseleccionado->cedula }}</strong></span>
+                                @endif
+                                @if(!empty($usuarioPreseleccionado->telefono))
+                                    <span><i class="bi bi-telephone me-1 text-success"></i>Tel: <strong class="text-white">{{ $usuarioPreseleccionado->telefono }}</strong></span>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-5">
-                        <div class="p-4 rounded-4" style="background-color: rgba(95, 178, 48, 0.03); border: 1px dashed rgba(95, 178, 48, 0.2);">
-                            <label for="fecha_registro" class="form-label-custom"><i class="bi bi-calendar-check"></i> Fecha de Registro:</label>
-                            <input type="date" name="fecha_registro" id="fecha_registro" form="expediente-form" class="form-control form-control-custom bg-transparent w-100">
-                            <div class="form-text text-white-50 small mt-2"><i class="bi bi-info-circle me-1"></i> Por defecto se usará la fecha de hoy.</div>
+                    <div>
+                        <a href="{{ route('usuarios.index') }}" class="btn btn-outline-light rounded-pill px-3 py-2 btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i> Cambiar Usuario
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @else
+            <!-- PASO 1: BUSCADOR (Solo si NO se seleccionó usuario previamente) -->
+            <div class="glass-card" id="user-search-card">
+                <div class="step-header">
+                    <div class="step-badge">1</div> Identificación del Estudiante
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <div class="row align-items-end g-4">
+                        <div class="col-md-7 position-relative">
+                            <label for="user-search" class="form-label-custom"><i class="bi bi-search"></i> Buscar en el sistema:</label>
+                            <div class="input-group">
+                                <input type="text" id="user-search" class="form-control form-control-custom w-100" placeholder="Escriba nombre, email o cédula...">
+                                <button id="reset-user-search" class="btn btn-outline-danger border-2 ms-2 rounded-3" type="button" style="display: none;">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                            <div id="user-search-results" class="list-group position-absolute w-100 shadow" style="z-index: 1000; max-height: 200px; overflow-y: auto; display: none;"></div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="p-3 rounded-4" style="background-color: rgba(95, 178, 48, 0.03); border: 1px dashed rgba(95, 178, 48, 0.2);">
+                                <small class="text-white-50"><i class="bi bi-info-circle me-1"></i> Ingrese al menos 3 letras o busque por cédula para seleccionar al estudiante.</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
 
-        <!-- FORMULARIO DETALLADO (OCULTO POR DEFECTO) -->
-        <div id="expediente-data-section" class="glass-card" style="display: none;">
+        <!-- FORMULARIO DETALLADO DEL EXPEDIENTE -->
+        <div id="expediente-data-section" class="glass-card" style="{{ (isset($usuarioPreseleccionado) && $usuarioPreseleccionado) ? '' : 'display: none;' }}">
             <div class="step-header">
-                <div class="step-badge">2</div> Datos del Expediente
+                <div class="step-badge"><i class="bi bi-folder-check"></i></div> Datos del Expediente Digital
             </div>
             <div class="card-body p-4 p-md-5">
-                <h4 class="text-white fw-bold mb-4" id="data-form-header"></h4>
+                <h4 class="text-white fw-bold mb-4" id="data-form-header">
+                    @if(isset($usuarioPreseleccionado) && $usuarioPreseleccionado)
+                        Expediente para: {{ $usuarioPreseleccionado->nombre }} {{ $usuarioPreseleccionado->apellidos }}
+                    @endif
+                </h4>
                 
                 <form id="expediente-form" method="post" action="{{ route('expedientes.store') }}">
                     @csrf
-                    <input type="hidden" id="student_id" name="id_usuario" value="">
+                    <input type="hidden" id="student_id" name="id_usuario" value="{{ $usuarioPreseleccionado->id ?? '' }}">
 
                     <!-- GRADO Y ESPECIALIDAD -->
                     <fieldset class="mb-5">
                         <div class="legend-custom">Grado e Interés Académico</div>
                         <div class="row g-4">
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <label for="grado_a_matricular" class="form-label-custom">Grado a Matricular</label>
                                 <select name="grado_a_matricular" id="grado_a_matricular" class="form-select form-select-custom w-100">
                                     <option value="Bachillerato">Bachillerato</option>
@@ -247,13 +289,17 @@
                                     <option value="Curso Libre">Curso Libre</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <label for="especialidad_deseada" class="form-label-custom">Especialidad o Carrera Deseada</label>
                                 <select name="especialidad_deseada" id="especialidad_deseada" class="form-select form-select-custom w-100">
                                     @foreach ($programas as $prog)
                                         <option value="{{ $prog->nombre_programa }}">{{ $prog->nombre_programa }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="fecha_registro" class="form-label-custom">Fecha de Registro</label>
+                                <input type="date" name="fecha_registro" id="fecha_registro" class="form-control form-control-custom w-100" value="{{ date('Y-m-d') }}">
                             </div>
                         </div>
                     </fieldset>
@@ -262,7 +308,11 @@
                     <fieldset class="mb-5">
                         <div class="legend-custom">Datos Personales</div>
                         <div class="row g-4">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label class="form-label-custom">Cédula / Identificación</label>
+                                <input type="text" name="cedula_residencia" class="form-control form-control-custom w-100" value="{{ $usuarioPreseleccionado->cedula ?? '' }}" placeholder="Ej: 1-1234-5678">
+                            </div>
+                            <div class="col-md-3">
                                 <label class="form-label-custom">Género</label>
                                 <select name="genero" class="form-select form-select-custom w-100">
                                     <option value="Masculino">Masculino</option>
@@ -270,11 +320,11 @@
                                     <option value="No especificado">No especificado</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label-custom">Fecha de Nacimiento</label>
-                                <input type="date" name="fecha_nacimiento" class="form-control form-control-custom w-100">
+                                <input type="date" name="fecha_nacimiento" class="form-control form-control-custom w-100" value="{{ ($usuarioPreseleccionado && $usuarioPreseleccionado->fecha_nacimiento) ? $usuarioPreseleccionado->fecha_nacimiento->format('Y-m-d') : '' }}">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label-custom">Estado Civil</label>
                                 <select name="estado_civil" class="form-select form-select-custom w-100">
                                     <option value="Soltero(a)">Soltero(a)</option>
@@ -315,7 +365,7 @@
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label-custom">Celular / WhatsApp</label>
-                                <input type="text" name="contacto_tel_celular" class="form-control form-control-custom w-100" placeholder="Ej: 50688887777">
+                                <input type="text" name="contacto_tel_celular" class="form-control form-control-custom w-100" value="{{ $usuarioPreseleccionado->telefono ?? '' }}" placeholder="Ej: 50688887777">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label-custom">Contacto Emergencia</label>
@@ -369,7 +419,7 @@
         $(document).ready(function() {
             let searchTimeout = null;
 
-            // Búsqueda interactiva de estudiante
+            // Búsqueda interactiva de estudiante (solo si está disponible el buscador)
             $('#user-search').on('input', function() {
                 let term = $(this).val();
                 if (term.length < 3) {
@@ -414,7 +464,7 @@
                                     container.hide();
                                     return;
                                 }
-                                selectUser(user.id, user.nombre + ' ' + user.apellidos, user.email);
+                                selectUser(user.id, user.nombre + ' ' + (user.apellidos || ''), user.email);
                                 container.hide();
                             });
 
@@ -453,26 +503,7 @@
                         this.submit();
                     }
                 });
-            // Auto-seleccionar usuario si fue enviado como parámetro (ej. desde /usuarios)
-            @if(isset($usuarioPreseleccionado) && $usuarioPreseleccionado)
-                const preUserId = {{ $usuarioPreseleccionado->id }};
-                const preUserName = @json(trim(($usuarioPreseleccionado->nombre ?? '') . ' ' . ($usuarioPreseleccionado->apellidos ?? '')));
-                const preUserEmail = @json($usuarioPreseleccionado->email ?? '');
-                selectUser(preUserId, preUserName, preUserEmail);
-
-                @if($usuarioPreseleccionado->cedula)
-                    const elCedula = document.querySelector('input[name="cedula_residencia"]');
-                    if (elCedula && !elCedula.value) elCedula.value = @json($usuarioPreseleccionado->cedula);
-                @endif
-                @if($usuarioPreseleccionado->telefono)
-                    const elTel = document.querySelector('input[name="contacto_tel_celular"]');
-                    if (elTel && !elTel.value) elTel.value = @json($usuarioPreseleccionado->telefono);
-                @endif
-                @if($usuarioPreseleccionado->fecha_nacimiento)
-                    const elNac = document.querySelector('input[name="fecha_nacimiento"]');
-                    if (elNac && !elNac.value) elNac.value = @json($usuarioPreseleccionado->fecha_nacimiento->format('Y-m-d'));
-                @endif
-            @endif
+            });
         });
     </script>
 @endsection
