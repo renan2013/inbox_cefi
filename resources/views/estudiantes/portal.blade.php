@@ -403,17 +403,20 @@
                             <tr>
                                 <td><span class="badge bg-primary bg-opacity-20 text-primary font-monospace fw-bold">#{{ $b->id }}</span></td>
                                 <td><span class="fw-semibold">{{ $b->periodo ?: 'Activo' }}</span></td>
-                                <td><span class="font-monospace fw-bold">₡{{ number_format($b->total, 2) }}</span></td>
+                                <td><span class="font-monospace fw-bold">₡{{ number_format((float)($b->total ?? 0), 2) }}</span></td>
                                 <td>
-                                    <span class="font-monospace fw-bold {{ $b->saldo > 0 ? 'text-danger' : 'text-success' }}">
-                                        ₡{{ number_format($b->saldo, 2) }}
+                                    @php
+                                        $saldoVal = (float)($b->saldo_pendiente ?? $b->saldo ?? 0);
+                                    @endphp
+                                    <span class="font-monospace fw-bold {{ $saldoVal > 0 ? 'text-danger' : 'text-success' }}">
+                                        ₡{{ number_format($saldoVal, 2) }}
                                     </span>
                                 </td>
                                 <td>
-                                    @if($b->firma_estudiante_aceptada)
+                                    @if(!empty($b->ruta_firma) || !empty($b->fecha_firma))
                                         <span class="badge bg-success bg-opacity-25 text-success rounded-pill px-2 py-1"><i class="bi bi-pen-fill me-1"></i> Firmada</span>
-                                    @elseif($b->requiere_firma)
-                                        <a href="{{ route('boletas.firmar_publico', $b->token_firma ?: 'token') }}" class="btn btn-warning btn-sm rounded-pill px-3 py-1 fw-bold">
+                                    @elseif(!empty($b->token_firma))
+                                        <a href="{{ route('boletas.firmar_publico', $b->token_firma) }}" class="btn btn-warning btn-sm rounded-pill px-3 py-1 fw-bold">
                                             Firmar <i class="bi bi-pencil-square ms-1"></i>
                                         </a>
                                     @else
@@ -421,12 +424,15 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($b->estado_pago === 'Pagada')
+                                    @php
+                                        $estadoPago = $b->estado ?? 'Pendiente';
+                                    @endphp
+                                    @if($estadoPago === 'Pagada')
                                         <span class="badge bg-success bg-opacity-25 text-success rounded-pill px-2 py-1">Pagada</span>
-                                    @elseif($b->estado_pago === 'Parcial')
+                                    @elseif($estadoPago === 'Parcial')
                                         <span class="badge bg-warning bg-opacity-25 text-warning rounded-pill px-2 py-1">Pago Parcial</span>
                                     @else
-                                        <span class="badge bg-danger bg-opacity-25 text-danger rounded-pill px-2 py-1">Pendiente</span>
+                                        <span class="badge bg-danger bg-opacity-25 text-danger rounded-pill px-2 py-1">{{ $estadoPago }}</span>
                                     @endif
                                 </td>
                                 <td class="text-end">
@@ -488,8 +494,8 @@
                                 <div class="d-flex align-items-center gap-2 text-truncate me-2">
                                     <i class="bi bi-file-earmark-check fs-3 text-primary"></i>
                                     <div class="text-truncate">
-                                        <div class="fw-bold small text-truncate">{{ $arch->nombre_archivo }}</div>
-                                        <span class="text-muted small" style="font-size: 0.75rem;">{{ $arch->categoria_legible }}</span>
+                                        <div class="fw-bold small text-truncate">{{ $arch->nombre_original ?? $arch->nombre_servidor ?? 'Documento' }}</div>
+                                        <span class="text-muted small" style="font-size: 0.75rem;">{{ $arch->categoria ?? 'Expediente' }}</span>
                                     </div>
                                 </div>
                                 <a href="{{ asset('storage/' . $arch->ruta_archivo) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle" title="Ver documento">

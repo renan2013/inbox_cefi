@@ -16,31 +16,67 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 class PortalEstudianteController extends Controller
 {
+    /**
+     * Asegura que las tablas y columnas necesarias existan en el servidor.
+     */
+    protected function asegurarTablas()
+    {
+        try {
+            if (!Schema::hasTable('convalidaciones') || !Schema::hasColumn('matriculas', 'estado')) {
+                Artisan::call('migrate', ['--force' => true]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Auto-migrate warning in Portal: " . $e->getMessage());
+        }
+    }
+
     /**
      * Vista principal del Portal de Autogestión Estudiantil (Fase 6 CEFI).
      */
     public function index(Request $request)
     {
+        $this->asegurarTablas();
+
         $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
         $idEstudiante = $user->id;
 
         // Permite a los administradores previsualizar el portal de cualquier estudiante
-        if ($user->id_rol == 1 && $request->has('preview_id')) {
-            $idEstudiante = $request->get('preview_id');
-            $user = Usuario::find($idEstudiante) ?: $user;
+        if ((int)$user->id_rol === 1 && $request->has('preview_id')) {
+            $previewUser = Usuario::find($request->get('preview_id'));
+            if ($previewUser) {
+                $user = $previewUser;
+                $idEstudiante = $user->id;
+            }
         }
 
         // 1. Cursos Matriculados Actuales (Activos)
-        $matriculas = Matricula::with(['cursoActivo.planEstudio.programa', 'cursoActivo.profesor'])
-            ->where('id_estudiante', $idEstudiante)
-            ->where(function ($q) {
-                $q->whereNull('estado')
-                  ->orWhere('estado', '!=', 'Retirado');
-            })
-            ->get();
+        $matriculas = collect();
+        try {
+            if (Schema::hasTable('matriculas')) {
+                $matriculaQuery = Matricula::with(['cursoActivo.planEstudio.programa', 'cursoActivo.profesor'])
+                    ->where('id_estudiante', $idEstudiante);
+
+                if (Schema::hasColumn('matriculas', 'estado')) {
+                    $matriculaQuery->where(function ($q) {
+                        $q->whereNull('estado')
+                          ->orWhere('estado', '!=', 'Retirado');
+                    });
+                }
+
+                $matriculas = $matriculaQuery->get();
+            }
+        } catch (\Throwable $e) {
+            Log::error("Error cargando matriculas estudiante: " . $e->getMessage());
+            $matriculas = collect();
+        }
 
         // 2. Historial de Calificaciones y Récord
         $cursosAprobados = 0;
@@ -56,8 +92,9 @@ class PortalEstudianteController extends Controller
             $pe = $ca ? $ca->planEstudio : null;
             $cred = (float)($pe ? ($pe->creditos ?: 3) : 3);
             $nota = $m->calificacion;
+            $estadoMat = $m->estado ?? null;
 
-            if ($m->estado === 'Retirado') {
+            if ($estadoMat === 'Retirado') {
                 $estado = 'RETIRADO';
             } elseif ($nota !== null && $nota !== '') {
                 $notaNum = (float)$nota;
@@ -93,62 +130,115 @@ class PortalEstudianteController extends Controller
 
         // Convalidaciones Aprobadas del Estudiante
         $convalidaciones = collect();
-        if (Schema::hasTable('convalidaciones')) {
-            $convalidaciones = Convalidacion::with('planEstudio')
-                ->where('id_estudiante', $idEstudiante)
-                ->where('estado', 'Aprobada')
-                ->get();
+        try {
+            if (Schema::hasTable('convalidaciones')) {
+                $convalidaciones = Convalidacion::with('planEstudio')
+                    ->where('id_estudiante', $idEstudiante)
+                    ->where('estado', 'Aprobada')
+                    ->get();
 
-            foreach ($convalidaciones as $conv) {
-                $credConv = (float)($conv->creditos_convalidados ?: 3.0);
-                $totalCreditosAprobados += $credConv;
-                $cursosAprobados++;
+                foreach ($convalidaciones as $conv) {
+                    $credConv = (float)($conv->creditos_convalidados ?: 3.0);
+                    $totalCreditosAprobados += $credConv;
+                    $cursosAprobados++;
 
-                $historialCursos[] = [
-                    'materia'         => ($conv->planEstudio ? $conv->planEstudio->materia : $conv->materia_origen) . ' (Homologado)',
-                    'codigo'          => $conv->planEstudio ? $conv->planEstudio->codigo : ($conv->codigo_origen ?: 'CONV'),
-                    'periodo'         => 'CONVALIDACIÓN',
-                    'creditos'        => $credConv,
-                    'calificacion'    => $conv->calificacion_homologada ? number_format($conv->calificacion_homologada, 1) : 'AP',
-                    'estado'          => 'CONVALIDADO',
-                    'profesor'        => $conv->institucion_origen,
-                    'enlace_zoom'     => null,
-                    'horario'         => 'Resolución: ' . ($conv->numero_resolucion ?: 'Aprobada'),
-                    'moodle_course_id'=> null,
-                ];
+                    $historialCursos[] = [
+                        'materia'         => ($conv->planEstudio ? $conv->planEstudio->materia : $conv->materia_origen) . ' (Homologado)',
+                        'codigo'          => $conv->planEstudio ? $conv->planEstudio->codigo : ($conv->codigo_origen ?: 'CONV'),
+                        'periodo'         => 'CONVALIDACIÓN',
+                        'creditos'        => $credConv,
+                        'calificacion'    => $conv->calificacion_homologada ? number_format($conv->calificacion_homologada, 1) : 'AP',
+                        'estado'          => 'CONVALIDADO',
+                        'profesor'        => $conv->institucion_origen ?: 'Institución Universitaria Externa',
+                        'enlace_zoom'     => null,
+                        'horario'         => 'Resolución: ' . ($conv->numero_resolucion ?: 'Aprobada'),
+                        'moodle_course_id'=> null,
+                    ];
+                }
             }
+        } catch (\Throwable $e) {
+            Log::warning("Error convalidaciones estudiante: " . $e->getMessage());
+            $convalidaciones = collect();
         }
 
         $promedioPonderado = ($totalCreditosCursados > 0) ? round($sumaPonderada / $totalCreditosCursados, 2) : 0.00;
 
-        // 3. Finanzas y Boletas de Matrícula
-        $boletas = Boleta::where('id_usuario', $idEstudiante)
-            ->where('estado', '!=', 'Anulada')
-            ->orderBy('id', 'desc')
-            ->get();
+        // 3. Finanzas y Boletas de Matrícula (según id_estudiante en boletas)
+        $boletas = collect();
+        $saldoPendienteTotal = 0.0;
+        $boletasPorFirmar = collect();
+        try {
+            if (Schema::hasTable('boletas')) {
+                $boletaQuery = Boleta::where(function ($q) use ($idEstudiante) {
+                    if (Schema::hasColumn('boletas', 'id_estudiante')) {
+                        $q->where('id_estudiante', $idEstudiante);
+                    } elseif (Schema::hasColumn('boletas', 'id_usuario')) {
+                        $q->where('id_usuario', $idEstudiante);
+                    }
+                });
 
-        $saldoPendienteTotal = $boletas->sum('saldo');
-        $boletasPorFirmar = $boletas->where('requiere_firma', true)->where('firma_estudiante_aceptada', false);
+                if (Schema::hasColumn('boletas', 'estado')) {
+                    $boletaQuery->where('estado', '!=', 'Anulada');
+                }
+
+                $boletas = $boletaQuery->orderBy('id', 'desc')->get();
+                $saldoPendienteTotal = (float)$boletas->sum(function ($b) {
+                    return (float)($b->saldo_pendiente ?? $b->saldo ?? 0);
+                });
+
+                $boletasPorFirmar = $boletas->filter(function ($b) {
+                    return !empty($b->token_firma) && empty($b->ruta_firma) && empty($b->fecha_firma);
+                });
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Error boletas estudiante: " . $e->getMessage());
+            $boletas = collect();
+            $boletasPorFirmar = collect();
+        }
 
         // 4. Expediente Digital del Estudiante
-        $expediente = ExpedienteDigital::with('archivos')->where('id_usuario', $idEstudiante)->first();
+        $expediente = null;
+        try {
+            if (Schema::hasTable('expedientes_digitales')) {
+                $expediente = ExpedienteDigital::with('archivos')->where('id_usuario', $idEstudiante)->first();
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Error expediente estudiante: " . $e->getMessage());
+            $expediente = null;
+        }
 
         // 5. Bitácora de TCU
-        $tcu = TcuBitacora::with('actividades')->where('usuario_id', $idEstudiante)->first();
+        $tcu = null;
         $horasTcuCompletadas = 0;
-        if ($tcu && $tcu->actividades) {
-            $horasTcuCompletadas = $tcu->actividades->sum('horas');
+        try {
+            if (Schema::hasTable('tcu_bitacoras')) {
+                $tcu = TcuBitacora::with('actividades')->where('usuario_id', $idEstudiante)->first();
+                if ($tcu && $tcu->actividades) {
+                    $horasTcuCompletadas = (int)$tcu->actividades->sum('horas');
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Error TCU estudiante: " . $e->getMessage());
+            $tcu = null;
         }
 
         // 6. Oferta Académica del Período
-        $ofertaCursos = CursoActivo::with(['planEstudio.programa', 'profesor'])
-            ->where(function ($q) {
-                $q->whereNull('check_terminado')
-                  ->orWhere('check_terminado', false);
-            })
-            ->orderBy('id_curso_activo', 'desc')
-            ->take(8)
-            ->get();
+        $ofertaCursos = collect();
+        try {
+            if (Schema::hasTable('cursos_activos')) {
+                $ofertaQuery = CursoActivo::with(['planEstudio.programa', 'profesor']);
+                if (Schema::hasColumn('cursos_activos', 'check_terminado')) {
+                    $ofertaQuery->where(function ($q) {
+                        $q->whereNull('check_terminado')
+                          ->orWhere('check_terminado', false);
+                    });
+                }
+                $ofertaCursos = $ofertaQuery->orderBy('id_curso_activo', 'desc')->take(8)->get();
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Error oferta cursos: " . $e->getMessage());
+            $ofertaCursos = collect();
+        }
 
         return view('estudiantes.portal', compact(
             'user',
@@ -176,7 +266,10 @@ class PortalEstudianteController extends Controller
     public function descargarMiRecordPdf()
     {
         $idEstudiante = Auth::id();
-        $expediente = ExpedienteDigital::with('usuario')->where('id_usuario', $idEstudiante)->first();
+        $expediente = null;
+        if (Schema::hasTable('expedientes_digitales')) {
+            $expediente = ExpedienteDigital::with('usuario')->where('id_usuario', $idEstudiante)->first();
+        }
 
         if (!$expediente) {
             return back()->with('error', 'Aún no posees un Expediente Digital aperturado. Consulta con Registro Académico.');
