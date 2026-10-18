@@ -57,6 +57,17 @@ Route::post('/encuesta/procesar', [EncuestaController::class, 'procesarRespuesta
 // API Externa Finanzas (n8n, Green-API, Cron WhatsApp Morosidad)
 Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaController::class, 'apiCuotasVencimiento'])->name('finanzas.api.cuotas_vencimiento');
 
+// Ruta utilitaria para ejecutar migraciones en el servidor web (Hostinger / Producción)
+Route::get('/sistema/migrar', function () {
+    try {
+        $exitCode = \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        return "<pre style='background:#0f172a;color:#38bdf8;padding:25px;border-radius:12px;font-family:monospace;font-size:14px;line-height:1.6;'><h3>✔️ Migración de Base de Datos CEFI</h3>Exit Code: {$exitCode}\n\n{$output}\n<a href='" . url('/convalidaciones') . "' style='color:#4ade80;'>Ir a Convalidaciones &rarr;</a></pre>";
+    } catch (\Throwable $e) {
+        return "<pre style='background:#0f172a;color:#f87171;padding:25px;border-radius:12px;font-family:monospace;font-size:14px;line-height:1.6;'><h3>❌ Error al ejecutar migraciones</h3>" . $e->getMessage() . "</pre>";
+    }
+})->name('sistema.migrar');
+
 
 
 Route::middleware('auth')->group(function () {

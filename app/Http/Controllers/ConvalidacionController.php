@@ -11,17 +11,50 @@ use App\Services\ExpedienteStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ConvalidacionController extends Controller
 {
+    /**
+     * Asegura que las tablas necesarias existan antes de ejecutar consultas.
+     */
+    protected function asegurarTablas()
+    {
+        if (!Schema::hasTable('convalidaciones')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Auto-migrate error: " . $e->getMessage());
+            }
+        }
+    }
+
     /**
      * Listado general de convalidaciones y homologaciones académicas con KPIs y filtros.
      */
     public function index(Request $request)
     {
+        $this->asegurarTablas();
+
         $busqueda = trim($request->get('q', ''));
         $estadoFiltro = $request->get('estado', '');
         $programaFiltro = $request->get('id_programa', '');
+
+        if (!Schema::hasTable('convalidaciones')) {
+            return view('convalidaciones.index', [
+                'convalidaciones' => new LengthAwarePaginator([], 0, 20),
+                'kpiTotal'        => 0,
+                'kpiAprobadas'    => 0,
+                'kpiPendientes'   => 0,
+                'kpiCreditos'     => 0,
+                'programas'       => Schema::hasTable('programas') ? Programa::orderBy('nombre_programa', 'asc')->get() : collect(),
+                'busqueda'        => '',
+                'estadoFiltro'    => '',
+                'programaFiltro'  => ''
+            ]);
+        }
 
         $query = Convalidacion::with(['estudiante', 'programa', 'planEstudio', 'expediente']);
 
@@ -59,7 +92,7 @@ class ConvalidacionController extends Controller
         $kpiPendientes = Convalidacion::where('estado', 'Pendiente')->count();
         $kpiCreditos = Convalidacion::where('estado', 'Aprobada')->sum('creditos_convalidados');
 
-        $programas = Programa::orderBy('nombre_programa', 'asc')->get();
+        $programas = Schema::hasTable('programas') ? Programa::orderBy('nombre_programa', 'asc')->get() : collect();
 
         return view('convalidaciones.index', compact(
             'convalidaciones', 'kpiTotal', 'kpiAprobadas', 'kpiPendientes', 'kpiCreditos',

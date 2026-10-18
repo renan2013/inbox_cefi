@@ -15,17 +15,50 @@ use App\Services\DictamenGraduacionPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class GraduacionController extends Controller
 {
+    /**
+     * Asegura que las tablas necesarias existan antes de ejecutar consultas.
+     */
+    protected function asegurarTablas()
+    {
+        if (!Schema::hasTable('graduaciones')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Auto-migrate error: " . $e->getMessage());
+            }
+        }
+    }
+
     /**
      * Listado general de postulaciones a graduación y estado de auditoría.
      */
     public function index(Request $request)
     {
+        $this->asegurarTablas();
+
         $busqueda = trim($request->get('q', ''));
         $estadoFiltro = $request->get('estado', '');
         $convocatoriaFiltro = $request->get('convocatoria', '');
+
+        if (!Schema::hasTable('graduaciones')) {
+            return view('graduaciones.index', [
+                'graduaciones'       => new LengthAwarePaginator([], 0, 20),
+                'kpiTotal'           => 0,
+                'kpiAprobados'       => 0,
+                'kpiAuditoria'       => 0,
+                'kpiCumLaude'        => 0,
+                'convocatorias'      => collect(),
+                'busqueda'           => '',
+                'estadoFiltro'       => '',
+                'convocatoriaFiltro' => ''
+            ]);
+        }
 
         $query = Graduacion::with(['estudiante', 'programa', 'expediente', 'autorizador']);
 

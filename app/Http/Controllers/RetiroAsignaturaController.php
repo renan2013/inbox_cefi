@@ -9,17 +9,49 @@ use App\Models\CursoActivo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class RetiroAsignaturaController extends Controller
 {
+    /**
+     * Asegura que las tablas necesarias existan antes de ejecutar consultas.
+     */
+    protected function asegurarTablas()
+    {
+        if (!Schema::hasTable('retiros_asignaturas')) {
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Auto-migrate error: " . $e->getMessage());
+            }
+        }
+    }
+
     /**
      * Listado general de solicitudes de retiros y cambios de asignaturas con KPIs.
      */
     public function index(Request $request)
     {
+        $this->asegurarTablas();
+
         $busqueda = trim($request->get('q', ''));
         $estadoFiltro = $request->get('estado', '');
         $tipoFiltro = $request->get('tipo_tramite', '');
+
+        if (!Schema::hasTable('retiros_asignaturas')) {
+            return view('retiros.index', [
+                'retiros'       => new LengthAwarePaginator([], 0, 20),
+                'kpiTotal'      => 0,
+                'kpiPendientes' => 0,
+                'kpiAprobados'  => 0,
+                'kpiCambios'    => 0,
+                'busqueda'      => '',
+                'estadoFiltro'  => '',
+                'tipoFiltro'    => ''
+            ]);
+        }
 
         $query = RetiroAsignatura::with([
             'estudiante', 
