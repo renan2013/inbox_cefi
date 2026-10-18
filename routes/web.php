@@ -351,12 +351,12 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    // --- ESTUDIANTE & TCU ---
-    Route::middleware('module:estudiante_tcu')->group(function () {
-        // Portal de Autogestión Estudiantil (Fase 6 CEFI)
-        Route::get('/estudiante/portal', [PortalEstudianteController::class, 'index'])->name('estudiante.portal');
-        Route::get('/estudiante/mi-record-pdf', [PortalEstudianteController::class, 'descargarMiRecordPdf'])->name('estudiante.mi_record_pdf');
+    // --- PORTAL DE AUTOGESTIÓN ESTUDIANTIL (FASE 6 CEFI - SIEMPRE DISPONIBLE) ---
+    Route::get('/estudiante/portal', [PortalEstudianteController::class, 'index'])->name('estudiante.portal');
+    Route::get('/estudiante/mi-record-pdf', [PortalEstudianteController::class, 'descargarMiRecordPdf'])->name('estudiante.mi_record_pdf');
 
+    // --- SEGUIMIENTO DE TCU & TRÁMITES ESTUDIANTILES ---
+    Route::middleware('module:estudiante_tcu')->group(function () {
         Route::get('/estudiante/tcu', [TcuController::class, 'index'])->name('tcu.index');
         Route::get('/estudiante/tcu/crear', [TcuController::class, 'create'])->name('tcu.create');
         Route::post('/estudiante/tcu/crear', [TcuController::class, 'store'])->name('tcu.store');

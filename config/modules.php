@@ -24,7 +24,7 @@ return [
         'registro_academico' => true,
         'expedientes_360' => true,
         'moodle_sync' => true,
-        'estudiante_tcu' => false,
+        'estudiante_tcu' => true,
 
         // --- FACTURACIÓN Y FINANZAS (CONTRATADO POR CEFI) ---
         'boletas_matricula' => true,

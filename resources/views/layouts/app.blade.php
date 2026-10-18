@@ -373,11 +373,13 @@
                             <i class="bi bi-mortarboard-fill me-1 text-success"></i> Mi Portal Estudiantil
                         </a>
                     </li>
+                    @module('estudiante_tcu')
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom {{ Route::is('tcu.*') ? 'active' : '' }}" href="{{ route('tcu.index') }}">
                             <i class="bi bi-journal-text me-1"></i> Mi TCU
                         </a>
                     </li>
+                    @endmodule
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom" href="{{ route('estudiante.mi_record_pdf') }}" target="_blank">
                             <i class="bi bi-file-earmark-pdf me-1"></i> Mi Récord (PDF)
