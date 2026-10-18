@@ -98,6 +98,97 @@
         background-color: #e2e8f0;
         color: #0f172a !important;
     }
+
+    /* Iconos KPI Estudiantes */
+    .kpi-icon-avatar {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.65rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-student-card:hover .kpi-icon-avatar {
+        transform: scale(1.06);
+    }
+    .kpi-avatar-blue {
+        background-color: #eff6ff !important;
+        color: #2563eb !important;
+        border: 1px solid #bfdbfe !important;
+    }
+    .kpi-avatar-green {
+        background-color: #f0fdf4 !important;
+        color: #16a34a !important;
+        border: 1px solid #bbf7d0 !important;
+    }
+    .kpi-avatar-cyan {
+        background-color: #f0f9ff !important;
+        color: #0284c7 !important;
+        border: 1px solid #bae6fd !important;
+    }
+    .kpi-avatar-red {
+        background-color: #fef2f2 !important;
+        color: #dc2626 !important;
+        border: 1px solid #fecaca !important;
+    }
+
+    [data-theme="dark"] .kpi-avatar-blue {
+        background-color: rgba(37, 99, 235, 0.16) !important;
+        color: #60a5fa !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    }
+    [data-theme="dark"] .kpi-avatar-green {
+        background-color: rgba(22, 163, 74, 0.16) !important;
+        color: #4ade80 !important;
+        border: 1px solid rgba(34, 197, 94, 0.3) !important;
+    }
+    [data-theme="dark"] .kpi-avatar-cyan {
+        background-color: rgba(2, 132, 199, 0.16) !important;
+        color: #38bdf8 !important;
+        border: 1px solid rgba(14, 165, 233, 0.3) !important;
+    }
+    [data-theme="dark"] .kpi-avatar-red {
+        background-color: rgba(220, 38, 38, 0.16) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+
+    /* Badges con contraste perfecto */
+    .badge-periodo-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 1.15rem;
+        border-radius: 50rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        background-color: #eff6ff !important;
+        color: #1d4ed8 !important;
+        border: 1px solid #bfdbfe !important;
+    }
+    [data-theme="dark"] .badge-periodo-pill {
+        background-color: rgba(37, 99, 235, 0.2) !important;
+        color: #93c5fd !important;
+        border: 1px solid rgba(96, 165, 250, 0.35) !important;
+    }
+    .badge-code-pill {
+        display: inline-block;
+        padding: 0.3rem 0.65rem;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        font-weight: 700;
+        background-color: #eff6ff !important;
+        color: #1d4ed8 !important;
+        border: 1px solid #bfdbfe !important;
+    }
+    [data-theme="dark"] .badge-code-pill {
+        background-color: rgba(37, 99, 235, 0.2) !important;
+        color: #93c5fd !important;
+        border: 1px solid rgba(96, 165, 250, 0.35) !important;
+    }
 </style>
 @endsection
 
@@ -164,7 +255,7 @@
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
             <div class="kpi-student-card d-flex align-items-center gap-3">
-                <div class="rounded-4 p-3 bg-primary bg-opacity-15 text-primary fs-3">
+                <div class="kpi-icon-avatar kpi-avatar-blue">
                     <i class="bi bi-book-half"></i>
                 </div>
                 <div>
@@ -175,8 +266,8 @@
         </div>
         <div class="col-sm-6 col-xl-3">
             <div class="kpi-student-card d-flex align-items-center gap-3">
-                <div class="rounded-4 p-3 bg-success bg-opacity-15 text-success fs-3">
-                    <i class="bi bi-award"></i>
+                <div class="kpi-icon-avatar kpi-avatar-green">
+                    <i class="bi bi-award-fill"></i>
                 </div>
                 <div>
                     <span class="text-muted small d-block">Créditos Aprobados</span>
@@ -186,19 +277,19 @@
         </div>
         <div class="col-sm-6 col-xl-3">
             <div class="kpi-student-card d-flex align-items-center gap-3">
-                <div class="rounded-4 p-3 bg-info bg-opacity-15 text-info fs-3">
+                <div class="kpi-icon-avatar kpi-avatar-cyan">
                     <i class="bi bi-graph-up-arrow"></i>
                 </div>
                 <div>
                     <span class="text-muted small d-block">Promedio Ponderado</span>
-                    <h3 class="fw-bold mb-0 text-info">{{ number_format($promedioPonderado, 2) }} / 100</h3>
+                    <h3 class="fw-bold mb-0" style="color: #0284c7;">{{ number_format($promedioPonderado, 2) }} / 100</h3>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
             <div class="kpi-student-card d-flex align-items-center gap-3">
-                <div class="rounded-4 p-3 {{ $saldoPendienteTotal > 0 ? 'bg-danger bg-opacity-15 text-danger' : 'bg-success bg-opacity-15 text-success' }} fs-3">
-                    <i class="bi {{ $saldoPendienteTotal > 0 ? 'bi-exclamation-triangle' : 'bi-wallet2' }}"></i>
+                <div class="kpi-icon-avatar {{ $saldoPendienteTotal > 0 ? 'kpi-avatar-red' : 'kpi-avatar-green' }}">
+                    <i class="bi {{ $saldoPendienteTotal > 0 ? 'bi-exclamation-triangle-fill' : 'bi-shield-check' }}"></i>
                 </div>
                 <div>
                     <span class="text-muted small d-block">Estado Financiero</span>
@@ -259,7 +350,7 @@
                     <div class="course-card-custom">
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="badge bg-primary bg-opacity-20 text-primary font-monospace fw-semibold">
+                                <span class="badge-code-pill">
                                     {{ $pe ? $pe->codigo : 'S/C' }}
                                 </span>
                                 <span class="badge bg-secondary bg-opacity-25 text-secondary small">
@@ -401,7 +492,7 @@
                         <tbody>
                             @forelse($boletas as $b)
                             <tr>
-                                <td><span class="badge bg-primary bg-opacity-20 text-primary font-monospace fw-bold">#{{ $b->id }}</span></td>
+                                <td><span class="badge-code-pill">#{{ $b->id }}</span></td>
                                 <td><span class="fw-semibold">{{ $b->periodo ?: 'Activo' }}</span></td>
                                 <td><span class="font-monospace fw-bold">₡{{ number_format((float)($b->total ?? 0), 2) }}</span></td>
                                 <td>
@@ -579,8 +670,8 @@
                         <h4 class="h5 fw-bold mb-1">Oferta Académica & Calendario Institucional</h4>
                         <p class="text-muted small mb-0">Cursos disponibles para matrícula y fechas clave del cuatrimestre.</p>
                     </div>
-                    <span class="badge bg-primary bg-opacity-20 text-primary px-3 py-1 rounded-pill small">
-                        Período {{ date('Y') }}
+                    <span class="badge-periodo-pill">
+                        <i class="bi bi-calendar-event me-2"></i> Período Activo {{ date('Y') }}
                     </span>
                 </div>
 
