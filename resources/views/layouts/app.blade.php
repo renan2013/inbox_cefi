@@ -367,6 +367,26 @@
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                     <!-- Dashboard -->
+                    <!-- Acceso Exclusivo para Estudiantes -->
+                    @if(Auth::check() && Auth::user()->id_rol == 3)
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom fw-bold {{ Route::is('estudiante.portal') ? 'active' : '' }}" href="{{ route('estudiante.portal') }}">
+                            <i class="bi bi-mortarboard-fill me-1 text-success"></i> Mi Portal Estudiantil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom {{ Route::is('tcu.*') ? 'active' : '' }}" href="{{ route('tcu.index') }}">
+                            <i class="bi bi-journal-text me-1"></i> Mi TCU
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="{{ route('estudiante.mi_record_pdf') }}" target="_blank">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Mi Récord (PDF)
+                        </a>
+                    </li>
+                    @endif
+
+                    @if(Auth::check() && Auth::user()->id_rol != 3)
                     @module('dashboard')
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom {{ Route::is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
@@ -374,6 +394,7 @@
                         </a>
                     </li>
                     @endmodule
+                    @endif
 
                     <!-- Logística Dropdown -->
                     @module('inventario')
@@ -391,6 +412,7 @@
                     @endmodule
 
                     <!-- Gestionar Curso Dropdown -->
+                    @if(Auth::check() && Auth::user()->id_rol != 3)
                     @module('gestion_cursos')
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -413,18 +435,22 @@
                         </ul>
                     </li>
                     @endmodule
+                    @endif
 
-                    <!-- Estudiante Dropdown -->
+                    <!-- Estudiante Dropdown (Para personal administrativo/docente) -->
+                    @if(Auth::check() && Auth::user()->id_rol != 3)
                     @module('estudiante_tcu')
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Estudiante
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom">
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('estudiante.portal') }}"><i class="bi bi-mortarboard text-success me-2"></i> Portal de Estudiantes</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('tcu.index') }}"><i class="bi bi-journal-text"></i> Bitácora de TCU</a></li>
                         </ul>
                     </li>
                     @endmodule
+                    @endif
 
                     <!-- Soporte Dropdown -->
                     @module('soporte')

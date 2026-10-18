@@ -36,6 +36,7 @@ use App\Http\Controllers\MarketingProspectoController;
 use App\Http\Controllers\ConvalidacionController;
 use App\Http\Controllers\RetiroAsignaturaController;
 use App\Http\Controllers\GraduacionController;
+use App\Http\Controllers\PortalEstudianteController;
 
 Route::post('/inbox-ai/chat', [InboxAiController::class, 'chat'])->name('inbox_ai.chat');
 
@@ -352,6 +353,10 @@ Route::middleware('auth')->group(function () {
 
     // --- ESTUDIANTE & TCU ---
     Route::middleware('module:estudiante_tcu')->group(function () {
+        // Portal de Autogestión Estudiantil (Fase 6 CEFI)
+        Route::get('/estudiante/portal', [PortalEstudianteController::class, 'index'])->name('estudiante.portal');
+        Route::get('/estudiante/mi-record-pdf', [PortalEstudianteController::class, 'descargarMiRecordPdf'])->name('estudiante.mi_record_pdf');
+
         Route::get('/estudiante/tcu', [TcuController::class, 'index'])->name('tcu.index');
         Route::get('/estudiante/tcu/crear', [TcuController::class, 'create'])->name('tcu.create');
         Route::post('/estudiante/tcu/crear', [TcuController::class, 'store'])->name('tcu.store');

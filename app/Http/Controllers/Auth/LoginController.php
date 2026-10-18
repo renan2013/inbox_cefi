@@ -15,7 +15,7 @@ class LoginController extends Controller
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return redirect()->intended('/dashboard');
+            return $this->redirectDestinoSegunRol(Auth::user());
         }
 
         // Generar Captcha Matemático si no existe en la sesión
@@ -88,7 +88,7 @@ class LoginController extends Controller
                 // Silenciosamente capturado si el webhook no responde
             }
 
-            return redirect()->intended('/dashboard');
+            return $this->redirectDestinoSegunRol($user);
         }
 
         // Regenerar captcha en caso de fallo de autenticación
@@ -97,6 +97,19 @@ class LoginController extends Controller
         return back()->withInput()->withErrors([
             'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
         ]);
+    }
+
+    /**
+     * Retorna la redirección apropiada según el rol del usuario institucional.
+     */
+    protected function redirectDestinoSegunRol($user)
+    {
+        if ($user && $user->id_rol == 3) {
+            return redirect()->intended('/estudiante/portal');
+        } elseif ($user && $user->id_rol == 2) {
+            return redirect()->intended('/docente/cursos');
+        }
+        return redirect()->intended('/dashboard');
     }
 
     /**

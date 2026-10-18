@@ -16,6 +16,12 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+
+        // Si es rol Estudiante, redirigir a su portal personalizado de autogestión
+        if ($user && $user->id_rol == 3) {
+            return redirect()->route('estudiante.portal');
+        }
+
         $es_admin = ($user->id_rol == 1);
         $user_id = $user->id;
 
