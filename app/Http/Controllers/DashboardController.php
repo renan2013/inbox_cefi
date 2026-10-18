@@ -17,8 +17,8 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Si es rol Estudiante, redirigir a su portal personalizado de autogestión
-        if ($user && $user->id_rol == 3) {
+        // Si es rol Estudiante / Alumno, redirigir a su portal personalizado de autogestión
+        if ($user && ((int)$user->id_rol === 3 || (method_exists($user, 'esAlumno') && $user->esAlumno()))) {
             return redirect()->route('estudiante.portal');
         }
 

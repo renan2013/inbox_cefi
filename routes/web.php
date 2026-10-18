@@ -136,7 +136,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- REGISTRO ACADÉMICO ---
-    Route::middleware('module:registro_academico')->group(function () {
+    Route::middleware(['module:registro_academico', 'no.alumno'])->group(function () {
         Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
         Route::get('/usuarios/crear', [UsuarioController::class, 'create'])->name('usuarios.create');
         Route::post('/usuarios/crear', [UsuarioController::class, 'store'])->name('usuarios.store');
@@ -211,7 +211,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- FACTURACIÓN Y BOLETAS DE MATRÍCULA ---
-    Route::middleware('module:boletas_matricula')->group(function () {
+    Route::middleware(['module:boletas_matricula', 'no.alumno'])->group(function () {
         Route::get('/boletas', [BoletaController::class, 'index'])->name('boletas.index');
         Route::get('/boletas/generar', [BoletaController::class, 'generar'])->name('boletas.generar');
         Route::post('/boletas/generar', [BoletaController::class, 'store'])->name('boletas.store');
@@ -233,7 +233,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- FINANZAS, MOROSIDAD Y ESTADO DE CUENTA ---
-    Route::middleware('module:finanzas')->group(function () {
+    Route::middleware(['module:finanzas', 'no.alumno'])->group(function () {
         Route::get('/boletas/estado-cuenta', [BoletaController::class, 'estadoCuenta'])->name('boletas.estado_cuenta');
         Route::get('/boletas/estado-cuenta/{id}/ajax', [BoletaController::class, 'getEstadoCuentaAjax'])->name('boletas.estado_cuenta_ajax');
         Route::get('/boletas/morosidad', [BoletaController::class, 'morosidad'])->name('boletas.morosidad');
@@ -241,7 +241,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- EXPEDIENTES DIGITALES 360° ---
-    Route::middleware('module:expedientes_360')->group(function () {
+    Route::middleware(['module:expedientes_360', 'no.alumno'])->group(function () {
         Route::get('/expedientes', [ExpedienteController::class, 'index'])->name('expedientes.index');
         Route::get('/expedientes/crear', [ExpedienteController::class, 'create'])->name('expedientes.create');
         Route::post('/expedientes/crear', [ExpedienteController::class, 'store'])->name('expedientes.store');
@@ -372,7 +372,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- GESTIÓN DE CURSOS, SÍLABOS Y RECURSOS DOCENTES ---
-    Route::middleware('module:gestion_cursos')->group(function () {
+    Route::middleware(['module:gestion_cursos', 'no.alumno'])->group(function () {
         Route::get('/cursos/supervision', [SupervisionCursosController::class, 'index'])->name('supervision.index');
         Route::post('/cursos/supervision/toggle', [SupervisionCursosController::class, 'toggleSupervision'])->name('supervision.toggle');
         Route::post('/cursos/supervision/toggle-supervision', [SupervisionCursosController::class, 'toggleSupervision'])->name('supervision.toggle_supervision');

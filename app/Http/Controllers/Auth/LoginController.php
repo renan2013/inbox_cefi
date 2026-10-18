@@ -104,9 +104,9 @@ class LoginController extends Controller
      */
     protected function redirectDestinoSegunRol($user)
     {
-        if ($user && $user->id_rol == 3) {
+        if ($user && ((int)$user->id_rol === 3 || (method_exists($user, 'esAlumno') && $user->esAlumno()))) {
             return redirect()->intended('/estudiante/portal');
-        } elseif ($user && $user->id_rol == 2) {
+        } elseif ($user && ((int)$user->id_rol === 2 || (int)$user->id_rol === 4 || (method_exists($user, 'esDocente') && $user->esDocente()))) {
             return redirect()->intended('/docente/cursos');
         }
         return redirect()->intended('/dashboard');

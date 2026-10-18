@@ -354,7 +354,7 @@
     <!-- Header / Navbar CEFI v2.1 -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container-fluid">
-            <a class="brand-logo d-flex align-items-center text-decoration-none" href="{{ route('dashboard') }}">
+            <a class="brand-logo d-flex align-items-center text-decoration-none" href="{{ (Auth::check() && (Auth::user()->id_rol == 3 || (method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))) ? route('estudiante.portal') : route('dashboard') }}">
                 <img src="{{ asset('imgs/SVG/logo_blanco.svg') }}" alt="Inbox Logo" class="logo-dark-theme">
                 <img src="{{ asset('imgs/SVG/logo_color.svg') }}" alt="Inbox Logo" class="logo-light-theme">
                 <span class="badge rounded-pill ms-2 fs-6 fw-bold px-2 py-1 text-white" style="background-color: var(--primary, #5fb230) !important;">2.0</span>
@@ -366,9 +366,8 @@
 
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                    <!-- Dashboard -->
-                    <!-- Acceso Exclusivo para Estudiantes -->
-                    @if(Auth::check() && Auth::user()->id_rol == 3)
+                    <!-- Acceso Exclusivo para Estudiantes / Alumnos -->
+                    @if(Auth::check() && (Auth::user()->id_rol == 3 || (method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno())))
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom fw-bold {{ Route::is('estudiante.portal') ? 'active' : '' }}" href="{{ route('estudiante.portal') }}">
                             <i class="bi bi-mortarboard-fill me-1 text-success"></i> Mi Portal Estudiantil
@@ -386,7 +385,7 @@
                     </li>
                     @endif
 
-                    @if(Auth::check() && Auth::user()->id_rol != 3)
+                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
                     @module('dashboard')
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom {{ Route::is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
@@ -411,8 +410,8 @@
                     @endif
                     @endmodule
 
-                    <!-- Gestionar Curso Dropdown -->
-                    @if(Auth::check() && Auth::user()->id_rol != 3)
+                    <!-- Gestionar Curso Dropdown (Jamás visible para rol Alumno) -->
+                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
                     @module('gestion_cursos')
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -438,7 +437,7 @@
                     @endif
 
                     <!-- Estudiante Dropdown (Para personal administrativo/docente) -->
-                    @if(Auth::check() && Auth::user()->id_rol != 3)
+                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
                     @module('estudiante_tcu')
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -452,7 +451,8 @@
                     @endmodule
                     @endif
 
-                    <!-- Soporte Dropdown -->
+                    <!-- Soporte Dropdown (Personal Administrativo / Docente) -->
+                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
                     @module('soporte')
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -478,8 +478,10 @@
                         </ul>
                     </li>
                     @endmodule
+                    @endif
 
-                    <!-- Planilla Dropdown -->
+                    <!-- Planilla Dropdown (Personal Administrativo / Docente) -->
+                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
                     @module('planilla')
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -499,8 +501,10 @@
                         </ul>
                     </li>
                     @endmodule
+                    @endif
 
-                    <!-- Registro Dropdown -->
+                    <!-- Registro Dropdown (Jamás visible para el rol Alumno) -->
+                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
                     @if(\App\Services\ModuleService::isEnabled('registro_academico') || \App\Services\ModuleService::isEnabled('boletas_matricula') || \App\Services\ModuleService::isEnabled('finanzas') || \App\Services\ModuleService::isEnabled('expedientes_360'))
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -548,6 +552,7 @@
                             @endmodule
                         </ul>
                     </li>
+                    @endif
                     @endif
 
                     <!-- Configuración Dropdown (Solo Administrador General con Clave) -->

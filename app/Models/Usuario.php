@@ -80,4 +80,48 @@ class Usuario extends Authenticatable
     {
         return $this->hasMany(Matricula::class, 'id_estudiante', 'id');
     }
+
+    /**
+     * Determina si el usuario tiene rol de Alumno / Estudiante.
+     */
+    public function esAlumno(): bool
+    {
+        if ((int)$this->id_rol === 3) {
+            return true;
+        }
+        $nombreRol = strtolower(optional($this->rol)->nombre ?? '');
+        return in_array($nombreRol, ['alumno', 'estudiante', 'miembro', 'alumnos', 'estudiantes']);
+    }
+
+    /**
+     * Alias para esAlumno.
+     */
+    public function esEstudiante(): bool
+    {
+        return $this->esAlumno();
+    }
+
+    /**
+     * Determina si el usuario es Docente / Profesor.
+     */
+    public function esDocente(): bool
+    {
+        if ((int)$this->id_rol === 2 || (int)$this->id_rol === 4) {
+            return true;
+        }
+        $nombreRol = strtolower(optional($this->rol)->nombre ?? '');
+        return in_array($nombreRol, ['profesor', 'docente', 'tutor', 'profesores', 'docentes']);
+    }
+
+    /**
+     * Determina si el usuario es Administrador.
+     */
+    public function esAdmin(): bool
+    {
+        if ((int)$this->id_rol === 1) {
+            return true;
+        }
+        $nombreRol = strtolower(optional($this->rol)->nombre ?? '');
+        return in_array($nombreRol, ['administrador', 'admin', 'superadmin', 'coordinador']);
+    }
 }
