@@ -444,3 +444,137 @@ Route::middleware('auth')->group(function () {
 // --- FIRMA DIGITAL PÚBLICA DE BOLETA PARA ESTUDIANTE (SIN LOGIN) ---
 Route::get('/boletas/firmar/{token}', [BoletaController::class, 'firmarPublico'])->name('boletas.firmar_publico');
 Route::post('/boletas/firmar/{token}/guardar', [BoletaController::class, 'guardarFirmaPublica'])->name('boletas.guardar_firma_publica');
+
+// --- DEMO AUTOMATIZADO / SEMBRAR ALUMNO COMPLETO 360° ---
+Route::get('/sistema/sembrar-demo', function () {
+    try {
+        $seeder = new \Database\Seeders\AlumnoDemoCompletoSeeder();
+        $res = $seeder->run();
+
+        $alumno = $res['alumno'];
+        $cursos = $res['cursos'];
+        $convalidacion = $res['convalidacion'];
+        $boleta = $res['boleta'];
+        $tcu = $res['tcu'];
+
+        return response("
+        <!DOCTYPE html>
+        <html lang='es'>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Alumno Demo Creado con Éxito - CEFI</title>
+            <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+            <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+            <style>
+                body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; padding: 40px 15px; }
+                .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+                .accent-pill { background: linear-gradient(135deg, #0284c7, #2563eb); color: white; padding: 4px 14px; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; display: inline-block; }
+                .success-pill { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 4px 12px; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; }
+                .info-badge { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+                .module-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 18px; margin-bottom: 15px; }
+            </style>
+        </head>
+        <body>
+            <div class='container' style='max-width: 900px;'>
+                <div class='glass-card p-4 p-md-5'>
+                    <div class='d-flex align-items-center justify-content-between border-bottom pb-4 mb-4 border-secondary border-opacity-25'>
+                        <div>
+                            <span class='accent-pill mb-2'><i class='fa-solid fa-graduation-cap me-1'></i> Entorno de Pruebas Institucional</span>
+                            <h2 class='fw-bold mb-0 text-white'>Alumno Demo 360° Sembrado</h2>
+                            <p class='text-secondary mb-0'>Se ha configurado todo el ciclo del estudiante: expediente, matrícula, notas, boletas y TCU.</p>
+                        </div>
+                        <div class='text-end'>
+                            <span class='success-pill'><i class='fa-solid fa-check-circle me-1'></i> 100% Operativo</span>
+                        </div>
+                    </div>
+
+                    <!-- Credenciales -->
+                    <div class='alert alert-primary bg-primary bg-opacity-10 border-primary border-opacity-25 text-white p-3 rounded-3 mb-4'>
+                        <h5 class='fw-bold text-info mb-2'><i class='fa-solid fa-key me-2'></i>Credenciales para Iniciar Sesión como Alumno:</h5>
+                        <div class='row g-3'>
+                            <div class='col-sm-6'><strong>Correo:</strong> <code class='text-warning fs-6'>{$alumno->email}</code></div>
+                            <div class='col-sm-6'><strong>Contraseña:</strong> <code class='text-warning fs-6'>cefi2026</code></div>
+                            <div class='col-sm-6'><strong>Nombre Completo:</strong> {$alumno->nombre} {$alumno->apellidos}</div>
+                            <div class='col-sm-6'><strong>Cédula:</strong> {$alumno->cedula} (Rol Alumno)</div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen del Ciclo -->
+                    <div class='row g-3 mb-4'>
+                        <!-- Expediente Digital -->
+                        <div class='col-md-6'>
+                            <div class='module-card h-100'>
+                                <h6 class='text-info fw-bold mb-2'><i class='fa-solid fa-folder-open me-2'></i>1. Expediente Digital 360°</h6>
+                                <p class='small text-secondary mb-2'>Datos personales, bachillerato de secundaria, antecedentes laborales y checklist de requisitos.</p>
+                                <span class='badge bg-success'><i class='fa-solid fa-check me-1'></i> Estado: Aprobado (100% Completo)</span>
+                            </div>
+                        </div>
+
+                        <!-- Cursos y Notas -->
+                        <div class='col-md-6'>
+                            <div class='module-card h-100'>
+                                <h6 class='text-info fw-bold mb-2'><i class='fa-solid fa-book-bookmark me-2'></i>2. Cursos Matriculados (3)</h6>
+                                <ul class='small text-secondary ps-3 mb-0'>
+                                    <li><strong class='text-white'>CON-101 Contabilidad I:</strong> <span class='text-success fw-bold'>Nota 92.5 (Aprobado)</span></li>
+                                    <li><strong class='text-white'>LEG-102 Legislación Laboral:</strong> <span class='text-success fw-bold'>Nota 87.0 (Aprobado)</span></li>
+                                    <li><strong class='text-white'>FIN-201 Finanzas Empresariales:</strong> <span class='text-warning fw-bold'>En Curso (Con Zoom y Silabo)</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Convalidaciones -->
+                        <div class='col-md-6'>
+                            <div class='module-card h-100'>
+                                <h6 class='text-info fw-bold mb-2'><i class='fa-solid fa-award me-2'></i>3. Homologación / Convalidación</h6>
+                                <p class='small text-secondary mb-1'><strong>U. de Costa Rica:</strong> MAT-100 Matemática General</p>
+                                <p class='small text-secondary mb-2'><strong>Resolución:</strong> RES-CEFI-2026-042 (Nota: 90.0)</p>
+                                <span class='badge bg-primary'><i class='fa-solid fa-stamp me-1'></i> Reconocimiento Aprobado</span>
+                            </div>
+                        </div>
+
+                        <!-- Finanzas / Boleta -->
+                        <div class='col-md-6'>
+                            <div class='module-card h-100'>
+                                <h6 class='text-info fw-bold mb-2'><i class='fa-solid fa-file-invoice-dollar me-2'></i>4. Boleta y Estado Financiero</h6>
+                                <p class='small text-secondary mb-1'><strong>Boleta:</strong> {$boleta->numero_boleta} - ₡" . number_format($boleta->monto_total, 2) . "</p>
+                                <p class='small text-secondary mb-2'><strong>Pagado:</strong> ₡" . number_format($boleta->monto_pagado, 2) . " | <strong>Saldo:</strong> <span class='text-warning fw-bold'>₡" . number_format($boleta->saldo_pendiente, 2) . "</span></p>
+                                <span class='badge bg-warning text-dark'><i class='fa-solid fa-clock me-1'></i> Estado: Pago Parcial</span>
+                            </div>
+                        </div>
+
+                        <!-- TCU -->
+                        <div class='col-12'>
+                            <div class='module-card'>
+                                <h6 class='text-info fw-bold mb-2'><i class='fa-solid fa-hand-holding-heart me-2'></i>5. Trabajo Comunal Universitario (TCU)</h6>
+                                <p class='small text-secondary mb-2'>Proyecto: <em>Apoyo Comunal y Alfabetización Financiera San José</em></p>
+                                <div class='progress mb-2' style='height: 10px; background: rgba(255,255,255,0.1);'>
+                                    <div class='progress-bar bg-success' style='width: 30%;'></div>
+                                </div>
+                                <span class='small text-light'><strong>45 horas completadas</strong> de 150 requeridas (2 bitácoras registradas)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enlaces de Navegación -->
+                    <div class='d-flex flex-wrap gap-2 pt-3 border-top border-secondary border-opacity-25'>
+                        <a href='/estudiante/portal' class='btn btn-primary px-4 fw-bold shadow-sm'><i class='fa-solid fa-graduation-cap me-2'></i>Ir al Portal del Estudiante</a>
+                        <a href='/expedientes' class='btn btn-outline-light px-3'><i class='fa-solid fa-folder me-2'></i>Ver Expedientes (Admin)</a>
+                        <a href='/boletas' class='btn btn-outline-light px-3'><i class='fa-solid fa-file-invoice me-2'></i>Ver Boletas (Admin)</a>
+                        <a href='/convalidaciones' class='btn btn-outline-light px-3'><i class='fa-solid fa-stamp me-2'></i>Ver Convalidaciones</a>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        ", 200, ['Content-Type' => 'text/html']);
+    } catch (\Throwable $e) {
+        return response("
+            <div style='background: #1e1e2d; color: #ff6b6b; padding: 30px; font-family: monospace; border-radius: 8px; margin: 30px auto; max-width: 800px; border: 1px solid #ff4d4f;'>
+                <h2><i class='fa fa-exclamation-triangle'></i> Error al Sembrar Datos Demo</h2>
+                <p><strong>Mensaje:</strong> " . htmlspecialchars($e->getMessage()) . "</p>
+                <p><strong>Archivo:</strong> " . htmlspecialchars($e->getFile()) . " en línea " . $e->getLine() . "</p>
+                <pre style='background: #151521; color: #f8f9fa; padding: 15px; border-radius: 6px; overflow-x: auto;'>" . htmlspecialchars($e->getTraceAsString()) . "</pre>
+            </div>
+        ", 500, ['Content-Type' => 'text/html']);
+    }
+})->name('sistema.sembrar_demo');
