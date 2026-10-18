@@ -280,4 +280,23 @@ class PortalEstudianteController extends Controller
         $expController = app(ExpedienteController::class);
         return $expController->generarRecordPdf($expediente->id_expediente);
     }
+
+    /**
+     * Permite al estudiante descargar directamente su Ficha de Expediente Digital oficial en PDF.
+     */
+    public function descargarMiExpedientePdf()
+    {
+        $idEstudiante = Auth::id();
+        $expediente = null;
+        if (Schema::hasTable('expedientes_digitales')) {
+            $expediente = ExpedienteDigital::with(['usuario', 'archivos'])->where('id_usuario', $idEstudiante)->first();
+        }
+
+        if (!$expediente) {
+            return back()->with('error', 'Aún no posees un Expediente Digital aperturado. Consulta con Registro Académico.');
+        }
+
+        $expController = app(ExpedienteController::class);
+        return $expController->generarExpedientePdf($expediente->id_expediente);
+    }
 }

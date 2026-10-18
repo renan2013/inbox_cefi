@@ -759,6 +759,21 @@ class ExpedienteController extends Controller
     }
 
     /**
+     * Genera la Ficha Oficial del Expediente Digital 360° en PDF.
+     */
+    public function generarExpedientePdf($id)
+    {
+        $expediente = ExpedienteDigital::with(['usuario', 'archivos'])->findOrFail($id);
+        $pdfContent = \App\Services\ExpedientePdfService::generarPdf($expediente);
+        $fileName = "Ficha_Expediente_EXP_{$expediente->id_expediente}.pdf";
+
+        return response($pdfContent, 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => "inline; filename=\"{$fileName}\"",
+        ]);
+    }
+
+    /**
      * Busca usuarios y comprueba si ya tienen un expediente (para modal de creación).
      */
     public function buscarUsuarioAjax(Request $request)

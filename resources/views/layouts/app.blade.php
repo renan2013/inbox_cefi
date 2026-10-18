@@ -381,6 +381,11 @@
                     </li>
                     @endmodule
                     <li class="nav-item">
+                        <a class="nav-link nav-link-custom" href="{{ route('estudiante.mi_expediente_pdf') }}" target="_blank">
+                            <i class="bi bi-file-earmark-person me-1"></i> Mi Expediente (PDF)
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link nav-link-custom" href="{{ route('estudiante.mi_record_pdf') }}" target="_blank">
                             <i class="bi bi-file-earmark-pdf me-1"></i> Mi Récord (PDF)
                         </a>

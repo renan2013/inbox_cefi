@@ -524,6 +524,10 @@
                             </a>
                         @endif
 
+                        <a href="{{ route('expedientes.expediente_pdf', $expediente->id_expediente) }}" target="_blank" class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-semibold d-flex align-items-center gap-2">
+                            <i class="bi bi-file-earmark-person-fill"></i> Ficha Expediente PDF
+                        </a>
+
                         <a href="{{ route('expedientes.record_pdf', $expediente->id_expediente) }}" target="_blank" class="btn btn-outline-info btn-sm px-3 rounded-pill fw-semibold d-flex align-items-center gap-2">
                             <i class="bi bi-file-earmark-pdf-fill"></i> Certificación Récord PDF
                         </a>

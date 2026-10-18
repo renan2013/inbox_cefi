@@ -257,6 +257,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/expedientes/observaciones/{id}/eliminar', [ExpedienteController::class, 'eliminarObservacion'])->name('expedientes.observaciones.eliminar');
         Route::get('/expedientes/{id}/descargar-zip', [ExpedienteController::class, 'descargarZip'])->name('expedientes.descargar_zip');
         Route::get('/expedientes/{id}/record-pdf', [ExpedienteController::class, 'generarRecordPdf'])->name('expedientes.record_pdf');
+        Route::get('/expedientes/{id}/expediente-pdf', [ExpedienteController::class, 'generarExpedientePdf'])->name('expedientes.expediente_pdf');
     });
 
     // --- DIFUSIÓN WHATSAPP & MARKETING PROSPECTOS ---
@@ -354,6 +355,7 @@ Route::middleware('auth')->group(function () {
     // --- PORTAL DE AUTOGESTIÓN ESTUDIANTIL (FASE 6 CEFI - SIEMPRE DISPONIBLE) ---
     Route::get('/estudiante/portal', [PortalEstudianteController::class, 'index'])->name('estudiante.portal');
     Route::get('/estudiante/mi-record-pdf', [PortalEstudianteController::class, 'descargarMiRecordPdf'])->name('estudiante.mi_record_pdf');
+    Route::get('/estudiante/mi-expediente-pdf', [PortalEstudianteController::class, 'descargarMiExpedientePdf'])->name('estudiante.mi_expediente_pdf');
 
     // --- SEGUIMIENTO DE TCU & TRÁMITES ESTUDIANTILES ---
     Route::middleware('module:estudiante_tcu')->group(function () {
