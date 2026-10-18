@@ -660,7 +660,7 @@ class ExpedienteController extends Controller
             ->leftJoin('usuarios as u_prof', 'ca.id_profesor', '=', 'u_prof.id')
             ->where('m.id_estudiante', $idUsuario)
             ->select(
-                'm.id_matricula', 'm.calificacion', 'm.comentarios',
+                'm.id_matricula', 'm.calificacion', 'm.comentarios', 'm.estado as matricula_estado',
                 'ca.periodo', 'ca.fecha_inicio', 'ca.fecha_final', 'ca.check_acta',
                 'pe.materia', 'pe.codigo', DB::raw('IFNULL(pe.creditos, 3) as creditos'),
                 'p.nombre_programa',
@@ -683,7 +683,9 @@ class ExpedienteController extends Controller
             $cred = (float)$c->creditos;
             if ($cred <= 0) $cred = 3;
 
-            if ($nota !== null && $nota !== '') {
+            if ($c->matricula_estado === 'Retirado') {
+                $estado = 'RETIRADO';
+            } elseif ($nota !== null && $nota !== '') {
                 $notaNum = (float)$nota;
                 $totalCreditosCursados += $cred;
                 $sumaPonderada += ($notaNum * $cred);
@@ -708,6 +710,33 @@ class ExpedienteController extends Controller
                 'creditos_calc'  => $cred,
                 'calificacion'   => $c->calificacion,
                 'estado_calc'    => $estado,
+            ];
+        }
+
+        // Convalidaciones & Homologaciones oficiales aprobadas
+        $convalidaciones = \App\Models\Convalidacion::with('planEstudio')
+            ->where('id_estudiante', $idUsuario)
+            ->where('estado', 'Aprobada')
+            ->get();
+
+        foreach ($convalidaciones as $conv) {
+            $credConv = (float)($conv->creditos_convalidados ?: 3.0);
+            $totalCreditosAprobados += $credConv;
+            $cursosAprobados++;
+
+            if ($conv->calificacion_homologada !== null) {
+                $notaConvNum = (float)$conv->calificacion_homologada;
+                $totalCreditosCursados += $credConv;
+                $sumaPonderada += ($notaConvNum * $credConv);
+            }
+
+            $cursosData[] = [
+                'codigo'         => $conv->planEstudio ? $conv->planEstudio->codigo : ($conv->codigo_origen ?: 'CONV'),
+                'materia'        => ($conv->planEstudio ? $conv->planEstudio->materia : $conv->materia_origen) . ' [Convalidado]',
+                'periodo'        => 'CONVALIDACIÓN',
+                'creditos_calc'  => $credConv,
+                'calificacion'   => $conv->calificacion_homologada ? number_format($conv->calificacion_homologada, 1) : 'AP',
+                'estado_calc'    => 'CONVALIDADO',
             ];
         }
 

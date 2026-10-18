@@ -60,4 +60,24 @@ class Usuario extends Authenticatable
     {
         return $this->hasOne(ExpedienteDigital::class, 'id_usuario', 'id');
     }
+
+    public function convalidaciones()
+    {
+        return $this->hasMany(Convalidacion::class, 'id_estudiante', 'id');
+    }
+
+    public function retiros()
+    {
+        return $this->hasMany(RetiroAsignatura::class, 'id_estudiante', 'id');
+    }
+
+    public function graduaciones()
+    {
+        return $this->hasMany(Graduacion::class, 'id_estudiante', 'id');
+    }
+
+    public function matriculas()
+    {
+        return $this->hasMany(Matricula::class, 'id_estudiante', 'id');
+    }
 }

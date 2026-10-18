@@ -33,6 +33,9 @@ use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\CampanaWhatsAppController;
 use App\Http\Controllers\MarketingProspectoController;
+use App\Http\Controllers\ConvalidacionController;
+use App\Http\Controllers\RetiroAsignaturaController;
+use App\Http\Controllers\GraduacionController;
 
 Route::post('/inbox-ai/chat', [InboxAiController::class, 'chat'])->name('inbox_ai.chat');
 
@@ -168,6 +171,31 @@ Route::middleware('auth')->group(function () {
         Route::get('/utilitarios', [UtilitarioController::class, 'index'])->name('utilitarios.index');
         Route::post('/utilitarios/acceder', [UtilitarioController::class, 'acceder'])->name('utilitarios.acceder');
         Route::post('/utilitarios/{id}/eliminar', [UtilitarioController::class, 'destroy'])->name('utilitarios.destroy');
+
+        // Convalidaciones & Homologaciones (Fase 4 CEFI)
+        Route::get('/convalidaciones', [ConvalidacionController::class, 'index'])->name('convalidaciones.index');
+        Route::get('/convalidaciones/crear', [ConvalidacionController::class, 'create'])->name('convalidaciones.create');
+        Route::post('/convalidaciones/crear', [ConvalidacionController::class, 'store'])->name('convalidaciones.store');
+        Route::post('/convalidaciones/{id}/estado', [ConvalidacionController::class, 'cambiarEstado'])->name('convalidaciones.cambiar_estado');
+        Route::post('/convalidaciones/{id}/eliminar', [ConvalidacionController::class, 'destroy'])->name('convalidaciones.destroy');
+        Route::get('/convalidaciones/programa/{id}/cursos-ajax', [ConvalidacionController::class, 'ajaxCursosPrograma'])->name('convalidaciones.cursos_programa_ajax');
+
+        // Retiros y Cambios de Asignaturas (Fase 4 CEFI)
+        Route::get('/retiros-asignaturas', [RetiroAsignaturaController::class, 'index'])->name('retiros.index');
+        Route::get('/retiros-asignaturas/crear', [RetiroAsignaturaController::class, 'create'])->name('retiros.create');
+        Route::post('/retiros-asignaturas/crear', [RetiroAsignaturaController::class, 'store'])->name('retiros.store');
+        Route::post('/retiros-asignaturas/{id}/resolver', [RetiroAsignaturaController::class, 'resolver'])->name('retiros.resolver');
+        Route::post('/retiros-asignaturas/{id}/eliminar', [RetiroAsignaturaController::class, 'destroy'])->name('retiros.destroy');
+        Route::get('/retiros-asignaturas/estudiante/{id}/matriculas-ajax', [RetiroAsignaturaController::class, 'ajaxMatriculasEstudiante'])->name('retiros.matriculas_estudiante_ajax');
+
+        // Graduaciones & Auditoría de Requisitos (Fase 4 CEFI)
+        Route::get('/graduaciones', [GraduacionController::class, 'index'])->name('graduaciones.index');
+        Route::get('/graduaciones/crear', [GraduacionController::class, 'create'])->name('graduaciones.create');
+        Route::post('/graduaciones/crear', [GraduacionController::class, 'store'])->name('graduaciones.store');
+        Route::get('/graduaciones/{id}/auditar', [GraduacionController::class, 'auditar'])->name('graduaciones.auditar');
+        Route::post('/graduaciones/{id}/aprobar', [GraduacionController::class, 'aprobar'])->name('graduaciones.aprobar');
+        Route::get('/graduaciones/{id}/dictamen-pdf', [GraduacionController::class, 'generarDictamenPdf'])->name('graduaciones.dictamen_pdf');
+        Route::post('/graduaciones/{id}/eliminar', [GraduacionController::class, 'destroy'])->name('graduaciones.destroy');
     });
 
     // --- FACTURACIÓN Y BOLETAS DE MATRÍCULA ---

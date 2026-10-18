@@ -232,13 +232,15 @@ class RecordAcademicoPdfService
             $pdf->Cell(25, 6.5, $pdf->toPdf($c['periodo'] ?: 'N/A'), 1, 0, 'C', true);
             $pdf->Cell(14, 6.5, $c['creditos_calc'], 1, 0, 'C', true);
 
-            $notaStr = ($c['calificacion'] !== null && $c['calificacion'] !== '') ? number_format((float)$c['calificacion'], 1) : '-';
+            $notaStr = is_numeric($c['calificacion']) ? number_format((float)$c['calificacion'], 1) : ($c['calificacion'] ?: '-');
             
-            // Color de nota
-            if ($c['estado_calc'] === 'APROBADO') {
+            // Color de nota y estado
+            if ($c['estado_calc'] === 'APROBADO' || $c['estado_calc'] === 'CONVALIDADO') {
                 $pdf->SetTextColor(22, 163, 74); // Verde
             } elseif ($c['estado_calc'] === 'REPROBADO') {
                 $pdf->SetTextColor(220, 38, 38); // Rojo
+            } elseif ($c['estado_calc'] === 'RETIRADO') {
+                $pdf->SetTextColor(217, 119, 6); // Ámbar
             } else {
                 $pdf->SetTextColor(100, 116, 139);
             }

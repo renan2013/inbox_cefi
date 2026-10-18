@@ -82,6 +82,16 @@ class ExpedienteDigital extends Model
         return $this->hasMany(ExpedienteObservacion::class, 'id_expediente', 'id_expediente')->orderBy('fecha_registro', 'desc');
     }
 
+    public function convalidaciones()
+    {
+        return $this->hasMany(Convalidacion::class, 'id_expediente', 'id_expediente');
+    }
+
+    public function graduacion()
+    {
+        return $this->hasOne(Graduacion::class, 'id_expediente', 'id_expediente');
+    }
+
     public function getPorcentajeCompletitudAttribute(): int
     {
         $campos = [

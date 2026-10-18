@@ -511,6 +511,12 @@
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.index') }}"><i class="bi bi-list-task"></i> Lista de Programas</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('cursos.index') }}"><i class="bi bi-journals"></i> Lista de Cursos</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.completos') }}"><i class="bi bi-file-earmark-ruled"></i> Programas Completos</a></li>
+                            @module('registro_academico')
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li><h6 class="dropdown-header-custom"><i class="bi bi-mortarboard-fill me-1"></i> Control Académico (Fase 4)</h6></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('convalidaciones.index') }}"><i class="bi bi-patch-check"></i> Convalidaciones & Homologaciones</a></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('retiros.index') }}"><i class="bi bi-arrow-left-right"></i> Retiros y Cambios de Curso</a></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('graduaciones.index') }}"><i class="bi bi-award"></i> Auditoría y Graduaciones</a></li>
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('reportes.index') }}"><i class="bi bi-file-earmark-pdf"></i> Reportes del Sistema</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('utilitarios.index') }}"><i class="bi bi-tools"></i> Utilitarios</a></li>
