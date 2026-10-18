@@ -511,7 +511,6 @@
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.index') }}"><i class="bi bi-list-task"></i> Lista de Programas</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('cursos.index') }}"><i class="bi bi-journals"></i> Lista de Cursos</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.completos') }}"><i class="bi bi-file-earmark-ruled"></i> Programas Completos</a></li>
-                            @module('registro_academico')
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><h6 class="dropdown-header-custom"><i class="bi bi-mortarboard-fill me-1"></i> Control Académico (Fase 4)</h6></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('convalidaciones.index') }}"><i class="bi bi-patch-check"></i> Convalidaciones & Homologaciones</a></li>
