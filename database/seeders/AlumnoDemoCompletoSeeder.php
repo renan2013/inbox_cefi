@@ -254,8 +254,9 @@ class AlumnoDemoCompletoSeeder extends Seeder
         }
 
         // 8. Crear Convalidación Aprobada (Fase 4: Control Académico)
+        $convalidacion = null;
         if (Schema::hasTable('convalidaciones') && $materiaConv) {
-            Convalidacion::updateOrCreate(
+            $convalidacion = Convalidacion::updateOrCreate(
                 ['id_estudiante' => $alumno->id, 'materia_origen' => 'Cálculo y Matemática Financiera I'],
                 [
                     'id_expediente'          => $expediente ? $expediente->id_expediente : null,
@@ -280,8 +281,9 @@ class AlumnoDemoCompletoSeeder extends Seeder
         }
 
         // 9. Crear Boleta de Matrícula y Finanzas
+        $boleta = null;
         if (Schema::hasTable('boletas')) {
-            Boleta::updateOrCreate(
+            $boleta = Boleta::updateOrCreate(
                 ['id_estudiante' => $alumno->id, 'periodo' => $periodoActual],
                 [
                     'numero_boleta'           => 'BOL-2026-0088',
@@ -305,6 +307,7 @@ class AlumnoDemoCompletoSeeder extends Seeder
         }
 
         // 10. Crear Bitácora de TCU con Actividades Registradas
+        $tcu = null;
         if (Schema::hasTable('tcu_bitacoras')) {
             $tcu = TcuBitacora::updateOrCreate(
                 ['usuario_id' => $alumno->id],
@@ -348,16 +351,22 @@ class AlumnoDemoCompletoSeeder extends Seeder
         }
 
         return [
-            'success'      => true,
-            'id_estudiante'=> $alumno->id,
-            'email'        => $alumno->email,
-            'password'     => 'cefi2026',
-            'nombre'       => $alumno->nombre . ' ' . $alumno->apellidos,
-            'cedula'       => $alumno->cedula,
-            'matriculas'   => 3,
-            'convalidado'  => 1,
-            'tcu_horas'    => 45,
-            'saldo_deuda'  => '₡60,000.00',
+            'success'       => true,
+            'alumno'        => $alumno,
+            'expediente'    => $expediente,
+            'cursos'        => [$materia1 ?? null, $materia2 ?? null, $materia3 ?? null],
+            'convalidacion' => $convalidacion,
+            'boleta'        => $boleta,
+            'tcu'           => $tcu,
+            'id_estudiante' => $alumno->id,
+            'email'         => $alumno->email,
+            'password'      => 'cefi2026',
+            'nombre'        => $alumno->nombre . ' ' . $alumno->apellidos,
+            'cedula'        => $alumno->cedula,
+            'matriculas'    => 3,
+            'convalidado'   => 1,
+            'tcu_horas'     => 45,
+            'saldo_deuda'   => '₡60,000.00',
         ];
     }
 }
