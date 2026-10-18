@@ -214,7 +214,9 @@ class PortalEstudianteController extends Controller
             if (Schema::hasTable('tcu_bitacoras')) {
                 $tcu = TcuBitacora::with('actividades')->where('usuario_id', $idEstudiante)->first();
                 if ($tcu && $tcu->actividades) {
-                    $horasTcuCompletadas = (int)$tcu->actividades->sum('horas');
+                    $horasTcuCompletadas = (float)$tcu->actividades->sum(function($a) {
+                        return $a->cantidad_horas ?? $a->horas ?? 0;
+                    });
                 }
             }
         } catch (\Throwable $e) {

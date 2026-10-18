@@ -295,7 +295,7 @@ class AlumnoDemoCompletoSeeder extends Seeder
                     'pago_inicial_metodo'     => 'SINPE Móvil',
                     'pago_inicial_referencia' => 'TR-88491024',
                     'cuotas'                  => 3,
-                    'estado'                  => 'Parcial',
+                    'estado'                  => 'pago_parcial',
                     'token_firma'             => 'TOKEN-FIRMA-DEMO-2026',
                     'fecha_firma'             => date('Y-m-d H:i:s', strtotime('-1 month')),
                     'fecha_creacion'          => date('Y-m-d H:i:s', strtotime('-1 month')),
@@ -317,29 +317,33 @@ class AlumnoDemoCompletoSeeder extends Seeder
                     'email_institucion'      => 'contacto@productoreslocales.cr',
                     'telefono_institucion'   => '50622223344',
                     'carrera'                => 'Gestión Financiera y Bancaria',
-                    'estado'                 => 'En Proceso',
+                    'estado'                 => 'borrador',
                     'fecha_creacion'         => date('Y-m-d H:i:s', strtotime('-40 days')),
                 ]
             );
 
             if (Schema::hasTable('tcu_actividades') && $tcu) {
-                TcuActividad::firstOrCreate(
-                    ['bitacora_id' => $tcu->id, 'descripcion' => 'Taller de presupuestos básicos y flujo de caja para 6 emprendimientos.'],
-                    [
-                        'fecha' => date('Y-m-d', strtotime('-25 days')),
-                        'horas' => 25,
-                        'estado'=> 'Aprobado'
-                    ]
-                );
+                TcuActividad::where('bitacora_id', $tcu->id)->delete();
 
-                TcuActividad::firstOrCreate(
-                    ['bitacora_id' => $tcu->id, 'descripcion' => 'Implementación de facturación electrónica y conciliación de cuentas bancarias.'],
-                    [
-                        'fecha' => date('Y-m-d', strtotime('-10 days')),
-                        'horas' => 20,
-                        'estado'=> 'Aprobado'
-                    ]
-                );
+                TcuActividad::create([
+                    'bitacora_id'    => $tcu->id,
+                    'fecha'          => date('Y-m-d', strtotime('-25 days')),
+                    'hora_entrada'   => '08:00:00',
+                    'hora_salida'    => '13:00:00',
+                    'cantidad_horas' => 25.0,
+                    'actividades'    => 'Taller de presupuestos básicos y flujo de caja para 6 emprendimientos.',
+                    'fecha_registro' => date('Y-m-d H:i:s', strtotime('-25 days')),
+                ]);
+
+                TcuActividad::create([
+                    'bitacora_id'    => $tcu->id,
+                    'fecha'          => date('Y-m-d', strtotime('-10 days')),
+                    'hora_entrada'   => '09:00:00',
+                    'hora_salida'    => '13:00:00',
+                    'cantidad_horas' => 20.0,
+                    'actividades'    => 'Implementación de facturación electrónica y conciliación de cuentas bancarias.',
+                    'fecha_registro' => date('Y-m-d H:i:s', strtotime('-10 days')),
+                ]);
             }
         }
 
