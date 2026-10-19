@@ -21,11 +21,32 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: var(--primary);
+        color: #5fb230;
         margin-bottom: 1.2rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+    }
+    .btn-cefi-primary {
+        background: linear-gradient(135deg, #5fb230 0%, #4a9423 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-weight: 700;
+        padding: 0.65rem 1.8rem;
+        border-radius: 50px;
+        box-shadow: 0 4px 14px rgba(95, 178, 48, 0.35);
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+    .btn-cefi-primary:hover {
+        background: linear-gradient(135deg, #6ec838 0%, #52a327 100%) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(95, 178, 48, 0.45);
+        color: #ffffff !important;
     }
 </style>
 @endsection
@@ -44,13 +65,13 @@
     <div class="form-container-card">
         <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
             <div>
-                <span class="badge bg-success bg-opacity-25 text-success px-3 py-1 rounded-pill small mb-2">
+                <span class="badge bg-success bg-opacity-25 text-success px-3 py-1 rounded-pill small mb-2 border border-success-subtle">
                     <i class="bi bi-patch-check-fill me-1"></i> Control Académico (Fase 4)
                 </span>
                 <h3 class="h4 fw-bold mb-1">Registrar Convalidación / Homologación</h3>
                 <p class="text-muted small mb-0">Reconocimiento y equivalencia de asignaturas aprobadas para el historial académico del estudiante.</p>
             </div>
-            <i class="bi bi-patch-check text-primary fs-1 opacity-50"></i>
+            <i class="bi bi-patch-check-fill text-success fs-1 opacity-75"></i>
         </div>
 
         @if($errors->any())
@@ -200,8 +221,8 @@
                 <a href="{{ route('convalidaciones.index') }}" class="btn btn-outline-secondary px-4 rounded-pill">
                     Cancelar
                 </a>
-                <button type="submit" class="btn btn-primary px-5 rounded-pill fw-semibold shadow-sm">
-                    <i class="bi bi-check-circle me-2"></i> Guardar Convalidación
+                <button type="submit" class="btn-cefi-primary px-5 shadow-sm">
+                    <i class="bi bi-check-circle me-1"></i> Guardar Convalidación
                 </button>
             </div>
         </form>
