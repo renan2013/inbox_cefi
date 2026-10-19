@@ -265,9 +265,13 @@ class PortalEstudianteController extends Controller
     /**
      * Permite al estudiante descargar directamente su Récord Académico oficial en PDF.
      */
-    public function descargarMiRecordPdf()
+    public function descargarMiRecordPdf(Request $request)
     {
         $idEstudiante = Auth::id();
+        if (Auth::check() && (int)Auth::user()->id_rol === 1 && ($request->filled('preview_id') || $request->filled('id_estudiante'))) {
+            $idEstudiante = $request->get('preview_id', $request->get('id_estudiante'));
+        }
+
         $expediente = null;
         if (Schema::hasTable('expedientes_digitales')) {
             $expediente = ExpedienteDigital::with('usuario')->where('id_usuario', $idEstudiante)->first();
@@ -284,9 +288,13 @@ class PortalEstudianteController extends Controller
     /**
      * Permite al estudiante descargar directamente su Ficha de Expediente Digital oficial en PDF.
      */
-    public function descargarMiExpedientePdf()
+    public function descargarMiExpedientePdf(Request $request)
     {
         $idEstudiante = Auth::id();
+        if (Auth::check() && (int)Auth::user()->id_rol === 1 && ($request->filled('preview_id') || $request->filled('id_estudiante'))) {
+            $idEstudiante = $request->get('preview_id', $request->get('id_estudiante'));
+        }
+
         $expediente = null;
         if (Schema::hasTable('expedientes_digitales')) {
             $expediente = ExpedienteDigital::with(['usuario', 'archivos'])->where('id_usuario', $idEstudiante)->first();

@@ -221,11 +221,14 @@
             </div>
 
             <!-- Accesos rápidos oficiales -->
+            @php
+                $pdfParams = request('preview_id') ? ['preview_id' => $user->id] : [];
+            @endphp
             <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('estudiante.mi_expediente_pdf') }}" target="_blank" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+                <a href="{{ route('estudiante.mi_expediente_pdf', $pdfParams) }}" target="_blank" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
                     <i class="bi bi-file-earmark-person me-2"></i> Mi Expediente Digital (PDF)
                 </a>
-                <a href="{{ route('estudiante.mi_record_pdf') }}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm">
+                <a href="{{ route('estudiante.mi_record_pdf', $pdfParams) }}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm">
                     <i class="bi bi-file-earmark-pdf me-2"></i> Mi Récord Académico (PDF)
                 </a>
                 @if(config('cliente.campus_url'))
@@ -406,7 +409,7 @@
                         <h4 class="h5 fw-bold mb-1">Historial Curricular y Calificaciones</h4>
                         <p class="text-muted small mb-0">Detalle de asignaturas cursadas, convalidaciones y calificaciones oficiales registradas.</p>
                     </div>
-                    <a href="{{ route('estudiante.mi_record_pdf') }}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 btn-sm fw-semibold">
+                    <a href="{{ route('estudiante.mi_record_pdf', $pdfParams) }}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 btn-sm fw-semibold">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Descargar Récord Académico Oficial (PDF)
                     </a>
                 </div>
@@ -559,10 +562,10 @@
                             <span class="badge {{ $expediente->estado === 'Aprobado' ? 'bg-success' : 'bg-warning' }} bg-opacity-25 {{ $expediente->estado === 'Aprobado' ? 'text-success' : 'text-warning' }} px-3 py-2 rounded-pill fs-7">
                                 Expediente #{{ $expediente->id_expediente }} ({{ $expediente->estado }})
                             </span>
-                            <a href="{{ route('estudiante.mi_expediente_pdf') }}" target="_blank" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                            <a href="{{ route('estudiante.mi_expediente_pdf', $pdfParams) }}" target="_blank" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm">
                                 <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar Expediente (PDF)
                             </a>
-                            <a href="{{ route('estudiante.mi_record_pdf') }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold">
+                            <a href="{{ route('estudiante.mi_record_pdf', $pdfParams) }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold">
                                 <i class="bi bi-mortarboard-fill me-1"></i> Récord Académico (PDF)
                             </a>
                         </div>
