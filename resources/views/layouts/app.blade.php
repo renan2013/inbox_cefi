@@ -390,6 +390,11 @@
                             <i class="bi bi-file-earmark-pdf me-1"></i> Mi Récord (PDF)
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom text-success fw-bold" href="javascript:void(0)" onclick="const f = document.getElementById('inboxAiFab'); if(f) f.click();">
+                            <i class="bi bi-robot text-success me-1"></i> Tutor AI
+                        </a>
+                    </li>
                     @endif
 
                     @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
@@ -556,18 +561,19 @@
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('reportes.index') }}"><i class="bi bi-file-earmark-pdf"></i> Reportes del Sistema</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('utilitarios.index') }}"><i class="bi bi-tools"></i> Utilitarios</a></li>
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li><a class="dropdown-item dropdown-item-custom fw-semibold" href="{{ route('configuracion.conocimiento_ai') }}"><i class="bi bi-robot text-success me-2"></i> Cerebro RAG - Tutor AI</a></li>
                             @endmodule
                         </ul>
                     </li>
                     @endif
                     @endif
 
-                    <!-- Cerebro & Tutor AI 2.0 (Menú Exclusivo de Inteligencia Artificial) -->
+                    <!-- Tutor & Cerebro AI 2.0 (Menú Exclusivo de Inteligencia Artificial) -->
                     @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
-                    @module('inbox_ai')
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle {{ Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-robot text-success me-1"></i> Cerebro AI
+                            <i class="bi bi-robot text-success me-1"></i> Tutor AI
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom">
                             <li><h6 class="dropdown-header-custom"><i class="bi bi-cpu-fill text-success me-1"></i> Tutor & Asistente Inteligente</h6></li>
@@ -579,12 +585,11 @@
                             <li><hr class="dropdown-divider-custom"></li>
                             <li>
                                 <a class="dropdown-item dropdown-item-custom" href="javascript:void(0)" onclick="const f = document.getElementById('inboxAiFab'); if(f) f.click();">
-                                    <i class="bi bi-chat-dots-fill text-success me-2"></i> Abrir Tutor Virtual (Chat)
+                                    <i class="bi bi-chat-dots-fill text-success me-2"></i> Abrir Chat Tutor AI
                                 </a>
                             </li>
                         </ul>
                     </li>
-                    @endmodule
                     @endif
 
                     <!-- Configuración Dropdown (Solo Administrador General con Clave) -->
@@ -604,6 +609,8 @@
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'smtp']) }}"><i class="bi bi-envelope-at-fill text-warning me-2"></i> Correo Saliente (SMTP)</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'modulos']) }}"><i class="bi bi-toggles2 text-danger me-2"></i> Módulos y Personalización</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'seguridad']) }}"><i class="bi bi-key-fill text-info me-2"></i> Clave Maestra Superior</a></li>
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('configuracion.conocimiento_ai') }}"><i class="bi bi-robot text-success me-2"></i> Cerebro RAG - Tutor AI</a></li>
                             <li><hr class="dropdown-divider-custom"></li>
                             <li>
                                 <form action="{{ route('configuracion.salir') }}" method="POST" class="d-inline">

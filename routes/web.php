@@ -346,11 +346,9 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- CEREBRO & TUTOR AI 2.0 (ASISTENTE VIRTUAL RAG CEFI) ---
-    Route::middleware('module:inbox_ai')->group(function () {
-        Route::get('/configuracion/conocimiento-ai', [ConfiguracionController::class, 'conocimientoAi'])->name('configuracion.conocimiento_ai');
-        Route::post('/configuracion/conocimiento-ai/guardar', [ConfiguracionController::class, 'guardarConocimientoAi'])->name('configuracion.conocimiento_ai.guardar');
-        Route::post('/configuracion/conocimiento-ai/{id}/eliminar', [ConfiguracionController::class, 'eliminarConocimientoAi'])->name('configuracion.conocimiento_ai.eliminar');
-    });
+    Route::get('/configuracion/conocimiento-ai', [ConfiguracionController::class, 'conocimientoAi'])->name('configuracion.conocimiento_ai');
+    Route::post('/configuracion/conocimiento-ai/guardar', [ConfiguracionController::class, 'guardarConocimientoAi'])->name('configuracion.conocimiento_ai.guardar');
+    Route::post('/configuracion/conocimiento-ai/{id}/eliminar', [ConfiguracionController::class, 'eliminarConocimientoAi'])->name('configuracion.conocimiento_ai.eliminar');
 
     // --- PORTAL DE AUTOGESTIÓN ESTUDIANTIL (FASE 6 CEFI - SIEMPRE DISPONIBLE) ---
     Route::get('/estudiante/portal', [PortalEstudianteController::class, 'index'])->name('estudiante.portal');
