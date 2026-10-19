@@ -517,7 +517,7 @@ class ConfiguracionController extends Controller
         return redirect()->route('configuracion.alertas')->with('success', 'Configuración de alertas actualizada correctamente.');
     }
 
-    public function conocimientoAi()
+    public function conocimientoAi(Request $request)
     {
         if (!Schema::hasTable('base_conocimiento_inbox_ai')) {
             Schema::create('base_conocimiento_inbox_ai', function ($table) {
@@ -596,8 +596,32 @@ class ConfiguracionController extends Controller
             DB::table('base_conocimiento_inbox_ai')->insert($initialKnowledge);
         }
 
-        $conocimientos = DB::table('base_conocimiento_inbox_ai')->orderBy('id', 'desc')->get();
-        return view('configuracion.conocimiento_ai', compact('conocimientos'));
+        $query = DB::table('base_conocimiento_inbox_ai');
+
+        if ($request->filled('buscar')) {
+            $buscar = trim($request->input('buscar'));
+            $query->where(function ($q) use ($buscar) {
+                $q->where('pregunta', 'like', "%{$buscar}%")
+                  ->orWhere('palabras_clave', 'like', "%{$buscar}%")
+                  ->orWhere('respuesta', 'like', "%{$buscar}%")
+                  ->orWhere('categoria', 'like', "%{$buscar}%");
+            });
+        }
+
+        if ($request->filled('categoria') && $request->input('categoria') !== 'todas') {
+            $query->where('categoria', $request->input('categoria'));
+        }
+
+        $conocimientos = $query->orderBy('id', 'asc')->paginate(50)->withQueryString();
+
+        $categorias = DB::table('base_conocimiento_inbox_ai')
+            ->whereNotNull('categoria')
+            ->where('categoria', '<>', '')
+            ->distinct()
+            ->orderBy('categoria', 'asc')
+            ->pluck('categoria');
+
+        return view('configuracion.conocimiento_ai', compact('conocimientos', 'categorias'));
     }
 
     public function guardarConocimientoAi(Request $request)

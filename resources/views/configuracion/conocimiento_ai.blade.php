@@ -49,14 +49,60 @@
         .text-adaptive-muted {
             color: rgba(255, 255, 255, 0.65);
         }
+        .pagination {
+            margin-bottom: 0;
+            gap: 4px;
+        }
+        .pagination .page-link {
+            border-radius: 8px !important;
+            border: 1px solid var(--border-dark, #334155);
+            background: var(--card-dark, #1e293b);
+            color: #94a3b8;
+            padding: 0.45rem 0.85rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .pagination .page-item.active .page-link {
+            background: var(--primary, #5fb230) !important;
+            border-color: var(--primary, #5fb230) !important;
+            color: #ffffff !important;
+        }
+        .pagination .page-link:hover {
+            background: rgba(95, 178, 48, 0.15);
+            color: #ffffff;
+        }
+        [data-theme="light"] .pagination .page-link {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            color: #475569;
+        }
+        [data-theme="light"] .pagination .page-item.active .page-link {
+            background: var(--primary, #5fb230) !important;
+            border-color: var(--primary, #5fb230) !important;
+            color: #ffffff !important;
+        }
+        .num-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            height: 32px;
+            padding: 0 10px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            border-radius: 8px;
+            background: rgba(95, 178, 48, 0.15);
+            color: var(--primary, #5fb230);
+            border: 1px solid rgba(95, 178, 48, 0.3);
+        }
     </style>
 @endsection
 
 @section('content')
-    <div class="container py-5">
+    <div class="container-fluid px-3 px-md-4 py-4">
         
         <!-- Header -->
-        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
             <div>
                 <nav aria-label="breadcrumb" class="mb-2">
                     <ol class="breadcrumb mb-0">
@@ -65,9 +111,12 @@
                     </ol>
                 </nav>
                 <h1 class="section-title mb-1 text-white"><i class="bi bi-cpu-fill text-success me-2"></i> Cerebro RAG - Inbox AI 2.0</h1>
-                <p class="text-white-50 mb-0">Administra las instrucciones, respuestas, enlaces a módulos y capturas de pantalla que utiliza el asistente de IA.</p>
+                <p class="text-white-50 mb-0">Administra las instrucciones, respuestas, enlaces a módulos y capturas de pantalla que utiliza el asistente de IA (50 preguntas por página).</p>
             </div>
-            <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 rounded-pill border border-success-subtle">
+                    <i class="bi bi-collection me-1"></i> Total: {{ $conocimientos->total() }}
+                </span>
                 <button type="button" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" style="background-color: var(--primary, #5fb230); border: none;" onclick="abrirModal(0)">
                     <i class="bi bi-plus-lg me-1"></i> Agregar Conocimiento
                 </button>
@@ -81,23 +130,62 @@
             </div>
         @endif
 
+        <!-- Barra de Filtros y Búsqueda -->
+        <div class="card-custom mb-4 p-3">
+            <form method="GET" action="{{ route('configuracion.conocimiento_ai') }}" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-secondary-subtle text-adaptive-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="buscar" class="form-control" placeholder="Buscar por pregunta, respuesta o palabra clave..." value="{{ request('buscar') }}">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-secondary-subtle text-adaptive-muted"><i class="bi bi-tag"></i></span>
+                        <select name="categoria" class="form-select" onchange="this.form.submit()">
+                            <option value="todas">-- Todas las Categorías ({{ count($categorias) }}) --</option>
+                            @foreach($categorias as $cat)
+                                <option value="{{ $cat }}" {{ request('categoria') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold flex-grow-1" style="background-color: var(--primary, #5fb230); border: none;">
+                        <i class="bi bi-funnel me-1"></i> Filtrar
+                    </button>
+                    @if(request()->filled('buscar') || (request()->filled('categoria') && request('categoria') !== 'todas'))
+                        <a href="{{ route('configuracion.conocimiento_ai') }}" class="btn btn-outline-secondary rounded-pill px-3" title="Limpiar Filtros">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+
         <!-- Tabla de Registros -->
         <div class="card-custom">
             <div class="table-responsive">
                 <table class="table table-custom table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr class="text-uppercase small fw-bold text-secondary">
-                            <th>Captura</th>
+                            <th class="text-center" style="width: 75px;"># N°</th>
+                            <th style="width: 75px;">Captura</th>
                             <th>Pregunta / Título</th>
-                            <th>Ruta / Módulo Vinculado</th>
-                            <th>Categoría</th>
-                            <th>Estado</th>
-                            <th class="text-end">Acciones</th>
+                            <th style="width: 200px;">Ruta / Módulo Vinculado</th>
+                            <th style="width: 170px;">Categoría</th>
+                            <th class="text-center" style="width: 90px;">Estado</th>
+                            <th class="text-end" style="width: 110px;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($conocimientos as $r)
                             <tr>
+                                <td class="text-center">
+                                    <span class="num-badge">
+                                        #{{ ($conocimientos->currentPage() - 1) * $conocimientos->perPage() + $loop->iteration }}
+                                    </span>
+                                </td>
                                 <td>
                                     @if (!empty($r->imagen) && file_exists(public_path('uploads/conocimiento_ai/' . $r->imagen)))
                                         <img src="{{ asset('uploads/conocimiento_ai/' . $r->imagen) }}" class="thumb-img" onclick="verImagen('{{ asset('uploads/conocimiento_ai/' . $r->imagen) }}')">
@@ -107,7 +195,7 @@
                                 </td>
                                 <td>
                                     <div class="fw-bold fs-6 item-title">{{ $r->pregunta }}</div>
-                                    <small class="text-adaptive-muted d-block text-truncate" style="max-width: 300px;">{!! strip_tags($r->respuesta) !!}</small>
+                                    <small class="text-adaptive-muted d-block text-truncate" style="max-width: 450px;">{!! strip_tags($r->respuesta) !!}</small>
                                 </td>
                                 <td>
                                     @if (!empty($r->ruta))
@@ -119,7 +207,7 @@
                                 <td>
                                     <span class="badge bg-info-subtle text-info rounded-pill fw-bold">{{ $r->categoria }}</span>
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     @if ($r->estado == 1)
                                         <span class="badge bg-success-subtle text-success rounded-pill">Activo</span>
                                     @else
@@ -140,15 +228,32 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-adaptive-muted">
+                                <td colspan="7" class="text-center py-5 text-adaptive-muted">
                                     <i class="bi bi-robot fs-1 d-block mb-2 text-success"></i>
-                                    No hay conocimientos registrados aún en la base de datos de la IA.
+                                    No se encontraron conocimientos registrados con los filtros seleccionados.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+
+            <!-- Paginación de 50 en 50 -->
+            @if($conocimientos->hasPages())
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 pt-3 mt-3 border-top border-secondary-subtle">
+                    <div class="text-adaptive-muted small">
+                        Mostrando <strong>{{ $conocimientos->firstItem() }}</strong> a <strong>{{ $conocimientos->lastItem() }}</strong> de <strong>{{ $conocimientos->total() }}</strong> preguntas (50 por página)
+                    </div>
+                    <div>
+                        {{ $conocimientos->links('pagination::bootstrap-5') }}
+                    </div>
+                </div>
+            @else
+                <div class="d-flex justify-content-between align-items-center pt-3 mt-3 border-top border-secondary-subtle text-adaptive-muted small">
+                    <span>Página 1 de 1</span>
+                    <span>Total: <strong>{{ $conocimientos->total() }}</strong> preguntas</span>
+                </div>
+            @endif
         </div>
     </div>
 
