@@ -188,7 +188,7 @@
                     <span class="inbox-ai-header-title">AI</span>
                     <span class="badge bg-success rounded-pill x-small fw-bold" style="background-color: var(--primary, #5fb230) !important; color: #ffffff !important;">2.0</span>
                 </div>
-                <small class="x-small" style="color: rgba(255,255,255,0.7) !important;"><i class="bi bi-circle-fill text-success me-1" style="font-size: 8px;"></i> Asistente VPS n8n</small>
+                <small class="x-small" style="color: rgba(255,255,255,0.7) !important;"><i class="bi bi-circle-fill text-success me-1" style="font-size: 8px;"></i> Tutor Virtual del Sistema</small>
             </div>
         </div>
         <div class="d-flex align-items-center gap-1">
@@ -204,21 +204,22 @@
     <!-- Body / Chat Messages -->
     <div class="inbox-ai-body" id="inboxAiBody">
         <div class="ai-msg ai-msg-bot">
-            ¡Hola! 👋 Soy <strong>Inbox AI 2.0</strong>, tu copiloto inteligente en Laravel conectado al servidor VPS n8n.
+            ¡Hola! 👋 <strong>¿Qué quieres saber acerca de Inbox?</strong>
             <br><br>
-            ¿En qué consulta del sistema te puedo asistir hoy?
+            Pregúntame sobre cualquier módulo, proceso o cómo realizar tareas en el sistema.
             
             <div class="ai-chips">
-                <div class="ai-chip" onclick="inboxAiAsk('¿Cuántos estudiantes están en mora?')">📊 Morosidad hoy</div>
-                <div class="ai-chip" onclick="inboxAiAsk('¿Qué cursos están activos?')">🎓 Cursos Activos</div>
-                <div class="ai-chip" onclick="inboxAiAsk('¿Cómo creo una boleta?')">❓ Ayuda de Boletas</div>
+                <div class="ai-chip" onclick="inboxAiAsk('¿Cómo gestionar un curso?')">🎓 Gestionar un curso</div>
+                <div class="ai-chip" onclick="inboxAiAsk('¿Cómo generar una boleta de pago?')">💳 Boleta de pago</div>
+                <div class="ai-chip" onclick="inboxAiAsk('¿Cómo ver un expediente digital 360?')">📁 Expedientes 360°</div>
+                <div class="ai-chip" onclick="inboxAiAsk('¿Cómo ver el control de morosidad?')">📊 Morosidad</div>
             </div>
         </div>
     </div>
 
     <!-- Footer / Input -->
     <div class="inbox-ai-footer">
-        <input type="text" id="inboxAiInput" class="form-control rounded-pill border-1" placeholder="Pregunta algo a Inbox AI 2.0..." autocomplete="off">
+        <input type="text" id="inboxAiInput" class="form-control rounded-pill border-1" placeholder="¿Qué quieres saber acerca de Inbox?..." autocomplete="off">
         <button type="button" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center p-0" id="inboxAiSend" style="width: 40px; height: 40px; background-color: var(--primary, #5fb230) !important; border: none;">
             <i class="bi bi-send-fill text-white fs-6"></i>
         </button>
@@ -251,13 +252,14 @@
         resetBtn.addEventListener('click', () => {
             body.innerHTML = `
                 <div class="ai-msg ai-msg-bot">
-                    ¡Hola! 👋 Soy <strong>Inbox AI 2.0</strong>, tu copiloto inteligente en Laravel conectado al servidor VPS n8n.
+                    ¡Hola! 👋 <strong>¿Qué quieres saber acerca de Inbox?</strong>
                     <br><br>
-                    ¿En qué consulta del sistema te puedo asistir hoy?
+                    Pregúntame sobre cualquier módulo, proceso o cómo realizar tareas en el sistema.
                     <div class="ai-chips">
-                        <div class="ai-chip" onclick="inboxAiAsk('¿Cuántos estudiantes están en mora?')">📊 Morosidad hoy</div>
-                        <div class="ai-chip" onclick="inboxAiAsk('¿Qué cursos están activos?')">🎓 Cursos Activos</div>
-                        <div class="ai-chip" onclick="inboxAiAsk('¿Cómo creo una boleta?')">❓ Ayuda de Boletas</div>
+                        <div class="ai-chip" onclick="inboxAiAsk('¿Cómo gestionar un curso?')">🎓 Gestionar un curso</div>
+                        <div class="ai-chip" onclick="inboxAiAsk('¿Cómo generar una boleta de pago?')">💳 Boleta de pago</div>
+                        <div class="ai-chip" onclick="inboxAiAsk('¿Cómo ver un expediente digital 360?')">📁 Expedientes 360°</div>
+                        <div class="ai-chip" onclick="inboxAiAsk('¿Cómo ver el control de morosidad?')">📊 Morosidad</div>
                     </div>
                 </div>
             `;
