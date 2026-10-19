@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Qué tipos de retiro de asignaturas existen en la normativa institucional de CEFI?',
+        'pregunta' => '426. ¿Qué tipos de retiro de asignaturas existen en la normativa institucional de CEFI?',
         'palabras_clave' => 'tipos de retiro asignaturas retiro justificado rj retiro no justificado abandono',
         'respuesta' => 'Existen dos figuras:<br><ul><li><strong>Retiro Justificado (RJ):</strong> Solicitud formal fundamentada en causas de fuerza mayor (salud, trabajo, traslado) antes de la fecha límite. No afecta el promedio ponderado del alumno.</li><li><strong>Retiro Injustificado / Abandono:</strong> Ocurre cuando el estudiante deja de asistir sin formalizar trámite; la materia se califica con nota de reprobación (0 o nota acumulada).</li></ul>',
         'categoria' => 'Retiros de Asignatura',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cuál es la diferencia entre un Retiro Justificado (RJ) y un Retiro Injustificado?',
+        'pregunta' => '427. ¿Cuál es la diferencia entre un Retiro Justificado (RJ) y un Retiro Injustificado?',
         'palabras_clave' => 'diferencia retiro justificado e injustificado promedio ponderado becas impacto',
         'respuesta' => 'El <strong>Retiro Justificado</strong> exime de calificar al alumno con nota reprobatoria, no mancha su promedio ponderado para honores y permite acuerdos sobre saldos financieros. El <strong>Injustificado</strong> genera una reprobación por abandono que afecta negativamente el récord académico.',
         'categoria' => 'Retiros de Asignatura',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cuáles son las causales válidas para solicitar un Retiro Justificado (salud, trabajo, fuerza mayor)?',
+        'pregunta' => '428. ¿Cuáles son las causales válidas para solicitar un Retiro Justificado (salud, trabajo, fuerza mayor)?',
         'palabras_clave' => 'causales validas retiro justificado salud trabajo fuerza mayor incapacidad cambio turno',
         'respuesta' => 'Son causas válidas: 1) Problemas de salud o incapacidades médicas prolongadas debidamente certificadas por la CCSS, 2) Cambio intempestivo de horario o traslado laboral comprobado con carta patronal, 3) Situaciones graves familiares o de fuerza mayor evaluadas por la Dirección.',
         'categoria' => 'Retiros de Asignatura',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar una solicitud de retiro de materia en Inbox CEFI?',
+        'pregunta' => '429. ¿Cómo registrar una solicitud de retiro de materia en Inbox CEFI?',
         'palabras_clave' => 'registrar solicitud retiro materia tramitar baja curso formalizar desmatricula',
         'respuesta' => 'Ve a <strong>Registro -> Retiros y Cambios de Asignatura</strong> y haz clic en <strong>Nuevo Retiro</strong>. Selecciona el estudiante, la materia a retirar, el tipo de retiro, escribe el motivo justificado y adjunta el comprobante probatorio.',
         'categoria' => 'Retiros de Asignatura',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cuál es el plazo o semana límite del cuatrimestre para tramitar el retiro de una materia?',
+        'pregunta' => '430. ¿Cuál es el plazo o semana límite del cuatrimestre para tramitar el retiro de una materia?',
         'palabras_clave' => 'plazo semana limite tramitar retiro materia fecha corte calendario retiro',
         'respuesta' => 'El plazo reglamentario vence al concluir la <strong>Semana 6 de clases</strong> del cuatrimestre. Transcurrida esa fecha, no se admiten retiros voluntarios salvo casos extraordinarios autorizados por la Dirección.',
         'categoria' => 'Retiros de Asignatura',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué comprobantes médicos o constancias laborales debe adjuntar el alumno en la solicitud?',
+        'pregunta' => '431. ¿Qué comprobantes médicos o constancias laborales debe adjuntar el alumno en la solicitud?',
         'palabras_clave' => 'comprobantes medicos constancias laborales adjuntar solicitud retiro dictamen ccss',
         'respuesta' => 'Debe adjuntar la <strong>Incapacidad oficial de la CCSS o INS</strong>, el dictamen médico firmado con código profesional, o la <strong>Carta Patronal con membrete y sello</strong> que acredite el cambio de jornada laboral.',
         'categoria' => 'Retiros de Asignatura',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo evalúa y resuelve la Dirección Académica una solicitud de retiro?',
+        'pregunta' => '432. ¿Cómo evalúa y resuelve la Dirección Académica una solicitud de retiro?',
         'palabras_clave' => 'evalua resuelve direccion academica solicitud retiro aprobar denegar resolver',
         'respuesta' => 'En <strong>Retiros de Asignatura</strong>, el director revisa las evidencias aportadas y presiona <strong>Resolver Solicitud</strong>, marcándola como <em>Aprobada</em> o <em>Rechazada</em> con el dictamen correspondiente.',
         'categoria' => 'Retiros de Asignatura',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué condición se refleja en el Récord Académico tras aprobar un retiro justificado (condición "RJ")?',
+        'pregunta' => '433. ¿Qué condición se refleja en el Récord Académico tras aprobar un retiro justificado (condición "RJ")?',
         'palabras_clave' => 'condicion record academico retiro justificado rj estado materia nota',
         'respuesta' => 'En el acta de calificaciones y en el Récord Académico oficial, la materia se rotula con la condición <strong>RJ (Retiro Justificado)</strong> en lugar de un puntaje numérico, sin ponderar como reprobada.',
         'categoria' => 'Retiros de Asignatura',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Afecta un Retiro Justificado el promedio ponderado del estudiante para becas o honores?',
+        'pregunta' => '434. ¿Afecta un Retiro Justificado el promedio ponderado del estudiante para becas o honores?',
         'palabras_clave' => 'afecta retiro justificado promedio ponderado becas honores graduacion calculo',
         'respuesta' => '<strong>No afecta el promedio ponderado</strong>. Los créditos de la materia retirada simplemente no se computan en el cálculo del promedio general ni impiden obtener honores de graduación.',
         'categoria' => 'Retiros de Asignatura',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo se ajusta la boleta financiera o cobro cuatrimestral al aprobarse un retiro?',
+        'pregunta' => '435. ¿Cómo se ajusta la boleta financiera o cobro cuatrimestral al aprobarse un retiro?',
         'palabras_clave' => 'ajuste boleta financiera cobro cuatrimestral saldo retiro reembolso cobro materia',
         'respuesta' => 'Si el retiro se tramita dentro de las dos primeras semanas de lecciones, la administración puede generar una nota de crédito por el monto de la materia; si se tramita con posterioridad, rige la política contractual de financiamiento.',
         'categoria' => 'Retiros de Asignatura',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Se realizan reembolsos económicos o se acredita saldo a favor para el siguiente período?',
+        'pregunta' => '436. ¿Se realizan reembolsos económicos o se acredita saldo a favor para el siguiente período?',
         'palabras_clave' => 'reembolsos economicos saldo a favor siguiente periodo dinero devolucion credito',
         'respuesta' => 'Por normativa institucional, no se realizan devoluciones en efectivo; el monto ajustado se acredita como <strong>Saldo a Favor</strong> aplicable al pago de matrícula y cuotas del siguiente cuatrimestre.',
         'categoria' => 'Retiros de Asignatura',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo tramitar un cambio de grupo u horario dentro de las dos primeras semanas de clase?',
+        'pregunta' => '437. ¿Cómo tramitar un cambio de grupo u horario dentro de las dos primeras semanas de clase?',
         'palabras_clave' => 'tramitar cambio grupo horario dos primeras semanas cambio seccion permuta',
         'respuesta' => 'En <strong>Retiros y Cambios</strong> selecciona el trámite <strong>Cambio de Grupo</strong>. Elige el nuevo horario disponible; el sistema traspasará la matrícula sin generar cobros adicionales.',
         'categoria' => 'Retiros de Asignatura',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué ocurre si un estudiante deja de asistir a clases sin tramitar el retiro formal?',
+        'pregunta' => '438. ¿Qué ocurre si un estudiante deja de asistir a clases sin tramitar el retiro formal?',
         'palabras_clave' => 'deja de asistir sin tramitar retiro abandono reprobacion nota 0 deudas',
         'respuesta' => 'Al no formalizar el trámite, el profesor registrará ausencias injustificadas, la materia se cerrará como <strong>Reprobada</strong> en el acta y las cuotas financieras pactadas seguirán siendo exigibles.',
         'categoria' => 'Retiros de Asignatura',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo consultar el historial de retiros solicitados por un estudiante en su expediente?',
+        'pregunta' => '439. ¿Cómo consultar el historial de retiros solicitados por un estudiante en su expediente?',
         'palabras_clave' => 'historial retiros solicitados estudiante expediente digital 360 antecedentes',
         'respuesta' => 'En el <strong>Expediente Digital 360°</strong> se encuentra la pestaña <em>Historial de Retiros y Modificaciones</em>, donde constan las fechas, motivos y resoluciones de cada retiro tramitado.',
         'categoria' => 'Retiros de Asignatura',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo notificar al docente que un alumno ha sido formalmente retirado de su lista de clase?',
+        'pregunta' => '440. ¿Cómo notificar al docente que un alumno ha sido formalmente retirado de su lista de clase?',
         'palabras_clave' => 'notificar docente alumno retirado lista de clase aviso profesor desmatriculacion',
         'respuesta' => 'Al aprobarse el retiro, el sistema envía un correo y una alerta interna al profesor asignado. En su planilla electrónica el estudiante figurará con la etiqueta <em>Retirado</em> en gris.',
         'categoria' => 'Retiros de Asignatura',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo anular una solicitud de retiro si el estudiante decide continuar en la materia?',
+        'pregunta' => '441. ¿Cómo anular una solicitud de retiro si el estudiante decide continuar en la materia?',
         'palabras_clave' => 'anular solicitud retiro estudiante decide continuar desistir retiro cancelacion',
         'respuesta' => 'Antes de que la resolución quede en firme, el administrador puede seleccionar <strong>Desistir Retiro</strong> a petición del estudiante, reintegrándolo a la lista activa del curso.',
         'categoria' => 'Retiros de Asignatura',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Existe un límite de materias que un estudiante puede retirar durante una carrera?',
+        'pregunta' => '442. ¿Existe un límite de materias que un estudiante puede retirar durante una carrera?',
         'palabras_clave' => 'limite materias retirar carrera cuantas veces puedo retirar tope retiros',
         'respuesta' => 'Un estudiante puede retirar una misma asignatura hasta un máximo de <strong>dos veces</strong> justificadas. Para un tercer intento, requiere autorización extraordinaria de la Vicerrectoría Académica.',
         'categoria' => 'Retiros de Asignatura',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo exportar un reporte estadístico de deserción y retiros por materia y profesor?',
+        'pregunta' => '443. ¿Cómo exportar un reporte estadístico de deserción y retiros por materia y profesor?',
         'palabras_clave' => 'reporte estadistico desercion retiros materia profesor informe bajas cuatrimestre',
         'respuesta' => 'En <strong>Registro -> Reportes -> Análisis de Retiros</strong> puedes generar estadísticas para identificar qué asignaturas presentan mayores índices de retiro temprano.',
         'categoria' => 'Retiros de Asignatura',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Quién es la autoridad encargada de firmar la resolución de retiro de matrícula?',
+        'pregunta' => '444. ¿Quién es la autoridad encargada de firmar la resolución de retiro de matrícula?',
         'palabras_clave' => 'quien firma resolucion retiro matricula director academico encargado registro',
         'respuesta' => 'La resolución oficial de retiro es firmada digitalmente por el <strong>Director Académico</strong> y archivada en el expediente para efectos de inspección del MEP.',
         'categoria' => 'Retiros de Asignatura',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo proceder si el retiro de una materia afecta la condición de estudiante a tiempo completo?',
+        'pregunta' => '445. ¿Cómo proceder si el retiro de una materia afecta la condición de estudiante a tiempo completo?',
         'palabras_clave' => 'retiro afecta estudiante tiempo completo carga minima creditos seguro ccss',
         'respuesta' => 'Si el retiro reduce la carga a menos de 3 materias, el sistema emite una advertencia alertando que el alumno pasará a condición de <em>Tiempo Parcial</em>, lo que podría incidir en beneficios de seguro estudiantil.',
         'categoria' => 'Retiros de Asignatura',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué ocurre con las calificaciones parciales que el alumno ya había obtenido antes de retirarse?',
+        'pregunta' => '446. ¿Qué ocurre con las calificaciones parciales que el alumno ya había obtenido antes de retirarse?',
         'palabras_clave' => 'calificaciones parciales antes retirarse notas previas archivo calificaciones',
         'respuesta' => 'Las notas parciales se conservan en la bitácora histórica interna pero no se promedian, quedando el acta final con la leyenda oficial RJ.',
         'categoria' => 'Retiros de Asignatura',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo tramitar la suspensión temporal o congelamiento de carrera por un año?',
+        'pregunta' => '447. ¿Cómo tramitar la suspensión temporal o congelamiento de carrera por un año?',
         'palabras_clave' => 'suspension temporal congelamiento de carrera congelar estudios pausa academica',
         'respuesta' => 'En el expediente del alumno se puede activar la condición de <strong>Carrera en Pausa / Congelada</strong>, reservando su cupo y plan de estudios por un plazo máximo de hasta 12 meses.',
         'categoria' => 'Retiros de Asignatura',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo reactivar la matrícula de un estudiante tras un período de congelamiento académico?',
+        'pregunta' => '448. ¿Cómo reactivar la matrícula de un estudiante tras un período de congelamiento académico?',
         'palabras_clave' => 'reactivar matricula congelamiento reingreso volver a estudiar reinscripcion',
         'respuesta' => 'El alumno tramita su reingreso en ventanilla o web. El administrador cambia el estado a <em>Activo</em> en <strong>Gestión de Usuarios</strong> y procede a emitir la boleta de matrícula del nuevo ciclo.',
         'categoria' => 'Retiros de Asignatura',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde se almacena la carta de solicitud firmada por el estudiante en el sistema?',
+        'pregunta' => '449. ¿Dónde se almacena la carta de solicitud firmada por el estudiante en el sistema?',
         'palabras_clave' => 'donde se almacena carta solicitud firmada retiro boveda expediente digital',
         'respuesta' => 'Se guarda en la <strong>Bóveda Documental del Expediente 360°</strong> del estudiante bajo la categoría <em>Solicitudes de Retiro y Permisos</em>.',
         'categoria' => 'Retiros de Asignatura',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo prever y mitigar la deserción estudiantil analizando las solicitudes de retiro?',
+        'pregunta' => '450. ¿Cómo prever y mitigar la deserción estudiantil analizando las solicitudes de retiro?',
         'palabras_clave' => 'mitigar desercion estudiantil analizar solicitudes retiro retencion tutoria apoyo',
         'respuesta' => 'El sistema categoriza los motivos de retiro (económicos, horarios, rendimiento). Esto permite a Bienestar Estudiantil contactar al alumno oportunamente para ofrecerle tutorías o arreglos de pago.',
         'categoria' => 'Retiros de Asignatura',

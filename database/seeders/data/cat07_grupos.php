@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Cómo crear un nuevo grupo para un curso en un cuatrimestre específico?',
+        'pregunta' => '151. ¿Cómo crear un nuevo grupo para un curso en un cuatrimestre específico?',
         'palabras_clave' => 'crear grupo, nuevo grupo cuatrimestre, aperturar aula seccion',
         'respuesta' => 'Para abrir un grupo, ve a <strong>Registro -> Grupos y Aulas</strong> y haz clic en <strong>Nuevo Grupo</strong>. Selecciona la asignatura, el cuatrimestre académico, asigna el código de grupo (ej. <em>G1-NOCHE</em>), el docente a cargo, el aula física o enlace virtual, los días y el horario. Presiona <strong>Guardar Grupo</strong>.',
         'categoria' => 'Grupos y Aulas',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo nombrar los grupos según la nomenclatura oficial (ej. G1-VIRTUAL, G2-NOCHE)?',
+        'pregunta' => '152. ¿Cómo nombrar los grupos según la nomenclatura oficial (ej. G1-VIRTUAL, G2-NOCHE)?',
         'palabras_clave' => 'nomenclatura grupos, como nombrar seccion grupo, g1 virtual g2 noche',
         'respuesta' => 'La convención institucional recomendada consiste en usar el prefijo <strong>G</strong> seguido del número de sección y la jornada o modalidad: ej. <code>G1-SABATINO</code>, <code>G2-VIRTUAL</code>, <code>G3-NOCHE</code>. Esto facilita la identificación rápida en los horarios de los estudiantes.',
         'categoria' => 'Grupos y Aulas',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo asignar días, horas de inicio y fin a un grupo?',
+        'pregunta' => '153. ¿Cómo asignar días, horas de inicio y fin a un grupo?',
         'palabras_clave' => 'asignar dias horas grupo, horario de clases inicio fin',
         'respuesta' => 'En el formulario del grupo, marca los días en que se imparten lecciones (Lunes a Sábado) y digita la <strong>Hora de Inicio</strong> (ej. 18:00) y la <strong>Hora de Finalización</strong> (ej. 21:00). El sistema validará que no existan traslapes.',
         'categoria' => 'Grupos y Aulas',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo configurar la modalidad del grupo (Presencial, Virtual, Híbrida)?',
+        'pregunta' => '154. ¿Cómo configurar la modalidad del grupo (Presencial, Virtual, Híbrida)?',
         'palabras_clave' => 'modalidad grupo, presencial virtual hibrida, tipo aula grupo',
         'respuesta' => 'En el campo <strong>Modalidad</strong> selecciona una de las opciones disponibles: <em>Presencial</em> (requiere aula física), <em>Virtual</em> (requiere URL de videoconferencia) o <em>Híbrida</em> (combina aula y transmisión sincrónica).',
         'categoria' => 'Grupos y Aulas',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo asignar un aula física o laboratorio a un grupo presencial?',
+        'pregunta' => '155. ¿Cómo asignar un aula física o laboratorio a un grupo presencial?',
         'palabras_clave' => 'asignar aula fisica laboratorio grupo, salon de clase',
         'respuesta' => 'En el campo <strong>Aula / Recinto</strong>, despliega la lista de aulas institucionales (ej. Aula 101, Laboratorio de Cómputo 2). El sistema comprobará si el aula está desocupada en ese rango horario.',
         'categoria' => 'Grupos y Aulas',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde se coloca el enlace de Zoom, Teams o Google Meet para grupos virtuales?',
+        'pregunta' => '156. ¿Dónde se coloca el enlace de Zoom, Teams o Google Meet para grupos virtuales?',
         'palabras_clave' => 'enlace zoom teams meet grupo virtual, link de clase',
         'respuesta' => 'En el campo <strong>Enlace de Videoconferencia (URL)</strong>, pega el link recurrente de la sesión de Zoom, Teams o Meet. Los alumnos y profesores tendrán un botón directo para unirse a la clase desde su portal.',
         'categoria' => 'Grupos y Aulas',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo definir el cupo máximo de estudiantes permitidos por grupo?',
+        'pregunta' => '157. ¿Cómo definir el cupo máximo de estudiantes permitidos por grupo?',
         'palabras_clave' => 'cupo maximo grupo, limite estudiantes grupo, capacidad aula',
         'respuesta' => 'En el campo <strong>Cupo Máximo</strong>, digita la cantidad límite de alumnos (por ejemplo 25 o 30 estudiantes). Al matricular, el sistema controlará los asientos disponibles para evitar sobrecupo.',
         'categoria' => 'Grupos y Aulas',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué sucede cuando un grupo alcanza su límite de cupos en matrícula?',
+        'pregunta' => '158. ¿Qué sucede cuando un grupo alcanza su límite de cupos en matrícula?',
         'palabras_clave' => 'grupo lleno sin cupo, limite matricula cupos agotados',
         'respuesta' => 'El sistema bloquea la opción de añadir más estudiantes y marca el grupo como <strong>Lleno</strong>. Para matricular a otro estudiante, un administrador debe ampliar el cupo máximo o abrir un nuevo grupo complementario.',
         'categoria' => 'Grupos y Aulas',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo asignar o cambiar el profesor responsable de un grupo?',
+        'pregunta' => '159. ¿Cómo asignar o cambiar el profesor responsable de un grupo?',
         'palabras_clave' => 'cambiar profesor grupo, reasignar docente aula, profesor suplente',
         'respuesta' => 'Edita el grupo en <strong>Registro -> Grupos y Aulas</strong>, selecciona el nuevo docente en el menú desplegable y guarda los cambios. El curso pasará a figurar en el módulo <em>Mis Cursos</em> del nuevo profesor.',
         'categoria' => 'Grupos y Aulas',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo ver la lista de estudiantes inscritos en un grupo determinado?',
+        'pregunta' => '160. ¿Cómo ver la lista de estudiantes inscritos en un grupo determinado?',
         'palabras_clave' => 'lista estudiantes grupo, padron inscritos aula, alumnos matriculados grupo',
         'respuesta' => 'En la tabla de grupos, haz clic en el botón <strong>Ver Estudiantes</strong> (icono de personas). Se desplegará la lista con cédula, nombres, correo, teléfono y estado financiero de cada alumno inscrito.',
         'categoria' => 'Grupos y Aulas',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo trasladar a un estudiante de un grupo a otro sin perder sus notas?',
+        'pregunta' => '161. ¿Cómo trasladar a un estudiante de un grupo a otro sin perder sus notas?',
         'palabras_clave' => 'trasladar estudiante otro grupo, cambio de seccion alumno',
         'respuesta' => 'Ingresa al módulo de <strong>Retiros y Cambios de Asignatura</strong>, selecciona el estudiante y utiliza la opción <strong>Cambio de Grupo</strong>. El sistema migrará automáticamente las calificaciones y marcas de asistencia ya registradas.',
         'categoria' => 'Grupos y Aulas',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo fusionar o unir dos grupos con baja matrícula?',
+        'pregunta' => '162. ¿Cómo fusionar o unir dos grupos con baja matrícula?',
         'palabras_clave' => 'fusionar grupos, unir secciones baja matricula, consolidar aula',
         'respuesta' => 'En <strong>Grupos y Aulas</strong>, selecciona la opción <strong>Fusionar Grupos</strong>, elige el grupo origen y el grupo destino. Los estudiantes serán trasladados al grupo principal y el grupo secundario se cerrará.',
         'categoria' => 'Grupos y Aulas',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo cancelar o cerrar un grupo que no alcanzó el mínimo de estudiantes requerido?',
+        'pregunta' => '163. ¿Cómo cancelar o cerrar un grupo que no alcanzó el mínimo de estudiantes requerido?',
         'palabras_clave' => 'cerrar grupo baja matricula, cancelar grupo sin cupos',
         'respuesta' => 'Si el grupo no tiene estudiantes matriculados, puedes eliminarlo con el botón rojo. Si ya tenía inscritos, debes reubicarlos en otro horario antes de marcar el grupo como <strong>Cancelado</strong>.',
         'categoria' => 'Grupos y Aulas',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo imprimir o descargar la lista oficial de asistencia del grupo?',
+        'pregunta' => '164. ¿Cómo imprimir o descargar la lista oficial de asistencia del grupo?',
         'palabras_clave' => 'imprimir lista asistencia grupo pdf, descargar padron grupo',
         'respuesta' => 'En la fila del grupo presiona <strong>Lista de Asistencia (PDF)</strong>. Obtendrás un formato listo para imprimir con columnas para marcar cada semana de clase del cuatrimestre.',
         'categoria' => 'Grupos y Aulas',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde se consultan los choques de horario de aulas físicas en el recinto educativo?',
+        'pregunta' => '165. ¿Dónde se consultan los choques de horario de aulas físicas en el recinto educativo?',
         'palabras_clave' => 'choques de horario aulas, traslapes salones de clase',
         'respuesta' => 'En <strong>Grupos -> Mapa de Ocupación de Aulas</strong> se muestra un cronograma visual por día y hora donde los traslapes se señalan con alertas rojas para evitar que dos profesores utilicen la misma sala.',
         'categoria' => 'Grupos y Aulas',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo evitar que a un docente se le asignen dos grupos en el mismo horario?',
+        'pregunta' => '166. ¿Cómo evitar que a un docente se le asignen dos grupos en el mismo horario?',
         'palabras_clave' => 'choque horario profesor, docente dos clases misma hora',
         'respuesta' => 'Al guardar la asignación de un grupo, el sistema comprueba la disponibilidad del profesor y muestra un aviso de advertencia si el docente ya tiene otro grupo asignado en ese mismo día y bloque horario.',
         'categoria' => 'Grupos y Aulas',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo crear grupos para talleres prácticos o tutorías especiales?',
+        'pregunta' => '167. ¿Cómo crear grupos para talleres prácticos o tutorías especiales?',
         'palabras_clave' => 'grupos talleres tutorias especiales, abrir grupo taller',
         'respuesta' => 'Al crear el grupo selecciona el tipo <strong>Taller Práctico / Tutoría</strong> e indica la duración en días o semanas, permitiendo configurar cupos reducidos para atención individualizada.',
         'categoria' => 'Grupos y Aulas',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consultar la ocupación de aulas y laboratorios por día de la semana?',
+        'pregunta' => '168. ¿Dónde consultar la ocupación de aulas y laboratorios por día de la semana?',
         'palabras_clave' => 'ocupacion aulas laboratorios por dia, disponibilidad salones',
         'respuesta' => 'En <strong>Registro -> Utilitarios -> Ocupación de Espacios</strong> puedes consultar qué aulas están libres u ocupadas en cada franja horaria (mañana, tarde, noche).',
         'categoria' => 'Grupos y Aulas',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo habilitar un período de matrícula extraordinaria para un grupo?',
+        'pregunta' => '169. ¿Cómo habilitar un período de matrícula extraordinaria para un grupo?',
         'palabras_clave' => 'matricula extraordinaria grupo, ampliar plazo inscripcion aula',
         'respuesta' => 'En la configuración del grupo activa la casilla <strong>Permitir Matrícula Extraordinaria</strong> y establece la fecha límite extendida para permitir inscripciones tardías.',
         'categoria' => 'Grupos y Aulas',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo notificar a todos los alumnos de un grupo sobre un cambio de aula o fecha?',
+        'pregunta' => '170. ¿Cómo notificar a todos los alumnos de un grupo sobre un cambio de aula o fecha?',
         'palabras_clave' => 'notificar alumnos cambio aula horario grupo, aviso grupal',
         'respuesta' => 'En la ficha del grupo presiona <strong>Enviar Notificación Grupal</strong>. Puedes redactar un mensaje que se enviará automáticamente por correo y WhatsApp a todos los matriculados.',
         'categoria' => 'Grupos y Aulas',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo ver el balance de género o procedencia de los alumnos de un grupo?',
+        'pregunta' => '171. ¿Cómo ver el balance de género o procedencia de los alumnos de un grupo?',
         'palabras_clave' => 'estadisticas demograficas grupo, balance genero procedencia aula',
         'respuesta' => 'Al abrir la vista de detalle del grupo se despliega una tarjeta estadística con la distribución por género, promedio de edad y cantones de procedencia para reportes institucionales.',
         'categoria' => 'Grupos y Aulas',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué reportes de matrícula por grupo se pueden exportar a formato Excel?',
+        'pregunta' => '172. ¿Qué reportes de matrícula por grupo se pueden exportar a formato Excel?',
         'palabras_clave' => 'reporte matricula por grupo excel, descargar lista clase excel',
         'respuesta' => 'En <strong>Grupos y Aulas</strong> presiona el botón <strong>Exportar Matrícula (.xlsx)</strong> para descargar la planilla con nombre completo, cédula, estado de pago y teléfonos de los estudiantes.',
         'categoria' => 'Grupos y Aulas',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo configurar grupos en horarios sabatinos o dominicales?',
+        'pregunta' => '173. ¿Cómo configurar grupos en horarios sabatinos o dominicales?',
         'palabras_clave' => 'grupos sabatinos dominicales fin de semana, clases sabados',
         'respuesta' => 'Al crear el grupo selecciona únicamente el día <em>Sábado</em> o <em>Domingo</em> y configura el bloque horario correspondiente (ejemplo: intensivo de 08:00 a 13:00).',
         'categoria' => 'Grupos y Aulas',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo gestionar grupos espejo para alumnos que llevan la materia por tutoría?',
+        'pregunta' => '174. ¿Cómo gestionar grupos espejo para alumnos que llevan la materia por tutoría?',
         'palabras_clave' => 'grupos espejo tutorias individuales, modalidad suficiencia',
         'respuesta' => 'Crea un grupo con la nomenclatura <code>G-TUTORIA</code> y cupo límite de 1 a 5 estudiantes. Esto permite asignar al profesor tutor y registrar actas sin mezclar con grupos regulares.',
         'categoria' => 'Grupos y Aulas',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo verificar si un estudiante cumple los prerrequisitos antes de agregarlo al grupo?',
+        'pregunta' => '175. ¿Cómo verificar si un estudiante cumple los prerrequisitos antes de agregarlo al grupo?',
         'palabras_clave' => 'validar prerrequisitos antes de agregar grupo, control requisitos matricula',
         'respuesta' => 'Al intentar inscribir al alumno en el grupo, el sistema examina automáticamente su récord de notas. Si adeuda una materia prerrequisito, se mostrará una advertencia impidiendo la matrícula salvo dispensa expresa.',
         'categoria' => 'Grupos y Aulas',

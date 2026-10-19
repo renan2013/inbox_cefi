@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Cómo accede un profesor a la sección "Mis Cursos" en Inbox CEFI?',
+        'pregunta' => '301. ¿Cómo accede un profesor a la sección "Mis Cursos" en Inbox CEFI?',
         'palabras_clave' => 'acceso mis cursos profesor aula virtual docente materias asignadas',
         'respuesta' => 'El profesor debe iniciar sesión con sus credenciales institucionales. En la barra superior de navegación o en el menú lateral, debe hacer clic en <strong>Gestionar Curso -> Mis Cursos</strong>. Allí se mostrarán todas las asignaturas y grupos que tiene asignados en el cuatrimestre vigente.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo ingresar y guardar las calificaciones de los estudiantes en un curso?',
+        'pregunta' => '302. ¿Cómo ingresar y guardar las calificaciones de los estudiantes en un curso?',
         'palabras_clave' => 'ingresar guardar calificaciones notas estudiantes curso planilla profesor',
         'respuesta' => 'En <strong>Mis Cursos</strong>, haz clic en el botón <strong>Notas</strong> de la materia correspondiente. Se abrirá la planilla electrónica con la lista de estudiantes. Digita las notas obtenidas en cada componente (Quices, Tareas, Proyectos, Exámenes) y presiona <strong>Guardar Notas</strong> al pie de la tabla.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué componentes de evaluación se configuran (quices, tareas, proyectos, exámenes)?',
+        'pregunta' => '303. ¿Qué componentes de evaluación se configuran (quices, tareas, proyectos, exámenes)?',
         'palabras_clave' => 'componentes evaluacion quices tareas proyectos examenes asistencia rubros',
         'respuesta' => 'La planilla de evaluación permite configurar libremente los rubros acordados en el sílabo: Quices (e.g. 15%), Tareas y Casos (20%), Proyecto de Aplicación (25%), Examen Parcial (20%), Examen Final (20%). Cada rubro calcula su porcentaje ponderado automáticamente.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar el Acta Oficial de Calificaciones del curso en formato PDF?',
+        'pregunta' => '304. ¿Cómo generar el Acta Oficial de Calificaciones del curso en formato PDF?',
         'palabras_clave' => 'generar acta oficial calificaciones pdf reporte notas firma profesor',
         'respuesta' => 'Una vez completadas todas las calificaciones, en la parte superior de la planilla de notas presiona el botón <strong>Generar Acta Oficial (PDF)</strong>. El sistema creará el acta membretada con los promedios finales, la condición de cada alumno y el espacio para la firma del docente.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo enviar la nota final y desglose a un estudiante individualmente por WhatsApp?',
+        'pregunta' => '305. ¿Cómo enviar la nota final y desglose a un estudiante individualmente por WhatsApp?',
         'palabras_clave' => 'enviar nota individual whatsapp alumno boletin calificaciones mensaje profesor',
         'respuesta' => 'En la planilla de notas, cada estudiante cuenta con un botón verde de WhatsApp <strong>Enviar Nota</strong>. Al presionarlo, el sistema redactará automáticamente un mensaje formal con el desglose de sus notas parciales, nota final y condición obtenida.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo sincronizar estudiantes y calificaciones directamente con la plataforma Moodle?',
+        'pregunta' => '306. ¿Cómo sincronizar estudiantes y calificaciones directamente con la plataforma Moodle?',
         'palabras_clave' => 'sincronizar estudiantes calificaciones moodle campus virtual importar notas',
         'respuesta' => 'En la vista del curso dispones de dos botones de integración:<br><ul><li><strong>Sincronizar Estudiantes de Moodle:</strong> Descarga la lista de alumnos matriculados en el aula virtual.</li><li><strong>Sincronizar Notas de Moodle:</strong> Importa las calificaciones del libro de calificaciones de Moodle hacia Inbox CEFI.</li></ul>',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo llevar el control de asistencia diaria de los alumnos a clase?',
+        'pregunta' => '307. ¿Cómo llevar el control de asistencia diaria de los alumnos a clase?',
         'palabras_clave' => 'control asistencia diaria clase lista presentes ausentes tardias pasar lista',
         'respuesta' => 'En el curso, presiona el botón <strong>Asistencia</strong>. Selecciona la fecha de la sesión y marca el estado para cada alumno (Presente, Ausente, Tardía o Justificado). Al finalizar haz clic en <strong>Guardar Asistencia</strong>.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué opciones de asistencia existen (Presente, Ausente Injustificado, Justificado, Tardía)?',
+        'pregunta' => '308. ¿Qué opciones de asistencia existen (Presente, Ausente Injustificado, Justificado, Tardía)?',
         'palabras_clave' => 'opciones asistencia presente ausente injustificado justificado tardia',
         'respuesta' => 'Se contemplan cuatro estados:<br><ul><li><strong>Presente (P):</strong> Asistió a la sesión completa.</li><li><strong>Ausente Injustificado (AI):</strong> No se presentó y no aportó justificante.</li><li><strong>Ausente Justificado (AJ):</strong> Aportó dictamen médico o laboral aprobado.</li><li><strong>Tardía (T):</strong> Ingresó después del tiempo de tolerancia.</li></ul>',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo subir y tramitar la factura electrónica de servicios profesionales del docente?',
+        'pregunta' => '309. ¿Cómo subir y tramitar la factura electrónica de servicios profesionales del docente?',
         'palabras_clave' => 'subir factura electronica servicios profesionales docente honorarios profesor xml pdf',
         'respuesta' => 'En <strong>Mis Cursos</strong>, en la tarjeta de la materia haz clic en <strong>Subir Factura Electrónica</strong>. Adjunta el archivo PDF y el XML emitido a nombre de CEFI por tus honorarios de docencia y presiona <strong>Enviar Factura</strong>.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo eliminar o reemplazar una factura subida incorrectamente por el profesor?',
+        'pregunta' => '310. ¿Cómo eliminar o reemplazar una factura subida incorrectamente por el profesor?',
         'palabras_clave' => 'eliminar reemplazar factura incorrecta profesor cambiar factura docente',
         'respuesta' => 'Si la factura aún no ha sido aprobada por Contabilidad, presiona el botón <strong>Eliminar Factura</strong> en la tarjeta del curso y sube el nuevo documento corregido.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde se redactan y envían avisos o notificaciones de clase a todos los alumnos del curso?',
+        'pregunta' => '311. ¿Dónde se redactan y envían avisos o notificaciones de clase a todos los alumnos del curso?',
         'palabras_clave' => 'notificaciones de clase avisos grupales mensaje curso comunicado alumnos',
         'respuesta' => 'En la vista de gestión del curso, presiona <strong>Notificaciones de Clase</strong>. Escribe el asunto y el mensaje; el sistema lo despachará al correo de todos los matriculados y quedará publicado en sus portales.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo compartir recursos didácticos y enlaces de Google Drive con la clase?',
+        'pregunta' => '312. ¿Cómo compartir recursos didácticos y enlaces de Google Drive con la clase?',
         'palabras_clave' => 'compartir recursos didacticos enlaces google drive material clase docente',
         'respuesta' => 'Accede a la pestaña <strong>Recursos Drive</strong> de tu curso, haz clic en <strong>Agregar Enlace</strong>, ingresa el título del material (ej. <em>"Presentación Semana 4 - Estados Financieros"</em>) y pega la URL de Google Drive.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo crear portadas gráficas y cortinas de presentación para las clases virtuales?',
+        'pregunta' => '313. ¿Cómo crear portadas gráficas y cortinas de presentación para las clases virtuales?',
         'palabras_clave' => 'crear portadas graficas cortinas presentacion clases virtuales zoom meet',
         'respuesta' => 'En <strong>Mis Cursos -> Crear Portada</strong> o <strong>Ver Cortina</strong>, dispones de una herramienta que genera gráficos elegantes con el nombre de la materia, tema de la sesión y fecha para proyectar al iniciar transmisiones en Zoom.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo gestionar solicitudes de revisión de notas planteadas por los estudiantes?',
+        'pregunta' => '314. ¿Cómo gestionar solicitudes de revisión de notas planteadas por los estudiantes?',
         'palabras_clave' => 'revision de notas apelacion calificacion reclamo estudiante profesor',
         'respuesta' => 'En <strong>Mis Cursos -> Revisiones de Nota</strong>, verás las solicitudes formales enviadas por los alumnos junto con sus justificaciones. Puedes revisarlas y emitir tu resolución directamente.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo resolver o actualizar una calificación tras una apelación aprobada?',
+        'pregunta' => '315. ¿Cómo resolver o actualizar una calificación tras una apelación aprobada?',
         'palabras_clave' => 'resolver apelacion actualizar calificacion corregir nota acta',
         'respuesta' => 'Al aceptar la apelación en el módulo de revisiones, digita la nueva nota rectificada. El sistema actualizará el promedio del estudiante y guardará el registro de la corrección.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué fecha límite tienen los docentes para subir el acta final de calificaciones?',
+        'pregunta' => '316. ¿Qué fecha límite tienen los docentes para subir el acta final de calificaciones?',
         'palabras_clave' => 'fecha limite entrega actas notas plazo cierre calificaciones cuatrimestre',
         'respuesta' => 'De acuerdo con el calendario institucional, los profesores disponen de hasta <strong>7 días naturales</strong> tras la última semana de clases para oficializar el acta definitiva en el sistema.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo cerrar y bloquear un acta de notas una vez entregada a Registro Académico?',
+        'pregunta' => '317. ¿Cómo cerrar y bloquear un acta de notas una vez entregada a Registro Académico?',
         'palabras_clave' => 'cerrar bloquear acta de notas oficializar entrega registro academico',
         'respuesta' => 'Al presionar <strong>Oficializar y Entregar Acta</strong>, el sistema bloquea los campos de notas para evitar alteraciones no autorizadas y notifica a Registro Académico para su custodia definitiva.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Quién puede autorizar la reapertura de un acta de notas cerrada?',
+        'pregunta' => '318. ¿Quién puede autorizar la reapertura de un acta de notas cerrada?',
         'palabras_clave' => 'reabrir acta cerrada autorizacion direccion academica desbloquear notas',
         'respuesta' => 'Únicamente el <strong>Director Académico</strong> o el <strong>Administrador General</strong> pueden desbloquear temporalmente un acta cerrada previa justificación formal del docente.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo calcular el promedio ponderado automático de las calificaciones registradas?',
+        'pregunta' => '319. ¿Cómo calcular el promedio ponderado automático de las calificaciones registradas?',
         'palabras_clave' => 'promedio ponderado automatico calculo notas finales formula promedio',
         'respuesta' => 'La planilla electrónica multiplica automáticamente cada calificación parcial por su porcentaje respectivo y las suma, mostrando el promedio ponderado final en tiempo real mientras el docente digita.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué condición asigna el sistema a cada alumno (Aprobado, Reprobado, Retirado)?',
+        'pregunta' => '320. ¿Qué condición asigna el sistema a cada alumno (Aprobado, Reprobado, Retirado)?',
         'palabras_clave' => 'condicion alumno aprobado reprobado retirado estado final materia',
         'respuesta' => 'Si el promedio es mayor o igual a la nota mínima (ej. 70 o 80), asigna <strong>Aprobado (AP)</strong>; si es inferior, asigna <strong>Reprobado (RP)</strong>; y si el alumno tramitó retiro formal, asigna <strong>Retirado (RJ)</strong>.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo descargar la lista de asistencia en PDF con porcentajes de cumplimiento?',
+        'pregunta' => '321. ¿Cómo descargar la lista de asistencia en PDF con porcentajes de cumplimiento?',
         'palabras_clave' => 'descargar lista asistencia pdf porcentajes cumplimiento faltas asistencia',
         'respuesta' => 'En el módulo de asistencia del curso, haz clic en <strong>Reporte de Asistencia (PDF)</strong>. Obtendrás el desglose de sesiones y el porcentaje total de asistencia de cada estudiante.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo consultar los comentarios u observaciones pedagógicas sobre el desempeño del alumno?',
+        'pregunta' => '322. ¿Cómo consultar los comentarios u observaciones pedagógicas sobre el desempeño del alumno?',
         'palabras_clave' => 'observaciones pedagogicas desempeno alumno notas privadas profesor',
         'respuesta' => 'En la fila de cada alumno en la planilla de notas dispones de un campo de <em>Observaciones Pedagógicas</em> para anotar recomendaciones o alertas de seguimiento estudiantil.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo funciona la herramienta de cortina de inicio para transmisiones en Zoom?',
+        'pregunta' => '323. ¿Cómo funciona la herramienta de cortina de inicio para transmisiones en Zoom?',
         'palabras_clave' => 'cortina de inicio zoom transmision virtual cuenta regresiva clase',
         'respuesta' => 'Es una pantalla interactiva con el logo de CEFI, el título de la sesión y una cuenta regresiva opcional que el docente proyecta compartiendo pantalla mientras ingresan los estudiantes a la sala virtual.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consulta el docente los resultados de las encuestas de evaluación estudiantil de su curso?',
+        'pregunta' => '324. ¿Dónde consulta el docente los resultados de las encuestas de evaluación estudiantil de su curso?',
         'palabras_clave' => 'resultados encuestas evaluacion estudiantil satisfaccion profesor notas docentes',
         'respuesta' => 'En <strong>Gestionar Curso -> Resultados de Encuestas</strong>, el profesor puede visualizar las calificaciones anónimas otorgadas por sus alumnos y las recomendaciones de mejora pedagógica.',
         'categoria' => 'Gestión Docente y Calificaciones',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué hacer si un alumno matriculado no aparece en la lista de calificaciones del profesor?',
+        'pregunta' => '325. ¿Qué hacer si un alumno matriculado no aparece en la lista de calificaciones del profesor?',
         'palabras_clave' => 'alumno matriculado no aparece lista calificaciones profesor sincronizar lista',
         'respuesta' => 'Verifica con el departamento de Registro Académico si la boleta de matrícula del alumno fue debidamente oficializada. Si fue oficializada recientemente, presiona <strong>Sincronizar Lista</strong> para refrescar el padrón del aula.',
         'categoria' => 'Gestión Docente y Calificaciones',

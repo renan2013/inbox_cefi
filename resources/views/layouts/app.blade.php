@@ -346,6 +346,30 @@
             font-size: 0.85rem;
             margin-top: auto;
         }
+
+        /* Diseño 100% Ancho Completo (Full Width) para todo Inbox CEFI */
+        .container, 
+        .container-sm, 
+        .container-md, 
+        .container-lg, 
+        .container-xl, 
+        .container-xxl {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding-left: clamp(1rem, 2vw, 2.5rem) !important;
+            padding-right: clamp(1rem, 2vw, 2.5rem) !important;
+        }
+
+        .container-fluid {
+            width: 100% !important;
+            padding-left: clamp(1rem, 2vw, 2.5rem) !important;
+            padding-right: clamp(1rem, 2vw, 2.5rem) !important;
+        }
+
+        main.flex-grow-1 {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
     </style>
     @yield('styles')
 </head>

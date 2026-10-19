@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Cómo marcan su entrada y salida los colaboradores mediante el reloj marcador QR?',
+        'pregunta' => '326. ¿Cómo marcan su entrada y salida los colaboradores mediante el reloj marcador QR?',
         'palabras_clave' => 'marcar entrada salida reloj marcador qr escanear credencial asistencia personal',
         'respuesta' => 'Los colaboradores colocan su credencial digital o física frente al escáner de cámara en <strong>Asistencia -> Reloj Marcador</strong> (o pantalla de kiosco institucional). La cámara lee el código QR único y confirma la marca de <strong>Entrada</strong> o <strong>Salida</strong> con un sonido de verificación y muestra la foto del empleado en pantalla.',
         'categoria' => 'Asistencia y Planilla',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar e imprimir la credencial con código QR y fotografía de un empleado?',
+        'pregunta' => '327. ¿Cómo generar e imprimir la credencial con código QR y fotografía de un empleado?',
         'palabras_clave' => 'generar imprimir credencial qr fotografia empleado carnet funcionario carnet personal',
         'respuesta' => 'En <strong>Planilla -> Catálogo de Empleados</strong>, localiza al colaborador y presiona el botón <strong>Credencial QR</strong>. Se abrirá la tarjeta en formato estándar con fotografía, nombre, puesto, código QR cifrado y el botón <strong>Imprimir Credencial</strong>.',
         'categoria' => 'Asistencia y Planilla',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo usar el escáner de cámara integrado para registrar marcas de asistencia?',
+        'pregunta' => '328. ¿Cómo usar el escáner de cámara integrado para registrar marcas de asistencia?',
         'palabras_clave' => 'usar escaner camara integrado marcas asistencia qr webcam lector',
         'respuesta' => 'Ingresa a <strong>Planilla -> Escanear QR</strong> y permite el acceso a la cámara web en el navegador. Al aproximar cualquier carné de funcionario a la lente, el sistema procesará la marca automáticamente en menos de un segundo.',
         'categoria' => 'Asistencia y Planilla',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde se consulta el historial de marcas de asistencia del personal?',
+        'pregunta' => '329. ¿Dónde se consulta el historial de marcas de asistencia del personal?',
         'palabras_clave' => 'consultar historial marcas asistencia personal registro entradas salidas',
         'respuesta' => 'En <strong>Asistencia -> Historial de Marcas</strong> se listan cronológicamente todas las marcas registradas, con nombre del funcionario, fecha, hora exacta, tipo (Entrada/Salida) y método (QR o Manual).',
         'categoria' => 'Asistencia y Planilla',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar o corregir una marca manual si el colaborador olvidó escanear su código?',
+        'pregunta' => '330. ¿Cómo registrar o corregir una marca manual si el colaborador olvidó escanear su código?',
         'palabras_clave' => 'registrar marca manual corregir olvido escanear qr asistencia rrhh',
         'respuesta' => 'En <strong>Asistencia -> Historial</strong>, presiona <strong>Nueva Marca Manual</strong>. Selecciona el empleado, la fecha, la hora de entrada/salida y escribe el motivo de la justificación. Al guardar, quedará registrada con la etiqueta <em>Manual Aprobada</em>.',
         'categoria' => 'Asistencia y Planilla',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo editar o justificar una marca de llegada tardía o ausencia con comprobante médico?',
+        'pregunta' => '331. ¿Cómo editar o justificar una marca de llegada tardía o ausencia con comprobante médico?',
         'palabras_clave' => 'editar justificar marca llegada tardia ausencia comprobante medico incapacidad',
         'respuesta' => 'Haz clic en el botón <strong>Editar</strong> sobre la marca en el historial, marca el casillero <em>Justificada</em> y adjunta el comprobante médico o boleta de permiso emitida por Recursos Humanos.',
         'categoria' => 'Asistencia y Planilla',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo eliminar una marca duplicada o registrada por error?',
+        'pregunta' => '332. ¿Cómo eliminar una marca duplicada o registrada por error?',
         'palabras_clave' => 'eliminar marca duplicada error doble marca reloj borrar asistencia',
         'respuesta' => 'Si un colaborador escaneó dos veces su credencial en el mismo minuto, el administrador puede presionar el botón rojo de eliminar en la marca repetida para limpiar el registro.',
         'categoria' => 'Asistencia y Planilla',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo configurar las tarifas por hora según la categoría del puesto o empleado?',
+        'pregunta' => '333. ¿Cómo configurar las tarifas por hora según la categoría del puesto o empleado?',
         'palabras_clave' => 'configurar tarifas por hora categoria puesto empleado salario hora planilla',
         'respuesta' => 'En <strong>Planilla -> Tarifas y Categorías</strong> puedes definir el valor por hora estándar de cada puesto (ej. Profesor Titular ₡8,500/hora, Asistente Administrativo ₡4,200/hora) o fijar tarifas personalizadas por colaborador.',
         'categoria' => 'Asistencia y Planilla',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo calcular la planilla del período en base a las horas trabajadas registradas?',
+        'pregunta' => '334. ¿Cómo calcular la planilla del período en base a las horas trabajadas registradas?',
         'palabras_clave' => 'calcular planilla periodo horas trabajadas calculo nomina sueldos quincena',
         'respuesta' => 'Ve a <strong>Planilla -> Calcular Planilla</strong>, selecciona el rango de fechas (ej. del 1 al 15 del mes) y presiona <strong>Procesar Horas</strong>. El sistema cruzará las marcas de entrada y salida contra las tarifas horarias y calculará el salario bruto.',
         'categoria' => 'Asistencia y Planilla',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo aplicar deducciones, adelantos o cargas sociales en el cálculo de planilla?',
+        'pregunta' => '335. ¿Cómo aplicar deducciones, adelantos o cargas sociales en el cálculo de planilla?',
         'palabras_clave' => 'aplicar deducciones adelantos cargas sociales ccss retenciones seguro',
         'respuesta' => 'En la planilla preliminar puedes agregar rubros de deducción por colaborador: cargas de la CCSS (Caja), deducciones por adelanto de salario, préstamos o pólizas, calculando el salario neto a transferir.',
         'categoria' => 'Asistencia y Planilla',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo guardar y oficializar el pago de planilla de un período determinado?',
+        'pregunta' => '336. ¿Cómo guardar y oficializar el pago de planilla de un período determinado?',
         'palabras_clave' => 'guardar oficializar pago planilla cerrar nomina periodo pagar',
         'respuesta' => 'Tras verificar los montos, haz clic en el botón <strong>Oficializar Pago de Planilla</strong>. Los registros se congelarán para histórico y se generarán los comprobantes de pago individuales.',
         'categoria' => 'Asistencia y Planilla',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consultar el historial de pagos y desgloses de nóminas anteriores?',
+        'pregunta' => '337. ¿Dónde consultar el historial de pagos y desgloses de nóminas anteriores?',
         'palabras_clave' => 'consultar historial pagos nominas anteriores planillas pasadas historico sueldos',
         'respuesta' => 'Ingresa a <strong>Planilla -> Historial de Pagos</strong>, donde encontrarás la lista de períodos liquidados con sus montos globales y la opción de consultar los pagos de cada colaborador.',
         'categoria' => 'Asistencia y Planilla',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo exportar el comprobante de pago de salario en formato PDF para el colaborador?',
+        'pregunta' => '338. ¿Cómo exportar el comprobante de pago de salario en formato PDF para el colaborador?',
         'palabras_clave' => 'comprobante pago salario pdf colilla sueldo boleta pago empleado',
         'respuesta' => 'En el detalle de la nómina, presiona <strong>Ver Comprobante (PDF)</strong> junto al nombre del empleado para descargar su colilla de pago formal con desglose de horas, deducciones y salario neto.',
         'categoria' => 'Asistencia y Planilla',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo distinguir entre horas ordinarias, horas extraordinarias y horas de docencia?',
+        'pregunta' => '339. ¿Cómo distinguir entre horas ordinarias, horas extraordinarias y horas de docencia?',
         'palabras_clave' => 'distinguir horas ordinarias extraordinarias extras horas docencia calculo',
         'respuesta' => 'El algoritmo de planilla contabiliza las horas de acuerdo a la jornada pactada (ej. 8 horas diarias); las horas adicionales laboradas después de la jornada se computan automáticamente a tiempo y medio (1.5x) como horas extra.',
         'categoria' => 'Asistencia y Planilla',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué validaciones de seguridad evitan que un empleado marque por otro?',
+        'pregunta' => '340. ¿Qué validaciones de seguridad evitan que un empleado marque por otro?',
         'palabras_clave' => 'seguridad marcas no marcar por otro empleado foto en pantalla qr dinamico',
         'respuesta' => 'Al realizar la marca, la pantalla del reloj marcador proyecta de inmediato la fotografía y datos del titular del carné a la vista de los presentes y registra la dirección IP y captura de cámara para supervisión.',
         'categoria' => 'Asistencia y Planilla',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo configurar la geolocalización o IP permitida para la marcación de asistencia?',
+        'pregunta' => '341. ¿Cómo configurar la geolocalización o IP permitida para la marcación de asistencia?',
         'palabras_clave' => 'geolocalizacion ip permitida reloj marcador marcar solo en la sede wifi institucional',
         'respuesta' => 'En <strong>Configuración -> Parámetros de Asistencia</strong> puedes restringir las marcas para que solo se acepten desde las direcciones IP de la red Wi-Fi de la sede o mediante coordenadas GPS autorizadas.',
         'categoria' => 'Asistencia y Planilla',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo programar los horarios de turno y tolerancias de ingreso para el personal?',
+        'pregunta' => '342. ¿Cómo programar los horarios de turno y tolerancias de ingreso para el personal?',
         'palabras_clave' => 'programar horarios turno tolerancia ingreso minutos gracia puntualidad',
         'respuesta' => 'En la ficha de cada empleado se asigna su horario laboral (ej. 08:00 a 17:00) y se fijan los minutos de gracia de tolerancia (ej. 10 minutos) antes de catalogar la marca como tardía.',
         'categoria' => 'Asistencia y Planilla',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar un reporte mensual de ausentismo y tardanzas para Recursos Humanos?',
+        'pregunta' => '343. ¿Cómo generar un reporte mensual de ausentismo y tardanzas para Recursos Humanos?',
         'palabras_clave' => 'reporte mensual ausentismo tardanzas rrhh faltas personal informe asistencia',
         'respuesta' => 'En <strong>Asistencia -> Reportes</strong>, selecciona el mes y genera el <strong>Informe Consolidado de Asistencia</strong> para revisar el ranking de puntualidad y ausentismo laboral.',
         'categoria' => 'Asistencia y Planilla',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar vacaciones, permisos con y sin goce de salario en el sistema?',
+        'pregunta' => '344. ¿Cómo registrar vacaciones, permisos con y sin goce de salario en el sistema?',
         'palabras_clave' => 'registrar vacaciones permisos con goce sin goce de salario boleta permiso',
         'respuesta' => 'En el catálogo de empleados dispones de la pestaña <strong>Permisos y Vacaciones</strong>, donde se cargan los días concedidos para que el cálculo de planilla no los catalogue como faltas injustificadas.',
         'categoria' => 'Asistencia y Planilla',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo se calculan los montos devengados por docentes que cobran por curso cerrado?',
+        'pregunta' => '345. ¿Cómo se calculan los montos devengados por docentes que cobran por curso cerrado?',
         'palabras_clave' => 'docentes curso cerrado honorarios fijos tarifa por curso profesor',
         'respuesta' => 'En la ficha de contratación del docente se marca la modalidad <em>Tarifa Fija por Curso</em>. El pago se liquida al presentar la factura electrónica y el acta oficial de notas final aprobada.',
         'categoria' => 'Asistencia y Planilla',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo emitir la orden patronal o constancia salarial para los empleados?',
+        'pregunta' => '346. ¿Cómo emitir la orden patronal o constancia salarial para los empleados?',
         'palabras_clave' => 'constancia salarial orden patronal certificar ingresos colaborador empleado',
         'respuesta' => 'Desde la ficha del colaborador en <strong>Planilla -> Empleados</strong>, presiona <strong>Generar Constancia Salarial (PDF)</strong> para emitir el certificado con salario promedio de los últimos 3 meses.',
         'categoria' => 'Asistencia y Planilla',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Quiénes tienen acceso al módulo de cálculo y configuración de salarios?',
+        'pregunta' => '347. ¿Quiénes tienen acceso al módulo de cálculo y configuración de salarios?',
         'palabras_clave' => 'acceso calculo salarios privacidad nomina recursos humanos contabilidad',
         'respuesta' => 'Únicamente el <strong>Administrador General</strong> y usuarios autorizados del departamento de <strong>Recursos Humanos / Contabilidad</strong> tienen permiso para ver salarios y calcular nóminas.',
         'categoria' => 'Asistencia y Planilla',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo respaldar la información de marcas de asistencia ante auditorías del Ministerio de Trabajo?',
+        'pregunta' => '348. ¿Cómo respaldar la información de marcas de asistencia ante auditorías del Ministerio de Trabajo?',
         'palabras_clave' => 'respaldar marcas asistencia auditoria ministerio de trabajo mtss archivo laboral',
         'respuesta' => 'En el historial de asistencia puedes presionar <strong>Exportar Libro de Asistencia Oficial</strong> para obtener el archivo en Excel o PDF foliado con el formato exigido por la inspección de trabajo.',
         'categoria' => 'Asistencia y Planilla',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo archivar registros de personal cesado manteniendo su histórico salarial?',
+        'pregunta' => '349. ¿Cómo archivar registros de personal cesado manteniendo su histórico salarial?',
         'palabras_clave' => 'archivar personal cesado liquidacion exempleados historico salarial',
         'respuesta' => 'Al cesar la relación laboral con un colaborador, se cambia su estado a <em>Cesado / Inactivo</em>. Sus marcas de asistencia y pagos históricos se conservan para consultas de cesantía o jubilación.',
         'categoria' => 'Asistencia y Planilla',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo notificar al empleado por correo cuando su comprobante de pago está disponible?',
+        'pregunta' => '350. ¿Cómo notificar al empleado por correo cuando su comprobante de pago está disponible?',
         'palabras_clave' => 'notificar comprobante pago correo aviso colilla salario disponible',
         'respuesta' => 'Al oficializar la planilla, activa la casilla <strong>Enviar Colillas por Correo Electrónico</strong>. El servidor despachará el PDF de forma individual y privada a cada colaborador.',
         'categoria' => 'Asistencia y Planilla',

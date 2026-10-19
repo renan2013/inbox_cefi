@@ -53,8 +53,11 @@ class BaseConocimientoInboxAiSeeder extends Seeder
                 continue;
             }
 
+            $cleanPregunta = preg_replace('/^\d+\.\s*/', '', $pregunta);
+
             $exists = DB::table('base_conocimiento_inbox_ai')
                 ->where('pregunta', $pregunta)
+                ->orWhere('pregunta', $cleanPregunta)
                 ->first();
 
             $payload = [

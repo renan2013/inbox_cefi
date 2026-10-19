@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Cómo iniciar un proceso de postulación a graduación en Inbox CEFI?',
+        'pregunta' => '451. ¿Cómo iniciar un proceso de postulación a graduación en Inbox CEFI?',
         'palabras_clave' => 'postulacion graduacion iniciar proceso solicitar titulo graduarse expediente graduacion',
         'respuesta' => 'Ingresa al menú <strong>Registro -> Graduaciones</strong> y haz clic en <strong>Nueva Postulación</strong>. Selecciona al estudiante candidato y la carrera a titular. El sistema abrirá el expediente de graduación e iniciará el proceso de auditoría automática.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué requisitos verifica automáticamente el Módulo de Auditoría de Graduación?',
+        'pregunta' => '452. ¿Qué requisitos verifica automáticamente el Módulo de Auditoría de Graduación?',
         'palabras_clave' => 'auditoria graduacion requisitos automaticos materias aprobadas tcu saldo cero expediente',
         'respuesta' => 'La auditoría automática verifica cuatro pilares indispensables:<br><ul><li><strong>1. Malla Curricular 100%:</strong> Todas las materias del plan aprobadas o convalidadas.</li><li><strong>2. TCU Cumplido:</strong> 150 horas de trabajo comunal concluidas y certificadas.</li><li><strong>3. Paz y Salvo Financiero:</strong> Saldo deudor en ₡0 (sin boletas ni mora pendiente).</li><li><strong>4. Expediente 360° Completo:</strong> Título de secundaria, cédula y fotografías verificados.</li></ul>',
         'categoria' => 'Graduaciones y Auditoría',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo audita el sistema el 100% de materias aprobadas del plan de estudios?',
+        'pregunta' => '453. ¿Cómo audita el sistema el 100% de materias aprobadas del plan de estudios?',
         'palabras_clave' => 'auditar materias aprobadas plan de estudios cruce notas creditos carrera',
         'respuesta' => 'El algoritmo compara la lista de cursos obligatorios y optativos del programa contra el historial de actas oficiales del alumno. Si falta una sola materia o alguna se encuentra en condición de Reprobada, la auditoría marca el semáforo en rojo.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo verifica la auditoría que las 150 horas de TCU estén concluidas y certificadas?',
+        'pregunta' => '454. ¿Cómo verifica la auditoría que las 150 horas de TCU estén concluidas y certificadas?',
         'palabras_clave' => 'verificar 150 horas tcu certificadas auditoria graduacion liquidacion comunal',
         'respuesta' => 'El sistema consulta la tabla de TCU del estudiante comprobando que el estado del proyecto sea <em>"Concluido y Aprobado"</em> con un total de 150 horas válidas registradas en las bitácoras.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo comprueba el sistema que el estudiante esté en condición de Paz y Salvo financiero (saldo ₡0)?',
+        'pregunta' => '455. ¿Cómo comprueba el sistema que el estudiante esté en condición de Paz y Salvo financiero (saldo ₡0)?',
         'palabras_clave' => 'comprobar paz y salvo financiero saldo cero deudas pendientes auditoria cobros',
         'respuesta' => 'La auditoría efectúa un arqueo del estado de cuenta en tiempo real. Si existe alguna boleta vencida o con saldo pendiente, bloquea la aprobación de graduación e indica el monto exacto adeudado.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo valida la auditoría los requisitos documentales del Expediente 360° (título bachiller, fotos)?',
+        'pregunta' => '456. ¿Cómo valida la auditoría los requisitos documentales del Expediente 360° (título bachiller, fotos)?',
         'palabras_clave' => 'validar requisitos documentales expediente 360 titulo bachiller fotos cedula checklist',
         'respuesta' => 'Examina el checklist del <strong>Expediente Digital 360°</strong> verificando que los ítems indispensables (Bachillerato, Identificación oficial y Fotos) tengan el estado <em>"Entregado / Verificado"</em>.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué reporte de dictamen genera la auditoría cuando se detecta un requisito pendiente?',
+        'pregunta' => '457. ¿Qué reporte de dictamen genera la auditoría cuando se detecta un requisito pendiente?',
         'palabras_clave' => 'reporte dictamen requisitos pendientes no cumple graduacion prevencion informe',
         'respuesta' => 'Genera una <strong>Hoja de Prevenciones Académicas</strong> señalando con precisión qué requisito falta por subsanar (ej. <em>"Falta certificación de notas de convalidación"</em> o <em>"Saldo pendiente de ₡45,000 en boleta BOL-2026-0040"</em>).',
         'categoria' => 'Graduaciones y Auditoría',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo emitir el Dictamen Favorable de Graduación una vez cumplido el 100% de requisitos?',
+        'pregunta' => '458. ¿Cómo emitir el Dictamen Favorable de Graduación una vez cumplido el 100% de requisitos?',
         'palabras_clave' => 'emitir dictamen favorable graduacion aprobar expediente grado cumple 100',
         'respuesta' => 'Cuando los cuatro semáforos de la auditoría se tornan verdes, el botón <strong>Aprobar y Emitir Dictamen</strong> se desbloquea. Al presionarlo, el alumno queda formalmente incorporado al padrón de graduandos.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar y descargar el Dictamen Oficial de Graduación en formato PDF con sellos?',
+        'pregunta' => '459. ¿Cómo generar y descargar el Dictamen Oficial de Graduación en formato PDF con sellos?',
         'palabras_clave' => 'descargar dictamen oficial graduacion pdf actas de grado sellos institucionales',
         'respuesta' => 'En la ficha de graduación aprobada haz clic en <strong>Descargar Dictamen de Grado (PDF)</strong>. Se emitirá el documento formal de auditoría foliado con las firmas de Registro y Dirección Académica.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar los datos oficiales del título (Número de Tomo, Folio, Asiento y Código de Registro)?',
+        'pregunta' => '460. ¿Cómo registrar los datos oficiales del título (Número de Tomo, Folio, Asiento y Código de Registro)?',
         'palabras_clave' => 'registrar datos titulo tomo folio asiento codigo de registro libro de actas',
         'respuesta' => 'En la pestaña <em>Libro de Títulos y Actas</em>, digita el <strong>Número de Tomo</strong> (ej. Tomo 4), <strong>Folio</strong> (ej. Folio 128), <strong>Asiento</strong> (ej. Asiento 1052) y el <strong>Código de Registro MEP/CEFI</strong> para su asiento perpetuo.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo programar la fecha, hora y recinto de la Ceremonia Oficial de Graduación?',
+        'pregunta' => '461. ¿Cómo programar la fecha, hora y recinto de la Ceremonia Oficial de Graduación?',
         'palabras_clave' => 'programar ceremonia graduacion fecha hora recinto acto solemne promocion',
         'respuesta' => 'En <strong>Graduaciones -> Convocatorias</strong> crea la nueva ceremonia indicando fecha, hora, recinto o auditorio y fecha límite para entrega de requisitos y derechos de graduación.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar la lista oficial de graduandos para confección de títulos e invitaciones?',
+        'pregunta' => '462. ¿Cómo generar la lista oficial de graduandos para confección de títulos e invitaciones?',
         'palabras_clave' => 'lista oficial graduandos padron confeccion titulos invitaciones diploma caligrafia',
         'respuesta' => 'En la convocatoria de graduación presiona <strong>Exportar Padrón de Graduandos</strong>. Obtendrás la lista oficial con nombres exactos según cédula, carrera y menciones de honor para el taller de caligrafía y diplomas.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar pagos por derechos de graduación y confección de títulos?',
+        'pregunta' => '463. ¿Cómo registrar pagos por derechos de graduación y confección de títulos?',
         'palabras_clave' => 'pagar derechos graduacion arancel titulo confeccion diploma toga gastos',
         'respuesta' => 'Se emite la boleta bajo el concepto <em>"Derechos de Graduación y Titulación"</em> en <strong>Registro -> Generar Boleta</strong>. Al registrar el pago bancario, el requisito financiero queda solventado.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar la boleta de cobro por aranceles de graduación?',
+        'pregunta' => '464. ¿Cómo generar la boleta de cobro por aranceles de graduación?',
         'palabras_clave' => 'generar boleta aranceles graduacion cobro titulo cuota graduando',
         'respuesta' => 'Selecciona al estudiante en <strong>Generar Boleta de Pago</strong> y marca el rubro oficial de graduación. Puedes incluir aranceles adicionales por paquete de toga, estola y fotografías si aplica.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué menciones de honor (Cum Laude, Magna Cum Laude, Mejor Promedio) se calculan automáticamente?',
+        'pregunta' => '465. ¿Qué menciones de honor (Cum Laude, Magna Cum Laude, Mejor Promedio) se calculan automáticamente?',
         'palabras_clave' => 'menciones de honor cum laude magna cum laude mejor promedio distincion honores',
         'respuesta' => 'El sistema calcula el promedio ponderado histórico: estudiantes con promedio de 90 a 94.9 reciben mención <strong>Cum Laude</strong>, de 95 a 100 reciben <strong>Magna Cum Laude</strong>, y el puntaje más alto de la cohorte es distinguido como <strong>Mejor Promedio de Promoción</strong>.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo imprimir el Acta Consolidada de Grado firmada por el Consejo Académico?',
+        'pregunta' => '466. ¿Cómo imprimir el Acta Consolidada de Grado firmada por el Consejo Académico?',
         'palabras_clave' => 'acta consolidada de grado pdf consejo academico firmas libro oficial',
         'respuesta' => 'En la vista de convocatoria presiona <strong>Imprimir Acta Consolidada de Graduación</strong>. Se generará el acta general con todos los graduandos de la fecha para firma del Rector y Secretaria General.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo marcar el estado del estudiante como "Graduado" en su expediente digital?',
+        'pregunta' => '467. ¿Cómo marcar el estado del estudiante como "Graduado" en su expediente digital?',
         'palabras_clave' => 'marcar estudiante graduado estado egresado expediente 360 cerrar ciclo alumno',
         'respuesta' => 'Al concluir el acto de graduación, presiona el botón <strong>Asentar Estado Graduado</strong>. El usuario pasará de Alumno Activo a <strong>Graduado / Egresado</strong> en todo el sistema.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Puede un estudiante graduado seguir accediendo a su portal para descargar su récord?',
+        'pregunta' => '468. ¿Puede un estudiante graduado seguir accediendo a su portal para descargar su récord?',
         'palabras_clave' => 'estudiante graduado acceso portal descargar record egresados egresado activo',
         'respuesta' => '<strong>Sí</strong>, los graduados conservan acceso permanente a su portal para consultar su historial de notas, descargar copias digitales de su récord y solicitar constancias oficiales de título.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo tramitar solicitudes de graduación en modalidad por ventanilla o extraordinaria?',
+        'pregunta' => '469. ¿Cómo tramitar solicitudes de graduación en modalidad por ventanilla o extraordinaria?',
         'palabras_clave' => 'graduacion por ventanilla extraordinaria tramite urgente entrega titulo antes',
         'respuesta' => 'Si el alumno requiere su título con urgencia para trámites laborales o becas antes de la ceremonia solemne, se puede seleccionar la modalidad <em>Graduación Extraordinaria por Ventanilla</em> cumpliendo la auditoría.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo reponer o emitir un duplicado de título por pérdida o deterioro?',
+        'pregunta' => '470. ¿Cómo reponer o emitir un duplicado de título por pérdida o deterioro?',
         'palabras_clave' => 'reponer duplicado titulo perdida deterioro emision nuevo diploma registro',
         'respuesta' => 'En <strong>Graduaciones -> Duplicados</strong> se registra la solicitud aportando la denuncia de pérdida o entrega del título deteriorado. El sistema emitirá el nuevo diploma con la leyenda visible <em>"Duplicado"</em> y referencia al asiento original.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo verificar la autenticidad de un título emitido mediante el portal de validación pública?',
+        'pregunta' => '471. ¿Cómo verificar la autenticidad de un título emitido mediante el portal de validación pública?',
         'palabras_clave' => 'verificar autenticidad titulo validacion publica codigo qr hash consultar egresado',
         'respuesta' => 'Todo título emitido incluye un código QR y un enlace público de validación. Al escanearlo, empleadores o universidades pueden constatar en la web oficial de CEFI la autenticidad del título, fecha de graduación y carrera.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué formato de fotografía exige el archivo institucional para el carné y título de graduado?',
+        'pregunta' => '472. ¿Qué formato de fotografía exige el archivo institucional para el carné y título de graduado?',
         'palabras_clave' => 'formato fotografia titulo carnet graduado traje formal fondo blanco tamano pasaporte',
         'respuesta' => 'Se requiere una fotografía reciente tamaño pasaporte, en traje formal (saco/camisa formal), de frente, con fondo blanco nítido, sin lentes oscuros ni accesorios llamativos.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consultar el histórico de promociones de graduados de años anteriores?',
+        'pregunta' => '473. ¿Dónde consultar el histórico de promociones de graduados de años anteriores?',
         'palabras_clave' => 'historico promociones graduados anos anteriores archivo egresados promocion',
         'respuesta' => 'En <strong>Registro -> Graduaciones -> Histórico de Egresados</strong> puedes realizar búsquedas por año de graduación, carrera técnica o número de cédula para consultar actas antiguas.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo exportar el padrón de graduados para el informe anual requerido por el ente rector educativo?',
+        'pregunta' => '474. ¿Cómo exportar el padrón de graduados para el informe anual requerido por el ente rector educativo?',
         'palabras_clave' => 'exportar padron graduados informe anual mep estadisticas educacion superior',
         'respuesta' => 'Presiona <strong>Exportar Padrón MEP (.xlsx)</strong> para generar la sábana en el formato oficial estandarizado con cédulas, nombres, tomos, folios y fechas de graduación del ciclo lectivo.',
         'categoria' => 'Graduaciones y Auditoría',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo emitir una certificación de título en trámite mientras se realiza la ceremonia de entrega?',
+        'pregunta' => '475. ¿Cómo emitir una certificación de título en trámite mientras se realiza la ceremonia de entrega?',
         'palabras_clave' => 'certificacion titulo en tramite constancia graduando egresado espera ceremonia',
         'respuesta' => 'En el expediente de graduación aprobado haz clic en <strong>Emitir Certificación de Título en Trámite</strong>. Se expedirá un documento en PDF con firma digital indicando que el alumno ha cumplido el plan y se encuentra a la espera del diploma.',
         'categoria' => 'Graduaciones y Auditoría',

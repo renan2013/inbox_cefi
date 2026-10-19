@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Qué es el Portal de Autogestión Estudiantil y cómo ingresa un alumno?',
+        'pregunta' => '351. ¿Qué es el Portal de Autogestión Estudiantil y cómo ingresa un alumno?',
         'palabras_clave' => 'portal autogestion estudiante como ingresar portal alumno acceso notas record',
         'respuesta' => 'El <strong>Portal del Estudiante</strong> es el espacio digital exclusivo de CEFI (accesible en <code>/estudiante/portal</code>) donde los alumnos consultan sus asignaturas matriculadas, calificaciones, horarios, enlaces de Zoom, estado de cuenta y descargan su Récord Académico o Expediente 360° en PDF con validez oficial.',
         'categoria' => 'Portal de Estudiantes',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué información académica encuentra el estudiante en su página de bienvenida?',
+        'pregunta' => '352. ¿Qué información académica encuentra el estudiante en su página de bienvenida?',
         'palabras_clave' => 'informacion academica bienvenida portal estudiante tarjeta alumno resumen',
         'respuesta' => 'Al ingresar, el estudiante visualiza: su nombre completo, carrera técnica o programa en el que está inscrito, número de carné/cédula, cuatrimestre activo, cursos matriculados del ciclo y el estado de su expediente documental.',
         'categoria' => 'Portal de Estudiantes',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo consulta el estudiante los cursos que tiene matriculados en el cuatrimestre activo?',
+        'pregunta' => '353. ¿Cómo consulta el estudiante los cursos que tiene matriculados en el cuatrimestre activo?',
         'palabras_clave' => 'consultar cursos matriculados cuatrimestre activo mis materias portal alumno',
         'respuesta' => 'En la sección principal <strong>"Mis Asignaturas Matriculadas"</strong> del portal, el estudiante ve una tarjeta por cada materia con el nombre de la asignatura, código, nombre del profesor, horario y modalidad.',
         'categoria' => 'Portal de Estudiantes',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde ve el alumno los horarios de clase, profesor asignado y enlaces de videoconferencia?',
+        'pregunta' => '354. ¿Dónde ve el alumno los horarios de clase, profesor asignado y enlaces de videoconferencia?',
         'palabras_clave' => 'horarios clase profesor asignado enlace zoom teams videoconferencia portal',
         'respuesta' => 'Dentro de la tarjeta de cada materia en el portal hay un botón directo <strong>Entrar a Clase en Vivo (Zoom/Meet)</strong> y se indican los días y horas exactas en que se imparte la lección.',
         'categoria' => 'Portal de Estudiantes',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo descargar el Récord Académico de calificaciones oficial en PDF desde el portal?',
+        'pregunta' => '355. ¿Cómo descargar el Récord Académico de calificaciones oficial en PDF desde el portal?',
         'palabras_clave' => 'descargar record academico calificaciones pdf oficial notas portal estudiante',
         'respuesta' => 'En la parte superior de su portal, el alumno debe hacer clic en el botón <strong>Descargar Mi Récord Académico (PDF)</strong>. El sistema generará al instante su certificación de notas oficial con código de verificación institucional.',
         'categoria' => 'Portal de Estudiantes',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo descargar el Expediente Digital 360° personal en PDF con validez oficial?',
+        'pregunta' => '356. ¿Cómo descargar el Expediente Digital 360° personal en PDF con validez oficial?',
         'palabras_clave' => 'descargar mi expediente digital 360 pdf personal portal estudiante certificado',
         'respuesta' => 'En la cabecera del portal, presiona el botón <strong>Descargar Mi Expediente 360° (PDF)</strong>. Se emitirá el documento consolidado con la ficha de matrícula, historial y estado de aprobación de requisitos.',
         'categoria' => 'Portal de Estudiantes',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo verificar el estado de cuenta y saldos pendientes desde el portal del alumno?',
+        'pregunta' => '357. ¿Cómo verificar el estado de cuenta y saldos pendientes desde el portal del alumno?',
         'palabras_clave' => 'verificar estado de cuenta saldos pendientes cuotas por pagar portal estudiante',
         'respuesta' => 'En la tarjeta <strong>"Mi Estado Financiero"</strong> el alumno puede consultar el saldo total adeudado, las cuotas canceladas y las fechas de vencimiento de sus próximas mensualidades para evitar recargos.',
         'categoria' => 'Portal de Estudiantes',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Puede el estudiante firmar boletas de matrícula pendientes directamente desde su portal?',
+        'pregunta' => '358. ¿Puede el estudiante firmar boletas de matrícula pendientes directamente desde su portal?',
         'palabras_clave' => 'firmar boleta pendiente portal estudiante firma digital alumno sin salir',
         'respuesta' => 'Sí, si tiene una boleta recién emitida en estado pendiente de firma, el portal desplegará un banner amarillo alertando: <em>"Tienes una boleta pendiente de firma"</em> con el botón <strong>Firmar Boleta Ahora</strong>.',
         'categoria' => 'Portal de Estudiantes',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo consultar las fechas del calendario académico, feriados y semanas de exámenes?',
+        'pregunta' => '359. ¿Cómo consultar las fechas del calendario académico, feriados y semanas de exámenes?',
         'palabras_clave' => 'calendario academico feriados semanas examenes portal estudiante fechas',
         'respuesta' => 'En el menú del portal se encuentra el <strong>Calendario Académico</strong>, donde el estudiante puede revisar las fechas de inicio de clases, semanas de evaluación, feriados nacionales y cierres de ciclo.',
         'categoria' => 'Portal de Estudiantes',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo actualizar datos de contacto personales (teléfono, domicilio, correo) en el portal?',
+        'pregunta' => '360. ¿Cómo actualizar datos de contacto personales (teléfono, domicilio, correo) en el portal?',
         'palabras_clave' => 'actualizar datos contacto telefono direccion correo perfil estudiante',
         'respuesta' => 'En la esquina superior derecha, haz clic en tu nombre y selecciona <strong>Mi Perfil</strong>. Puedes actualizar tu número telefónico de WhatsApp, dirección de residencia o contacto de emergencia.',
         'categoria' => 'Portal de Estudiantes',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consulta el alumno los requisitos faltantes de su expediente institucional?',
+        'pregunta' => '361. ¿Dónde consulta el alumno los requisitos faltantes de su expediente institucional?',
         'palabras_clave' => 'requisitos faltantes expediente institucional documentos pendientes entrega registro',
         'respuesta' => 'En el widget <strong>"Estado de Mi Expediente"</strong>, el alumno verá en color rojo los documentos marcados como <em>Pendientes</em> (ej. falta entregar copia de cédula o título de bachillerato en ventanilla).',
         'categoria' => 'Portal de Estudiantes',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo reportar un problema técnico o solicitar ayuda desde el portal estudiantil?',
+        'pregunta' => '362. ¿Cómo reportar un problema técnico o solicitar ayuda desde el portal estudiantil?',
         'palabras_clave' => 'reportar problema tecnico soporte mesa de ayuda ticket portal estudiante',
         'respuesta' => 'En el pie de página del portal se ubica el botón <strong>Soporte al Estudiante</strong>, donde el alumno puede crear un ticket de consulta técnica o abrir un chat directo de WhatsApp con la secretaría de CEFI.',
         'categoria' => 'Portal de Estudiantes',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿El portal de estudiantes está optimizado para teléfonos celulares y tabletas?',
+        'pregunta' => '363. ¿El portal de estudiantes está optimizado para teléfonos celulares y tabletas?',
         'palabras_clave' => 'portal celular movil tablet responsive diseno adaptable pantalla pequena',
         'respuesta' => 'Sí, el portal de estudiantes cuenta con diseño 100% responsive, adaptándose de forma fluida a teléfonos Android, iPhone y tabletas para que el alumno consulte sus notas cómodamente desde su móvil.',
         'categoria' => 'Portal de Estudiantes',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo acceder al enlace de responder las encuestas de evaluación docente del curso?',
+        'pregunta' => '364. ¿Cómo acceder al enlace de responder las encuestas de evaluación docente del curso?',
         'palabras_clave' => 'responder encuesta evaluacion docente calificar profesor enlace portal alumno',
         'respuesta' => 'En las últimas semanas del cuatrimestre, en la tarjeta de cada materia se habilita el botón <strong>Evaluar Docente</strong>, que dirige al alumno a la encuesta anónima oficial.',
         'categoria' => 'Portal de Estudiantes',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consultar el avance y horas aprobadas del Trabajo Comunal Universitario (TCU)?',
+        'pregunta' => '365. ¿Dónde consultar el avance y horas aprobadas del Trabajo Comunal Universitario (TCU)?',
         'palabras_clave' => 'avance horas aprobadas tcu trabajo comunal universitario portal estudiante',
         'respuesta' => 'En la pestaña <strong>Mi TCU</strong> del portal, el estudiante puede visualizar una barra de progreso indicando cuántas de las 150 horas requeridas han sido aprobadas por la coordinación.',
         'categoria' => 'Portal de Estudiantes',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo ver el desglose de notas parciales que el profesor va publicando durante el ciclo?',
+        'pregunta' => '366. ¿Cómo ver el desglose de notas parciales que el profesor va publicando durante el ciclo?',
         'palabras_clave' => 'notas parciales desglose quices tareas examenes publicados profesor portal',
         'respuesta' => 'Al hacer clic en <strong>Ver Calificaciones</strong> en la tarjeta del curso, se despliega la tabla con los puntajes de quices, tareas, proyecto y exámenes calificados por el docente a la fecha.',
         'categoria' => 'Portal de Estudiantes',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo consultar si una materia convalidada ya fue incorporada al plan de estudios?',
+        'pregunta' => '367. ¿Cómo consultar si una materia convalidada ya fue incorporada al plan de estudios?',
         'palabras_clave' => 'materia convalidada incorporada plan estudios ver resolucion homologacion portal',
         'respuesta' => 'En el Récord Académico o en la pestaña <strong>Historial de Calificaciones</strong>, las materias homologadas aparecen identificadas con la condición <strong>Convalidada (CV)</strong> y el número de resolución oficial.',
         'categoria' => 'Portal de Estudiantes',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué hacer si el portal indica "Acceso restringido por morosidad"?',
+        'pregunta' => '368. ¿Qué hacer si el portal indica "Acceso restringido por morosidad"?',
         'palabras_clave' => 'acceso restringido por morosidad bloqueo deudas cuotas pendientes portal alumno',
         'respuesta' => 'Si posees cuotas vencidas, la visualización de notas queda en pausa temporal. Puedes revisar los montos adeudados en la tarjeta financiera del portal y realizar el pago por SINPE Móvil para desbloquear tu cuenta.',
         'categoria' => 'Portal de Estudiantes',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo descargar las constancias de estudio vigentes para la Caja (CCSS) o trabajo?',
+        'pregunta' => '369. ¿Cómo descargar las constancias de estudio vigentes para la Caja (CCSS) o trabajo?',
         'palabras_clave' => 'constancia de estudio ccss trabajo comprobante alumno regular descargar pdf',
         'respuesta' => 'En <strong>Trámites y Constancias</strong> de su portal, el alumno puede generar y descargar su <strong>Constancia de Estudiante Regular</strong> con sello digital para presentar en la CCSS o su patrono.',
         'categoria' => 'Portal de Estudiantes',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo cambiar la contraseña de acceso al portal de estudiante?',
+        'pregunta' => '370. ¿Cómo cambiar la contraseña de acceso al portal de estudiante?',
         'palabras_clave' => 'cambiar contrasena portal estudiante modificar password alumno',
         'respuesta' => 'En <strong>Mi Perfil -> Seguridad</strong>, escribe tu contraseña actual, ingresa la nueva clave de al menos 8 caracteres y presiona <strong>Actualizar Contraseña</strong>.',
         'categoria' => 'Portal de Estudiantes',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde descargar los programas de estudio y sílabos de los cursos matriculados?',
+        'pregunta' => '371. ¿Dónde descargar los programas de estudio y sílabos de los cursos matriculados?',
         'palabras_clave' => 'descargar silabo curso matriculado programa de estudio portal alumno',
         'respuesta' => 'En cada asignatura de tu portal se encuentra el botón <strong>Descargar Sílabo (PDF)</strong> con los contenidos temáticos, cronograma de lecturas y rúbricas de evaluación del docente.',
         'categoria' => 'Portal de Estudiantes',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo postularse a los procesos de graduación cuando se completó el plan de estudios?',
+        'pregunta' => '372. ¿Cómo postularse a los procesos de graduación cuando se completó el plan de estudios?',
         'palabras_clave' => 'postularse graduacion completar plan estudios solicitar titulo portal estudiante',
         'respuesta' => 'Cuando el sistema detecta que has aprobado el 100% de asignaturas y las 150 horas de TCU, habilita en el portal el botón <strong>Postular a Graduación</strong> para iniciar el trámite de titulación.',
         'categoria' => 'Portal de Estudiantes',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo consultar las calificaciones de cuatrimestres anteriores en el historial de notas?',
+        'pregunta' => '373. ¿Cómo consultar las calificaciones de cuatrimestres anteriores en el historial de notas?',
         'palabras_clave' => 'calificaciones cuatrimestres anteriores historial notas notas viejas portal',
         'respuesta' => 'En la pestaña <strong>Histórico de Notas</strong> puedes filtrar por cuatrimestre y año para revisar las actas cerradas de todos los períodos cursados desde tu ingreso a CEFI.',
         'categoria' => 'Portal de Estudiantes',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Puede el estudiante solicitar el retiro de una materia desde su cuenta?',
+        'pregunta' => '374. ¿Puede el estudiante solicitar el retiro de una materia desde su cuenta?',
         'palabras_clave' => 'solicitar retiro materia desde portal estudiante tramitar baja asignatura',
         'respuesta' => 'Sí, durante las primeras semanas del ciclo el portal habilita la opción <strong>Solicitar Retiro de Asignatura</strong>, donde el alumno adjunta su justificación para dictamen de la Dirección Académica.',
         'categoria' => 'Portal de Estudiantes',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo recibir notificaciones importantes de la dirección académica en el portal?',
+        'pregunta' => '375. ¿Cómo recibir notificaciones importantes de la dirección académica en el portal?',
         'palabras_clave' => 'notificaciones direccion academica portal estudiante avisos importantes comunicados',
         'respuesta' => 'En la parte superior del portal se exhibe la campanita de notificaciones y banners informativos con avisos urgentes sobre feriados, cierres de matrícula y eventos institucionales.',
         'categoria' => 'Portal de Estudiantes',

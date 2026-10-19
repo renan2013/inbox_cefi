@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Cómo crear una tarea rápida en Inbox CEFI?',
+        'pregunta' => '51. ¿Cómo crear una tarea rápida en Inbox CEFI?',
         'palabras_clave' => 'crear tarea rapida, nueva tarea, agregar pendiente, tarea bpm',
         'respuesta' => 'Para registrar una tarea rápida, ve al Dashboard principal o al menú de Tareas. En el campo <strong>"Nueva Tarea Rápida"</strong> escribe el título de la actividad, selecciona la prioridad (Baja, Media, Alta o Urgente) y presiona la tecla <strong>Enter</strong> o el botón <strong>Crear</strong>. La tarea quedará agregada de inmediato a tu lista de pendientes.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cuáles son los estados posibles de una tarea en el sistema?',
+        'pregunta' => '52. ¿Cuáles son los estados posibles de una tarea en el sistema?',
         'palabras_clave' => 'estados tarea, flujo tarea, pendiente en proceso completada cancelada',
         'respuesta' => 'Las tareas manejan cuatro estados:<br><ul><li><strong>Pendiente:</strong> Tarea creada a la espera de ser iniciada.</li><li><strong>En Proceso:</strong> El responsable se encuentra ejecutando la actividad.</li><li><strong>Completada:</strong> La actividad fue finalizada y revisada con éxito.</li><li><strong>Cancelada:</strong> Tarea descartada o anulada por la jefatura.</li></ul>',
         'categoria' => 'Tareas y Flujos BPM',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo cambiar la prioridad de una tarea (Baja, Media, Alta, Urgente)?',
+        'pregunta' => '53. ¿Cómo cambiar la prioridad de una tarea (Baja, Media, Alta, Urgente)?',
         'palabras_clave' => 'cambiar prioridad tarea, urgente alta media baja, nivel importancia',
         'respuesta' => 'Al visualizar la tarea en el tablero o en su ficha de edición, haz clic en el selector de <strong>Prioridad</strong>. Selecciona el nuevo nivel y el sistema actualizará el color de la tarjeta automáticamente para que todo el equipo conozca la urgencia del requerimiento.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué es el módulo de Plantillas de Tareas y cómo agiliza los procesos cuatrimestrales?',
+        'pregunta' => '54. ¿Qué es el módulo de Plantillas de Tareas y cómo agiliza los procesos cuatrimestrales?',
         'palabras_clave' => 'plantillas de tareas, tareas recurrentes, automatizacion cuatrimestre bpm',
         'respuesta' => 'Las <strong>Plantillas de Tareas</strong> permiten definir flujos de trabajo repetitivos (ej. "Apertura de Cuatrimestre", "Proceso de Matrícula", "Cierre de Actas"). Al iniciar un nuevo ciclo, el coordinador selecciona la plantilla y el sistema genera automáticamente todas las tareas con sus responsables y plazos estimados.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo crear una nueva plantilla de tareas recurrentes para inicio de cuatrimestre?',
+        'pregunta' => '55. ¿Cómo crear una nueva plantilla de tareas recurrentes para inicio de cuatrimestre?',
         'palabras_clave' => 'crear plantilla tareas, nueva plantilla inicio ciclo, configurar flujo',
         'respuesta' => 'Ingresa a <strong>Tareas -> Plantillas -> Gestionar Plantillas</strong> y haz clic en <strong>Nueva Plantilla</strong>. Asigna un nombre (ej. "Checklist Apertura 2026-I"), describe el objetivo y agrega paso a paso cada una de las actividades que deben ejecutarse.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo aplicar una plantilla de tareas a un período académico específico?',
+        'pregunta' => '56. ¿Cómo aplicar una plantilla de tareas a un período académico específico?',
         'palabras_clave' => 'aplicar plantilla tareas, clonar tareas periodo, sembrar tareas ciclo',
         'respuesta' => 'Dirígete a <strong>Tareas -> Seleccionar Plantilla</strong>, elige la plantilla requerida del catálogo, selecciona la fecha de inicio del ciclo y presiona <strong>Instanciar Tareas</strong>. Las actividades se crearán en el tablero vinculadas a las fechas calculadas.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo asignar una tarea a un colaborador o departamento en particular?',
+        'pregunta' => '57. ¿Cómo asignar una tarea a un colaborador o departamento en particular?',
         'palabras_clave' => 'asignar responsable tarea, delegar tarea, responsable actividad',
         'respuesta' => 'En el formulario de creación o edición de la tarea, despliega el campo <strong>Responsable</strong> y selecciona el nombre del usuario o departamento encargado. Al asignarla, el usuario verá la tarea en su Dashboard de trabajo diario.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo definir fechas límite de inicio y finalización para una tarea?',
+        'pregunta' => '58. ¿Cómo definir fechas límite de inicio y finalización para una tarea?',
         'palabras_clave' => 'fecha limite tarea, fecha vencimiento, plazo entrega, calendario tarea',
         'respuesta' => 'Dentro de los campos de la tarea encontrarás <strong>Fecha de Inicio</strong> y <strong>Fecha Límite (Deadline)</strong>. Selecciona las fechas en el selector de calendario para que el sistema emita alertas preventivas antes de su vencimiento.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo editar los detalles o la descripción de una tarea existente?',
+        'pregunta' => '59. ¿Cómo editar los detalles o la descripción de una tarea existente?',
         'palabras_clave' => 'editar tarea, modificar descripcion tarea, actualizar pendiente',
         'respuesta' => 'Haz clic en el título de la tarea en el Dashboard o lista general. Se abrirá la ventana modal de edición donde podrás modificar el título, la descripción detallada, el porcentaje de avance, el responsable o la fecha límite.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo eliminar una tarea cancelada o duplicada?',
+        'pregunta' => '60. ¿Cómo eliminar una tarea cancelada o duplicada?',
         'palabras_clave' => 'eliminar tarea, borrar tarea, descartar pendiente',
         'respuesta' => 'Abre la tarea en su modal de detalle y presiona el botón rojo con icono de basurero <strong>Eliminar Tarea</strong>. El sistema te pedirá confirmación antes de removerla definitivamente del tablero.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consultar el historial de cambios y comentarios de una tarea?',
+        'pregunta' => '61. ¿Dónde consultar el historial de cambios y comentarios de una tarea?',
         'palabras_clave' => 'historial tarea, comentarios tarea, bitacora seguimiento actividad',
         'respuesta' => 'Al abrir la vista detallada de la tarea encontrarás la pestaña <strong>Comentarios e Historial</strong>, donde se registran las observaciones añadidas por los colaboradores junto con la fecha y hora de cada modificación.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo funciona la vista Gantt de tareas para seguimiento de proyectos institucionales?',
+        'pregunta' => '62. ¿Cómo funciona la vista Gantt de tareas para seguimiento de proyectos institucionales?',
         'palabras_clave' => 'vista gantt, cronograma gantt, diagrama de gantt tareas',
         'respuesta' => 'La vista <strong>Gantt</strong> organiza cronológicamente las tareas en una línea de tiempo horizontal. Permite a los directores evaluar el traslape de actividades, los cuellos de botella y el cumplimiento de metas en las semanas de trabajo.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo mover tareas entre columnas en el tablero Kanban interactivo?',
+        'pregunta' => '63. ¿Cómo mover tareas entre columnas en el tablero Kanban interactivo?',
         'palabras_clave' => 'kanban interactivo, drag and drop tareas, arrastrar tarjetas tareas',
         'respuesta' => 'En la vista Kanban puedes arrastrar y soltar (drag & drop) las tarjetas de una columna a otra (ejemplo: de <em>Pendiente</em> a <em>En Proceso</em> o a <em>Completada</em>). La actualización de estado se guarda inmediatamente en la base de datos.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Quién puede reabrir una tarea que ya fue marcada como finalizada?',
+        'pregunta' => '64. ¿Quién puede reabrir una tarea que ya fue marcada como finalizada?',
         'palabras_clave' => 'reabrir tarea completada, desmarcar tarea, reactivar pendiente',
         'respuesta' => 'Tanto el responsable de la tarea como el Administrador General pueden desmarcar la casilla de completada o cambiar su estado a <strong>En Proceso</strong> si se determinó que faltaban entregables por cumplir.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo recibir notificaciones cuando una tarea asignada está próxima a vencer?',
+        'pregunta' => '65. ¿Cómo recibir notificaciones cuando una tarea asignada está próxima a vencer?',
         'palabras_clave' => 'notificaciones vencimiento tarea, alertas tareas por vencer, avisos',
         'respuesta' => 'El sistema resalta en rojo las tareas cuyo plazo vence en menos de 24 horas y emite una alerta visual en el Dashboard. Además, si están configuradas las alertas por correo o WhatsApp, se enviará un recordatorio automático.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Es posible adjuntar archivos o enlaces a una tarea?',
+        'pregunta' => '66. ¿Es posible adjuntar archivos o enlaces a una tarea?',
         'palabras_clave' => 'adjuntar archivos tarea, link en tarea, anexar documento',
         'respuesta' => 'Sí, en el campo de descripción puedes pegar enlaces a documentos compartidos de Google Drive, actas en PDF o páginas del sistema, facilitando que el colaborador acceda de inmediato a la información requerida.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo crear subtareas o listas de verificación dentro de una tarea principal?',
+        'pregunta' => '67. ¿Cómo crear subtareas o listas de verificación dentro de una tarea principal?',
         'palabras_clave' => 'subtareas, checklist en tarea, lista de chequeo actividad',
         'respuesta' => 'Al editar la tarea completa puedes añadir ítems a la <strong>Lista de Verificación (Checklist)</strong>. A medida que marques cada sub-ítem, la barra de progreso porcentual de la tarea principal avanzará automáticamente.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo filtrar las tareas por responsable, prioridad o fecha de entrega?',
+        'pregunta' => '68. ¿Cómo filtrar las tareas por responsable, prioridad o fecha de entrega?',
         'palabras_clave' => 'filtrar tareas, buscador de tareas, ver tareas por usuario',
         'respuesta' => 'En la barra superior del módulo de Tareas dispones de filtros interactivos para ver solo <strong>"Mis Tareas"</strong>, filtrar por usuario responsable, por estado o por nivel de prioridad, agilizando la gestión en reuniones de seguimiento.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo duplicar una plantilla de tareas para adaptarla a otra sede o modalidad?',
+        'pregunta' => '69. ¿Cómo duplicar una plantilla de tareas para adaptarla a otra sede o modalidad?',
         'palabras_clave' => 'duplicar plantilla tareas, clonar plantilla, copiar flujo',
         'respuesta' => 'En <strong>Tareas -> Plantillas -> Gestionar Plantillas</strong>, haz clic en el botón <strong>Duplicar</strong> junto a la plantilla deseada. Se creará una copia idéntica que podrás renombrar y editar según las necesidades de la nueva sede.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué sucede si una tarea supera su fecha límite sin completarse?',
+        'pregunta' => '70. ¿Qué sucede si una tarea supera su fecha límite sin completarse?',
         'palabras_clave' => 'tarea vencida, retraso tarea, alerta demora actividad',
         'respuesta' => 'La tarea se marca visualmente con la etiqueta <strong>Vencida</strong> en color rojo parpadeante y asciende a los primeros lugares de la lista de pendientes para alertar a la supervisión sobre el retraso operativo.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo exportar la lista de tareas pendientes a Excel o formato impreso?',
+        'pregunta' => '71. ¿Cómo exportar la lista de tareas pendientes a Excel o formato impreso?',
         'palabras_clave' => 'exportar tareas excel, imprimir lista tareas, reporte tareas pendientes',
         'respuesta' => 'Desde el menú de Tareas haz clic en <strong>Exportar Listado</strong> o imprime directamente la vista de tabla para obtener un informe con fecha, responsable, descripción y estado actual.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué buenas prácticas se recomiendan para nombrar y categorizar las tareas del equipo?',
+        'pregunta' => '72. ¿Qué buenas prácticas se recomiendan para nombrar y categorizar las tareas del equipo?',
         'palabras_clave' => 'buenas practicas tareas, como redactar tareas, gestion del tiempo bpm',
         'respuesta' => 'Se aconseja iniciar el título con un verbo de acción claro (ej. "Revisar actas de Contabilidad I", "Emitir boletas de matrícula"), asignar un único responsable principal y establecer siempre una fecha límite realista.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo supervisar el avance porcentual del plan operativo institucional mediante tareas?',
+        'pregunta' => '73. ¿Cómo supervisar el avance porcentual del plan operativo institucional mediante tareas?',
         'palabras_clave' => 'avance porcentual plan operativo, progreso institucional tareas',
         'respuesta' => 'En la parte superior del tablero de tareas se muestra la barra global de <strong>Progreso del Cuatrimestre</strong>, que calcula la relación entre tareas finalizadas y el total de tareas planificadas para el período.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo archivar tareas de cuatrimestres anteriores para mantener limpio el tablero?',
+        'pregunta' => '74. ¿Cómo archivar tareas de cuatrimestres anteriores para mantener limpio el tablero?',
         'palabras_clave' => 'archivar tareas, limpiar tablero tareas, tareas viejas',
         'respuesta' => 'Al cerrar el período académico, el administrador puede utilizar el botón <strong>Archivar Tareas del Ciclo</strong> en la gestión de plantillas. Las tareas quedarán archivadas para consulta histórica sin saturar el flujo de trabajo activo.',
         'categoria' => 'Tareas y Flujos BPM',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo enlazar una tarea a un curso, estudiante o boleta específica?',
+        'pregunta' => '75. ¿Cómo enlazar una tarea a un curso, estudiante o boleta específica?',
         'palabras_clave' => 'vincular tarea curso alumno, asociar tarea expediente',
         'respuesta' => 'En el formulario de creación avanzada puedes seleccionar la casilla <strong>Vincular a Registro</strong> y seleccionar el estudiante o materia involucrada, permitiendo que la tarea aparezca referenciada en la ficha de dicho registro.',
         'categoria' => 'Tareas y Flujos BPM',

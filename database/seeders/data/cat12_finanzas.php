@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Cómo funciona el módulo de Control de Morosidad institucional en Inbox CEFI?',
+        'pregunta' => '276. ¿Cómo funciona el módulo de Control de Morosidad institucional en Inbox CEFI?',
         'palabras_clave' => 'control de morosidad institucional deudores atrasados cobro cartera vencida',
         'respuesta' => 'El módulo accesible en <strong>Registro -> Control de Morosidad</strong> analiza en tiempo real todas las boletas cuyas fechas de vencimiento han expirado. Agrupa los deudores por rango de días de atraso, calcula las multas acumuladas y permite ejecutar acciones de cobro mediante WhatsApp y reportes ejecutivos.',
         'categoria' => 'Finanzas y Morosidad',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo se calcula automáticamente la mora diaria por atraso en el pago de cuotas?',
+        'pregunta' => '277. ¿Cómo se calcula automáticamente la mora diaria por atraso en el pago de cuotas?',
         'palabras_clave' => 'calculo automatico mora diaria atraso cuotas interes recargo formula',
         'respuesta' => 'El sistema evalúa la diferencia en días entre la fecha actual y la fecha de vencimiento pactada en la boleta. Si supera el período de gracia configurado, multiplica los días vencidos por la tarifa diaria fija (ej. ₡1,000 por día) o por el porcentaje de interés mensual establecido institucionalmente.',
         'categoria' => 'Finanzas y Morosidad',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde se configuran las políticas de mora (monto por día, porcentaje, días de gracia)?',
+        'pregunta' => '278. ¿Dónde se configuran las políticas de mora (monto por día, porcentaje, días de gracia)?',
         'palabras_clave' => 'configurar politicas mora monto por dia porcentaje dias de gracia parametros',
         'respuesta' => 'Ingresa a <strong>Configuración -> Parámetros de Pagos</strong> (requiere clave superior de administrador). En la sección <em>Cálculo de Morosidad</em> puedes fijar los días de gracia (ej. 3 o 5 días), el recargo por día o la tasa porcentual máxima aplicable.',
         'categoria' => 'Finanzas y Morosidad',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo consultar el Estado de Cuenta individual de un estudiante en tiempo real?',
+        'pregunta' => '279. ¿Cómo consultar el Estado de Cuenta individual de un estudiante en tiempo real?',
         'palabras_clave' => 'consultar estado de cuenta individual estudiante tiempo real saldo deudor',
         'respuesta' => 'Ve a <strong>Registro -> Estado de Cuenta</strong> o búscalo desde su Expediente 360°. Selecciona al estudiante y verás el resumen consolidado: Total Facturado, Total Abonado, Saldo Vencido, Mora Generada y el detalle línea por línea de cada boleta.',
         'categoria' => 'Finanzas y Morosidad',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo enviar un recordatorio preventivo de cobro antes de la fecha de vencimiento?',
+        'pregunta' => '280. ¿Cómo enviar un recordatorio preventivo de cobro antes de la fecha de vencimiento?',
         'palabras_clave' => 'recordatorio preventivo cobro antes vencimiento aviso cuota proxima vencer',
         'respuesta' => 'En el módulo de morosidad, filtra por <em>Cuotas que Vencen Esta Semana</em> y presiona <strong>Enviar Recordatorio Preventivo WhatsApp</strong>. Se enviará un mensaje cordial informando al alumno el monto y la fecha límite para evitar recargos.',
         'categoria' => 'Finanzas y Morosidad',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo enviar una notificación formal de cobro moroso por WhatsApp con el desglose adeudado?',
+        'pregunta' => '281. ¿Cómo enviar una notificación formal de cobro moroso por WhatsApp con el desglose adeudado?',
         'palabras_clave' => 'notificacion formal cobro moroso whatsapp desglose adeudado mensaje cobro',
         'respuesta' => 'Junto a la fila de cada deudor en <strong>Control de Morosidad</strong>, haz clic en el botón <strong>WhatsApp Cobro</strong>. El sistema abrirá un mensaje oficial con el número de boleta, cuotas adeudadas, mora y las cuentas bancarias institucionales para cancelar.',
         'categoria' => 'Finanzas y Morosidad',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo suspender temporalmente el cálculo de mora a un estudiante con justificación aprobada?',
+        'pregunta' => '282. ¿Cómo suspender temporalmente el cálculo de mora a un estudiante con justificación aprobada?',
         'palabras_clave' => 'suspender calculo mora justificacion aprobada congelar intereses exencion',
         'respuesta' => 'Al abrir la boleta del estudiante, el administrador puede activar la casilla <strong>Exonerar / Congelar Mora</strong> e ingresar el motivo (ej. <em>"Convenio médico autorizado por Dirección"</em>). A partir de ese momento la boleta no acumulará recargos adicionales.',
         'categoria' => 'Finanzas y Morosidad',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar convenios de pago o refinanciamiento de cuotas atrasadas?',
+        'pregunta' => '283. ¿Cómo registrar convenios de pago o refinanciamiento de cuotas atrasadas?',
         'palabras_clave' => 'registrar convenios de pago refinanciamiento cuotas atrasadas arreglo pago',
         'respuesta' => 'Desde el <strong>Estado de Cuenta</strong> presiona <strong>Crear Convenio de Pago</strong>. Selecciona las boletas adeudadas, define el número de nuevos pagos mensuales y el sistema reprogramará el saldo adeudado formalizando el compromiso.',
         'categoria' => 'Finanzas y Morosidad',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué integración existe con n8n para la automatización diaria de recordatorios financieros?',
+        'pregunta' => '284. ¿Qué integración existe con n8n para la automatización diaria de recordatorios financieros?',
         'palabras_clave' => 'integracion n8n automatizacion diaria recordatorios financieros webhook cron',
         'respuesta' => 'Inbox CEFI cuenta con un webhook automático programado en n8n que consulta diariamente a las 8:00 AM el estado de las cuotas mediante la API institucional, despachando recordatorios vía WhatsApp de forma autónoma sin intervención manual.',
         'categoria' => 'Finanzas y Morosidad',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cuál es el endpoint API `/api/finanzas/cuotas-vencimiento` y cómo funciona para bots externos?',
+        'pregunta' => '285. ¿Cuál es el endpoint API `/api/finanzas/cuotas-vencimiento` y cómo funciona para bots externos?',
         'palabras_clave' => 'endpoint api cuotas vencimiento finanzas bot externo n8n json deudores',
         'respuesta' => 'Es un servicio web REST accesible en <code>/api/finanzas/cuotas-vencimiento</code> que devuelve en formato JSON la lista de cuotas vencidas y próximas a vencer con los números telefónicos y montos para integraciones con bots de cobranza y pasarelas.',
         'categoria' => 'Finanzas y Morosidad',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo filtrar a los deudores por rango de días de atraso (1-30 días, 31-60 días, más de 60)?',
+        'pregunta' => '286. ¿Cómo filtrar a los deudores por rango de días de atraso (1-30 días, 31-60 días, más de 60)?',
         'palabras_clave' => 'filtrar deudores rango dias atraso 30 60 90 dias antiguedad saldos cartera',
         'respuesta' => 'En <strong>Control de Morosidad</strong> utiliza las pestañas de antigüedad de saldo: <em>1 a 30 días (Mora Leve)</em>, <em>31 a 60 días (Mora Media)</em> y <em>Más de 60 días (Cobro Judicial / Administrativo)</em>.',
         'categoria' => 'Finanzas y Morosidad',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo exportar la cartera de cobro y deudores institucionales a formato Excel?',
+        'pregunta' => '287. ¿Cómo exportar la cartera de cobro y deudores institucionales a formato Excel?',
         'palabras_clave' => 'exportar cartera de cobro deudores excel descargar morosidad hoja calculo',
         'respuesta' => 'Presiona el botón verde <strong>Exportar a Excel</strong> en la esquina superior del panel de morosidad. Descargarás un informe completo con nombres, cédulas, teléfonos, días de atraso, saldo neto y mora acumulada.',
         'categoria' => 'Finanzas y Morosidad',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo visualizar el total vencido institucional en el cuadro de control financiero?',
+        'pregunta' => '288. ¿Cómo visualizar el total vencido institucional en el cuadro de control financiero?',
         'palabras_clave' => 'total vencido institucional cuadro control financiero kpi morosidad global',
         'respuesta' => 'Tanto en el Dashboard principal como en la cabecera de <strong>Control de Morosidad</strong> se muestra una tarjeta gigante resaltada en rojo con el <strong>Total Vencido Acumulado</strong> en colones y el número total de deudores activos.',
         'categoria' => 'Finanzas y Morosidad',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué restricciones automáticas se aplican a los estudiantes morosos (matrícula, notas, títulos)?',
+        'pregunta' => '289. ¿Qué restricciones automáticas se aplican a los estudiantes morosos (matrícula, notas, títulos)?',
         'palabras_clave' => 'restricciones automaticas morosos bloqueo matricula notas titulos retencion',
         'respuesta' => 'Por política institucional, los estudiantes con saldo vencido tienen restringido: la visualización de notas finales en su portal, la descarga de récord académico oficial, la matrícula del siguiente ciclo y la emisión de títulos de graduación.',
         'categoria' => 'Finanzas y Morosidad',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo desbloquear a un estudiante que canceló su deuda para que pueda ver sus notas?',
+        'pregunta' => '290. ¿Cómo desbloquear a un estudiante que canceló su deuda para que pueda ver sus notas?',
         'palabras_clave' => 'desbloquear estudiante cancelo deuda ver notas quitar bloqueo morosidad',
         'respuesta' => 'El desbloqueo es <strong>inmediato y automático</strong>: al registrar el pago que liquide el saldo adeudado en la boleta, el sistema remueve la restricción de morosidad y el alumno recupera el acceso pleno a su portal.',
         'categoria' => 'Finanzas y Morosidad',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo condonar intereses o multas de mora con autorización administrativa?',
+        'pregunta' => '291. ¿Cómo condonar intereses o multas de mora con autorización administrativa?',
         'palabras_clave' => 'condonar intereses multas mora perdonar recargos descuento administrativo',
         'respuesta' => 'Al registrar un pago, el administrador autorizado puede marcar la opción <strong>Condonar Mora</strong>. El sistema registrará el pago del capital principal y asentará el ajuste de condonación en la bitácora contable.',
         'categoria' => 'Finanzas y Morosidad',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar una constancia de "Paz y Salvo" financiero para trámites de graduación?',
+        'pregunta' => '292. ¿Cómo generar una constancia de "Paz y Salvo" financiero para trámites de graduación?',
         'palabras_clave' => 'constancia paz y salvo financiero tramite graduacion certificado sin deuda',
         'respuesta' => 'Desde el <strong>Estado de Cuenta</strong>, si el saldo pendiente es ₡0, haz clic en <strong>Emitir Certificación de Paz y Salvo</strong>. Se generará un PDF oficial con sello digital certificando que el estudiante no posee deudas.',
         'categoria' => 'Finanzas y Morosidad',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consultar el histórico de pagos realizados por un estudiante desde su ingreso?',
+        'pregunta' => '293. ¿Dónde consultar el histórico de pagos realizados por un estudiante desde su ingreso?',
         'palabras_clave' => 'historico pagos realizados estudiante historial cobros recibos emitidos',
         'respuesta' => 'En el <strong>Estado de Cuenta</strong> del alumno, en la pestaña <em>Historial de Transacciones</em>, se listan todos los pagos, abonos, métodos y fechas desde su primera matrícula institucional.',
         'categoria' => 'Finanzas y Morosidad',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo conciliar los pagos ingresados por SINPE Móvil con los reportes bancarios diarios?',
+        'pregunta' => '294. ¿Cómo conciliar los pagos ingresados por SINPE Móvil con los reportes bancarios diarios?',
         'palabras_clave' => 'conciliar pagos sinpe movil reportes bancarios arqueo diario cotejo',
         'respuesta' => 'En <strong>Reportes -> Conciliación Bancaria</strong> puedes cruzar los números de comprobante SINPE registrados en Inbox CEFI contra el extracto de cuenta bancaria para validar ingresos al centavo.',
         'categoria' => 'Finanzas y Morosidad',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo identificar qué cuatrimestres presentan el índice más alto de morosidad?',
+        'pregunta' => '295. ¿Cómo identificar qué cuatrimestres presentan el índice más alto de morosidad?',
         'palabras_clave' => 'indice mas alto morosidad reporte cuatrimestre comparativo mora periodos',
         'respuesta' => 'El gráfico de <strong>Morosidad por Período</strong> en el módulo financiero compara la tasa de cobro efectivo de cada cuatrimestre para detectar temporadas con mayor atraso de pagos.',
         'categoria' => 'Finanzas y Morosidad',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo emitir un estado de cuenta consolidado para empresas que patrocinan a colaboradores?',
+        'pregunta' => '296. ¿Cómo emitir un estado de cuenta consolidado para empresas que patrocinan a colaboradores?',
         'palabras_clave' => 'estado cuenta consolidado empresas patrocinadoras convenios corporativos factura',
         'respuesta' => 'En <strong>Finanzas -> Convenios Empresariales</strong> puedes seleccionar a todos los colaboradores de una misma empresa y emitir una boleta o estado de cuenta corporativo consolidado.',
         'categoria' => 'Finanzas y Morosidad',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué reporte financiero sirve de apoyo para las declaraciones tributarias de la institución?',
+        'pregunta' => '297. ¿Qué reporte financiero sirve de apoyo para las declaraciones tributarias de la institución?',
         'palabras_clave' => 'reporte financiero declaraciones tributarias hacienda dgt ingresos facturacion',
         'respuesta' => 'El <strong>Reporte Mensual de Facturación e Ingresos</strong> en <strong>Registro -> Reportes</strong> exporta las ventas desglosadas con cédulas jurídicas o físicas y método de cobro para el contador de la institución.',
         'categoria' => 'Finanzas y Morosidad',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar los gastos operativos y facturas de servicios para el balance general?',
+        'pregunta' => '298. ¿Cómo registrar los gastos operativos y facturas de servicios para el balance general?',
         'palabras_clave' => 'gastos operativos facturas servicios balance general egresos caja chica',
         'respuesta' => 'En el submódulo <strong>Egresos y Pagos a Proveedores</strong> se pueden asentar los pagos de servicios públicos, honorarios docentes y materiales para calcular la utilidad neta institucional.',
         'categoria' => 'Finanzas y Morosidad',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Quiénes son los únicos autorizados para modificar saldos en el estado de cuenta?',
+        'pregunta' => '299. ¿Quiénes son los únicos autorizados para modificar saldos en el estado de cuenta?',
         'palabras_clave' => 'quien puede modificar saldos estado de cuenta permisos cobro finanzas',
         'respuesta' => 'Únicamente los usuarios con rol <strong>Administrador General</strong> o <strong>Jefatura Financiera</strong> poseen autorización en el sistema para ajustar saldos, condonar deudas o anular recargos.',
         'categoria' => 'Finanzas y Morosidad',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo auditar cualquier ajuste o descuento aplicado a una cuenta por cobrar?',
+        'pregunta' => '300. ¿Cómo auditar cualquier ajuste o descuento aplicado a una cuenta por cobrar?',
         'palabras_clave' => 'auditar ajustes descuentos cuenta por cobrar bitacora auditoria financiera',
         'respuesta' => 'Cada ajuste manual genera un registro indeleble en la <strong>Bitácora de Auditoría Financiera</strong> indicando: fecha, hora, monto ajustado, usuario que lo autorizó y justificación ingresada.',
         'categoria' => 'Finanzas y Morosidad',

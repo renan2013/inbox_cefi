@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Cómo registrar un nuevo curso o materia en Inbox CEFI?',
+        'pregunta' => '126. ¿Cómo registrar un nuevo curso o materia en Inbox CEFI?',
         'palabras_clave' => 'registrar curso, crear nueva materia, agregar asignatura, nuevo curso',
         'respuesta' => 'Para registrar una materia, ve a <strong>Registro -> Catálogo de Cursos</strong> y haz clic en <strong>Nuevo Curso</strong>. Completa el código oficial (ej. <em>CON-101</em>), el nombre de la asignatura (ej. <em>Contabilidad I</em>), créditos, horas teóricas y prácticas, programa al que pertenece y nota mínima de aprobación. Haz clic en <strong>Guardar Curso</strong>.',
         'categoria' => 'Cursos y Sílabos',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué información requiere un curso (código, nombre, créditos, horas teóricas y prácticas)?',
+        'pregunta' => '127. ¿Qué información requiere un curso (código, nombre, créditos, horas teóricas y prácticas)?',
         'palabras_clave' => 'campos curso, estructura materia, creditos horas curso',
         'respuesta' => 'Los campos esenciales de un curso son:<br><ul><li><strong>Código de Asignatura:</strong> Identificador único del curso.</li><li><strong>Nombre Oficial:</strong> Nombre completo de la materia.</li><li><strong>Créditos Académicos:</strong> Valor curricular del curso.</li><li><strong>Horas Semanales:</strong> Desglose en horas teóricas, prácticas e independientes.</li><li><strong>Nota Mínima de Aprobación:</strong> Umbral oficial (ej. 70 o 80 puntos).</li><li><strong>Descripción y Competencias:</strong> Perfil de egreso y contenidos temáticos.</li></ul>',
         'categoria' => 'Cursos y Sílabos',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar y editar el Sílabo de un curso con asistencia de Inteligencia Artificial?',
+        'pregunta' => '128. ¿Cómo generar y editar el Sílabo de un curso con asistencia de Inteligencia Artificial?',
         'palabras_clave' => 'generar silabo ia, disenar silabo inteligencia artificial, redactar silabo automatico',
         'respuesta' => 'En <strong>Mis Cursos -> Gestionar Sílabo</strong>, presiona el botón <strong>Diseñar Sílabo con IA</strong>. El asistente analizará los objetivos del curso y generará automáticamente la justificación pedagógica, el cronograma de 15 semanas, las actividades formativas y los instrumentos de evaluación.',
         'categoria' => 'Cursos y Sílabos',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué secciones estándar componen el Sílabo oficial de CEFI?',
+        'pregunta' => '129. ¿Qué secciones estándar componen el Sílabo oficial de CEFI?',
         'palabras_clave' => 'secciones silabo oficial, estructura silabo cefi, partes silabo',
         'respuesta' => 'El formato oficial de sílabo de CEFI incluye: 1) Datos Generales de la Asignatura, 2) Descripción y Justificación, 3) Competencias y Objetivos de Aprendizaje, 4) Cronograma Temático Semana a Semana, 5) Estrategias Metodológicas, 6) Criterios y Rúbricas de Evaluación, y 7) Bibliografía y Recursos Digitales.',
         'categoria' => 'Cursos y Sílabos',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo descargar el Sílabo oficial de un curso en formato PDF listo para firmar?',
+        'pregunta' => '130. ¿Cómo descargar el Sílabo oficial de un curso en formato PDF listo para firmar?',
         'palabras_clave' => 'descargar silabo pdf, imprimir silabo curso, ver silabo pdf',
         'respuesta' => 'Tanto desde el panel docente como desde el catálogo administrativo, presiona el botón <strong>Ver Sílabo (PDF)</strong>. Se abrirá el documento maquetado con encabezado institucional, firmas y código de verificación.',
         'categoria' => 'Cursos y Sílabos',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar el Descriptor de Asignatura oficial en Word (.DOC) y PDF?',
+        'pregunta' => '131. ¿Cómo generar el Descriptor de Asignatura oficial en Word (.DOC) y PDF?',
         'palabras_clave' => 'descriptor asignatura word doc pdf, descargar descriptor curso',
         'respuesta' => 'En <strong>Registro -> Catálogo de Cursos</strong>, en la fila de la materia haz clic en <strong>Descriptor DOC</strong> o <strong>Descriptor PDF</strong> para obtener la ficha técnica curricular exigida por entes acreditadores.',
         'categoria' => 'Cursos y Sílabos',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo asignar los objetivos generales, específicos y competencias al curso?',
+        'pregunta' => '132. ¿Cómo asignar los objetivos generales, específicos y competencias al curso?',
         'palabras_clave' => 'objetivos generales especificos curso, competencias materia',
         'respuesta' => 'Al editar el curso o su sílabo, ingresa a la pestaña <strong>Competencias y Objetivos</strong>. Redacta el objetivo general y desglosa los objetivos específicos indicando el saber, saber hacer y saber ser.',
         'categoria' => 'Cursos y Sílabos',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo definir los criterios de evaluación y porcentajes de notas en el sílabo?',
+        'pregunta' => '133. ¿Cómo definir los criterios de evaluación y porcentajes de notas en el sílabo?',
         'palabras_clave' => 'criterios evaluacion porcentajes silabo, desglose notas curso',
         'respuesta' => 'En la tabla de evaluación del sílabo, ingresa cada rubro (ej. Quices 15%, Examen Parcial 25%, Proyecto Final 30%, Asistencia y Participación 10%, Examen Final 20%) asegurando que la suma total sea exactamente <strong>100%</strong>.',
         'categoria' => 'Cursos y Sílabos',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo subir lecturas, bibliografías recomendadas y recursos al sílabo del curso?',
+        'pregunta' => '134. ¿Cómo subir lecturas, bibliografías recomendadas y recursos al sílabo del curso?',
         'palabras_clave' => 'subir lecturas bibliografia silabo, enlaces recursos curso',
         'respuesta' => 'En la sección <strong>Bibliografía y Recursos</strong> del sílabo, puedes añadir citas en formato APA y enlaces a libros digitales, manuales en PDF y recursos de acceso abierto.',
         'categoria' => 'Cursos y Sílabos',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo clonar el sílabo de un cuatrimestre anterior para el ciclo actual?',
+        'pregunta' => '135. ¿Cómo clonar el sílabo de un cuatrimestre anterior para el ciclo actual?',
         'palabras_clave' => 'clonar silabo cuatrimestre anterior, copiar silabo ciclo pasado',
         'respuesta' => 'En <strong>Gestionar Sílabo</strong>, presiona el botón <strong>Importar de Ciclo Anterior</strong>, selecciona el cuatrimestre previo y el sistema copiará toda la estructura temática para que solo ajustes las fechas específicas.',
         'categoria' => 'Cursos y Sílabos',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo actualizar el código o la descripción de un curso sin desvincular matrículas previas?',
+        'pregunta' => '136. ¿Cómo actualizar el código o la descripción de un curso sin desvincular matrículas previas?',
         'palabras_clave' => 'actualizar codigo curso, modificar nombre materia historico',
         'respuesta' => 'Edita el curso desde <strong>Registro -> Catálogo de Cursos</strong>. Los cambios de nombre o código se aplicarán manteniendo intactos los identificadores relacionales (ID de base de datos) de las matrículas pasadas.',
         'categoria' => 'Cursos y Sílabos',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde se supervisa si un profesor ya entregó el sílabo actualizado de su materia?',
+        'pregunta' => '137. ¿Dónde se supervisa si un profesor ya entregó el sílabo actualizado de su materia?',
         'palabras_clave' => 'supervisar entrega silabos, control de silabos direccion academica',
         'respuesta' => 'En el módulo <strong>Supervisión de Cursos</strong>, la Dirección Académica cuenta con una columna de verificación donde se marca con un check verde los sílabos aprobados y con alerta roja los pendientes de entrega.',
         'categoria' => 'Cursos y Sílabos',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo eliminar un curso que se registró por error y no tiene alumnos asociados?',
+        'pregunta' => '138. ¿Cómo eliminar un curso que se registró por error y no tiene alumnos asociados?',
         'palabras_clave' => 'eliminar curso sin alumnos, borrar materia error',
         'respuesta' => 'En la tabla de cursos, haz clic en el botón de eliminar (icono de basurero rojo). Si el curso no tiene ningún grupo, matrícula o calificación vinculada, el sistema lo removerá de forma segura.',
         'categoria' => 'Cursos y Sílabos',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué validaciones impiden borrar un curso con notas o boletas emitidas?',
+        'pregunta' => '139. ¿Qué validaciones impiden borrar un curso con notas o boletas emitidas?',
         'palabras_clave' => 'error no se puede borrar curso, curso con notas o boletas',
         'respuesta' => 'Para proteger la integridad legal del historial del estudiante, el sistema bloquea el borrado de cualquier asignatura que posea boletas de cobro o actas de calificaciones registradas.',
         'categoria' => 'Cursos y Sílabos',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo establecer la nota mínima de aprobación para un curso (e.g. 70 o 80 puntos)?',
+        'pregunta' => '140. ¿Cómo establecer la nota mínima de aprobación para un curso (e.g. 70 o 80 puntos)?',
         'palabras_clave' => 'nota minima aprobacion curso, nota de pase 70 80',
         'respuesta' => 'En el campo <strong>Nota Mínima</strong> del formulario del curso, digita el puntaje correspondiente (habitualmente 70 para técnicos y 80 para especializaciones). Al calcular las actas, el sistema asignará la condición de Aprobado o Reprobado según este umbral.',
         'categoria' => 'Cursos y Sílabos',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo clasificar un curso por área de conocimiento o departamento?',
+        'pregunta' => '141. ¿Cómo clasificar un curso por área de conocimiento o departamento?',
         'palabras_clave' => 'clasificar curso por area departamento, categorizar materia',
         'respuesta' => 'Utiliza el selector <strong>Área de Conocimiento</strong> (ej. Contabilidad, Tecnología, Idiomas, Salud) para organizar los cursos en reportes temáticos y filtros de búsqueda.',
         'categoria' => 'Cursos y Sílabos',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo configurar las rúbricas de evaluación cualitativas y cuantitativas de la materia?',
+        'pregunta' => '142. ¿Cómo configurar las rúbricas de evaluación cualitativas y cuantitativas de la materia?',
         'palabras_clave' => 'rubricas de evaluacion materia, escala cualitativa cuantitativa',
         'respuesta' => 'En la pestaña <strong>Rúbricas</strong> del sílabo, puedes crear tablas con niveles de desempeño (Excelente, Bueno, Regular, Insuficiente) y sus ponderaciones numéricas para cada criterio.',
         'categoria' => 'Cursos y Sílabos',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consultar el histórico de todos los cursos registrados en la institución?',
+        'pregunta' => '143. ¿Dónde consultar el histórico de todos los cursos registrados en la institución?',
         'palabras_clave' => 'historico cursos registrados catalogo, listado general asignaturas',
         'respuesta' => 'Ingresa a <strong>Registro -> Catálogo de Cursos</strong>. Dispones de un buscador para filtrar por nombre, código, programa o créditos con paginación rápida.',
         'categoria' => 'Cursos y Sílabos',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo vincular un curso a un aula de Moodle o plataforma de videoconferencia?',
+        'pregunta' => '144. ¿Cómo vincular un curso a un aula de Moodle o plataforma de videoconferencia?',
         'palabras_clave' => 'vincular curso moodle zoom, enlace aula virtual materia',
         'respuesta' => 'En los detalles del grupo o curso, ingresa el <strong>ID del Curso en Moodle</strong> y el <strong>Enlace Recurrente de Zoom</strong>. Los alumnos podrán acceder con un clic desde su portal personal.',
         'categoria' => 'Cursos y Sílabos',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo compartir el sílabo del curso con los estudiantes para que lo descarguen en su portal?',
+        'pregunta' => '145. ¿Cómo compartir el sílabo del curso con los estudiantes para que lo descarguen en su portal?',
         'palabras_clave' => 'compartir silabo estudiantes portal, descargar silabo alumno',
         'respuesta' => 'Una vez que el sílabo es marcado como <strong>Oficial / Aprobado</strong>, queda disponible inmediatamente en el Portal de Estudiantes dentro de la tarjeta de la materia correspondiente.',
         'categoria' => 'Cursos y Sílabos',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué rol tiene el docente en la edición y actualización de los contenidos del sílabo?',
+        'pregunta' => '146. ¿Qué rol tiene el docente en la edición y actualización de los contenidos del sílabo?',
         'palabras_clave' => 'rol docente edicion silabo, profesor actualiza silabo',
         'respuesta' => 'El docente asignado al grupo es responsable de ingresar a <strong>Mis Cursos -> Gestionar Sílabo</strong> al inicio del ciclo para personalizar el cronograma de lecciones y las tareas semanales antes de su aprobación por la dirección.',
         'categoria' => 'Cursos y Sílabos',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo configurar cursos modulares de duración intensiva (1 o 2 meses)?',
+        'pregunta' => '147. ¿Cómo configurar cursos modulares de duración intensiva (1 o 2 meses)?',
         'palabras_clave' => 'cursos modulares intensivos duracion corta, semanas curso modular',
         'respuesta' => 'En el campo <strong>Duración en Semanas</strong>, ajusta el valor (ej. 4 u 8 semanas en lugar de las 15 tradicionales) para que el cronograma adapte la frecuencia de entregables.',
         'categoria' => 'Cursos y Sílabos',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde registrar los enlaces a grabaciones de clases o carpetas compartidas de Drive?',
+        'pregunta' => '148. ¿Dónde registrar los enlaces a grabaciones de clases o carpetas compartidas de Drive?',
         'palabras_clave' => 'grabaciones de clase drive, enlaces videos curso, recursos compartidos',
         'respuesta' => 'En la vista del curso docente, ingresa a <strong>Recursos Drive / Grabaciones</strong> y pega el enlace de la carpeta compartida. El enlace se reflejará tanto para el profesor como para los alumnos del grupo.',
         'categoria' => 'Cursos y Sílabos',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo imprimir el descriptor analítico de la materia para trámites de convalidación externa?',
+        'pregunta' => '149. ¿Cómo imprimir el descriptor analítico de la materia para trámites de convalidación externa?',
         'palabras_clave' => 'descriptor analitico materia convalidacion externa, certificar contenidos curso',
         'respuesta' => 'Descarga el <strong>Descriptor PDF</strong> desde el catálogo de cursos. Este documento oficial contiene el sello de la institución, la cantidad de horas certificadas y el desglose de contenidos temáticos.',
         'categoria' => 'Cursos y Sílabos',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo auditar quién fue la última persona en modificar los datos o el sílabo de un curso?',
+        'pregunta' => '150. ¿Cómo auditar quién fue la última persona en modificar los datos o el sílabo de un curso?',
         'palabras_clave' => 'auditar cambios silabo curso, quien modifico materia',
         'respuesta' => 'Al pie de la pantalla de edición del curso y del sílabo se muestra la leyenda de auditoría: <em>"Última actualización: [Fecha y Hora] por el usuario [Nombre del Funcionario]"</em>.',
         'categoria' => 'Cursos y Sílabos',

@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Cómo crear y gestionar campañas masivas de WhatsApp para oferta académica en Inbox CEFI?',
+        'pregunta' => '476. ¿Cómo crear y gestionar campañas masivas de WhatsApp para oferta académica en Inbox CEFI?',
         'palabras_clave' => 'crear campanas masivas whatsapp difusion oferta academica mensajes masivos matricula',
         'respuesta' => 'Ingresa al menú <strong>Marketing / WhatsApp -> Campañas de WhatsApp</strong>. Haz clic en <strong>Nueva Campaña</strong>, define el nombre de la convocatoria (ej. <em>"Matrícula 2026-II"</em>), selecciona el público objetivo (leads o estudiantes activos), redacta la plantilla del mensaje con variables como <code>{nombre}</code> y presiona <strong>Lanzar Campaña</strong>.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo importar prospectos o interesados desde formularios web, CSV o texto copiado y pegado?',
+        'pregunta' => '477. ¿Cómo importar prospectos o interesados desde formularios web, CSV o texto copiado y pegado?',
         'palabras_clave' => 'importar prospectos interesados csv pegado texto leads contactos nuevos marketing',
         'respuesta' => 'En <strong>Marketing -> Prospectos y Leads</strong> dispones de dos herramientas de carga rápida:<br><ul><li><strong>Importar desde CSV:</strong> Sube una hoja de cálculo con columnas de nombre, teléfono y curso de interés.</li><li><strong>Importar por Pegado de Texto:</strong> Pega directamente líneas de texto con nombres y números copiados de WhatsApp o formularios para procesarlos en bloque.</li></ul>',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo segmentar a los prospectos por origen (Redes Sociales, Ferias, Web, WhatsApp, Referidos)?',
+        'pregunta' => '478. ¿Cómo segmentar a los prospectos por origen (Redes Sociales, Ferias, Web, WhatsApp, Referidos)?',
         'palabras_clave' => 'segmentar prospectos origen redes sociales ferias web referidos canal captacion',
         'respuesta' => 'Al registrar o importar prospectos se les asigna una etiqueta de <strong>Origen</strong> (Facebook Ads, Instagram, Sitio Web, Feria Vocacional, Recomendación). Puedes filtrar por este campo para orientar tus mensajes a audiencias específicas.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo probar el envío de un mensaje de prueba antes de lanzar la campaña masiva a todos los contactos?',
+        'pregunta' => '479. ¿Cómo probar el envío de un mensaje de prueba antes de lanzar la campaña masiva a todos los contactos?',
         'palabras_clave' => 'mensaje prueba test envio antes lanzar campana masiva whatsapp verificar plantilla',
         'respuesta' => 'En la pantalla de configuración de la campaña, digita tu número telefónico personal en el campo <strong>Teléfono de Prueba</strong> y presiona <strong>Enviar Test</strong>. Recibirás el mensaje en tu WhatsApp para constatar el texto, los saltos de línea y el formato antes del despacho global.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo configurar el Webhook y la conexión con n8n o Green-API / Evolution API para WhatsApp?',
+        'pregunta' => '480. ¿Cómo configurar el Webhook y la conexión con n8n o Green-API / Evolution API para WhatsApp?',
         'palabras_clave' => 'configurar webhook conexion n8n green api evolution api whatsapp token url',
         'respuesta' => 'Accede a <strong>Configuración -> Parámetros de WhatsApp</strong> (con clave superior). Configura la URL del Webhook de n8n o las credenciales de instancia (Instance ID y API Token) de Green-API o Evolution API para sincronizar el envío de mensajes.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo evitar bloqueos de WhatsApp al enviar mensajes masivos (tiempos de espera, plantillas)?',
+        'pregunta' => '481. ¿Cómo evitar bloqueos de WhatsApp al enviar mensajes masivos (tiempos de espera, plantillas)?',
         'palabras_clave' => 'evitar bloqueos whatsapp baneo pausas tiempo espera plantillas buenas practicas',
         'respuesta' => 'El sistema incorpora un temporizador que espacia los envíos con intervalos aleatorios de entre 5 y 15 segundos entre cada mensaje. Además, se recomienda personalizar cada mensaje con el nombre del destinatario y no superar los 300 mensajes por lote diario.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar un nuevo prospecto de manera individual con sus cursos de interés?',
+        'pregunta' => '482. ¿Cómo registrar un nuevo prospecto de manera individual con sus cursos de interés?',
         'palabras_clave' => 'registrar prospecto individual nuevo lead curso interes contacto admision',
         'respuesta' => 'En <strong>Marketing -> Prospectos</strong>, presiona <strong>Nuevo Prospecto</strong>. Digita nombre, número de WhatsApp, correo electrónico y selecciona qué programas técnicos o cursos libres desea estudiar.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo convertir a un prospecto de marketing en un estudiante matriculado formalmente?',
+        'pregunta' => '483. ¿Cómo convertir a un prospecto de marketing en un estudiante matriculado formalmente?',
         'palabras_clave' => 'convertir prospecto estudiante matriculado formalmente crear alumno desde lead',
         'respuesta' => 'En la fila del prospecto presiona el botón <strong>Matricular / Convertir a Estudiante</strong>. Los datos de contacto se transferirán al formulario de registro de usuario y se abrirá la boleta de matrícula oficial.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde consultar las métricas de entrega, respuesta y conversión de las campañas de difusión?',
+        'pregunta' => '484. ¿Dónde consultar las métricas de entrega, respuesta y conversión de las campañas de difusión?',
         'palabras_clave' => 'metricas entrega respuesta conversion campanas difusion whatsapp dashboard marketing',
         'respuesta' => 'Al abrir la campaña enviada verás un panel analítico con: <em>Total de Mensajes Programados</em>, <em>Entregados con Éxito</em>, <em>Fallidos o Números Inválidos</em> y <em>Tasa de Conversión</em>.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo funciona la Bóveda de Claves Segura (`/claves`) para accesos institucionales?',
+        'pregunta' => '485. ¿Cómo funciona la Bóveda de Claves Segura (`/claves`) para accesos institucionales?',
         'palabras_clave' => 'boveda de claves segura contrasenas accesos institucionales hosting correo passwords',
         'respuesta' => 'La <strong>Bóveda de Claves</strong> (<code>/claves</code>) permite custodiar con cifrado de grado militar las contraseñas institucionales de plataformas educativas (Moodle, Zoom, cuentas de Google Workspace, Hosting y servidores) organizadas por categorías.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Quién tiene acceso a la Bóveda de Contraseñas y cómo se cifran los registros?',
+        'pregunta' => '486. ¿Quién tiene acceso a la Bóveda de Contraseñas y cómo se cifran los registros?',
         'palabras_clave' => 'quien accede boveda contrasenas cifrado aes claves seguridad privilegios',
         'respuesta' => 'Solo el <strong>Administrador General</strong> autenticado con la Clave Maestra puede acceder. Las contraseñas se almacenan mediante cifrado AES-256 en la base de datos y únicamente se desencriptan en memoria al hacer clic en el icono de visualización.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué es el módulo de Automatizaciones de Documentos y para qué sirve?',
+        'pregunta' => '487. ¿Qué es el módulo de Automatizaciones de Documentos y para qué sirve?',
         'palabras_clave' => 'automatizaciones documentos plantillas diplomas constancias certificados generador masivo',
         'respuesta' => 'Es un motor de diseño y emisión masiva (<code>/automatizaciones</code>) que toma plantillas gráficas en HTML o imagen y las combina con datos de estudiantes para generar diplomas, constancias y certificados personalizados en segundos.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo diseñar plantillas personalizadas para diplomas, constancias y certificados con variables dinámicas?',
+        'pregunta' => '488. ¿Cómo diseñar plantillas personalizadas para diplomas, constancias y certificados con variables dinámicas?',
         'palabras_clave' => 'disenar plantillas personalizadas variables dinamicas nombre cedula curso diploma',
         'respuesta' => 'En <strong>Automatizaciones -> Crear Plantilla</strong>, puedes redactar el contenido utilizando etiquetas dinámicas como <code>{{nombre}}</code>, <code>{{cedula}}</code>, <code>{{curso}}</code>, <code>{{fecha}}</code> y <code>{{horas}}</code>, ubicándolas con precisión visual.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar certificados masivos en lote comprimidos en archivo ZIP?',
+        'pregunta' => '489. ¿Cómo generar certificados masivos en lote comprimidos en archivo ZIP?',
         'palabras_clave' => 'generar certificados masivos lote zip paquete diplomas comprimido descargar',
         'respuesta' => 'Selecciona la plantilla en <strong>Automatizaciones</strong>, carga la lista de graduandos del grupo o período y presiona <strong>Generar Lote Masivo (ZIP)</strong>. Descargarás un archivo comprimido con todos los diplomas individuales nombrados por alumno.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar constancias individuales en formato PDF o imagen PNG de alta resolución?',
+        'pregunta' => '490. ¿Cómo generar constancias individuales en formato PDF o imagen PNG de alta resolución?',
         'palabras_clave' => 'generar constancia individual pdf imagen png alta resolucion diploma',
         'respuesta' => 'En la vista previa de la plantilla, selecciona el estudiante y presiona <strong>Descargar PDF</strong> o <strong>Descargar PNG</strong> (ideal para compartir por WhatsApp o redes sociales con calidad de impresión de 300 DPI).',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo consultar y gestionar los videotutoriales de capacitación del sistema (`/tutoriales`)?',
+        'pregunta' => '491. ¿Cómo consultar y gestionar los videotutoriales de capacitación del sistema (`/tutoriales`)?',
         'palabras_clave' => 'videotutoriales capacitacion sistema tutoriales videos ayuda como usar inbox',
         'respuesta' => 'En el menú <strong>Soporte / Capacitación -> Videotutoriales</strong> dispones de una videoteca con cápsulas breves que explican paso a paso cómo emitir boletas, subir notas, gestionar sílabos y calificar en el sistema.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo subir recursos multimedia, banners y logos a la Biblioteca de Medios institucional?',
+        'pregunta' => '492. ¿Cómo subir recursos multimedia, banners y logos a la Biblioteca de Medios institucional?',
         'palabras_clave' => 'subir recursos multimedia biblioteca de medios logos banners assets imagenes',
         'respuesta' => 'En <strong>Biblioteca de Medios</strong> (<code>/biblioteca</code>), presiona <strong>Subir Archivo</strong>. Puedes cargar logotipos institucionales, firmas digitalizadas, banners promocionales y encabezados para utilizarlos en todo el sistema.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo crear y publicar encuestas de evaluación docente conectadas a Moodle?',
+        'pregunta' => '493. ¿Cómo crear y publicar encuestas de evaluación docente conectadas a Moodle?',
         'palabras_clave' => 'crear publicar encuestas evaluacion docente moodle calificar profesor preguntas',
         'respuesta' => 'En <strong>Gestionar Curso -> Encuestas Docentes</strong>, configura el banco de preguntas (puntualidad, dominio del tema, material didáctico). Puedes presionar <strong>Publicar en Moodle</strong> para que aparezca automáticamente en el aula virtual de los alumnos.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde ver los resultados gráficos de satisfacción estudiantil por curso y docente?',
+        'pregunta' => '494. ¿Dónde ver los resultados gráficos de satisfacción estudiantil por curso y docente?',
         'palabras_clave' => 'resultados graficos satisfaccion estudiantil evaluacion docente estadisticas encuestas',
         'respuesta' => 'En <strong>Encuestas -> Resultados</strong> se despliegan gráficos de barras y radiales con el puntaje promedio obtenido por cada profesor, comparativa departamental y comentarios anónimos de los estudiantes.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué es el Tutor AI 2.0 y cómo ayuda a los usuarios a navegar y resolver dudas del sistema?',
+        'pregunta' => '495. ¿Qué es el Tutor AI 2.0 y cómo ayuda a los usuarios a navegar y resolver dudas del sistema?',
         'palabras_clave' => 'que es tutor ai 2.0 asistente virtual copiloto robot inbox cefi ayuda dudas',
         'respuesta' => 'El <strong>Tutor AI 2.0</strong> es el copiloto inteligente de Inbox CEFI. Funciona mediante un motor RAG híbrido que busca en la Base de Conocimiento institucional para responder cualquier duda sobre procesos, finanzas, notas, expedientes y guiar al usuario directamente a las pantallas mediante botones interactivos.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo acceder al Tutor AI desde la barra superior de Inbox CEFI?',
+        'pregunta' => '496. ¿Cómo acceder al Tutor AI desde la barra superior de Inbox CEFI?',
         'palabras_clave' => 'acceder tutor ai barra superior menu tutor boton flotante chat ai',
         'respuesta' => 'En la barra superior de navegación de Inbox CEFI se encuentra el acceso directo permanente <strong>Tutor AI</strong> con un distintivo verde. Al hacer clic o al presionar el widget flotante inferior derecho, se despliega la ventana interactiva de chat.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo busca respuestas el Tutor AI (algoritmo RAG con coincidencia por palabras clave y contexto)?',
+        'pregunta' => '497. ¿Cómo busca respuestas el Tutor AI (algoritmo RAG con coincidencia por palabras clave y contexto)?',
         'palabras_clave' => 'como busca tutor ai algoritmo rag palabras clave contexto nlp coincidencia semantica',
         'respuesta' => 'El motor analiza las palabras clave normalizadas de la consulta del usuario, calcula una puntuación ponderada de coincidencia contra las preguntas y etiquetas de la base de datos, y selecciona la respuesta más precisa acompañada del enlace de acción correspondiente.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo gestionar y enriquecer la Base de Conocimiento del Tutor AI (`/configuracion/conocimiento-ai`)?',
+        'pregunta' => '498. ¿Cómo gestionar y enriquecer la Base de Conocimiento del Tutor AI (`/configuracion/conocimiento-ai`)?',
         'palabras_clave' => 'gestionar enriquecer base de conocimiento tutor ai agregar preguntas respuestas rag',
         'respuesta' => 'En el menú <strong>Configuración -> Base de Conocimiento AI</strong> (o haciendo clic en <em>Tutor AI</em> en la barra superior), los administradores pueden añadir nuevas preguntas, editar respuestas, asignar categorías y definir las rutas de navegación.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
@@ -186,16 +186,15 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo agregar enlaces directos y rutas del sistema en las respuestas del Tutor AI para navegación asistida?',
+        'pregunta' => '499. ¿Cómo agregar enlaces directos y rutas del sistema en las respuestas del Tutor AI para navegación asistida?',
         'palabras_clave' => 'agregar enlaces directos rutas sistema respuestas tutor ai navegacion asistida boton',
         'respuesta' => 'Al crear o editar una pregunta en la base de conocimiento, en el campo <strong>Ruta / Módulo</strong> ingresa el nombre de la ruta interna (ej. <code>boletas.generar</code> o <code>expedientes.index</code>). El Tutor AI renderizará automáticamente un botón verde para dirigir al usuario con un solo clic.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',
         'ruta' => 'configuracion.conocimiento_ai',
-        'estado 1' => 1,
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo consultar métricas institucionales en vivo (deudores, cursos activos) a través de preguntas al Tutor AI?',
+        'pregunta' => '500. ¿Cómo consultar métricas institucionales en vivo (deudores, cursos activos) a través de preguntas al Tutor AI?',
         'palabras_clave' => 'metricas institucionales en vivo deudores cursos activos preguntas tutor ai kpi tiempo real',
         'respuesta' => 'El Tutor AI está conectado en tiempo real a las estadísticas del sistema. Al preguntarle por ejemplo: <em>"¿Cómo está la morosidad hoy?"</em> o <em>"¿Cuántos cursos activos tenemos?"</em>, responderá con la cifra exacta de deudores, monto adeudado y cantidad de materias en desarrollo.',
         'categoria' => 'Marketing, WhatsApp y Tutor AI',

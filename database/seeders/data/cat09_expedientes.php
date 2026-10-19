@@ -2,7 +2,7 @@
 
 return [
     [
-        'pregunta' => '¿Qué es el Expediente Digital 360° en Inbox CEFI y por qué es clave para auditorías?',
+        'pregunta' => '201. ¿Qué es el Expediente Digital 360° en Inbox CEFI y por qué es clave para auditorías?',
         'palabras_clave' => 'que es expediente digital 360 importancia auditoria archivo unico estudiante',
         'respuesta' => 'El <strong>Expediente Digital 360°</strong> es el repositorio institucional centralizado donde converge toda la información de un alumno: datos personales, checklist de requisitos de admisión, documentos escaneados en la bóveda, calificaciones oficiales, historial de boletas de pago, bitácora de observaciones y horas de TCU. Es el instrumento oficial auditado para graduación y entes rectores.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -10,7 +10,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo crear o consultar el Expediente Digital 360° de un estudiante?',
+        'pregunta' => '202. ¿Cómo crear o consultar el Expediente Digital 360° de un estudiante?',
         'palabras_clave' => 'crear consultar expediente digital 360 nuevo expediente abrir carpeta alumno',
         'respuesta' => 'Ve al menú <strong>Registro -> Expedientes Digitales 360°</strong>. Para crear uno nuevo presiona <strong>Nuevo Expediente</strong> y selecciona el estudiante; para consultar uno existente, usa el buscador por cédula o nombre y haz clic en <strong>Ver Expediente 360°</strong>.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -18,7 +18,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué checklist de requisitos documentales incluye el expediente institucional?',
+        'pregunta' => '203. ¿Qué checklist de requisitos documentales incluye el expediente institucional?',
         'palabras_clave' => 'checklist requisitos expediente documentos matricula cedula titulo fotos',
         'respuesta' => 'El checklist incluye:<br><ul><li>Copia de Cédula de Identidad o DIMEX vigente.</li><li>Título de Bachillerato en Educación Media (o certificación del MEP).</li><li>Fotografía tamaño pasaporte reciente para carné.</li><li>Comprobante de pago o boleta de matrícula formalizada.</li><li>Fórmula de matrícula firmada digitalmente.</li><li>Certificación de notas (en casos de convalidación).</li></ul>',
         'categoria' => 'Expedientes Digitales 360°',
@@ -26,7 +26,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo marcar como entregado o pendiente cada requisito (Título, Cédula, Fotos, etc.)?',
+        'pregunta' => '204. ¿Cómo marcar como entregado o pendiente cada requisito (Título, Cédula, Fotos, etc.)?',
         'palabras_clave' => 'marcar entregado pendiente requisito checklist validar documento',
         'respuesta' => 'Dentro del expediente, en la sección <strong>Checklist de Requisitos</strong>, haz clic en el interruptor de cada ítem para cambiar su estado entre <em>Pendiente</em> y <em>Entregado / Verificado</em>. El porcentaje de completitud del expediente se actualizará automáticamente.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -34,7 +34,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo subir documentos en PDF o imágenes a la Bóveda del Expediente Digital?',
+        'pregunta' => '205. ¿Cómo subir documentos en PDF o imágenes a la Bóveda del Expediente Digital?',
         'palabras_clave' => 'subir documentos boveda pdf imagenes expediente digital adjuntar archivo',
         'respuesta' => 'En la pestaña <strong>Bóveda Documental</strong>, presiona <strong>Subir Documento</strong>. Elige la categoría (ej. <em>Título de Bachiller</em>, <em>Cédula</em>, <em>Contrato</em>), selecciona el archivo desde tu equipo y presiona <strong>Cargar Documento</strong>.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -42,7 +42,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo previsualizar un documento almacenado en la bóveda sin salir de la pantalla?',
+        'pregunta' => '206. ¿Cómo previsualizar un documento almacenado en la bóveda sin salir de la pantalla?',
         'palabras_clave' => 'previsualizar documento boveda visor pdf imagen modal expediente',
         'respuesta' => 'Haz clic en el icono de ojo (<strong>Ver</strong>) junto al archivo en la lista. Se desplegará un visor modal interactivo que permite revisar el PDF o la imagen a pantalla completa con controles de zoom y rotación.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -50,7 +50,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo eliminar un archivo subido por error al expediente de un alumno?',
+        'pregunta' => '207. ¿Cómo eliminar un archivo subido por error al expediente de un alumno?',
         'palabras_clave' => 'eliminar archivo boveda borrar documento expediente subir de nuevo',
         'respuesta' => 'En la fila del documento dentro de la Bóveda, presiona el botón rojo de eliminar (icono de basurero) y confirma la acción en la ventana de advertencia. El archivo será removido de forma segura del almacenamiento.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -58,7 +58,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué tamaño y formatos de archivo son permitidos en la subida de documentos?',
+        'pregunta' => '208. ¿Qué tamaño y formatos de archivo son permitidos en la subida de documentos?',
         'palabras_clave' => 'tamano maximo formatos permitidos pdf jpg png mb boveda',
         'respuesta' => 'Se admiten archivos en formato <strong>PDF</strong>, <strong>JPG</strong>, <strong>PNG</strong> y <strong>WEBP</strong>, con un tamaño máximo recomendado de hasta <strong>10 MB por archivo</strong> para garantizar fluidez en las descargas.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -66,7 +66,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar bitácoras u observaciones administrativas dentro del expediente?',
+        'pregunta' => '209. ¿Cómo registrar bitácoras u observaciones administrativas dentro del expediente?',
         'palabras_clave' => 'registrar bitacora observaciones expediente notas internas seguimiento',
         'respuesta' => 'En la sección <strong>Observaciones y Bitácora</strong>, escribe tu comentario (ej. <em>"Estudiante entregó prórroga para presentación de título original antes del 15 de marzo"</em>) y presiona <strong>Guardar Observación</strong>. Quedará registrada con tu usuario y marca temporal.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -74,7 +74,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Quién puede ver las observaciones confidenciales registradas en el expediente?',
+        'pregunta' => '210. ¿Quién puede ver las observaciones confidenciales registradas en el expediente?',
         'palabras_clave' => 'quien ve observaciones confidenciales expediente privacidad notas internas',
         'respuesta' => 'Las observaciones administrativas únicamente son visibles para los usuarios con rol <strong>Administrador General</strong> o <strong>Registro Académico</strong>; nunca son mostradas en el portal del estudiante.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -82,7 +82,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar y descargar el Expediente Digital 360° Oficial en PDF con sello CEFI?',
+        'pregunta' => '211. ¿Cómo generar y descargar el Expediente Digital 360° Oficial en PDF con sello CEFI?',
         'palabras_clave' => 'descargar expediente digital 360 pdf imprimir expediente completo sello',
         'respuesta' => 'En la cabecera del expediente, haz clic en el botón azul <strong>Descargar Expediente 360° (PDF)</strong>. El sistema compilará la carátula, datos personales, checklist de requisitos, notas y firmas en un elegante informe oficial.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -90,7 +90,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo generar el Récord de Calificaciones Oficial en formato PDF desde el expediente?',
+        'pregunta' => '212. ¿Cómo generar el Récord de Calificaciones Oficial en formato PDF desde el expediente?',
         'palabras_clave' => 'generar record calificaciones oficial pdf notas aprobadas promedio',
         'respuesta' => 'Presiona el botón <strong>Récord de Notas (PDF)</strong> en el expediente. Se generará la sábana académica con todas las materias aprobadas, reprobadas, convalidadas, el promedio ponderado acumulado y los créditos obtenidos.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -98,7 +98,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo descargar todos los documentos del expediente en un único archivo comprimido ZIP?',
+        'pregunta' => '213. ¿Cómo descargar todos los documentos del expediente en un único archivo comprimido ZIP?',
         'palabras_clave' => 'descargar todos los documentos zip comprimido expediente paquete archivos',
         'respuesta' => 'Haz clic en el botón <strong>Descargar Paquete ZIP</strong>. El servidor agrupará la cédula, títulos escaneados y comprobantes del estudiante en un único archivo <code>.zip</code> con el nombre y cédula del alumno.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -106,7 +106,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cuáles son los estados del expediente (En Revisión, Incompleto, Completo, Graduado)?',
+        'pregunta' => '214. ¿Cuáles son los estados del expediente (En Revisión, Incompleto, Completo, Graduado)?',
         'palabras_clave' => 'estados expediente en revision incompleto completo aprobado graduado',
         'respuesta' => 'Los estados indican la madurez del archivo:<br><ul><li><strong>Incompleto:</strong> Falta entregar uno o más requisitos esenciales.</li><li><strong>En Revisión:</strong> Documentos entregados pendientes de cotejo físico.</li><li><strong>Completo / Aprobado:</strong> 100% de requisitos válidos.</li><li><strong>Graduado:</strong> Alumno culminó plan y recibió su titulación.</li></ul>',
         'categoria' => 'Expedientes Digitales 360°',
@@ -114,7 +114,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo cambiar el estado del expediente una vez validados todos los requisitos?',
+        'pregunta' => '215. ¿Cómo cambiar el estado del expediente una vez validados todos los requisitos?',
         'palabras_clave' => 'cambiar estado expediente aprobar expediente marcar completo',
         'respuesta' => 'En el encabezado del expediente, utiliza el selector <strong>Estado del Expediente</strong> para cambiar a <em>Completo / Aprobado</em> y presiona <strong>Guardar Estado</strong>.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -122,7 +122,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué ocurre si un estudiante intenta graduarse con el expediente en estado incompleto?',
+        'pregunta' => '216. ¿Qué ocurre si un estudiante intenta graduarse con el expediente en estado incompleto?',
         'palabras_clave' => 'graduarse con expediente incompleto bloqueo auditoria graduacion rechazo',
         'respuesta' => 'El módulo de <strong>Auditoría de Graduaciones</strong> rechazará automáticamente la postulación y mostrará una alerta roja indicando cuáles documentos faltan en el expediente para poder extender el título.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -130,7 +130,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo buscar expedientes por cédula, nombre, carrera o estado de documentación?',
+        'pregunta' => '217. ¿Cómo buscar expedientes por cédula, nombre, carrera o estado de documentación?',
         'palabras_clave' => 'buscar expedientes cedula nombre carrera estado documentacion filtro',
         'respuesta' => 'En <strong>Registro -> Expedientes Digitales 360°</strong> dispones de filtros superiores por programa técnico, estado del expediente (Completo/Incompleto) y una barra de búsqueda rápida por nombre o identificación.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -138,7 +138,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Puede el estudiante consultar el estado de su expediente desde su portal personal?',
+        'pregunta' => '218. ¿Puede el estudiante consultar el estado de su expediente desde su portal personal?',
         'palabras_clave' => 'estudiante ve estado expediente portal alumno documentos faltantes',
         'respuesta' => 'Sí, en el <strong>Portal del Estudiante</strong> hay una tarjeta que le indica el porcentaje de cumplimiento de su expediente y cuáles requisitos tiene pendientes de presentar en Registro.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -146,7 +146,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo proteger la confidencialidad de los expedientes bajo la ley de protección de datos?',
+        'pregunta' => '219. ¿Cómo proteger la confidencialidad de los expedientes bajo la ley de protección de datos?',
         'palabras_clave' => 'confidencialidad expedientes ley proteccion datos prodhab seguridad',
         'respuesta' => 'Los documentos se almacenan fuera de la raíz web pública accesible por enlaces directos, sirviéndose a través de controladores autenticados con verificación de roles para asegurar estricto apego legal.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -154,7 +154,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo registrar antecedentes médicos o adecuaciones curriculares en el expediente?',
+        'pregunta' => '220. ¿Cómo registrar antecedentes médicos o adecuaciones curriculares en el expediente?',
         'palabras_clave' => 'antecedentes medicos adecuaciones curriculares expediente necesidades especiales',
         'respuesta' => 'En la pestaña <strong>Ficha Médica / Adecuación Curricular</strong> puedes ingresar diagnósticos avalados y recomendaciones pedagógicas que los docentes deben aplicar en sus clases.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -162,7 +162,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Dónde se almacena la firma digital o consentimiento informado del estudiante?',
+        'pregunta' => '221. ¿Dónde se almacena la firma digital o consentimiento informado del estudiante?',
         'palabras_clave' => 'firma digital consentimiento informado expediente contrato aceptacion',
         'respuesta' => 'Se guarda en la bóveda bajo la etiqueta <em>Contrato de Matrícula y Consentimiento Informado</em>, vinculada directamente al proceso de firma digital por token.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -170,7 +170,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo auditar qué funcionario revisó y aprobó los documentos del expediente?',
+        'pregunta' => '222. ¿Cómo auditar qué funcionario revisó y aprobó los documentos del expediente?',
         'palabras_clave' => 'auditar quien aprobo expediente funcionario responsable revision',
         'respuesta' => 'Cada vez que se cambia un requisito a "Entregado", el sistema estampa la fecha, hora y el ID del funcionario revisor en la base de datos para trazabilidad total.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -178,7 +178,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo exportar un reporte de estudiantes con expedientes incompletos para seguimiento?',
+        'pregunta' => '223. ¿Cómo exportar un reporte de estudiantes con expedientes incompletos para seguimiento?',
         'palabras_clave' => 'reporte expedientes incompletos exportar excel seguimiento admision',
         'respuesta' => 'En el índice de expedientes, filtra por <strong>Estado: Incompleto</strong> y presiona <strong>Exportar a Excel</strong> para obtener la lista con los números de teléfono para campañas de recaudación documental.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -186,7 +186,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Cómo reabrir un expediente cerrado tras una solicitud de rectificación documental?',
+        'pregunta' => '224. ¿Cómo reabrir un expediente cerrado tras una solicitud de rectificación documental?',
         'palabras_clave' => 'reabrir expediente cerrado rectificacion documental modificar aprobado',
         'respuesta' => 'Un usuario con rol Administrador puede cambiar el estado de <em>Aprobado</em> a <em>En Revisión</em> en cualquier momento, habilitando la subida de nuevos comprobantes corregidos.',
         'categoria' => 'Expedientes Digitales 360°',
@@ -194,7 +194,7 @@ return [
         'estado' => 1,
     ],
     [
-        'pregunta' => '¿Qué hacer si los archivos escaneados aparecen rotados o de baja resolución?',
+        'pregunta' => '225. ¿Qué hacer si los archivos escaneados aparecen rotados o de baja resolución?',
         'palabras_clave' => 'archivos rotados baja resolucion corregir documento escaneado boveda',
         'respuesta' => 'En el visor de documentos dispones de botones para rotar la vista 90 grados. Si la resolución es ilegible, elimina el archivo y solicita al estudiante un escaneo más nítido.',
         'categoria' => 'Expedientes Digitales 360°',
