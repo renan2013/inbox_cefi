@@ -561,8 +561,6 @@
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('reportes.index') }}"><i class="bi bi-file-earmark-pdf"></i> Reportes del Sistema</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('utilitarios.index') }}"><i class="bi bi-tools"></i> Utilitarios</a></li>
-                            <li><hr class="dropdown-divider-custom"></li>
-                            <li><a class="dropdown-item dropdown-item-custom fw-semibold" href="{{ route('configuracion.conocimiento_ai') }}"><i class="bi bi-robot text-success me-2"></i> Cerebro RAG - Tutor AI</a></li>
                             @endmodule
                         </ul>
                     </li>
@@ -609,8 +607,6 @@
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'smtp']) }}"><i class="bi bi-envelope-at-fill text-warning me-2"></i> Correo Saliente (SMTP)</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'modulos']) }}"><i class="bi bi-toggles2 text-danger me-2"></i> Módulos y Personalización</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'seguridad']) }}"><i class="bi bi-key-fill text-info me-2"></i> Clave Maestra Superior</a></li>
-                            <li><hr class="dropdown-divider-custom"></li>
-                            <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('configuracion.conocimiento_ai') }}"><i class="bi bi-robot text-success me-2"></i> Cerebro RAG - Tutor AI</a></li>
                             <li><hr class="dropdown-divider-custom"></li>
                             <li>
                                 <form action="{{ route('configuracion.salir') }}" method="POST" class="d-inline">
