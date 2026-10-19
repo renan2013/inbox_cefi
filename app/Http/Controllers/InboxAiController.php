@@ -135,9 +135,13 @@ class InboxAiController extends Controller
             }
         } catch (\Exception $e) {}
 
-        // 4. PRIORIDAD 4: Respuesta por defecto limpia
-        $nombreCliente = config('cliente.nombre', 'CEFI');
-        $default_reply = "Entendí tu consulta sobre *\"{$query}\"*. ¿Podrías ser un poco más específico con tu pregunta? Puedo ayudarte a redactar contenidos o guiarte en cualquier módulo del sistema BPM de {$nombreCliente}.";
+        // 4. PRIORIDAD 4: Respuesta por defecto limpia y directa
+        $q_clean = trim(mb_strtolower($query));
+        if (in_array($q_clean, ['hola', 'buenas', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'hola inbox'])) {
+            return response()->json(['reply' => '¡Hola! 👋 ¿En qué proceso o módulo de Inbox te puedo orientar hoy?']);
+        }
+
+        $default_reply = "¿Podrías ser un poco más específico con tu pregunta o indicarme qué proceso necesitas realizar?";
         return response()->json(['reply' => $default_reply]);
     }
 
