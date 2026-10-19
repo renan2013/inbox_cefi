@@ -1002,8 +1002,8 @@
                         </div>
                     @endif
 
-                    <!-- Widget Mis Cursos -->
-                    @if (count($mis_cursos_asignados) > 0)
+                    <!-- Widget Mis Cursos (Solo Profesores / Docentes) -->
+                    @if (!$es_admin && count($mis_cursos_asignados) > 0)
                         <div class="col-12">
                             <div class="dash-card border-top border-4 border-info p-3">
                                 <div class="px-2 py-1 mb-3 d-flex justify-content-between align-items-center">

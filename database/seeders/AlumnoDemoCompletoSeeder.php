@@ -50,11 +50,8 @@ class AlumnoDemoCompletoSeeder extends Seeder
             ]);
         }
 
-        // 2. Crear o recuperar Docente para los cursos
+        // 2. Crear o recuperar Docente para los cursos (Exclusivo Docente, NUNCA Administrador)
         $profesor = Usuario::where('id_rol', 2)->orWhere('id_rol', 4)->first();
-        if (!$profesor) {
-            $profesor = Usuario::where('id_rol', 1)->first();
-        }
         if (!$profesor) {
             $profesor = Usuario::create([
                 'nombre'    => 'Lic. Fernando',

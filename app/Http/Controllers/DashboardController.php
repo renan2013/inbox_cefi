@@ -112,15 +112,45 @@ class DashboardController extends Controller
             ->orderByRaw('DAY(fecha_nacimiento) ASC')
             ->get();
 
-        // 7. Mis Cursos Asignados (Profesor o Docente)
-        $mis_cursos_asignados = DB::table('cursos_activos as ca')
-            ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
-            ->join('programas as p', 'pe.id_programa', '=', 'p.id_programa')
-            ->where('ca.id_profesor', $user_id)
-            ->select('ca.id_curso_activo', 'ca.periodo', 'pe.materia', 'pe.codigo', 'p.nombre_programa')
-            ->orderBy('ca.fecha_inicio', 'desc')
-            ->limit(6)
-            ->get();
+        // 7. Mis Cursos Asignados (Exclusivo para Profesores / Docentes, NUNCA para el Administrador General)
+        $mis_cursos_asignados = collect([]);
+        if (!$es_admin && in_array($usuario->id_rol ?? 0, [2, 4])) {
+            $mis_cursos_asignados = DB::table('cursos_activos as ca')
+                ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+                ->join('programas as p', 'pe.id_programa', '=', 'p.id_programa')
+                ->where('ca.id_profesor', $user_id)
+                ->select('ca.id_curso_activo', 'ca.periodo', 'pe.materia', 'pe.codigo', 'p.nombre_programa')
+                ->orderBy('ca.fecha_inicio', 'desc')
+                ->limit(6)
+                ->get();
+        }
+
+        // Si existen cursos asignados erróneamente al Administrador (ej: tras ejecutar sembradores), corregir y reasignar a docente
+        try {
+            if ($es_admin && Schema::hasTable('cursos_activos') && Schema::hasTable('usuarios')) {
+                $cursosConAdmin = DB::table('cursos_activos')->where('id_profesor', $user_id)->count();
+                if ($cursosConAdmin > 0) {
+                    $docente = DB::table('usuarios')->whereIn('id_rol', [2, 4])->first();
+                    if (!$docente) {
+                        $docenteId = DB::table('usuarios')->insertGetId([
+                            'nombre'    => 'Lic. Fernando',
+                            'apellidos' => 'Solano Valverde',
+                            'cedula'    => '1-0987-0654',
+                            'email'     => 'profesor.solano@ceficr.com',
+                            'telefono'  => '50683334455',
+                            'password'  => bcrypt('cefi2026'),
+                            'id_rol'    => 2,
+                            'origen'    => 'inbox',
+                            'created_at'=> now(),
+                            'updated_at'=> now(),
+                        ]);
+                    } else {
+                        $docenteId = $docente->id;
+                    }
+                    DB::table('cursos_activos')->where('id_profesor', $user_id)->update(['id_profesor' => $docenteId]);
+                }
+            }
+        } catch (\Throwable $e) {}
 
         // 8. Listas de apoyo para modal de edición completa
         $usuarios_disponibles = DB::table('usuarios')->orderBy('nombre', 'asc')->get();
