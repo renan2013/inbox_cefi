@@ -36,6 +36,19 @@
         .thumb-img:hover {
             transform: scale(1.1);
         }
+        .item-title {
+            color: #ffffff;
+        }
+        [data-theme="light"] .item-title,
+        [data-theme="light"] .section-title {
+            color: #0f172a !important;
+        }
+        [data-theme="light"] .text-adaptive-muted {
+            color: #64748b !important;
+        }
+        .text-adaptive-muted {
+            color: rgba(255, 255, 255, 0.65);
+        }
     </style>
 @endsection
 
@@ -71,7 +84,7 @@
         <!-- Tabla de Registros -->
         <div class="card-custom">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-custom table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr class="text-uppercase small fw-bold text-secondary">
                             <th>Captura</th>
@@ -93,14 +106,14 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-white fs-6">{{ $r->pregunta }}</div>
-                                    <small class="text-white-50 d-block text-truncate" style="max-width: 280px;">{!! strip_tags($r->respuesta) !!}</small>
+                                    <div class="fw-bold fs-6 item-title">{{ $r->pregunta }}</div>
+                                    <small class="text-adaptive-muted d-block text-truncate" style="max-width: 300px;">{!! strip_tags($r->respuesta) !!}</small>
                                 </td>
                                 <td>
                                     @if (!empty($r->ruta))
                                         <span class="badge bg-success-subtle text-success rounded-pill fw-bold"><i class="bi bi-link-45deg me-1"></i> {{ $r->ruta }}</span>
                                     @else
-                                        <span class="text-white-50 small">Sin enlace</span>
+                                        <span class="text-adaptive-muted small">Sin enlace</span>
                                     @endif
                                 </td>
                                 <td>
@@ -114,12 +127,12 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-primary rounded-pill me-1" onclick='editarRegistro(@json($r))'>
+                                    <button class="btn btn-sm btn-outline-primary rounded-pill me-1" onclick='editarRegistro(@json($r))' title="Editar conocimiento">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <form action="{{ route('configuracion.conocimiento_ai.eliminar', $r->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar este conocimiento de la IA?');">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" title="Eliminar">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -127,8 +140,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-white-50">
-                                    <i class="bi bi-cpu fs-1 text-white-50 d-block mb-2"></i>
+                                <td colspan="6" class="text-center py-5 text-adaptive-muted">
+                                    <i class="bi bi-robot fs-1 d-block mb-2 text-success"></i>
                                     No hay conocimientos registrados aún en la base de datos de la IA.
                                 </td>
                             </tr>
@@ -185,10 +198,12 @@
                                         <option value="">1. Seleccionar Menú...</option>
                                         <option value="Registro">Registro</option>
                                         <option value="Gestionar Curso">Gestionar Curso</option>
+                                        <option value="Estudiante">Estudiante</option>
+                                        <option value="Tutor AI">Cerebro / Tutor AI</option>
+                                        <option value="Configuración">Configuración</option>
                                         <option value="Soporte">Soporte</option>
                                         <option value="Planilla">Planilla</option>
                                         <option value="Logística">Logística</option>
-                                        <option value="Estudiante">Estudiante</option>
                                         <option value="Custom">Escribir Manualmente...</option>
                                     </select>
                                 </div>
@@ -245,20 +260,22 @@
                 { nombre: "Historial de Boletas", ruta: "boletas.index" },
                 { nombre: "Estado de Cuenta", ruta: "boletas.estado_cuenta" },
                 { nombre: "Control de Morosidad", ruta: "boletas.morosidad" },
+                { nombre: "Expedientes Digitales 360°", ruta: "expedientes.index" },
+                { nombre: "Crear Expediente Digital", ruta: "expedientes.create" },
                 { nombre: "Registrar Usuario", ruta: "usuarios.create" },
                 { nombre: "Lista de Usuarios", ruta: "usuarios.index" },
-                { nombre: "Crear Expediente Digital", ruta: "expedientes.create" },
                 { nombre: "Registrar Programa", ruta: "programas.create" },
                 { nombre: "Registrar Curso", ruta: "cursos.create" },
                 { nombre: "Gestionar Grupos", ruta: "grupos.index" },
+                { nombre: "Convalidaciones & Homologaciones", ruta: "convalidaciones.index" },
+                { nombre: "Retiros y Cambios de Curso", ruta: "retiros.index" },
+                { nombre: "Auditoría y Graduaciones", ruta: "graduaciones.index" },
                 { nombre: "Formularios de Registro", ruta: "solicitudes.index" },
                 { nombre: "Lista de Programas", ruta: "programas.index" },
                 { nombre: "Lista de Cursos", ruta: "cursos.index" },
                 { nombre: "Programas Completos", ruta: "programas.completos" },
                 { nombre: "Generador de Reportes", ruta: "reportes.index" },
-                { nombre: "Ingresos Google Drive", ruta: "reportes.ingresos_drive" },
-                { nombre: "Utilitarios del Sistema", ruta: "utilitarios.index" },
-                { nombre: "Configuración Alertas", ruta: "configuracion.alertas" }
+                { nombre: "Utilitarios del Sistema", ruta: "utilitarios.index" }
             ],
             "Gestionar Curso": [
                 { nombre: "Mis Cursos (Asignaciones)", ruta: "mis_cursos.index" },
@@ -267,6 +284,18 @@
                 { nombre: "Videotutoriales", ruta: "videotutoriales.index" },
                 { nombre: "Biblioteca de Medios", ruta: "biblioteca.index" },
                 { nombre: "Supervisión de Cursos", ruta: "supervision.index" }
+            ],
+            "Estudiante": [
+                { nombre: "Portal de Estudiantes", ruta: "estudiante.portal" },
+                { nombre: "Bitácora de TCU", ruta: "tcu.index" }
+            ],
+            "Tutor AI": [
+                { nombre: "Base de Conocimiento RAG", ruta: "configuracion.conocimiento_ai" }
+            ],
+            "Configuración": [
+                { nombre: "Panel General de Configuración", ruta: "configuracion.index" },
+                { nombre: "Pagos, Morosidad e Intereses", ruta: "configuracion.pagos" },
+                { nombre: "Configuración Alertas", ruta: "configuracion.alertas" }
             ],
             "Soporte": [
                 { nombre: "Gestionar Soporte", ruta: "soporte.gestionar" },
@@ -290,9 +319,6 @@
             "Logística": [
                 { nombre: "Control de Inventario", ruta: "inventario.index" },
                 { nombre: "Operaciones de Bodega", ruta: "inventario.operaciones" }
-            ],
-            "Estudiante": [
-                { nombre: "Bitácora de TCU", ruta: "tcu.index" }
             ]
         };
 

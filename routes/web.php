@@ -343,13 +343,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/automatizaciones/generar', [PlantillaDocumentoController::class, 'generar'])->name('plantillas.generar');
         Route::post('/automatizaciones/generar-png', [PlantillaDocumentoController::class, 'generarPng'])->name('plantillas.generar_png');
         Route::post('/automatizaciones/generar-lote-zip', [PlantillaDocumentoController::class, 'generarLoteZip'])->name('plantillas.generar_lote_zip');
+    });
 
-        // Cerebro AI (submódulo inbox_ai)
-        Route::middleware('module:inbox_ai')->group(function () {
-            Route::get('/configuracion/conocimiento-ai', [ConfiguracionController::class, 'conocimientoAi'])->name('configuracion.conocimiento_ai');
-            Route::post('/configuracion/conocimiento-ai/guardar', [ConfiguracionController::class, 'guardarConocimientoAi'])->name('configuracion.conocimiento_ai.guardar');
-            Route::post('/configuracion/conocimiento-ai/{id}/eliminar', [ConfiguracionController::class, 'eliminarConocimientoAi'])->name('configuracion.conocimiento_ai.eliminar');
-        });
+    // --- CEREBRO & TUTOR AI 2.0 (ASISTENTE VIRTUAL RAG CEFI) ---
+    Route::middleware('module:inbox_ai')->group(function () {
+        Route::get('/configuracion/conocimiento-ai', [ConfiguracionController::class, 'conocimientoAi'])->name('configuracion.conocimiento_ai');
+        Route::post('/configuracion/conocimiento-ai/guardar', [ConfiguracionController::class, 'guardarConocimientoAi'])->name('configuracion.conocimiento_ai.guardar');
+        Route::post('/configuracion/conocimiento-ai/{id}/eliminar', [ConfiguracionController::class, 'eliminarConocimientoAi'])->name('configuracion.conocimiento_ai.eliminar');
     });
 
     // --- PORTAL DE AUTOGESTIÓN ESTUDIANTIL (FASE 6 CEFI - SIEMPRE DISPONIBLE) ---

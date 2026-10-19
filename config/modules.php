@@ -30,6 +30,9 @@ return [
         'boletas_matricula' => true,
         'finanzas' => true,
 
+        // --- INTELIGENCIA ARTIFICIAL & TUTOR ---
+        'inbox_ai' => true,
+
         // --- NO CONTRATADO POR CEFI (OCULTOS / DESACTIVADOS) ---
         'inventario' => false,
         'planilla' => false,

@@ -562,6 +562,31 @@
                     @endif
                     @endif
 
+                    <!-- Cerebro & Tutor AI 2.0 (Menú Exclusivo de Inteligencia Artificial) -->
+                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
+                    @module('inbox_ai')
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-custom dropdown-toggle {{ Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-robot text-success me-1"></i> Cerebro AI
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark-custom">
+                            <li><h6 class="dropdown-header-custom"><i class="bi bi-cpu-fill text-success me-1"></i> Tutor & Asistente Inteligente</h6></li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom fw-semibold {{ Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="{{ route('configuracion.conocimiento_ai') }}">
+                                    <i class="bi bi-mortarboard-fill text-info me-2"></i> Base de Conocimiento (RAG)
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom" href="javascript:void(0)" onclick="const f = document.getElementById('inboxAiFab'); if(f) f.click();">
+                                    <i class="bi bi-chat-dots-fill text-success me-2"></i> Abrir Tutor Virtual (Chat)
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @endmodule
+                    @endif
+
                     <!-- Configuración Dropdown (Solo Administrador General con Clave) -->
                     @if(Auth::check() && Auth::user()->id_rol == 1)
                     <li class="nav-item dropdown">

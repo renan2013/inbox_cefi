@@ -527,9 +527,73 @@ class ConfiguracionController extends Controller
                 $table->text('respuesta');
                 $table->string('imagen')->nullable();
                 $table->string('categoria', 100)->default('General');
+                $table->string('ruta')->nullable();
                 $table->boolean('estado')->default(true);
                 $table->timestamps();
             });
+        } else {
+            if (!Schema::hasColumn('base_conocimiento_inbox_ai', 'ruta')) {
+                Schema::table('base_conocimiento_inbox_ai', function ($table) {
+                    $table->string('ruta')->nullable()->after('categoria');
+                });
+            }
+        }
+
+        // Si la tabla está vacía, sembramos conocimientos iniciales del tutor
+        if (DB::table('base_conocimiento_inbox_ai')->count() == 0) {
+            $initialKnowledge = [
+                [
+                    'pregunta' => '¿Cómo generar una boleta de pago o cobro a un estudiante?',
+                    'palabras_clave' => 'boleta, pago, cobro, cuota, mensualidad, factura, generar boleta',
+                    'respuesta' => 'Para generar una boleta de pago oficial, dirígete al menú <strong>Registro -> Generar Boleta de Pago</strong>. Selecciona el estudiante, el concepto, el monto en colones y la fecha de vencimiento. El sistema calculará automáticamente la mora si la fecha límite expira.',
+                    'categoria' => 'Finanzas y Pagos',
+                    'ruta' => 'boletas.generar',
+                    'estado' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'pregunta' => '¿Dónde consultar el estado de cuenta y morosidad institucional?',
+                    'palabras_clave' => 'morosidad, deudores, atrasados, estado de cuenta, mora, cobros',
+                    'respuesta' => 'Puedes consultar todos los saldos pendientes y el cálculo de mora en tiempo real desde <strong>Registro -> Control de Morosidad</strong> o accediendo al <strong>Estado de Cuenta</strong> individual de cada estudiante.',
+                    'categoria' => 'Finanzas y Pagos',
+                    'ruta' => 'boletas.morosidad',
+                    'estado' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'pregunta' => '¿Cómo consultar o crear un Expediente Digital 360°?',
+                    'palabras_clave' => 'expediente, expediente digital, record, notas, boletas, perfil alumno, 360',
+                    'respuesta' => 'Los Expedientes Digitales 360° unifican la ficha del alumno, sus notas oficiales, historial de boletas y documentos en PDF. Accede desde el menú <strong>Registro -> Expedientes Digitales 360°</strong>.',
+                    'categoria' => 'Registro Académico',
+                    'ruta' => 'expedientes.index',
+                    'estado' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'pregunta' => '¿Cómo funciona el portal de autogestión para los estudiantes?',
+                    'palabras_clave' => 'portal, estudiante, alumno, mis notas, descargar record, portal estudiante',
+                    'respuesta' => 'Los alumnos disponen de su propio <strong>Portal de Estudiante</strong> donde pueden consultar sus cursos matriculados, calificaciones y descargar su Récord Académico o Expediente Digital en PDF con validez oficial.',
+                    'categoria' => 'Portal Estudiante',
+                    'ruta' => 'estudiante.portal',
+                    'estado' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'pregunta' => '¿Cómo registrar o gestionar un curso y sílabo?',
+                    'palabras_clave' => 'curso, silabo, materia, asignatura, crear curso, registrar curso',
+                    'respuesta' => 'Puedes crear y configurar nuevos cursos con diseño de sílabo asistido por IA ingresando a <strong>Registro -> Registrar Curso</strong> o revisando tus aulas en <strong>Gestionar Curso -> Mis Cursos</strong>.',
+                    'categoria' => 'Gestión Académica',
+                    'ruta' => 'cursos.create',
+                    'estado' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ];
+            DB::table('base_conocimiento_inbox_ai')->insert($initialKnowledge);
         }
 
         $conocimientos = DB::table('base_conocimiento_inbox_ai')->orderBy('id', 'desc')->get();
@@ -543,6 +607,7 @@ class ConfiguracionController extends Controller
         $palabras_clave = trim($request->input('palabras_clave', ''));
         $respuesta = trim($request->input('respuesta', ''));
         $categoria = trim($request->input('categoria', 'General'));
+        $ruta = trim($request->input('ruta', ''));
         $estado = $request->has('estado') ? 1 : 0;
         $imagen_name = null;
 
@@ -551,8 +616,12 @@ class ConfiguracionController extends Controller
             $ext = strtolower($file->getClientOriginalExtension());
             $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
             if (in_array($ext, $allowed)) {
+                $destPath = public_path('uploads/conocimiento_ai');
+                if (!file_exists($destPath)) {
+                    @mkdir($destPath, 0777, true);
+                }
                 $imagen_name = 'ai_img_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
-                $file->move(public_path('uploads/conocimiento_ai'), $imagen_name);
+                $file->move($destPath, $imagen_name);
             }
         }
 
@@ -561,6 +630,7 @@ class ConfiguracionController extends Controller
             'palabras_clave' => $palabras_clave,
             'respuesta'      => $respuesta,
             'categoria'      => $categoria,
+            'ruta'           => !empty($ruta) ? $ruta : null,
             'estado'         => $estado,
             'updated_at'     => now()
         ];
