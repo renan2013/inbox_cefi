@@ -204,16 +204,7 @@
     <!-- Body / Chat Messages -->
     <div class="inbox-ai-body" id="inboxAiBody">
         <div class="ai-msg ai-msg-bot">
-            ¡Hola! 👋 <strong>¿Qué quieres saber acerca de Inbox?</strong>
-            <br><br>
-            Pregúntame sobre cualquier módulo, proceso o cómo realizar tareas en el sistema.
-            
-            <div class="ai-chips">
-                <div class="ai-chip" onclick="inboxAiAsk('¿Cómo gestionar un curso?')">🎓 Gestionar un curso</div>
-                <div class="ai-chip" onclick="inboxAiAsk('¿Cómo generar una boleta de pago?')">💳 Boleta de pago</div>
-                <div class="ai-chip" onclick="inboxAiAsk('¿Cómo ver un expediente digital 360?')">📁 Expedientes 360°</div>
-                <div class="ai-chip" onclick="inboxAiAsk('¿Cómo ver el control de morosidad?')">📊 Morosidad</div>
-            </div>
+            ¡Hola! 👋 ¿Qué quieres saber acerca de Inbox?
         </div>
     </div>
 
@@ -252,15 +243,7 @@
         resetBtn.addEventListener('click', () => {
             body.innerHTML = `
                 <div class="ai-msg ai-msg-bot">
-                    ¡Hola! 👋 <strong>¿Qué quieres saber acerca de Inbox?</strong>
-                    <br><br>
-                    Pregúntame sobre cualquier módulo, proceso o cómo realizar tareas en el sistema.
-                    <div class="ai-chips">
-                        <div class="ai-chip" onclick="inboxAiAsk('¿Cómo gestionar un curso?')">🎓 Gestionar un curso</div>
-                        <div class="ai-chip" onclick="inboxAiAsk('¿Cómo generar una boleta de pago?')">💳 Boleta de pago</div>
-                        <div class="ai-chip" onclick="inboxAiAsk('¿Cómo ver un expediente digital 360?')">📁 Expedientes 360°</div>
-                        <div class="ai-chip" onclick="inboxAiAsk('¿Cómo ver el control de morosidad?')">📊 Morosidad</div>
-                    </div>
+                    ¡Hola! 👋 ¿Qué quieres saber acerca de Inbox?
                 </div>
             `;
         });
