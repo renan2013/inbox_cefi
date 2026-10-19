@@ -390,11 +390,6 @@
                             <i class="bi bi-file-earmark-pdf me-1"></i> Mi Récord (PDF)
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-custom text-success fw-bold" href="javascript:void(0)" onclick="const f = document.getElementById('inboxAiFab'); if(f) f.click();">
-                            <i class="bi bi-robot text-success me-1"></i> Tutor AI
-                        </a>
-                    </li>
                     @endif
 
                     @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
@@ -662,8 +657,10 @@
         </div>
     </footer>
 
-    <!-- Widget Flotante Inbox AI 2.0 -->
+    <!-- Widget Flotante Inbox AI 2.0 (Solo Administración y Docentes) -->
+    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
     @include('partials.inbox_ai')
+    @endif
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

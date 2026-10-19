@@ -1,3 +1,4 @@
+@if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
 <!-- Widget Flotante de Chat Inteligente: Inbox AI 2.0 (Laravel View) -->
 <style>
     .inbox-ai-fab {
@@ -345,3 +346,4 @@
         }
     });
 </script>
+@endif
