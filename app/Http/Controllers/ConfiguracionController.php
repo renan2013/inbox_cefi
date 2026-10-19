@@ -637,6 +637,17 @@ class ConfiguracionController extends Controller
                     $table->string('descripcion', 255)->nullable();
                     $table->timestamps();
                 });
+            } else {
+                // Si la tabla ya existía sin timestamps, añadirlos
+                if (!Schema::hasColumn('configuracion_sistema_pagos', 'updated_at')) {
+                    try {
+                        Schema::table('configuracion_sistema_pagos', function (\Illuminate\Database\Schema\Blueprint $table) {
+                            $table->timestamps();
+                        });
+                    } catch (\Throwable $th) {
+                        // Continuar si no se pudo alterar tabla
+                    }
+                }
             }
 
             $defaults = [
@@ -651,10 +662,14 @@ class ConfiguracionController extends Controller
                 ['clave' => 'monto_matricula_base', 'valor' => '30000.00', 'categoria' => 'cargos', 'descripcion' => 'Monto predeterminado de Matrícula de Período (ADM-01)']
             ];
 
+            $hasTimestamps = Schema::hasColumn('configuracion_sistema_pagos', 'created_at') && Schema::hasColumn('configuracion_sistema_pagos', 'updated_at');
+
             foreach ($defaults as $d) {
                 if (!DB::table('configuracion_sistema_pagos')->where('clave', $d['clave'])->exists()) {
-                    $d['created_at'] = now();
-                    $d['updated_at'] = now();
+                    if ($hasTimestamps) {
+                        $d['created_at'] = now();
+                        $d['updated_at'] = now();
+                    }
                     DB::table('configuracion_sistema_pagos')->insert($d);
                 }
             }
@@ -726,10 +741,17 @@ class ConfiguracionController extends Controller
                 $datos['firma_oficial_imagen'] = '';
             }
 
+            $hasUpdatedAt = Schema::hasColumn('configuracion_sistema_pagos', 'updated_at');
+
             foreach ($datos as $clave => $valor) {
+                $payload = ['valor' => (string)$valor];
+                if ($hasUpdatedAt) {
+                    $payload['updated_at'] = now();
+                }
+
                 DB::table('configuracion_sistema_pagos')->updateOrInsert(
                     ['clave' => $clave],
-                    ['valor' => (string)$valor, 'updated_at' => now()]
+                    $payload
                 );
             }
 
