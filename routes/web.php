@@ -69,6 +69,98 @@ Route::get('/sistema/migrar', function () {
     }
 })->name('sistema.migrar');
 
+// Ruta utilitaria para sembrar la Base de Conocimiento de 500 preguntas del Tutor AI en Producción
+Route::get('/sistema/sembrar-conocimiento', function () {
+    try {
+        $seeder = new \Database\Seeders\BaseConocimientoInboxAiSeeder();
+        $res = $seeder->run();
+
+        $cargados = $res['total_cargados'] ?? 500;
+        $insertados = $res['insertados'] ?? 0;
+        $actualizados = $res['actualizados'] ?? 0;
+        $totalBd = $res['total_en_bd'] ?? 0;
+
+        return response("
+        <!DOCTYPE html>
+        <html lang='es'>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Base de Conocimiento 360° Sembrada - CEFI Tutor AI</title>
+            <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+            <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+            <style>
+                body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; padding: 40px 15px; }
+                .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+                .accent-pill { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 4px 14px; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; display: inline-block; }
+                .stat-box { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <div class='container' style='max-width: 800px;'>
+                <div class='glass-card p-4 p-md-5'>
+                    <div class='d-flex align-items-center justify-content-between border-bottom pb-4 mb-4 border-secondary border-opacity-25'>
+                        <div>
+                            <span class='accent-pill mb-2'><i class='fa-solid fa-robot me-1'></i> Tutor AI 2.0 CEFI</span>
+                            <h2 class='fw-bold mb-0 text-white'>Base de Conocimiento Sembrada</h2>
+                            <p class='text-secondary mb-0'>El cerebro RAG ha sido enriquecido con las 500 preguntas y respuestas institucionales.</p>
+                        </div>
+                        <div class='text-end'>
+                            <span class='badge bg-success p-2 px-3 fs-6'><i class='fa-solid fa-check-circle me-1'></i> 100% Operativo</span>
+                        </div>
+                    </div>
+
+                    <div class='row g-3 mb-4'>
+                        <div class='col-sm-3'>
+                            <div class='stat-box'>
+                                <h3 class='text-info fw-bold mb-0'>{$cargados}</h3>
+                                <small class='text-secondary'>Preguntas Dataset</small>
+                            </div>
+                        </div>
+                        <div class='col-sm-3'>
+                            <div class='stat-box'>
+                                <h3 class='text-success fw-bold mb-0'>{$insertados}</h3>
+                                <small class='text-secondary'>Nuevas Insertadas</small>
+                            </div>
+                        </div>
+                        <div class='col-sm-3'>
+                            <div class='stat-box'>
+                                <h3 class='text-warning fw-bold mb-0'>{$actualizados}</h3>
+                                <small class='text-secondary'>Actualizadas</small>
+                            </div>
+                        </div>
+                        <div class='col-sm-3'>
+                            <div class='stat-box'>
+                                <h3 class='text-white fw-bold mb-0'>{$totalBd}</h3>
+                                <small class='text-secondary'>Total en BD</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class='alert alert-dark bg-dark bg-opacity-50 border-secondary border-opacity-25 text-light p-3 rounded-3 mb-4'>
+                        <h6 class='fw-bold text-info mb-2'><i class='fa-solid fa-layer-group me-2'></i>20 Módulos Cubiertos:</h6>
+                        <p class='small mb-0 text-secondary'>Acceso y Seguridad, Dashboard, Tareas BPM, Usuarios, Programas, Cursos y Sílabos, Grupos y Aulas, Cursos Libres, Expedientes 360°, Facturación, Firmas Digitales, Finanzas y Mora, Gestión Docente, Asistencia y Planilla, Portal Estudiante, TCU (150h), Convalidaciones, Retiros, Graduaciones, Marketing y Tutor AI.</p>
+                    </div>
+
+                    <div class='d-flex flex-wrap gap-2 pt-3 border-top border-secondary border-opacity-25'>
+                        <a href='/configuracion/conocimiento-ai' class='btn btn-success px-4 fw-bold shadow-sm'><i class='fa-solid fa-brain me-2'></i>Ver Base de Conocimiento (Admin)</a>
+                        <a href='/dashboard' class='btn btn-outline-light px-3'><i class='fa-solid fa-house me-2'></i>Ir al Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        ", 200, ['Content-Type' => 'text/html']);
+    } catch (\Throwable $e) {
+        return response("
+            <div style='background: #1e1e2d; color: #ff6b6b; padding: 30px; font-family: monospace; border-radius: 8px; margin: 30px auto; max-width: 800px; border: 1px solid #ff4d4f;'>
+                <h2><i class='fa fa-exclamation-triangle'></i> Error al Sembrar Base de Conocimiento</h2>
+                <p><strong>Mensaje:</strong> " . htmlspecialchars($e->getMessage()) . "</p>
+                <pre style='background: #151521; color: #f8f9fa; padding: 15px; border-radius: 6px; overflow-x: auto;'>" . htmlspecialchars($e->getTraceAsString()) . "</pre>
+            </div>
+        ", 500, ['Content-Type' => 'text/html']);
+    }
+})->name('sistema.sembrar_conocimiento');
+
 
 
 Route::middleware('auth')->group(function () {

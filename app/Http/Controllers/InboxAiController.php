@@ -55,11 +55,65 @@ class InboxAiController extends Controller
                     }
                 }
 
-                // B) Ruta del módulo
+                // B) Ruta del módulo con etiqueta amigable
                 $ruta_final = trim($matchedItem->ruta ?? '');
                 if (!empty($ruta_final)) {
                     $ruta_url = str_contains($ruta_final, 'http') ? $ruta_final : (str_contains($ruta_final, '/') ? asset($ruta_final) : (\Illuminate\Support\Facades\Route::has($ruta_final) ? route($ruta_final) : url($ruta_final)));
-                    $reply .= "<br><div class='mt-3'><a href='{$ruta_url}' class='btn btn-sm btn-success rounded-pill px-4 py-2 fw-bold text-white shadow-sm' style='background-color: #5fb230 !important; border: none; display: inline-flex; align-items: center;'><i class='bi bi-box-arrow-up-right me-2'></i> Ir al Módulo: " . htmlspecialchars($ruta_final) . "</a></div>";
+                    
+                    $ruta_label = match($ruta_final) {
+                        'boletas.generar' => 'Generar Boleta de Pago',
+                        'boletas.index' => 'Control de Boletas',
+                        'boletas.morosidad' => 'Control de Morosidad',
+                        'boletas.estado_cuenta' => 'Estado de Cuenta',
+                        'expedientes.index' => 'Expedientes Digitales 360°',
+                        'expedientes.create' => 'Nuevo Expediente 360°',
+                        'estudiante.portal' => 'Portal del Estudiante',
+                        'estudiante.mi_record_pdf' => 'Descargar Récord Académico',
+                        'estudiante.mi_expediente_pdf' => 'Descargar Expediente 360°',
+                        'cursos.create' => 'Registrar Nuevo Curso',
+                        'cursos.index' => 'Catálogo de Cursos',
+                        'programas.index' => 'Programas Académicos',
+                        'programas.completos' => 'Programas Completos',
+                        'grupos.index' => 'Grupos y Aulas',
+                        'mis_cursos.index' => 'Mis Cursos (Docente)',
+                        'supervision.index' => 'Supervisión de Cursos',
+                        'tcu.index' => 'Seguimiento de TCU',
+                        'tcu.create' => 'Registrar Proyecto TCU',
+                        'tcu.imprimir' => 'Liquidación de TCU',
+                        'convalidaciones.index' => 'Convalidaciones y Homologaciones',
+                        'convalidaciones.create' => 'Nueva Convalidación',
+                        'retiros.index' => 'Retiros de Asignatura',
+                        'retiros.create' => 'Solicitar Retiro de Materia',
+                        'graduaciones.index' => 'Expedientes de Graduación',
+                        'graduaciones.create' => 'Nueva Postulación a Grado',
+                        'graduaciones.dictamen_pdf' => 'Dictamen de Graduación',
+                        'usuarios.index' => 'Gestión de Usuarios',
+                        'usuarios.create' => 'Registrar Nuevo Usuario',
+                        'dashboard' => 'Dashboard Principal',
+                        'asistencia.marcar' => 'Reloj Marcador de Asistencia',
+                        'asistencia.historial' => 'Historial de Asistencia',
+                        'planilla.index' => 'Cálculo de Planilla',
+                        'planilla.empleados' => 'Catálogo de Empleados',
+                        'planilla.credencial' => 'Credencial con Código QR',
+                        'planilla.escanear' => 'Escáner QR de Asistencia',
+                        'whatsapp.campanas.index' => 'Campañas de WhatsApp',
+                        'marketing.prospectos.index' => 'Prospectos y Leads',
+                        'solicitudes.index' => 'Solicitudes de Cursos Libres',
+                        'solicitudes.public' => 'Formulario de Cursos Libres',
+                        'claves.index' => 'Bóveda Segura de Claves',
+                        'plantillas.index' => 'Automatizaciones y Diplomas',
+                        'videotutoriales.index' => 'Videotutoriales de Capacitación',
+                        'biblioteca.index' => 'Biblioteca de Medios',
+                        'encuestas.preguntas' => 'Preguntas de Evaluación Docente',
+                        'encuestas.resultados' => 'Resultados de Encuestas',
+                        'configuracion.index' => 'Configuración del Sistema',
+                        'configuracion.pagos' => 'Parámetros de Pagos y Mora',
+                        'configuracion.login' => 'Acceso de Seguridad Superior',
+                        'configuracion.conocimiento_ai' => 'Base de Conocimiento Tutor AI',
+                        default => ucwords(str_replace(['.', '_', '-'], ' ', $ruta_final))
+                    };
+
+                    $reply .= "<br><div class='mt-3'><a href='{$ruta_url}' class='btn btn-sm btn-success rounded-pill px-4 py-2 fw-bold text-white shadow-sm' style='background-color: #5fb230 !important; border: none; display: inline-flex; align-items: center;'><i class='bi bi-box-arrow-up-right me-2'></i> Ir a: " . htmlspecialchars($ruta_label) . "</a></div>";
                 }
 
                 // C) Métricas en vivo
