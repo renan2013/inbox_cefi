@@ -105,6 +105,51 @@
             border-color: var(--primary);
             color: var(--primary);
         }
+
+        /* --- MODO CLARO / LIGHT THEME --- */
+        [data-theme="light"] .glass-card {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .form-label-custom {
+            color: #1e293b !important;
+        }
+
+        [data-theme="light"] .form-control-custom {
+            background-color: #f8fafc !important;
+            border: 1.5px solid #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .form-control-custom:focus {
+            background-color: #ffffff !important;
+            border-color: var(--primary, #5fb230) !important;
+            box-shadow: 0 0 0 4px rgba(95, 178, 48, 0.15) !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .btn-secondary-custom {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #475569 !important;
+        }
+
+        [data-theme="light"] .btn-secondary-custom:hover {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            border-color: #94a3b8 !important;
+        }
+
+        [data-theme="light"] #togglePasswordVisibility {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        [data-theme="light"] #togglePasswordVisibility i {
+            color: #64748b !important;
+        }
     </style>
 @endsection
 
@@ -121,7 +166,7 @@
         </nav>
 
         <div class="row justify-content-center">
-            <div class="col-xl-6 col-lg-8">
+            <div class="col-12 col-xl-11">
                 
                 <!-- Success Details Card (from Session) -->
                 @if (session('new_user_details'))
@@ -179,49 +224,50 @@
                         <form action="{{ route('usuarios.store') }}" method="post">
                             @csrf
                             <div class="row">
-                                <div class="col-md-6 mb-4">
+                                <div class="col-md-6 mb-3">
                                     <label for="nombre" class="form-label form-label-custom"><i class="bi bi-person"></i> Nombres</label>
                                     <input type="text" name="nombre" id="nombre" class="form-control form-control-custom" placeholder="Ej: Juan" value="{{ old('nombre') }}" required>
                                 </div>
-                                <div class="col-md-6 mb-4">
+                                <div class="col-md-6 mb-3">
                                     <label for="apellidos" class="form-label form-label-custom"><i class="bi bi-person"></i> Apellidos</label>
                                     <input type="text" name="apellidos" id="apellidos" class="form-control form-control-custom" placeholder="Ej: Pérez García" value="{{ old('apellidos') }}" required>
                                 </div>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label for="cedula" class="form-label form-label-custom"><i class="bi bi-card-text"></i> Identificación</label>
-                                <input type="text" name="cedula" id="cedula" class="form-control form-control-custom" placeholder="Formato nacional o pasaporte" value="{{ old('cedula') }}" required>
-                            </div>
 
-                            <div class="mb-4">
-                                <label for="email" class="form-label form-label-custom"><i class="bi bi-envelope"></i> Correo Electrónico</label>
-                                <input type="email" name="email" id="email" class="form-control form-control-custom" placeholder="nombre@ejemplo.com" value="{{ old('email') }}" required>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="telefono" class="form-label form-label-custom"><i class="bi bi-whatsapp"></i> Teléfono / WhatsApp</label>
-                                <input type="text" name="telefono" id="telefono" class="form-control form-control-custom" placeholder="Ej: 50688889999" value="{{ old('telefono') }}">
-                                <div class="form-text text-white-50">Incluya el código de país (ej: 506 para CR).</div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="password" class="form-label form-label-custom"><i class="bi bi-shield-lock"></i> Contraseña</label>
-                                <div class="input-group">
-                                    <input type="password" name="password" id="password" class="form-control form-control-custom border-end-0" placeholder="Escriba o genere una" required>
-                                    <button class="btn btn-outline-secondary border-start-0 px-3 border-2" type="button" id="togglePasswordVisibility" style="border-radius: 0 0.75rem 0.75rem 0; border-color: var(--border-dark); background-color: rgba(255,255,255,0.02);">
-                                        <i class="bi bi-eye-slash text-white-50"></i>
-                                    </button>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cedula" class="form-label form-label-custom"><i class="bi bi-card-text"></i> Identificación</label>
+                                    <input type="text" name="cedula" id="cedula" class="form-control form-control-custom" placeholder="Formato nacional o pasaporte" value="{{ old('cedula') }}" required>
                                 </div>
-                                <div class="mt-3">
-                                    <button class="btn btn-secondary-custom" type="button" id="generatePasswordBtn">
-                                        <i class="bi bi-magic me-1"></i> Generar contraseña segura
-                                    </button>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label form-label-custom"><i class="bi bi-envelope"></i> Correo Electrónico</label>
+                                    <input type="email" name="email" id="email" class="form-control form-control-custom" placeholder="nombre@ejemplo.com" value="{{ old('email') }}" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="telefono" class="form-label form-label-custom"><i class="bi bi-whatsapp"></i> Teléfono / WhatsApp</label>
+                                    <input type="text" name="telefono" id="telefono" class="form-control form-control-custom" placeholder="Ej: 50688889999" value="{{ old('telefono') }}">
+                                    <div class="form-text text-white-50 small">Incluya el código de país (ej: 506 para CR).</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label for="password" class="form-label form-label-custom mb-0"><i class="bi bi-shield-lock"></i> Contraseña</label>
+                                        <button class="btn btn-secondary-custom py-0 px-2" style="font-size: 0.75rem;" type="button" id="generatePasswordBtn">
+                                            <i class="bi bi-magic me-1"></i> Generar segura
+                                        </button>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="password" name="password" id="password" class="form-control form-control-custom border-end-0" placeholder="Escriba o genere una" required>
+                                        <button class="btn btn-outline-secondary border-start-0 px-3 border-2" type="button" id="togglePasswordVisibility" style="border-radius: 0 0.75rem 0.75rem 0; border-color: var(--border-dark); background-color: rgba(255,255,255,0.02);">
+                                            <i class="bi bi-eye-slash text-white-50"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="d-grid mt-5">
-                                <button type="submit" class="btn btn-submit">
+                            <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top" style="border-color: var(--border-dark) !important;">
+                                <a href="{{ route('usuarios.index') }}" class="btn btn-secondary-custom py-2 px-4">
+                                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-submit px-4 py-2">
                                     <i class="bi bi-person-plus-fill me-2"></i> Registrar Usuario
                                 </button>
                             </div>
