@@ -362,12 +362,20 @@
                     </div>
                 </div>
 
-                <div class="d-flex align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                    <div class="px-3 py-2 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-30 text-center" id="box_capital_pendiente">
+                        <small class="text-primary fw-bold d-block text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">Capital Pendiente</small>
+                        <strong class="text-primary fs-5 font-monospace" id="capital_pendiente">₡0.00</strong>
+                    </div>
+                    <div class="px-3 py-2 rounded-4 bg-warning bg-opacity-10 border border-warning border-opacity-30 text-center" id="box_mora_acumulada" style="display: none;">
+                        <small class="text-warning fw-bold d-block text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">Mora Acumulada</small>
+                        <strong class="text-warning fs-5 font-monospace" id="mora_acumulada">+₡0.00</strong>
+                    </div>
                     <div class="px-4 py-2 rounded-4 bg-danger bg-opacity-10 border border-danger border-opacity-30 text-center">
                         <small class="text-danger fw-bold d-block text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Deuda Total Pendiente</small>
-                        <strong class="text-danger fs-3" id="deuda_total">₡0.00</strong>
+                        <strong class="text-danger fs-4 font-monospace" id="deuda_total">₡0.00</strong>
                     </div>
-                    <button class="btn btn-outline-light rounded-pill px-4 py-2 fw-semibold" onclick="recargarEstadoCuentaActual()">
+                    <button class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold" onclick="recargarEstadoCuentaActual()">
                         <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
                     </button>
                     <button class="btn btn-success rounded-pill px-4 py-2 fw-bold" onclick="irAGenerarBoleta()" style="background-color: var(--primary); border: none;">
@@ -415,6 +423,7 @@
                                     <th>Total Original</th>
                                     <th>Monto Pagado</th>
                                     <th>Saldo Pendiente</th>
+                                    <th>Próximo Vencimiento</th>
                                     <th>Estado</th>
                                     <th class="text-end">Acciones</th>
                                 </tr>
@@ -581,13 +590,25 @@
                     $('#telefono_estudiante_badge').html('<span class="text-white-50"><i class="bi bi-telephone-x me-1"></i>Sin Teléfono</span>').show();
                 }
 
-                $('#deuda_total').text(formatCurrency(data.estudiante.deuda_total));
+                const capitalTotal = parseFloat(data.estudiante.total_capital || (data.resumen && data.resumen.total_capital) || 0);
+                const moraTotal = parseFloat(data.estudiante.total_mora || (data.resumen && data.resumen.total_mora) || 0);
+                const deudaTotal = parseFloat(data.estudiante.deuda_total || (data.resumen && data.resumen.deuda_total) || 0);
+
+                $('#capital_pendiente').text(formatCurrency(capitalTotal));
+                $('#deuda_total').text(formatCurrency(deudaTotal));
+
+                if (moraTotal > 0) {
+                    $('#box_mora_acumulada').show();
+                    $('#mora_acumulada').text('+' + formatCurrency(moraTotal));
+                } else {
+                    $('#box_mora_acumulada').hide();
+                }
 
                 // 1. Render Boletas
                 boletasCache = {};
                 let tBoletas = $('#tabla_boletas').empty();
                 if (data.boletas.length === 0) {
-                    tBoletas.append('<tr><td colspan="8" class="text-center py-4 text-white-50">No hay boletas generadas para este estudiante.</td></tr>');
+                    tBoletas.append('<tr><td colspan="9" class="text-center py-4 text-white-50">No hay boletas generadas para este estudiante.</td></tr>');
                 } else {
                     data.boletas.forEach(function(b) {
                         boletasCache[b.id] = b;
@@ -614,6 +635,58 @@
                                          </button>`;
                         }
 
+                        let vencHtml = '';
+                        const pv = b.proximo_vencimiento;
+                        if (pv) {
+                            if (pv.estado === 'pagada') {
+                                vencHtml = `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Al día / Pagada
+                                            </span>`;
+                            } else if (pv.estado === 'vencida') {
+                                vencHtml = `<div class="d-flex flex-column">
+                                                <span class="fw-bold text-danger" style="font-size: 0.88rem;">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>${pv.fecha}
+                                                </span>
+                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-0 mt-1 align-self-start fw-bold" style="font-size: 0.7rem;">
+                                                    Venció hace ${Math.abs(pv.diff_dias)} d (Cuota ${pv.cuota_num}/${pv.total_cuotas})
+                                                </span>
+                                            </div>`;
+                            } else if (pv.estado === 'hoy') {
+                                vencHtml = `<div class="d-flex flex-column">
+                                                <span class="fw-bold text-danger" style="font-size: 0.88rem;">
+                                                    <i class="bi bi-bell-fill me-1"></i>${pv.fecha}
+                                                </span>
+                                                <span class="badge bg-danger text-white rounded-pill px-2 py-0 mt-1 align-self-start fw-bold" style="font-size: 0.7rem;">
+                                                    ¡Vence Hoy! (Cuota ${pv.cuota_num}/${pv.total_cuotas})
+                                                </span>
+                                            </div>`;
+                            } else if (pv.estado === 'pronto') {
+                                vencHtml = `<div class="d-flex flex-column">
+                                                <span class="fw-bold text-warning" style="font-size: 0.88rem;">
+                                                    <i class="bi bi-clock-history me-1"></i>${pv.fecha}
+                                                </span>
+                                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2 py-0 mt-1 align-self-start fw-bold" style="font-size: 0.7rem;">
+                                                    Vence en ${pv.diff_dias} d (Cuota ${pv.cuota_num}/${pv.total_cuotas})
+                                                </span>
+                                            </div>`;
+                            } else if (pv.estado === 'al_dia') {
+                                vencHtml = `<div class="d-flex flex-column">
+                                                <span class="fw-bold" style="font-size: 0.88rem;">
+                                                    <i class="bi bi-calendar-check me-1 text-success"></i>${pv.fecha}
+                                                </span>
+                                                <span class="text-white-50 small mt-1" style="font-size: 0.75rem;">
+                                                    Cuota ${pv.cuota_num} de ${pv.total_cuotas} (en ${pv.diff_dias} d)
+                                                </span>
+                                            </div>`;
+                            } else {
+                                vencHtml = `<span class="badge bg-secondary bg-opacity-25 text-white-50 rounded-pill px-2 py-1" style="font-size: 0.75rem;" title="Boleta de contado o sin cuotas fraccionadas registradas">
+                                                <i class="bi bi-dash-circle me-1"></i>Sin letras
+                                            </span>`;
+                            }
+                        } else {
+                            vencHtml = `<span class="badge bg-secondary bg-opacity-25 text-white-50 rounded-pill px-2 py-1" style="font-size: 0.75rem;"><i class="bi bi-dash-circle me-1"></i>Sin letras</span>`;
+                        }
+
                         tBoletas.append(`
                             <tr>
                                 <td><strong class="text-white">${b.numero_boleta}</strong></td>
@@ -625,6 +698,7 @@
                                     ${formatCurrency(b.saldo_pendiente)}
                                     ${b.interes_acumulado > 0 ? `<br><small class="text-warning" style="font-size:0.75rem;">(mora: ${formatCurrency(b.interes_acumulado)})</small>` : ''}
                                 </td>
+                                <td>${vencHtml}</td>
                                 <td><span class="status-badge ${badgeClass}">${b.estado}</span></td>
                                 <td class="text-end text-nowrap">${viewPdfBtn}${payBtn}${anularBtn}</td>
                             </tr>

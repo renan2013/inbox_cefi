@@ -277,7 +277,8 @@ class BoletaController extends Controller
                 // Continuar si falla el recálculo
             }
 
-            $boletas = Boleta::where('id_estudiante', $id)
+            $boletas = Boleta::with(['proximaCuota', 'seguimientoPagos'])
+                ->where('id_estudiante', $id)
                 ->orderBy('fecha_creacion', 'desc')
                 ->get();
 
@@ -315,11 +316,47 @@ class BoletaController extends Controller
                 }
             }
 
-            $totalDeuda = floatval(
-                $boletas->whereIn('estado', ['pendiente', 'pago_parcial', 'en_arreglo'])->sum('saldo_pendiente')
-            );
+            $boletasPendientes = $boletas->whereIn('estado', ['pendiente', 'pago_parcial', 'en_arreglo']);
+            $totalDeuda = floatval($boletasPendientes->sum('saldo_pendiente'));
+            $totalMora = floatval($boletasPendientes->sum('interes_acumulado'));
+            $totalCapital = max(0, $totalDeuda - $totalMora);
 
             $boletasMapped = $boletas->map(function($b) {
+                $cuotaActiva = $b->proximaCuota;
+                $totalCuotas = $b->seguimientoPagos ? $b->seguimientoPagos->count() : ($b->cuotas ?: 1);
+                if ($totalCuotas <= 0) $totalCuotas = 1;
+
+                $vencimientoStr = null;
+                if ($cuotaActiva && $cuotaActiva->fecha_vencimiento) {
+                    $vencimientoStr = $cuotaActiva->fecha_vencimiento instanceof Carbon 
+                        ? $cuotaActiva->fecha_vencimiento->format('Y-m-d') 
+                        : Carbon::parse($cuotaActiva->fecha_vencimiento)->format('Y-m-d');
+                } elseif (!empty($b->fechas_vencimiento_json)) {
+                    $fechasArr = json_decode($b->fechas_vencimiento_json, true);
+                    if (is_array($fechasArr) && count($fechasArr) > 0) {
+                        $vencimientoStr = $fechasArr[0];
+                    }
+                }
+
+                $diffDias = null;
+                $estadoVencimiento = 'sin_letras';
+                if ($b->estado === 'pagada' || $b->saldo_pendiente <= 0) {
+                    $estadoVencimiento = 'pagada';
+                } elseif ($vencimientoStr) {
+                    $hoy = Carbon::today();
+                    $fechaVenc = Carbon::parse($vencimientoStr)->startOfDay();
+                    $diffDias = (int)$hoy->diffInDays($fechaVenc, false);
+                    if ($diffDias < 0) {
+                        $estadoVencimiento = 'vencida';
+                    } elseif ($diffDias === 0) {
+                        $estadoVencimiento = 'hoy';
+                    } elseif ($diffDias <= 5) {
+                        $estadoVencimiento = 'pronto';
+                    } else {
+                        $estadoVencimiento = 'al_dia';
+                    }
+                }
+
                 return [
                     'id' => $b->id,
                     'numero_boleta' => $b->numero_boleta ?? 'B-' . str_pad($b->id, 6, '0', STR_PAD_LEFT),
@@ -331,7 +368,14 @@ class BoletaController extends Controller
                     'estado' => $b->estado,
                     'periodo' => $b->periodo,
                     'token_firma' => $b->token_firma,
-                    'pdf_url' => route('boletas.pdf', ['id' => $b->id])
+                    'pdf_url' => route('boletas.pdf', ['id' => $b->id]),
+                    'proximo_vencimiento' => [
+                        'fecha' => $vencimientoStr ? Carbon::parse($vencimientoStr)->format('d/m/Y') : null,
+                        'cuota_num' => $cuotaActiva ? $cuotaActiva->numero_cuota : 1,
+                        'total_cuotas' => $totalCuotas,
+                        'diff_dias' => $diffDias,
+                        'estado' => $estadoVencimiento
+                    ]
                 ];
             });
 
@@ -373,6 +417,13 @@ class BoletaController extends Controller
                 ];
             });
 
+            $resumenData = [
+                'deuda_total' => $totalDeuda,
+                'total_capital' => $totalCapital,
+                'total_mora' => $totalMora,
+                'boletas_pendientes' => $boletas->whereNotIn('estado', ['pagada', 'anulada'])->count(),
+            ];
+
             $estudianteData = [
                 'id' => $estudiante->id,
                 'nombre' => trim($estudiante->nombre . ' ' . ($estudiante->apellidos ?? '')),
@@ -380,17 +431,16 @@ class BoletaController extends Controller
                 'email' => $estudiante->email,
                 'telefono' => preg_replace('/[^0-9]/', '', $estudiante->telefono ?? ''),
                 'cedula' => $estudiante->cedula ?? '',
-                'deuda_total' => $totalDeuda
+                'deuda_total' => $totalDeuda,
+                'total_capital' => $totalCapital,
+                'total_mora' => $totalMora
             ];
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'estudiante' => $estudianteData,
-                    'resumen' => [
-                        'deuda_total' => $totalDeuda,
-                        'boletas_pendientes' => $boletas->whereNotIn('estado', ['pagada', 'anulada'])->count(),
-                    ],
+                    'resumen' => $resumenData,
                     'boletas' => $boletasMapped,
                     'letras' => $letrasMapped,
                     'pagos' => $pagosMapped,
@@ -398,10 +448,7 @@ class BoletaController extends Controller
                 ],
                 // Compatibilidad raíz con la vista estado_cuenta.blade.php
                 'estudiante' => $estudianteData,
-                'resumen' => [
-                    'deuda_total' => $totalDeuda,
-                    'boletas_pendientes' => $boletas->whereNotIn('estado', ['pagada', 'anulada'])->count(),
-                ],
+                'resumen' => $resumenData,
                 'boletas' => $boletasMapped,
                 'pagos' => $pagosMapped,
                 'letras' => $letrasMapped,
