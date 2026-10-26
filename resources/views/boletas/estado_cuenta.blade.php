@@ -522,9 +522,13 @@
                 }
 
                 $('#contenedor_estado_cuenta').fadeIn();
-            }).fail(function() {
+            }).fail(function(jqXHR) {
                 $('#loading_estado_cuenta').hide();
-                Swal.fire('Error', 'No se pudo cargar la información financiera del estudiante.', 'error');
+                let msg = 'No se pudo cargar la información financiera del estudiante.';
+                if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                    msg = jqXHR.responseJSON.message;
+                }
+                Swal.fire('Error', msg, 'error');
             });
         }
 

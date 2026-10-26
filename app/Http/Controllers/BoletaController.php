@@ -260,73 +260,66 @@ class BoletaController extends Controller
      */
     public function getEstadoCuentaAjax($id)
     {
-        self::ensureBoletasColumns();
-        InteresesService::recalcularInteresesEstudiante($id);
+        try {
+            self::ensureBoletasColumns();
 
-        $estudiante = Usuario::findOrFail($id);
+            $estudiante = Usuario::find($id);
+            if (!$estudiante) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Estudiante no encontrado (ID: ' . $id . ').'
+                ], 404);
+            }
 
-        $boletas = Boleta::where('id_estudiante', $id)
-            ->orderBy('fecha_creacion', 'desc')
-            ->get();
+            try {
+                InteresesService::recalcularInteresesEstudiante($id);
+            } catch (\Throwable $eInteres) {
+                // Continuar si falla el recálculo
+            }
 
-        $pagos = Pago::whereIn('boleta_id', $boletas->pluck('id'))
-            ->orderBy('fecha_pago', 'desc')
-            ->get();
+            $boletas = Boleta::where('id_estudiante', $id)
+                ->orderBy('fecha_creacion', 'desc')
+                ->get();
 
-        $letras = SeguimientoPago::where('id_estudiante', $id)
-            ->with('boleta')
-            ->orderBy('fecha_vencimiento', 'asc')
-            ->get();
+            $boletasIds = $boletas->pluck('id')->filter()->all();
 
-        $arreglos = ArregloPago::where('id_estudiante', $id)
-            ->where('estado', 'activo')
-            ->get();
+            $pagos = collect();
+            if (Schema::hasTable('pagos') && count($boletasIds) > 0) {
+                $pagos = Pago::whereIn('boleta_id', $boletasIds)
+                    ->orderBy('fecha_pago', 'desc')
+                    ->get();
+            }
 
-        $totalDeuda = floatval(
-            $boletas->whereIn('estado', ['pendiente', 'pago_parcial', 'en_arreglo'])->sum('saldo_pendiente')
-        );
+            $letras = collect();
+            if (Schema::hasTable('seguimiento_pagos')) {
+                $letras = SeguimientoPago::where('id_estudiante', $id)
+                    ->with('boleta')
+                    ->orderBy('fecha_vencimiento', 'asc')
+                    ->get();
+            }
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'estudiante' => [
-                    'id' => $estudiante->id,
-                    'nombre' => $estudiante->nombre,
-                    'apellidos' => $estudiante->apellidos ?? '',
-                    'email' => $estudiante->email,
-                    'telefono' => $estudiante->telefono ?? '',
-                    'cedula' => $estudiante->cedula ?? ''
-                ],
-                'resumen' => [
-                    'deuda_total' => $totalDeuda,
-                    'boletas_pendientes' => $boletas->whereNotIn('estado', ['pagada', 'anulada'])->count(),
-                ],
-                'boletas' => $boletas->map(function($b) {
-                    return [
-                        'id' => $b->id,
-                        'numero_boleta' => $b->numero_boleta ?? 'B-' . str_pad($b->id, 6, '0', STR_PAD_LEFT),
-                        'fecha_creacion' => $b->fecha_creacion ? Carbon::parse($b->fecha_creacion)->format('Y-m-d') : 'N/D',
-                        'total' => floatval($b->total),
-                        'monto_pagado' => floatval($b->monto_pagado ?? 0),
-                        'saldo_pendiente' => floatval($b->saldo_pendiente ?? 0),
-                        'interes_acumulado' => floatval($b->interes_acumulado ?? 0),
-                        'estado' => $b->estado,
-                        'periodo' => $b->periodo,
-                        'token_firma' => $b->token_firma,
-                        'pdf_url' => route('boletas.pdf', ['id' => $b->id])
-                    ];
-                })
-            ],
-            // Compatibilidad legacy
-            'estudiante' => [
-                'id' => $estudiante->id,
-                'nombre' => trim($estudiante->nombre . ' ' . ($estudiante->apellidos ?? '')),
-                'email' => $estudiante->email,
-                'telefono' => preg_replace('/[^0-9]/', '', $estudiante->telefono ?? ''),
-                'cedula' => $estudiante->cedula ?? '',
-                'deuda_total' => $totalDeuda
-            ],
-            'boletas' => $boletas->map(function($b) {
+            $arreglos = collect();
+            if (Schema::hasTable('arreglos_pago')) {
+                try {
+                    $colEst = Schema::hasColumn('arreglos_pago', 'estudiante_id') 
+                        ? 'estudiante_id' 
+                        : (Schema::hasColumn('arreglos_pago', 'id_estudiante') ? 'id_estudiante' : null);
+                    if ($colEst) {
+                        $arreglos = DB::table('arreglos_pago')
+                            ->where($colEst, $id)
+                            ->where('estado', 'activo')
+                            ->get();
+                    }
+                } catch (\Throwable $eArr) {
+                    $arreglos = collect();
+                }
+            }
+
+            $totalDeuda = floatval(
+                $boletas->whereIn('estado', ['pendiente', 'pago_parcial', 'en_arreglo'])->sum('saldo_pendiente')
+            );
+
+            $boletasMapped = $boletas->map(function($b) {
                 return [
                     'id' => $b->id,
                     'numero_boleta' => $b->numero_boleta ?? 'B-' . str_pad($b->id, 6, '0', STR_PAD_LEFT),
@@ -340,11 +333,86 @@ class BoletaController extends Controller
                     'token_firma' => $b->token_firma,
                     'pdf_url' => route('boletas.pdf', ['id' => $b->id])
                 ];
-            }),
-            'pagos' => $pagos,
-            'letras' => $letras,
-            'arreglos' => $arreglos
-        ]);
+            });
+
+            $letrasMapped = $letras->map(function($l) {
+                $boletaNum = 'N/D';
+                if ($l->boleta) {
+                    $boletaNum = $l->boleta->numero_boleta ?? ('B-' . str_pad($l->boleta->id, 6, '0', STR_PAD_LEFT));
+                }
+                return [
+                    'id' => $l->id,
+                    'numero_cuota' => $l->numero_cuota ?? 1,
+                    'boleta_numero' => $boletaNum,
+                    'monto_cuota' => floatval($l->monto_cuota ?? 0),
+                    'interes_acumulado' => floatval($l->interes_acumulado ?? 0),
+                    'fecha_vencimiento' => $l->fecha_vencimiento ? Carbon::parse($l->fecha_vencimiento)->format('Y-m-d') : 'N/D',
+                    'estado' => $l->estado ?? 'pendiente'
+                ];
+            });
+
+            $pagosMapped = $pagos->map(function($p) {
+                return [
+                    'id' => $p->id,
+                    'boleta_id' => $p->boleta_id,
+                    'monto' => floatval($p->monto ?? 0),
+                    'fecha_pago' => $p->fecha_pago ? Carbon::parse($p->fecha_pago)->format('Y-m-d H:i') : 'N/D',
+                    'metodo_pago' => $p->metodo_pago ?? 'N/D',
+                    'referencia' => $p->referencia ?? '',
+                    'ruta_comprobante' => $p->ruta_comprobante ?? null
+                ];
+            });
+
+            $arreglosMapped = $arreglos->map(function($a) {
+                return [
+                    'id' => $a->id,
+                    'monto_total_acordado' => floatval($a->monto_total_acordado ?? 0),
+                    'fecha_creacion' => isset($a->fecha_creacion) ? Carbon::parse($a->fecha_creacion)->format('Y-m-d') : 'N/D',
+                    'estado' => $a->estado ?? 'activo',
+                    'observaciones' => $a->observaciones ?? ''
+                ];
+            });
+
+            $estudianteData = [
+                'id' => $estudiante->id,
+                'nombre' => trim($estudiante->nombre . ' ' . ($estudiante->apellidos ?? '')),
+                'apellidos' => $estudiante->apellidos ?? '',
+                'email' => $estudiante->email,
+                'telefono' => preg_replace('/[^0-9]/', '', $estudiante->telefono ?? ''),
+                'cedula' => $estudiante->cedula ?? '',
+                'deuda_total' => $totalDeuda
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'estudiante' => $estudianteData,
+                    'resumen' => [
+                        'deuda_total' => $totalDeuda,
+                        'boletas_pendientes' => $boletas->whereNotIn('estado', ['pagada', 'anulada'])->count(),
+                    ],
+                    'boletas' => $boletasMapped,
+                    'letras' => $letrasMapped,
+                    'pagos' => $pagosMapped,
+                    'arreglos' => $arreglosMapped
+                ],
+                // Compatibilidad raíz con la vista estado_cuenta.blade.php
+                'estudiante' => $estudianteData,
+                'resumen' => [
+                    'deuda_total' => $totalDeuda,
+                    'boletas_pendientes' => $boletas->whereNotIn('estado', ['pagada', 'anulada'])->count(),
+                ],
+                'boletas' => $boletasMapped,
+                'pagos' => $pagosMapped,
+                'letras' => $letrasMapped,
+                'arreglos' => $arreglosMapped
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar el estado de cuenta: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
