@@ -172,6 +172,59 @@
             color: #ef4444 !important;
             border-color: rgba(239, 68, 68, 0.3);
         }
+
+        /* Estilos para el resumen del modal de pago */
+        .modal-pago-summary {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-dark);
+            border-radius: 0.85rem;
+        }
+
+        .modal-pago-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .modal-pago-value {
+            color: var(--text-light);
+            font-weight: 700;
+        }
+
+        /* Soporte para tema claro en boletas index y modal de pago */
+        [data-theme="light"] .modal-pago-summary {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        [data-theme="light"] .modal-pago-label {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .modal-pago-value {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .modal-content {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        [data-theme="light"] .form-control-custom {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .form-control-custom:focus {
+            background-color: #ffffff !important;
+            border-color: var(--primary) !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .btn-close-white {
+            filter: none !important;
+        }
     </style>
 @endsection
 
@@ -419,14 +472,14 @@
                 <form id="formPago">
                     <input type="hidden" id="pago_boleta_id">
                     <div class="modal-body p-4">
-                        <div class="p-3 mb-3 rounded" style="background-color: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-dark);">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-white-50">Boleta:</span>
-                                <span class="fw-bold text-white" id="pago_boleta_numero"></span>
+                        <div class="modal-pago-summary p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="modal-pago-label"><i class="bi bi-receipt me-1"></i> Boleta:</span>
+                                <span class="modal-pago-value fs-6 font-monospace" id="pago_boleta_numero"></span>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-white-50">Saldo Pendiente:</span>
-                                <span class="fw-bold text-danger" id="pago_saldo_display"></span>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="modal-pago-label"><i class="bi bi-clock-history me-1"></i> Saldo Pendiente:</span>
+                                <span class="fw-bold text-danger fs-5" id="pago_saldo_display"></span>
                             </div>
                         </div>
 
