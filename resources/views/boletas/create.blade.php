@@ -3,9 +3,6 @@
 @section('title', 'Inbox BPM - Generar Boleta de Matrícula')
 
 @section('styles')
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
-
 <style>
     /* Estilos oficiales del sistema de boletas CEFI */
     .boleta-preview {
@@ -66,10 +63,38 @@
         border-radius: 1rem;
         position: relative;
     }
-    .select2-container--bootstrap-5 .select2-selection {
-        border-radius: 0.85rem !important;
-        padding: 0.6rem !important;
-        border: 2px solid #e2e8f0 !important;
+    .student-search-results {
+        max-height: 320px;
+        overflow-y: auto;
+        border-radius: 0.85rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+    }
+    .student-search-item {
+        transition: all 0.15s ease-in-out;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+    }
+    .student-search-item:last-child {
+        border-bottom: none;
+    }
+    .student-search-item:hover, .student-search-item:focus {
+        background-color: rgba(95, 178, 48, 0.08) !important;
+    }
+    [data-bs-theme="dark"] .student-search-results {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    [data-bs-theme="dark"] .student-search-item {
+        border-bottom-color: #334155;
+        color: #f8fafc;
+    }
+    [data-bs-theme="dark"] .student-search-item:hover, [data-bs-theme="dark"] .student-search-item:focus {
+        background-color: rgba(95, 178, 48, 0.18) !important;
+    }
+    [data-bs-theme="dark"] .student-search-item .text-dark {
+        color: #f8fafc !important;
     }
     .cursor-pointer {
         cursor: pointer;
@@ -140,12 +165,22 @@
             <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-search me-2 text-primary"></i> 1. Seleccionar Estudiante</h5>
             <div class="row">
                 <div class="col-md-12">
-                    <label for="user-search" class="form-label fw-bold small text-muted">Estudiante (Nombre, Cédula o Email):</label>
-                    <div class="input-group">
-                        <select id="user-search" class="form-select"></select>
-                        <button id="reset-user-search" class="btn btn-outline-danger border-2 ms-2 rounded-3" type="button" onclick="location.reload()">
-                            <i class="bi bi-arrow-clockwise"></i> Reiniciar
-                        </button>
+                    <label for="user-search-input" class="form-label fw-bold small text-muted">Estudiante (Nombre, Cédula o Email):</label>
+                    <div class="position-relative">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-2 border-end-0 rounded-start-3 text-muted px-3">
+                                <i class="bi bi-search" id="user-search-icon"></i>
+                                <span class="spinner-border spinner-border-sm text-primary d-none" id="user-search-spinner" role="status"></span>
+                            </span>
+                            <input type="text" id="user-search-input" class="form-control border-2 border-start-0 py-2 fs-6" 
+                                placeholder="Escriba el nombre, cédula o email del estudiante..." autocomplete="off">
+                            <button id="reset-user-search" class="btn btn-outline-secondary border-2 ms-2 rounded-3 px-3 fw-bold" type="button" onclick="clearUserSearch()">
+                                <i class="bi bi-x-lg me-1"></i> Limpiar
+                            </button>
+                        </div>
+                        <!-- Dropdown de resultados de autocompletado directo -->
+                        <div id="user-search-results" class="student-search-results list-group position-absolute w-100 mt-2" 
+                            style="z-index: 1050; display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -162,7 +197,7 @@
                     <p class="text-muted mb-0" id="summary-student-email" style="font-size: 0.8rem;"></p>
                 </div>
                 
-                <!-- Datos Financieros y Botón (En una sola línea horizontal) -->
+                <!-- Datos Financieros y Botones (En una sola línea horizontal) -->
                 <div class="d-flex align-items-center gap-3 flex-wrap">
                     <!-- Deuda Total Compacta -->
                     <div class="px-3 py-1.5 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-10 d-flex align-items-center gap-2">
@@ -179,6 +214,11 @@
                     <!-- Botón Ver Boletas Compacto -->
                     <button class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-bold" onclick="window.location.href='{{ route('boletas.estado_cuenta') }}?id_estudiante=' + $('#boleta_id_estudiante').val()" style="font-size: 0.75rem;">
                         <i class="bi bi-file-earmark-text me-1"></i> Ver Boletas
+                    </button>
+
+                    <!-- Botón Cambiar Estudiante -->
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1.5 fw-bold" onclick="cambiarEstudiante()" style="font-size: 0.75rem;">
+                        <i class="bi bi-person-x me-1"></i> Cambiar Estudiante
                     </button>
                 </div>
             </div>
@@ -523,7 +563,6 @@
 
 @section('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -586,20 +625,95 @@
     }
 
     $(document).ready(function() {
-        // Inicializar Select2 para búsqueda de estudiantes
-        $('#user-search').select2({
-            theme: 'bootstrap-5',
-            placeholder: 'Busque un estudiante por nombre, cédula o email',
-            ajax: {
-                url: '{{ route('boletas.buscar_estudiante_ajax') }}',
-                dataType: 'json',
-                delay: 250,
-                data: params => ({ q: params.term }),
-                processResults: data => ({ results: data.results }),
-                cache: true
-            },
-            minimumInputLength: 2
-        }).on('select2:select', e => selectUser(e.params.data.id));
+        // Buscador directo de estudiantes en una sola caja de texto
+        let searchTimeout = null;
+
+        $('#user-search-input').on('input', function() {
+            clearTimeout(searchTimeout);
+            const query = $(this).val().trim();
+            const resultsContainer = $('#user-search-results');
+
+            if (query.length < 2) {
+                resultsContainer.empty().hide();
+                $('#user-search-spinner').addClass('d-none');
+                $('#user-search-icon').removeClass('d-none');
+                return;
+            }
+
+            $('#user-search-spinner').removeClass('d-none');
+            $('#user-search-icon').addClass('d-none');
+
+            searchTimeout = setTimeout(function() {
+                $.ajax({
+                    url: '{{ route('boletas.buscar_estudiante_ajax') }}',
+                    type: 'GET',
+                    data: { term: query },
+                    dataType: 'json',
+                    success: function(students) {
+                        $('#user-search-spinner').addClass('d-none');
+                        $('#user-search-icon').removeClass('d-none');
+                        resultsContainer.empty();
+
+                        if (!students || students.length === 0) {
+                            resultsContainer.html(`
+                                <div class="list-group-item p-3 text-center text-muted small">
+                                    <i class="bi bi-person-x fs-4 d-block mb-1 text-secondary"></i>
+                                    No se encontraron estudiantes para "<strong>${$('<div>').text(query).html()}</strong>"
+                                </div>
+                            `).show();
+                            return;
+                        }
+
+                        students.forEach(function(s) {
+                            const fullName = `${s.nombre || ''} ${s.apellidos || ''}`.trim();
+                            const email = s.email || 'Sin correo registrado';
+                            const cedula = s.cedula || 'Sin cédula';
+
+                            const item = $(`
+                                <div class="list-group-item list-group-item-action p-3 d-flex justify-content-between align-items-center student-search-item" role="button">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 42px; height: 42px; min-width: 42px; font-size: 1.15rem;">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark fs-6">${$('<div>').text(fullName).html()}</div>
+                                            <div class="small text-muted d-flex flex-wrap gap-2 align-items-center mt-1">
+                                                <span><i class="bi bi-envelope me-1"></i>${$('<div>').text(email).html()}</span>
+                                                <span class="badge bg-light text-dark border"><i class="bi bi-card-heading me-1"></i>${$('<div>').text(cedula).html()}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold">
+                                        Seleccionar <i class="bi bi-arrow-right-short"></i>
+                                    </span>
+                                </div>
+                            `);
+
+                            item.on('click', function() {
+                                $('#user-search-input').val(`${fullName} (${email})`);
+                                resultsContainer.empty().hide();
+                                selectUser(s.id);
+                            });
+
+                            resultsContainer.append(item);
+                        });
+
+                        resultsContainer.show();
+                    },
+                    error: function() {
+                        $('#user-search-spinner').addClass('d-none');
+                        $('#user-search-icon').removeClass('d-none');
+                    }
+                });
+            }, 250);
+        });
+
+        // Ocultar resultados al hacer clic fuera del buscador
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#user-search-card').length) {
+                $('#user-search-results').hide();
+            }
+        });
 
         // Listener para checkboxes de cursos
         $(document).on('change', '.curso-checkbox', function() {
@@ -705,9 +819,7 @@
 
         // Precargar si viene de parámetros GET
         if (autoEstudiante > 0) {
-            const text = `${autoEstudianteNombre} (${autoEstudianteEmail})`;
-            const newOption = new Option(text, autoEstudiante, true, true);
-            $('#user-search').append(newOption).trigger('change');
+            $('#user-search-input').val(`${autoEstudianteNombre} (${autoEstudianteEmail})`);
             selectUser(autoEstudiante);
         }
 
@@ -742,6 +854,26 @@
         // Lógica de Canvas para Firma Manuscrita
         initSignatureCanvas();
     });
+
+    function clearUserSearch() {
+        $('#user-search-input').val('').focus();
+        $('#user-search-results').empty().hide();
+        $('#user-search-spinner').addClass('d-none');
+        $('#user-search-icon').removeClass('d-none');
+    }
+
+    function cambiarEstudiante() {
+        $('#boleta_id_estudiante').val('');
+        $('#student-financial-summary-card').hide();
+        $('#student-signed-boletas-banner').empty().hide();
+        $('#programa-select-card').hide();
+        $('#boleta-container').hide();
+        $('.curso-checkbox').prop('checked', false);
+        $('#prepare-boleta-btn').hide();
+        $('#floating-prepare-container').hide();
+        $('#user-search-card').slideDown();
+        clearUserSearch();
+    }
 
     function selectUser(userId) {
         pagoInicialManual = false;
