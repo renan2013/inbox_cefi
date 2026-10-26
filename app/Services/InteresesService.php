@@ -169,6 +169,10 @@ class InteresesService
     public static function recalcularTodosLosIntereses()
     {
         $estudiantesIds = SeguimientoPago::where('estado', 'pendiente')
+            ->where(function($q) {
+                $q->whereDate('fecha_vencimiento', '<', Carbon::today())
+                  ->orWhere('interes_acumulado', '>', 0);
+            })
             ->distinct()
             ->pluck('id_estudiante');
 

@@ -448,7 +448,9 @@
                                             </div>
                                         @endif
                                     @else
-                                        <span class="text-muted small">N/D</span>
+                                        <span class="badge bg-secondary bg-opacity-25 text-white-50 rounded-pill px-2 py-1" style="font-size: 0.75rem;" title="Boleta de contado o sin cuotas fraccionadas registradas">
+                                            <i class="bi bi-dash-circle me-1"></i>Sin letras
+                                        </span>
                                     @endif
                                 </td>
                                 <td class="text-end">

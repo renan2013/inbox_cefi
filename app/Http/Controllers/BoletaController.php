@@ -93,6 +93,7 @@ class BoletaController extends Controller
     public function index(Request $request)
     {
         self::ensureBoletasColumns();
+        InteresesService::recalcularTodosLosIntereses();
 
         $query = Boleta::with(['estudiante', 'proximaCuota', 'seguimientoPagos']);
 
