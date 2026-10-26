@@ -123,6 +123,42 @@
             border-radius: 50rem;
         }
 
+        .tab-content-custom {
+            background-color: var(--card-dark, #1e293b);
+            border: 1px solid var(--border-dark, #334155);
+        }
+
+        .table-custom {
+            --bs-table-bg: transparent !important;
+            --bs-table-color: #f8fafc !important;
+            --bs-table-hover-bg: rgba(255, 255, 255, 0.03) !important;
+            --bs-table-hover-color: #ffffff !important;
+            color: #f8fafc !important;
+            width: 100%;
+        }
+
+        .table-custom th {
+            background-color: rgba(15, 23, 42, 0.4) !important;
+            color: #94a3b8 !important;
+            border-bottom: 2px solid var(--border-dark, #334155) !important;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            padding: 1rem 0.75rem;
+        }
+
+        .table-custom td {
+            background-color: transparent !important;
+            border-bottom: 1px solid var(--border-dark, #334155) !important;
+            color: #f8fafc !important;
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+        }
+
+        .table-custom tbody tr:hover td {
+            background-color: rgba(255, 255, 255, 0.03) !important;
+        }
+
         /* --- MODO CLARO / LIGHT THEME --- */
         [data-theme="light"] .page-header {
             background: #ffffff !important;
@@ -208,35 +244,56 @@
             border-bottom: 3px solid var(--primary, #5fb230) !important;
         }
 
-        [data-theme="light"] #finanzasTabsContent {
+        [data-theme="light"] .tab-content-custom {
             background-color: #ffffff !important;
-            border-color: #e2e8f0 !important;
+            border: 1px solid #e2e8f0 !important;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
         }
 
-        [data-theme="light"] #finanzasTabsContent .table-dark {
-            background-color: transparent !important;
+        [data-theme="light"] .table-custom {
+            --bs-table-bg: #ffffff !important;
+            --bs-table-color: #0f172a !important;
+            --bs-table-hover-bg: #f8fafc !important;
+            --bs-table-hover-color: #0f172a !important;
             color: #0f172a !important;
         }
 
-        [data-theme="light"] #finanzasTabsContent .table-dark th {
+        [data-theme="light"] .table-custom th {
             background-color: #f8fafc !important;
             color: #475569 !important;
             border-bottom: 2px solid #e2e8f0 !important;
         }
 
-        [data-theme="light"] #finanzasTabsContent .table-dark td {
+        [data-theme="light"] .table-custom td {
             background-color: #ffffff !important;
+            border-bottom: 1px solid #f1f5f9 !important;
             color: #1e293b !important;
-            border-color: #f1f5f9 !important;
         }
 
-        [data-theme="light"] #finanzasTabsContent .table-hover tbody tr:hover td {
+        [data-theme="light"] .table-custom tbody tr:hover td {
             background-color: #f8fafc !important;
         }
 
-        [data-theme="light"] #finanzasTabsContent strong.text-white {
+        [data-theme="light"] .table-custom strong.text-white,
+        [data-theme="light"] .table-custom strong,
+        [data-theme="light"] .table-custom .text-white {
             color: #0f172a !important;
+        }
+
+        [data-theme="light"] .table-custom .text-white-50 {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .btn-outline-light {
+            color: #334155 !important;
+            border-color: #cbd5e1 !important;
+            background-color: #f8fafc !important;
+        }
+
+        [data-theme="light"] .btn-outline-light:hover {
+            color: #0f172a !important;
+            background-color: #e2e8f0 !important;
+            border-color: #94a3b8 !important;
         }
     </style>
 @endsection
@@ -344,12 +401,12 @@
             </ul>
 
             <!-- Tab Content -->
-            <div class="tab-content bg-dark border border-secondary border-top-0 rounded-bottom-4 p-4 shadow mb-5" id="finanzasTabsContent">
+            <div class="tab-content tab-content-custom border-top-0 rounded-bottom-4 p-4 shadow mb-5" id="finanzasTabsContent">
                 
                 <!-- Boletas Tab -->
                 <div class="tab-pane fade show active" id="boletas" role="tabpanel">
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle mb-0">
+                        <table class="table table-custom table-hover align-middle mb-0">
                             <thead>
                                 <tr class="text-white-50 small text-uppercase">
                                     <th>N° Boleta</th>
@@ -370,7 +427,7 @@
                 <!-- Cuotas Tab -->
                 <div class="tab-pane fade" id="cuotas" role="tabpanel">
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle mb-0">
+                        <table class="table table-custom table-hover align-middle mb-0">
                             <thead>
                                 <tr class="text-white-50 small text-uppercase">
                                     <th>Cuota</th>
@@ -390,7 +447,7 @@
                 <!-- Pagos Tab -->
                 <div class="tab-pane fade" id="pagos" role="tabpanel">
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle mb-0">
+                        <table class="table table-custom table-hover align-middle mb-0">
                             <thead>
                                 <tr class="text-white-50 small text-uppercase">
                                     <th>Fecha Abono</th>
@@ -409,7 +466,7 @@
                 <!-- Arreglos Tab -->
                 <div class="tab-pane fade" id="arreglos" role="tabpanel">
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle mb-0">
+                        <table class="table table-custom table-hover align-middle mb-0">
                             <thead>
                                 <tr class="text-white-50 small text-uppercase">
                                     <th>ID Arreglo</th>
