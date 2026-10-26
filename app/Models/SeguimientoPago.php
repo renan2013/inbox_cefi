@@ -20,6 +20,7 @@ class SeguimientoPago extends Model
         'fecha_vencimiento',
         'ultimo_recalculo_interes',
         'estado',
+        'fecha_pago',
         'fecha_notificado',
         'enviado_email',
         'fecha_creacion'
@@ -30,6 +31,7 @@ class SeguimientoPago extends Model
         'interes_acumulado' => 'decimal:2',
         'fecha_vencimiento' => 'date',
         'ultimo_recalculo_interes' => 'date',
+        'fecha_pago' => 'datetime',
         'fecha_notificado' => 'datetime',
         'enviado_email' => 'boolean',
         'fecha_creacion' => 'datetime'

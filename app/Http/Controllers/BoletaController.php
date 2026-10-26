@@ -69,6 +69,19 @@ class BoletaController extends Controller
             if (Schema::hasTable('matriculas') && !Schema::hasColumn('matriculas', 'id_boleta')) {
                 DB::statement("ALTER TABLE `matriculas` ADD COLUMN `id_boleta` INT(11) NULL DEFAULT NULL AFTER `id_curso_activo`");
             }
+
+            // Asegurar que seguimiento_pagos tenga estado VARCHAR(50) y columna fecha_pago
+            if (Schema::hasTable('seguimiento_pagos')) {
+                try {
+                    DB::statement("ALTER TABLE `seguimiento_pagos` MODIFY COLUMN `estado` VARCHAR(50) NOT NULL DEFAULT 'pendiente'");
+                } catch (\Throwable $eSegEstado) {}
+
+                try {
+                    if (!Schema::hasColumn('seguimiento_pagos', 'fecha_pago')) {
+                        DB::statement("ALTER TABLE `seguimiento_pagos` ADD COLUMN `fecha_pago` DATETIME NULL AFTER `estado`");
+                    }
+                } catch (\Throwable $eFechaPago) {}
+            }
         } catch (\Throwable $e) {
             // Ignorar excepciones de dialecto si se ejecuta bajo SQLite local
         }
@@ -811,7 +824,7 @@ class BoletaController extends Controller
                     'monto_cuota' => $monto_cuota,
                     'interes_acumulado' => 0.00,
                     'fecha_vencimiento' => $vencimiento,
-                    'estado' => ($saldo_pendiente <= 0) ? 'pagada' : 'pendiente',
+                    'estado' => ($saldo_pendiente <= 0) ? 'pagado' : 'pendiente',
                     'fecha_creacion' => Carbon::now()
                 ]);
             }
@@ -940,7 +953,7 @@ class BoletaController extends Controller
                     'monto_cuota' => $monto_cuota,
                     'interes_acumulado' => 0.00,
                     'fecha_vencimiento' => $vencimiento,
-                    'estado' => ($saldo_pendiente <= 0) ? 'pagada' : 'pendiente',
+                    'estado' => ($saldo_pendiente <= 0) ? 'pagado' : 'pendiente',
                     'fecha_creacion' => Carbon::now()
                 ]);
             }
@@ -1067,6 +1080,8 @@ class BoletaController extends Controller
      */
     public function registrarPago(Request $request, $id)
     {
+        self::ensureBoletasColumns();
+
         $request->validate([
             'monto' => 'required|numeric|min:0.01',
             'metodo' => 'nullable|string',
@@ -1081,30 +1096,34 @@ class BoletaController extends Controller
         $funcionario = auth()->user()->nombre ?? 'Sistema';
         $referencia = empty($referencia_input) ? "Cobrado por: {$funcionario}" : "{$referencia_input} (Cobrado por: {$funcionario})";
 
-        if ($monto_pago > $boleta->saldo_pendiente) {
+        // Calcular mora pendiente acumulada en cuotas
+        $total_interes_pendiente = floatval(
+            SeguimientoPago::where('id_boleta', $id)
+                ->where('estado', 'pendiente')
+                ->sum('interes_acumulado')
+        );
+
+        $condonar = $request->boolean('condonar_interes');
+        $saldo_maximo = $condonar 
+            ? max(0, floatval($boleta->saldo_pendiente) - $total_interes_pendiente)
+            : floatval($boleta->saldo_pendiente);
+
+        if ($monto_pago > ($saldo_maximo + 0.05)) {
             return response()->json([
                 'success' => false,
-                'message' => "El monto del pago excede el saldo pendiente (¢" . number_format($boleta->saldo_pendiente, 2) . ")."
+                'message' => "El monto del pago excede el saldo pendiente (¢" . number_format($saldo_maximo, 2) . ")."
             ], 422);
         }
 
         try {
             DB::beginTransaction();
 
-            $total_interes_condonado = 0.00;
-            if ($request->boolean('condonar_interes')) {
-                $total_interes_condonado = floatval(
-                    SeguimientoPago::where('id_boleta', $id)
-                        ->where('estado', 'pendiente')
-                        ->sum('interes_acumulado')
-                );
-
-                if ($total_interes_condonado > 0) {
-                    SeguimientoPago::where('id_boleta', $id)
-                        ->where('estado', 'pendiente')
-                        ->update(['interes_acumulado' => 0.00]);
-                    $referencia .= " (Mora condonada: ¢" . number_format($total_interes_condonado, 2) . ")";
-                }
+            if ($condonar && $total_interes_pendiente > 0) {
+                SeguimientoPago::where('id_boleta', $id)
+                    ->where('estado', 'pendiente')
+                    ->update(['interes_acumulado' => 0.00]);
+                $referencia .= " (Mora condonada: ¢" . number_format($total_interes_pendiente, 2) . ")";
+                $boleta->interes_acumulado = 0.00;
             }
 
             // Registrar en tabla pagos
@@ -1128,38 +1147,38 @@ class BoletaController extends Controller
 
                 $monto_cuota = floatval($cuota->monto_cuota);
 
-                if ($monto_restante >= $monto_cuota) {
+                if ($monto_restante >= ($monto_cuota - 0.01)) {
                     $cuota->update([
-                        'estado' => 'pagada',
+                        'estado' => 'pagado',
+                        'monto_cuota' => 0.00,
+                        'interes_acumulado' => 0.00,
                         'fecha_pago' => Carbon::now()
                     ]);
                     $monto_restante -= $monto_cuota;
                 } else {
                     $cuota->update([
-                        'monto_cuota' => $monto_cuota - $monto_restante
+                        'monto_cuota' => max(0, $monto_cuota - $monto_restante)
                     ]);
                     $monto_restante = 0;
                 }
             }
 
-            // Actualizar saldos en boleta
+            // Actualizar montos pagados en boleta
             $nuevo_pagado = floatval($boleta->monto_pagado ?? 0) + $monto_pago;
-            $nuevo_saldo = max(0, floatval($boleta->total) - $nuevo_pagado);
-            $nuevo_estado = ($nuevo_saldo <= 0) ? 'pagada' : 'pago_parcial';
+            $boleta->monto_pagado = $nuevo_pagado;
+            $boleta->save();
 
-            $boleta->update([
-                'monto_pagado' => $nuevo_pagado,
-                'saldo_pendiente' => $nuevo_saldo,
-                'estado' => $nuevo_estado
-            ]);
+            // Recalcular saldo pendiente e intereses oficiales de la boleta
+            InteresesService::actualizarTotalesBoleta($id);
+            $boleta->refresh();
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Pago registrado con éxito.',
-                'saldo_pendiente' => $nuevo_saldo,
-                'estado' => $nuevo_estado
+                'saldo_pendiente' => floatval($boleta->saldo_pendiente),
+                'estado' => $boleta->estado
             ]);
 
         } catch (\Throwable $e) {

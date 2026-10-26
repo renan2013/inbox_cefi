@@ -418,6 +418,7 @@
                                                 data-id="{{ $boleta->id }}" 
                                                 data-numero="{{ $boleta->numero_boleta }}" 
                                                 data-saldo="{{ $boleta->saldo_pendiente }}" 
+                                                data-interes="{{ $boleta->interes_acumulado ?? 0 }}"
                                                 title="Registrar Pago / Abono">
                                                 <i class="bi bi-cash-stack"></i>
                                             </button>
@@ -477,8 +478,12 @@
                                 <span class="modal-pago-label"><i class="bi bi-receipt me-1"></i> Boleta:</span>
                                 <span class="modal-pago-value fs-6 font-monospace" id="pago_boleta_numero"></span>
                             </div>
+                            <div class="d-flex justify-content-between align-items-center mb-1" id="row_pago_interes" style="display: none;">
+                                <span class="modal-pago-label text-warning"><i class="bi bi-exclamation-triangle-fill me-1"></i> Interés Moratorio:</span>
+                                <span class="fw-bold text-warning" id="pago_interes_display">¢0.00</span>
+                            </div>
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="modal-pago-label"><i class="bi bi-clock-history me-1"></i> Saldo Pendiente:</span>
+                                <span class="modal-pago-label"><i class="bi bi-clock-history me-1"></i> Saldo a Cancelar:</span>
                                 <span class="fw-bold text-danger fs-5" id="pago_saldo_display"></span>
                             </div>
                         </div>
@@ -504,10 +509,10 @@
                             <input type="text" id="pago_referencia" class="form-control form-control-custom" placeholder="# Comprobante o Detalle">
                         </div>
 
-                        <div class="form-check form-switch mb-2">
+                        <div class="form-check form-switch mb-2" id="contenedor_pago_condonar">
                             <input class="form-check-input" type="checkbox" id="pago_condonar">
-                            <label class="form-check-label text-warning small" for="pago_condonar">
-                                Condonar morosidad acumulada en cuotas pendientes
+                            <label class="form-check-label text-warning small fw-semibold" for="pago_condonar">
+                                Condonar morosidad acumulada en cuotas pendientes (<span id="pago_condonar_monto">¢0.00</span>)
                             </label>
                         </div>
                     </div>
@@ -529,20 +534,47 @@
             const modalPagoEl = document.getElementById('modalPago');
             const modalPago = modalPagoEl ? new bootstrap.Modal(modalPagoEl) : null;
 
+            let saldoActualModal = 0;
+            let interesActualModal = 0;
+
+            function actualizarMontoPagoConCondonacion() {
+                const condonar = document.getElementById('pago_condonar').checked;
+                const saldoEfectivo = condonar ? Math.max(0, saldoActualModal - interesActualModal) : saldoActualModal;
+
+                document.getElementById('pago_saldo_display').textContent = '¢' + saldoEfectivo.toLocaleString('es-CR', {minimumFractionDigits: 2});
+                document.getElementById('pago_monto').value = saldoEfectivo.toFixed(2);
+                document.getElementById('pago_monto').max = saldoEfectivo.toFixed(2);
+            }
+
+            document.getElementById('pago_condonar')?.addEventListener('change', actualizarMontoPagoConCondonacion);
+
             document.querySelectorAll('.btn-pago').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = this.dataset.id;
                     const numero = this.dataset.numero;
-                    const saldo = parseFloat(this.dataset.saldo);
+                    saldoActualModal = parseFloat(this.dataset.saldo || 0);
+                    interesActualModal = parseFloat(this.dataset.interes || 0);
 
                     document.getElementById('pago_boleta_id').value = id;
                     document.getElementById('pago_boleta_numero').textContent = numero;
-                    document.getElementById('pago_saldo_display').textContent = '¢' + saldo.toLocaleString('es-CR', {minimumFractionDigits: 2});
-                    document.getElementById('pago_monto').value = saldo.toFixed(2);
-                    document.getElementById('pago_monto').max = saldo;
                     document.getElementById('pago_condonar').checked = false;
                     document.getElementById('pago_referencia').value = '';
 
+                    const rowInteres = document.getElementById('row_pago_interes');
+                    const contCondonar = document.getElementById('contenedor_pago_condonar');
+                    const txtCondonarMonto = document.getElementById('pago_condonar_monto');
+
+                    if (interesActualModal > 0) {
+                        rowInteres.style.display = 'flex';
+                        document.getElementById('pago_interes_display').textContent = '¢' + interesActualModal.toLocaleString('es-CR', {minimumFractionDigits: 2});
+                        contCondonar.style.display = 'block';
+                        txtCondonarMonto.textContent = '¢' + interesActualModal.toLocaleString('es-CR', {minimumFractionDigits: 2});
+                    } else {
+                        rowInteres.style.display = 'none';
+                        contCondonar.style.display = 'none';
+                    }
+
+                    actualizarMontoPagoConCondonacion();
                     modalPago.show();
                 });
             });
