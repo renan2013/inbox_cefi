@@ -73,6 +73,16 @@ class Boleta extends Model
         return $this->hasMany(SeguimientoPago::class, 'id_boleta', 'id')->orderBy('numero_cuota');
     }
 
+    public function proximaCuota()
+    {
+        return $this->hasOne(SeguimientoPago::class, 'id_boleta', 'id')
+            ->where(function($q) {
+                $q->where('estado', 'pendiente')
+                  ->orWhereNull('estado');
+            })
+            ->orderBy('numero_cuota', 'asc');
+    }
+
     public function pagos()
     {
         return $this->hasMany(Pago::class, 'boleta_id', 'id')->orderBy('fecha_pago', 'desc');

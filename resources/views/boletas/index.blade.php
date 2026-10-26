@@ -313,11 +313,27 @@
                             <th>Saldo Pendiente</th>
                             <th>Estado</th>
                             <th>Fecha Creación</th>
+                            <th>Próximo Vencimiento</th>
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($boletas as $boleta)
+                            @php
+                                $cuotaActiva = $boleta->proximaCuota;
+                                $totalCuotas = $boleta->seguimientoPagos ? $boleta->seguimientoPagos->count() : ($boleta->cuotas ?: 1);
+                                if ($totalCuotas <= 0) $totalCuotas = 1;
+
+                                $vencimientoStr = null;
+                                if ($cuotaActiva && $cuotaActiva->fecha_vencimiento) {
+                                    $vencimientoStr = $cuotaActiva->fecha_vencimiento;
+                                } elseif (!empty($boleta->fechas_vencimiento_json)) {
+                                    $fechasArr = json_decode($boleta->fechas_vencimiento_json, true);
+                                    if (is_array($fechasArr) && count($fechasArr) > 0) {
+                                        $vencimientoStr = $fechasArr[0];
+                                    }
+                                }
+                            @endphp
                             <tr>
                                 <td>
                                     <strong class="text-white">{{ $boleta->numero_boleta }}</strong>
@@ -369,6 +385,72 @@
                                 <td>
                                     <span class="text-white-50">{{ $boleta->fecha_creacion ? $boleta->fecha_creacion->format('Y-m-d H:i') : 'N/D' }}</span>
                                 </td>
+                                <td>
+                                    @if ($boleta->estado === 'pagada' || $boleta->saldo_pendiente <= 0)
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Al día / Pagada
+                                        </span>
+                                    @elseif ($boleta->estado === 'anulada')
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2 py-1" style="font-size: 0.75rem;">
+                                            Anulada
+                                        </span>
+                                    @elseif ($boleta->estado === 'pendiente_firma')
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2 py-1 fw-semibold" style="font-size: 0.75rem;">
+                                            <i class="bi bi-hourglass-split me-1"></i> Pendiente Firma
+                                        </span>
+                                    @elseif ($vencimientoStr)
+                                        @php
+                                            $fechaVenc = \Carbon\Carbon::parse($vencimientoStr)->startOfDay();
+                                            $hoy = \Carbon\Carbon::today();
+                                            $diffDias = (int)$hoy->diffInDays($fechaVenc, false);
+                                            $numCuota = $cuotaActiva ? $cuotaActiva->numero_cuota : 1;
+                                        @endphp
+
+                                        @if ($diffDias < 0)
+                                            {{-- Vencida --}}
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-danger" style="font-size: 0.88rem;">
+                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ $fechaVenc->format('d/m/Y') }}
+                                                </span>
+                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-0 mt-1 align-self-start fw-bold" style="font-size: 0.7rem;">
+                                                    Venció hace {{ abs($diffDias) }} d (Cuota {{ $numCuota }}/{{ $totalCuotas }})
+                                                </span>
+                                            </div>
+                                        @elseif ($diffDias === 0)
+                                            {{-- Vence Hoy --}}
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-danger" style="font-size: 0.88rem;">
+                                                    <i class="bi bi-bell-fill me-1"></i>{{ $fechaVenc->format('d/m/Y') }}
+                                                </span>
+                                                <span class="badge bg-danger text-white rounded-pill px-2 py-0 mt-1 align-self-start fw-bold" style="font-size: 0.7rem;">
+                                                    ¡Vence Hoy! (Cuota {{ $numCuota }}/{{ $totalCuotas }})
+                                                </span>
+                                            </div>
+                                        @elseif ($diffDias <= 5)
+                                            {{-- Vence Pronto (1 a 5 días) --}}
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-warning" style="font-size: 0.88rem;">
+                                                    <i class="bi bi-clock-history me-1"></i>{{ $fechaVenc->format('d/m/Y') }}
+                                                </span>
+                                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2 py-0 mt-1 align-self-start fw-bold" style="font-size: 0.7rem;">
+                                                    Vence en {{ $diffDias }} d (Cuota {{ $numCuota }}/{{ $totalCuotas }})
+                                                </span>
+                                            </div>
+                                        @else
+                                            {{-- Al día, fecha futura --}}
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-white" style="font-size: 0.88rem;">
+                                                    <i class="bi bi-calendar-check me-1 text-success"></i>{{ $fechaVenc->format('d/m/Y') }}
+                                                </span>
+                                                <span class="text-white-50 small mt-1" style="font-size: 0.75rem;">
+                                                    Cuota {{ $numCuota }} de {{ $totalCuotas }} (en {{ $diffDias }} d)
+                                                </span>
+                                            </div>
+                                        @endif
+                                    @else
+                                        <span class="text-muted small">N/D</span>
+                                    @endif
+                                </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-1 flex-wrap">
                                         @if ($boleta->estado == 'firmada')
@@ -419,6 +501,9 @@
                                                 data-numero="{{ $boleta->numero_boleta }}" 
                                                 data-saldo="{{ $boleta->saldo_pendiente }}" 
                                                 data-interes="{{ $boleta->interes_acumulado ?? 0 }}"
+                                                data-vencimiento="{{ $vencimientoStr ? \Carbon\Carbon::parse($vencimientoStr)->format('d/m/Y') : '' }}"
+                                                data-cuota-num="{{ $cuotaActiva ? $cuotaActiva->numero_cuota : 1 }}"
+                                                data-cuotas-total="{{ $totalCuotas }}"
                                                 title="Registrar Pago / Abono">
                                                 <i class="bi bi-cash-stack"></i>
                                             </button>
@@ -435,7 +520,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-5 text-white-50">
+                                <td colspan="9" class="text-center py-5 text-white-50">
                                     <i class="bi bi-receipt display-4 d-block mb-3 text-muted"></i>
                                     No se encontraron boletas en el historial.
                                 </td>
@@ -477,6 +562,10 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="modal-pago-label"><i class="bi bi-receipt me-1"></i> Boleta:</span>
                                 <span class="modal-pago-value fs-6 font-monospace" id="pago_boleta_numero"></span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-1" id="row_pago_vencimiento" style="display: none;">
+                                <span class="modal-pago-label"><i class="bi bi-calendar-event me-1"></i> Cuota / Vencimiento:</span>
+                                <span class="modal-pago-value fs-6 font-monospace text-primary" id="pago_vencimiento_display">-</span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-1" id="row_pago_interes" style="display: none;">
                                 <span class="modal-pago-label text-warning"><i class="bi bi-exclamation-triangle-fill me-1"></i> Interés Moratorio:</span>
@@ -563,6 +652,17 @@
                     const rowInteres = document.getElementById('row_pago_interes');
                     const contCondonar = document.getElementById('contenedor_pago_condonar');
                     const txtCondonarMonto = document.getElementById('pago_condonar_monto');
+                    const rowVenc = document.getElementById('row_pago_vencimiento');
+                    const vencimiento = this.dataset.vencimiento;
+                    const cuotaNum = this.dataset.cuotaNum;
+                    const cuotasTotal = this.dataset.cuotasTotal;
+
+                    if (vencimiento) {
+                        rowVenc.style.display = 'flex';
+                        document.getElementById('pago_vencimiento_display').textContent = `Cuota ${cuotaNum}/${cuotasTotal} (${vencimiento})`;
+                    } else {
+                        rowVenc.style.display = 'none';
+                    }
 
                     if (interesActualModal > 0) {
                         rowInteres.style.display = 'flex';

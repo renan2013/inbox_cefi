@@ -94,7 +94,7 @@ class BoletaController extends Controller
     {
         self::ensureBoletasColumns();
 
-        $query = Boleta::with('estudiante');
+        $query = Boleta::with(['estudiante', 'proximaCuota', 'seguimientoPagos']);
 
         if ($request->filled('search')) {
             $search = $request->search;
