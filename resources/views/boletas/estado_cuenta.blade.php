@@ -122,6 +122,122 @@
             font-weight: 600;
             border-radius: 50rem;
         }
+
+        /* --- MODO CLARO / LIGHT THEME --- */
+        [data-theme="light"] .page-header {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .search-section {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] .form-control-custom {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .form-control-custom:focus {
+            background-color: #ffffff !important;
+            border-color: var(--primary, #5fb230) !important;
+            box-shadow: 0 0 0 4px rgba(95, 178, 48, 0.15) !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .result-item {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+
+        [data-theme="light"] .result-item:hover {
+            background-color: var(--primary, #5fb230) !important;
+            color: #ffffff !important;
+            border-color: var(--primary, #5fb230) !important;
+        }
+
+        [data-theme="light"] .student-summary-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        [data-theme="light"] .student-summary-card h2,
+        [data-theme="light"] #nombre_estudiante {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .student-summary-card .text-white-50,
+        [data-theme="light"] .student-summary-card .text-white-50 span,
+        [data-theme="light"] .student-summary-card .text-white-50 i {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .student-summary-card .btn-outline-light {
+            color: #334155 !important;
+            border-color: #cbd5e1 !important;
+            background-color: #f8fafc !important;
+        }
+
+        [data-theme="light"] .student-summary-card .btn-outline-light:hover {
+            color: #0f172a !important;
+            background-color: #e2e8f0 !important;
+            border-color: #94a3b8 !important;
+        }
+
+        [data-theme="light"] .nav-tabs-custom {
+            border-bottom: 2px solid #e2e8f0 !important;
+        }
+
+        [data-theme="light"] .nav-tabs-custom .nav-link {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .nav-tabs-custom .nav-link:hover {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .nav-tabs-custom .nav-link.active {
+            color: var(--primary, #5fb230) !important;
+            background-color: transparent !important;
+            border-bottom: 3px solid var(--primary, #5fb230) !important;
+        }
+
+        [data-theme="light"] #finanzasTabsContent {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        [data-theme="light"] #finanzasTabsContent .table-dark {
+            background-color: transparent !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] #finanzasTabsContent .table-dark th {
+            background-color: #f8fafc !important;
+            color: #475569 !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+        }
+
+        [data-theme="light"] #finanzasTabsContent .table-dark td {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            border-color: #f1f5f9 !important;
+        }
+
+        [data-theme="light"] #finanzasTabsContent .table-hover tbody tr:hover td {
+            background-color: #f8fafc !important;
+        }
+
+        [data-theme="light"] #finanzasTabsContent strong.text-white {
+            color: #0f172a !important;
+        }
     </style>
 @endsection
 
