@@ -223,7 +223,7 @@ class SilaboPdfService
                 'p.normas_netiqueta',
                 'u.nombre as prof_nombre',
                 'u.apellidos as prof_apellidos',
-                'u.correo as prof_correo'
+                'u.email as prof_correo'
             )
             ->where('ca.id_curso_activo', $id_curso)
             ->first();
@@ -335,10 +335,10 @@ class SilaboPdfService
         if (empty($nombre_profesor)) $nombre_profesor = 'Sin asignar';
 
         $ficha = [
-            ['Código:', $curso->codigo, 'Créditos:', (string)($curso->creditos ?? '4')],
-            ['Periodo / Cuatrimestre:', $curso->periodo ?? 'N/A', 'Modalidad:', $curso->modalidad ?: ($curso->plan_modalidad ?: 'Virtual')],
-            ['Profesor / Catedrático:', $nombre_profesor, 'Horario:', $curso->horario ?: 'Asincrónico'],
-            ['Requisitos:', $curso->requisitos ?: 'No tiene', 'Correquisitos:', $curso->correquisitos ?: 'No tiene'],
+            ['Código:', $curso->codigo ?? '', 'Créditos:', (string)($curso->creditos ?? '4')],
+            ['Periodo / Cuatrimestre:', $curso->periodo ?? 'N/A', 'Modalidad:', !empty($curso->modalidad) ? $curso->modalidad : (!empty($curso->plan_modalidad) ? $curso->plan_modalidad : 'Virtual')],
+            ['Profesor / Catedrático:', $nombre_profesor, 'Horario:', !empty($curso->horario) ? $curso->horario : 'Asincrónico'],
+            ['Requisitos:', !empty($curso->requisitos) ? $curso->requisitos : 'No tiene', 'Correquisitos:', !empty($curso->correquisitos) ? $curso->correquisitos : 'No tiene'],
         ];
 
         $pdf->SetDrawColor(220, 220, 220);

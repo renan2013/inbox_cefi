@@ -178,11 +178,25 @@ class DescriptorPdfService
             abort(404, 'Plan de estudios no encontrado.');
         }
 
+        $prop = function ($key, $default = '') use ($plan) {
+            return (isset($plan->$key) && $plan->$key !== '' && $plan->$key !== null) ? $plan->$key : $default;
+        };
+
+        // Cargar sílabo de respaldo si algún campo del plan está vacío
+        $silabo = null;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('silabos')) {
+                $silabo = DB::table('silabos')->where('id_plan', $id_plan)->orderBy('id_silabo', 'desc')->first();
+            }
+        } catch (\Throwable $e) {
+            $silabo = null;
+        }
+
         $pdf = new DescriptorPDF();
-        $pdf->codigo = $plan->codigo ?? '';
-        $pdf->materia = $plan->materia ?? '';
-        $pdf->programa = $plan->nombre_programa ?? '';
-        $pdf->facultad = $plan->facultad ?: ($plan->facultad_programa ?? '');
+        $pdf->codigo = (string)$prop('codigo', '');
+        $pdf->materia = (string)$prop('materia', '');
+        $pdf->programa = (string)$prop('nombre_programa', '');
+        $pdf->facultad = (string)$prop('facultad', $prop('facultad_programa', ''));
 
         $pdf->AliasNbPages();
         $pdf->SetMargins(12, 12, 12);
@@ -190,30 +204,38 @@ class DescriptorPdfService
 
         // Logo oficial del cliente (Centrado y ajustado proporcionalmente)
         $logo_cliente = ClienteService::logoPath();
+        $ext = strtolower(pathinfo($logo_cliente, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['png', 'jpg', 'jpeg', 'gif']) && file_exists(public_path('imgs/logo.png'))) {
+            $logo_cliente = public_path('imgs/logo.png');
+        }
         if (file_exists($logo_cliente)) {
-            $imgSize = @getimagesize($logo_cliente);
-            $maxW = 50;
-            $maxH = 22;
-            $imgW = $maxW;
-            $imgH = 0;
+            try {
+                $imgSize = @getimagesize($logo_cliente);
+                $maxW = 50;
+                $maxH = 22;
+                $imgW = $maxW;
+                $imgH = 0;
 
-            if ($imgSize && $imgSize[0] > 0 && $imgSize[1] > 0) {
-                $ratio = $imgSize[0] / $imgSize[1];
-                if ($ratio < ($maxW / $maxH)) {
-                    $imgH = $maxH;
-                    $imgW = $maxH * $ratio;
+                if ($imgSize && $imgSize[0] > 0 && $imgSize[1] > 0) {
+                    $ratio = $imgSize[0] / $imgSize[1];
+                    if ($ratio < ($maxW / $maxH)) {
+                        $imgH = $maxH;
+                        $imgW = $maxH * $ratio;
+                    } else {
+                        $imgW = $maxW;
+                        $imgH = $maxW / $ratio;
+                    }
                 } else {
-                    $imgW = $maxW;
-                    $imgH = $maxW / $ratio;
+                    $imgH = 22;
+                    $imgW = 22;
                 }
-            } else {
-                $imgH = 22;
-                $imgW = 22;
-            }
 
-            $posX = 12 + ((186 - $imgW) / 2);
-            $posY = 14 + (($maxH - $imgH) / 2);
-            $pdf->Image($logo_cliente, $posX, $posY, $imgW, $imgH);
+                $posX = 12 + ((186 - $imgW) / 2);
+                $posY = 14 + (($maxH - $imgH) / 2);
+                @$pdf->Image($logo_cliente, $posX, $posY, $imgW, $imgH);
+            } catch (\Throwable $e) {
+                // Continuar si el logo tiene un formato no soportado por FPDF
+            }
         }
 
         $pdf->SetY(38);
@@ -242,18 +264,18 @@ class DescriptorPdfService
         $pdf->SetLineWidth(0.2);
 
         $ficha = [
-            ['Código', $plan->codigo ?? ''],
-            ['Nombre del Curso', $plan->materia ?? ''],
-            ['Créditos', $plan->creditos ?: '4'],
-            ['Duración', $plan->duracion ?: '15 semanas'],
-            ['Distribución horas por semana', $plan->distribucion_horas ?: '12 horas (3 teóricas, 1 práctica, 8 independientes)'],
-            ['Modalidad', $plan->modalidad ?: 'Virtual'],
-            ['Naturaleza', $plan->naturaleza ?: 'Teórico-práctica'],
-            ['Ubicación', $plan->cuatrimestre ?? ''],
-            ['Requisitos', $plan->requisitos ?: 'No tiene'],
-            ['Correquisitos', $plan->correquisitos ?: 'No tiene'],
-            ['Nivel', $plan->nivel ?: ($plan->categoria ?? 'Maestría')],
-            ['Profesor', $plan->profesor ?: '--'],
+            ['Código', (string)$prop('codigo', '')],
+            ['Nombre del Curso', (string)$prop('materia', '')],
+            ['Créditos', (string)$prop('creditos', '4')],
+            ['Duración', (string)$prop('duracion', '15 semanas')],
+            ['Distribución horas por semana', (string)$prop('distribucion_horas', '12 horas (3 teóricas, 1 práctica, 8 independientes)')],
+            ['Modalidad', (string)$prop('modalidad', 'Virtual')],
+            ['Naturaleza', (string)$prop('naturaleza', 'Teórico-práctica')],
+            ['Ubicación', (string)$prop('cuatrimestre', '')],
+            ['Requisitos', (string)$prop('requisitos', 'No tiene')],
+            ['Correquisitos', (string)$prop('correquisitos', 'No tiene')],
+            ['Nivel', (string)$prop('nivel', $prop('facultad_programa', 'Carrera Técnica'))],
+            ['Profesor', (string)$prop('profesor', '--')],
         ];
 
         foreach ($ficha as $row) {
@@ -268,17 +290,17 @@ class DescriptorPdfService
         }
 
         // Secciones Curriculares I a XI
-        $pdf->renderSeccion('I', 'Descripción del curso', $plan->descripcion_curso ?? '');
-        $pdf->renderSeccion('II', 'Objetivos generales', $plan->objetivo_general ?? '');
-        $pdf->renderSeccion('III', 'Objetivos específicos', $plan->objetivos_especificos ?? '');
-        $pdf->renderSeccion('IV', 'Contenidos temáticos', $plan->contenidos_tematicos ?? '');
-        $pdf->renderSeccion('V', 'Metodología de enseñanza', $plan->metodologia_ensenanza ?? '');
-        $pdf->renderSeccion('VI', 'Estrategias de aprendizaje', $plan->estrategias_aprendizaje ?? '');
-        $pdf->renderSeccion('VII', 'Evaluación de los aprendizajes', $plan->evaluacion_aprendizajes ?? '');
-        $pdf->renderSeccion('VIII', 'Recursos didácticos', $plan->recursos_didacticos ?? '');
-        $pdf->renderSeccion('IX', 'Cronograma', $plan->cronograma ?? '');
-        $pdf->renderSeccion('X', 'Las guías de evaluación', $plan->guias_evaluacion ?? '');
-        $pdf->renderSeccion('XI', 'Bibliografía', $plan->bibliografia ?? '');
+        $pdf->renderSeccion('I', 'Descripción del curso', (string)$prop('descripcion_curso', $silabo->descripcion ?? ''));
+        $pdf->renderSeccion('II', 'Objetivos generales', (string)$prop('objetivo_general', $silabo->objetivo_general ?? ''));
+        $pdf->renderSeccion('III', 'Objetivos específicos', (string)$prop('objetivos_especificos', $silabo->objetivos_especificos ?? ''));
+        $pdf->renderSeccion('IV', 'Contenidos temáticos', (string)$prop('contenidos_tematicos', $silabo->contenidos ?? ''));
+        $pdf->renderSeccion('V', 'Metodología de enseñanza', (string)$prop('metodologia_ensenanza', $silabo->metodologia ?? ''));
+        $pdf->renderSeccion('VI', 'Estrategias de aprendizaje', (string)$prop('estrategias_aprendizaje', $silabo->estrategias_aprendizaje ?? ''));
+        $pdf->renderSeccion('VII', 'Evaluación de los aprendizajes', (string)$prop('evaluacion_aprendizajes', ''));
+        $pdf->renderSeccion('VIII', 'Recursos didácticos', (string)$prop('recursos_didacticos', $silabo->recursos_aprendizaje ?? ''));
+        $pdf->renderSeccion('IX', 'Cronograma', (string)$prop('cronograma', $silabo->cronograma ?? ''));
+        $pdf->renderSeccion('X', 'Las guías de evaluación', (string)$prop('guias_evaluacion', ''));
+        $pdf->renderSeccion('XI', 'Bibliografía', (string)$prop('bibliografia', $silabo->bibliografia ?? ''));
 
         // Guardar copia
         $dir = public_path('uploads/descriptores_cursos');

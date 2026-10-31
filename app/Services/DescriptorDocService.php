@@ -29,14 +29,36 @@ class DescriptorDocService
 
         $logo_base64 = '';
         if (file_exists($logo_path)) {
-            $logo_data = file_get_contents($logo_path);
-            $logo_base64 = 'data:image/png;base64,' . base64_encode($logo_data);
+            $ext = strtolower(pathinfo($logo_path, PATHINFO_EXTENSION));
+            if ($ext === 'svg' && file_exists(public_path('imgs/logo.png'))) {
+                $logo_path = public_path('imgs/logo.png');
+                $ext = 'png';
+            }
+            $mime = ($ext === 'svg') ? 'image/svg+xml' : (($ext === 'jpg' || $ext === 'jpeg') ? 'image/jpeg' : 'image/png');
+            $logo_data = @file_get_contents($logo_path);
+            if ($logo_data !== false) {
+                $logo_base64 = "data:{$mime};base64," . base64_encode($logo_data);
+            }
         }
 
-        $codigo = htmlspecialchars($plan->codigo ?? '');
-        $materia = htmlspecialchars($plan->materia ?? '');
-        $programa = htmlspecialchars($plan->nombre_programa ?? '');
-        $facultad = htmlspecialchars($plan->facultad ?: ($plan->facultad_programa ?? ''));
+        // Cargar sílabo de respaldo si algún campo del plan está vacío
+        $silabo = null;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('silabos')) {
+                $silabo = DB::table('silabos')->where('id_plan', $id_plan)->orderBy('id_silabo', 'desc')->first();
+            }
+        } catch (\Throwable $e) {
+            $silabo = null;
+        }
+
+        $prop = function ($key, $default = '') use ($plan) {
+            return (isset($plan->$key) && $plan->$key !== '' && $plan->$key !== null) ? $plan->$key : $default;
+        };
+
+        $codigo = htmlspecialchars($prop('codigo', ''));
+        $materia = htmlspecialchars($prop('materia', ''));
+        $programa = htmlspecialchars($prop('nombre_programa', ''));
+        $facultad = htmlspecialchars($prop('facultad', $prop('facultad_programa', '')));
 
         $codigo_clean = preg_replace('/[^a-zA-Z0-9_-]/', '_', $plan->codigo ?? 'CURSO');
         $nombre_archivo = "descriptor_curso_{$id_plan}_{$codigo_clean}.doc";
@@ -168,58 +190,58 @@ class DescriptorDocService
         </tr>
         <tr>
             <td class='label'>Créditos</td>
-            <td class='value'>" . htmlspecialchars($plan->creditos ?: '4') . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('creditos', '4')) . "</td>
         </tr>
         <tr>
             <td class='label'>Duración</td>
-            <td class='value'>" . htmlspecialchars($plan->duracion ?: '15 semanas') . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('duracion', '15 semanas')) . "</td>
         </tr>
         <tr>
             <td class='label'>Distribución horas por semana</td>
-            <td class='value'>" . htmlspecialchars($plan->distribucion_horas ?: 'Este curso comprende un total de 12 horas distribuidas en 3 horas teóricas, 1 hora práctica y 8 horas de estudio independiente.') . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('distribucion_horas', 'Este curso comprende un total de 12 horas distribuidas en 3 horas teóricas, 1 hora práctica y 8 horas de estudio independiente.')) . "</td>
         </tr>
         <tr>
             <td class='label'>Modalidad</td>
-            <td class='value'>" . htmlspecialchars($plan->modalidad ?: 'Virtual (aprendizaje electrónico)') . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('modalidad', 'Virtual (aprendizaje electrónico)')) . "</td>
         </tr>
         <tr>
             <td class='label'>Naturaleza</td>
-            <td class='value'>" . htmlspecialchars($plan->naturaleza ?: 'Teórico-práctica') . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('naturaleza', 'Teórico-práctica')) . "</td>
         </tr>
         <tr>
             <td class='label'>Ubicación</td>
-            <td class='value'>" . htmlspecialchars($plan->cuatrimestre ?? '') . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('cuatrimestre', '')) . "</td>
         </tr>
         <tr>
             <td class='label'>Requisitos</td>
-            <td class='value'>" . htmlspecialchars($plan->requisitos ?: 'No tiene') . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('requisitos', 'No tiene')) . "</td>
         </tr>
         <tr>
             <td class='label'>Correquisitos</td>
-            <td class='value'>" . htmlspecialchars($plan->correquisitos ?: 'No tiene') . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('correquisitos', 'No tiene')) . "</td>
         </tr>
         <tr>
             <td class='label'>Nivel</td>
-            <td class='value'>" . htmlspecialchars($plan->nivel ?: ($plan->categoria ?? 'Maestría')) . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('nivel', $prop('facultad_programa', 'Carrera Técnica'))) . "</td>
         </tr>
         <tr>
             <td class='label'>Profesor</td>
-            <td class='value'>" . htmlspecialchars($plan->profesor ?: '--') . "</td>
+            <td class='value'>" . htmlspecialchars((string)$prop('profesor', '--')) . "</td>
         </tr>
     </table>
 
     <!-- SECCIONES CURRICULARES I A XI -->
-    " . $render_seccion('I', 'Descripción del curso', $plan->descripcion_curso ?? '') . "
-    " . $render_seccion('II', 'Objetivos generales', $plan->objetivo_general ?? '') . "
-    " . $render_seccion('III', 'Objetivos específicos', $plan->objetivos_especificos ?? '') . "
-    " . $render_seccion('IV', 'Contenidos temáticos', $plan->contenidos_tematicos ?? '') . "
-    " . $render_seccion('V', 'Metodología de enseñanza', $plan->metodologia_ensenanza ?? '') . "
-    " . $render_seccion('VI', 'Estrategias de aprendizaje', $plan->estrategias_aprendizaje ?? '') . "
-    " . $render_seccion('VII', 'Evaluación de los aprendizajes', $plan->evaluacion_aprendizajes ?? '') . "
-    " . $render_seccion('VIII', 'Recursos didácticos', $plan->recursos_didacticos ?? '') . "
-    " . $render_seccion('IX', 'Cronograma', $plan->cronograma ?? '') . "
-    " . $render_seccion('X', 'Las guías de evaluación', $plan->guias_evaluacion ?? '') . "
-    " . $render_seccion('XI', 'Bibliografía', $plan->bibliografia ?? '') . "
+    " . $render_seccion('I', 'Descripción del curso', $prop('descripcion_curso', $silabo->descripcion ?? '')) . "
+    " . $render_seccion('II', 'Objetivos generales', $prop('objetivo_general', $silabo->objetivo_general ?? '')) . "
+    " . $render_seccion('III', 'Objetivos específicos', $prop('objetivos_especificos', $silabo->objetivos_especificos ?? '')) . "
+    " . $render_seccion('IV', 'Contenidos temáticos', $prop('contenidos_tematicos', $silabo->contenidos ?? '')) . "
+    " . $render_seccion('V', 'Metodología de enseñanza', $prop('metodologia_ensenanza', $silabo->metodologia ?? '')) . "
+    " . $render_seccion('VI', 'Estrategias de aprendizaje', $prop('estrategias_aprendizaje', $silabo->estrategias_aprendizaje ?? '')) . "
+    " . $render_seccion('VII', 'Evaluación de los aprendizajes', $prop('evaluacion_aprendizajes', '')) . "
+    " . $render_seccion('VIII', 'Recursos didácticos', $prop('recursos_didacticos', $silabo->recursos_aprendizaje ?? '')) . "
+    " . $render_seccion('IX', 'Cronograma', $prop('cronograma', $silabo->cronograma ?? '')) . "
+    " . $render_seccion('X', 'Las guías de evaluación', $prop('guias_evaluacion', '')) . "
+    " . $render_seccion('XI', 'Bibliografía', $prop('bibliografia', $silabo->bibliografia ?? '')) . "
 
     <!-- PIE DE PÁGINA INSTITUCIONAL -->
     <div style='margin-top: 30pt; padding-top: 10pt; border-top: 1pt solid #cbd5e1; font-size: 8.5pt; color: #94a3b8; text-align: center;'>

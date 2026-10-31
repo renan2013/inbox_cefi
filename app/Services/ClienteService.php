@@ -144,7 +144,8 @@ class ClienteService
         }
         $rel = ltrim($val, '/\\');
         $p = public_path($rel);
-        if (file_exists($p)) {
+        $ext = strtolower(pathinfo($p, PATHINFO_EXTENSION));
+        if (file_exists($p) && in_array($ext, ['png', 'jpg', 'jpeg', 'gif'])) {
             return $p;
         }
         if (file_exists(public_path('imgs/logo.png'))) {

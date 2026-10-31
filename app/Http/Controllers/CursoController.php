@@ -612,6 +612,7 @@ class CursoController extends Controller
      */
     public function generarDescriptorDoc($id)
     {
+        $this->ensurePlanEstudiosColumns();
         return \App\Services\DescriptorDocService::generar((int)$id);
     }
 
@@ -620,6 +621,7 @@ class CursoController extends Controller
      */
     public function generarDescriptorPdf($id)
     {
+        $this->ensurePlanEstudiosColumns();
         return \App\Services\DescriptorPdfService::generar((int)$id);
     }
 }
