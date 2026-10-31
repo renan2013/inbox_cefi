@@ -60,12 +60,12 @@
 @endsection
 
 @section('content')
-<div class="container-fluid px-4 py-4" style="max-width: 1200px; margin: 0 auto;">
+<div class="container-fluid px-4 py-4">
 
     <!-- Header -->
     <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h1 class="h3 fw-bold mb-1"><i class="bi bi-bar-chart-fill me-2" style="color: #84cc16;"></i>Resultados de Encuestas Docentes</h1>
+            <h1 class="h3 fw-bold mb-1 text-white"><i class="bi bi-bar-chart-fill me-2" style="color: #84cc16;"></i>Resultados de Encuestas Docentes</h1>
             <p class="mb-0 text-white-50 small">Métricas y retroalimentación anónima de los cursos evaluados.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">

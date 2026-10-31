@@ -120,8 +120,8 @@
             </ol>
         </nav>
 
-        <div class="row justify-content-center">
-            <div class="col-xl-6 col-lg-8">
+        <div class="row">
+            <div class="col-12">
                 
                 @if (session('success'))
                     <div class="alert alert-success border-0 rounded-4 d-flex align-items-center mb-4 shadow-sm" style="background-color: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3) !important;">

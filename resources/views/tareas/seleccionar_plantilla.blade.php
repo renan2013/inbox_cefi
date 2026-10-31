@@ -55,10 +55,10 @@
             <p class="text-white-50 mb-0">Seleccione una plantilla predefinida para acelerar la creación de tareas recurrentes.</p>
         </div>
 
-        <div class="row justify-content-center g-4">
+        <div class="row g-4">
             
             <!-- Opción 1: Seleccionar Plantilla Existente -->
-            <div class="col-md-7 col-lg-6">
+            <div class="col-md-7 col-lg-7">
                 <div class="option-card p-4 p-md-5">
                     <h4 class="fw-bold text-white mb-3"><i class="bi bi-file-earmark-text text-primary me-2"></i> Plantillas Disponibles</h4>
                     <p class="text-white-50 small mb-4">Elija una plantilla para autocompletar el formulario de nueva tarea.</p>

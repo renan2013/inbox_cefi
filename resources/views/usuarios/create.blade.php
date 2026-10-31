@@ -165,8 +165,8 @@
             </ol>
         </nav>
 
-        <div class="row justify-content-center">
-            <div class="col-12 col-xl-11">
+        <div class="row">
+            <div class="col-12">
                 
                 <!-- Success Details Card (from Session) -->
                 @if (session('new_user_details'))

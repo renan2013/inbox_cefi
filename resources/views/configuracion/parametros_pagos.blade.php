@@ -3,7 +3,7 @@
 @section('title', 'Configuración de Pagos y Firmas Oficiales - Inbox CEFI')
 
 @section('content')
-<div class="container py-4" style="max-width: 1050px;">
+<div class="container-fluid px-4 py-4">
     <!-- Encabezado Estilo CEFI con Seguridad Superior -->
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
         <div>

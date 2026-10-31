@@ -160,6 +160,12 @@
         [data-theme="light"] .page-header {
             background: var(--card-dark) !important;
             border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        [data-theme="light"] .page-header h1,
+        [data-theme="light"] .page-header h2,
+        [data-theme="light"] .page-header h3 {
+            color: #0f172a !important;
         }
         [data-theme="light"] [style*="color: #f8fafc"],
         [data-theme="light"] [style*="color:#f8fafc"],

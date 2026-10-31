@@ -156,7 +156,7 @@
 
     <!-- Header -->
     <div class="enc-header">
-        <div class="container" style="max-width: 780px;">
+        <div class="container-fluid px-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <span class="badge-cefi"><i class="bi bi-mortarboard-fill me-1"></i> {{ config('cliente.nombre', 'CEFI') }} Virtual</span>
                 <span class="badge" style="background: rgba(0,0,0,0.25); color: #fff; font-size: 11px; border-radius: 50px;">
@@ -185,7 +185,7 @@
     </div>
 
     <!-- Contenido Principal -->
-    <div class="container pb-5" style="max-width: 780px; margin-top: -1.5rem;">
+    <div class="container-fluid px-4 pb-5" style="margin-top: -1.5rem;">
 
         @if ($ya_respondio)
             <!-- Ya respondió -->

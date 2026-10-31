@@ -95,7 +95,7 @@
                 <span class="badge" style="background: rgba(255,255,255,0.2); font-size: 11px;">Módulo de Calidad</span>
                 <span class="badge" style="background: rgba(0,0,0,0.25); font-size: 11px;"><i class="bi bi-shield-check me-1"></i> Administración</span>
             </div>
-            <h1 class="h3 fw-bold mb-1">Banco de Preguntas de Encuesta</h1>
+            <h1 class="h3 fw-bold mb-1 text-white">Banco de Preguntas de Encuesta</h1>
             <p class="mb-0 text-white-50 small">Administre y personalice los reactivos de evaluación docente y calidad institucional.</p>
         </div>
         <div class="d-flex gap-2">

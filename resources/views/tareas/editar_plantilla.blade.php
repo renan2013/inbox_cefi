@@ -74,8 +74,8 @@
             </div>
         </div>
 
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
+        <div class="row">
+            <div class="col-12">
                 <div class="glass-card p-4 p-md-5">
                     <form action="{{ route('tareas.plantillas.update', $plantilla->id) }}" method="POST">
                         @csrf

@@ -31,7 +31,7 @@
 @endsection
 
 @section('content')
-<div class="container-fluid px-4 py-4" style="max-width: 1000px;">
+<div class="container-fluid px-4 py-4">
 
     <!-- Back Button -->
     <div class="mb-3">

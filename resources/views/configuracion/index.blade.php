@@ -1066,8 +1066,8 @@
                 @csrf
                 <input type="hidden" name="active_tab" value="seguridad">
 
-                <div class="row justify-content-center">
-                    <div class="col-lg-7">
+                <div class="row">
+                    <div class="col-12">
                         <div class="config-card">
                             <div class="config-card-header">
                                 <div class="d-flex align-items-center gap-2">

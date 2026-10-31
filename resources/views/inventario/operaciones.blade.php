@@ -71,7 +71,7 @@
 <div class="container main-container">
     
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4 col-md-8 mx-auto">
+    <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none text-white-50"><i class="bi bi-house-door"></i> Inicio</a></li>
             <li class="breadcrumb-item"><a href="{{ route('inventario.index') }}" class="text-decoration-none text-white-50">Inventario</a></li>
@@ -79,8 +79,8 @@
         </ol>
     </nav>
 
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+    <div class="row">
+        <div class="col-12">
             <div class="operations-card">
                 
                 <div class="card-header-custom">
