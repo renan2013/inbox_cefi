@@ -592,39 +592,28 @@
                     @endif
                     @endif
 
-                    <!-- Tutor & Cerebro AI 2.0 (Menú Exclusivo de Inteligencia Artificial) -->
-                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
-                    <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-custom dropdown-toggle {{ Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-robot text-success me-1"></i> Tutor AI
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark-custom">
-                            <li><h6 class="dropdown-header-custom"><i class="bi bi-cpu-fill text-success me-1"></i> Tutor & Asistente Inteligente</h6></li>
-                            <li>
-                                <a class="dropdown-item dropdown-item-custom fw-semibold {{ Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="{{ route('configuracion.conocimiento_ai') }}">
-                                    <i class="bi bi-mortarboard-fill text-info me-2"></i> Base de Conocimiento (RAG)
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider-custom"></li>
-                            <li>
-                                <a class="dropdown-item dropdown-item-custom" href="javascript:void(0)" onclick="const f = document.getElementById('inboxAiFab'); if(f) f.click();">
-                                    <i class="bi bi-chat-dots-fill text-success me-2"></i> Abrir Chat Tutor AI
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    @endif
-
                     <!-- Configuración Dropdown (Solo Administrador General con Clave) -->
                     @if(Auth::check() && Auth::user()->id_rol == 1)
                     <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-custom nav-link-config dropdown-toggle {{ Request::is('configuracion*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link nav-link-custom nav-link-config dropdown-toggle {{ Request::is('configuracion*') || Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-sliders2-vertical me-1"></i> Configuración
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom dropdown-menu-end">
                             <li><h6 class="dropdown-header-custom"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Administración General</h6></li>
                             <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('configuracion.index') }}"><i class="bi bi-speedometer2 text-info me-2"></i> Panel de Configuración</a></li>
                             <li><a class="dropdown-item dropdown-item-custom fw-bold text-success" href="{{ route('configuracion.pagos') }}"><i class="bi bi-cash-coin text-success me-2"></i> Pagos, Morosidad e Intereses</a></li>
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li><h6 class="dropdown-header-custom"><i class="bi bi-robot text-success me-1"></i> Tutor AI</h6></li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom fw-semibold {{ Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="{{ route('configuracion.conocimiento_ai') }}">
+                                    <i class="bi bi-mortarboard-fill text-info me-2"></i> Base de Conocimiento (RAG)
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom" href="javascript:void(0)" onclick="const f = document.getElementById('inboxAiFab'); if(f) f.click();">
+                                    <i class="bi bi-chat-dots-fill text-success me-2"></i> Abrir Chat Tutor AI
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'parametros']) }}"><i class="bi bi-buildings text-primary me-2"></i> Parámetros del Sistema</a></li>
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'identidad']) }}"><i class="bi bi-palette text-warning me-2"></i> Logotipo e Identidad</a></li>
