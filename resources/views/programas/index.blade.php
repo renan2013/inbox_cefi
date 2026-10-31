@@ -260,7 +260,7 @@
 @endsection
 
 @section('content')
-    <div class="container py-5">
+    <div class="container-fluid px-4 py-4">
         
         <!-- Header -->
         <div class="page-header d-flex justify-content-between align-items-center flex-wrap g-3">
@@ -347,6 +347,9 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-2">
+                                        <a href="{{ route('programas.pdf', $prog->id_programa) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver PDF del Programa">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                        </a>
                                         <a href="{{ route('programas.edit', $prog->id_programa) }}" class="btn btn-sm btn-outline-success" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>

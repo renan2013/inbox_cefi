@@ -190,4 +190,12 @@ class ProgramaController extends Controller
         $programa->delete();
         return redirect()->route('programas.index')->with('success', "El programa \"{$nombre}\" fue eliminado exitosamente.");
     }
+
+    /**
+     * Genera y transmite en PDF la ficha oficial y malla curricular del programa académico.
+     */
+    public function generarPdf($id)
+    {
+        return \App\Services\ProgramaPdfService::generar((int)$id);
+    }
 }

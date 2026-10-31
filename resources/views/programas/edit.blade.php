@@ -196,7 +196,7 @@
 @endsection
 
 @section('content')
-    <div class="container py-5">
+    <div class="container-fluid px-4 py-4">
         
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
@@ -213,7 +213,10 @@
                 <h1 class="display-6 fw-bold mb-1">Editar Programa: {{ $programa->nombre_programa }}</h1>
                 <p class="text-white-50 mb-0">Actualice la información general, aranceles de cobro y recursos multimedia del programa.</p>
             </div>
-            <div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('programas.pdf', $programa->id_programa) }}" target="_blank" class="btn btn-outline-danger rounded-pill px-3 shadow-sm">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> Ver PDF
+                </a>
                 <a href="{{ route('programas.index') }}" class="btn btn-outline-custom">
                     <i class="bi bi-arrow-left me-1"></i> Volver a Programas
                 </a>
