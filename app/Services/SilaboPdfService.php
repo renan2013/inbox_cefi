@@ -457,22 +457,22 @@ class SilaboPdfService
         $pdf->SectionTitle('12. REFERENCIAS Y BIBLIOGRAFÍA');
         $pdf->SectionBody($silabo->bibliografia ?? $curso->plan_bibliografia);
 
-        // Guardar copia
-        $dir = public_path('uploads/silabos');
-        if (!file_exists($dir)) {
-            @mkdir($dir, 0777, true);
-        }
-        $ruta_disco = $dir . "/silabo_curso_{$id_curso}.pdf";
-        @$pdf->Output('F', $ruta_disco);
-
         $filename = "silabo_curso_{$id_curso}.pdf";
+        $pdfContent = $pdf->Output('S');
 
         if ($dest === 'F') {
+            $dir = public_path('uploads/silabos');
+            if (!file_exists($dir)) {
+                @mkdir($dir, 0777, true);
+            }
+            $ruta_disco = $dir . "/{$filename}";
+            @file_put_contents($ruta_disco, $pdfContent);
             return $ruta_disco;
         }
 
-        return response($pdf->Output('S'), 200)
+        return response($pdfContent, 200)
             ->header('Content-Type', 'application/pdf')
+            ->header('Content-Length', (string)strlen($pdfContent))
             ->header('Content-Disposition', ($dest === 'D' ? 'attachment' : 'inline') . '; filename="' . $filename . '"')
             ->header('Cache-Control', 'private, max-age=0, must-revalidate')
             ->header('Pragma', 'public');

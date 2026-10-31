@@ -16,6 +16,11 @@ class CursoController extends Controller
     protected function ensurePlanEstudiosColumns()
     {
         try {
+            $existing = array_map('strtolower', Schema::getColumnListing('plan_estudios'));
+            if (empty($existing)) {
+                return;
+            }
+
             $cols = [
                 'duracion' => "VARCHAR(100) NULL DEFAULT '15 semanas'",
                 'distribucion_horas' => "TEXT NULL",
@@ -41,7 +46,7 @@ class CursoController extends Controller
             ];
 
             foreach ($cols as $col => $type) {
-                if (!Schema::hasColumn('plan_estudios', $col)) {
+                if (!in_array(strtolower($col), $existing, true)) {
                     DB::statement("ALTER TABLE plan_estudios ADD COLUMN `{$col}` {$type}");
                 }
             }
@@ -55,7 +60,6 @@ class CursoController extends Controller
      */
     public function index(Request $request)
     {
-        $this->ensurePlanEstudiosColumns();
         $query = PlanEstudio::with('programa');
 
         // Búsqueda por término (materia o código)
@@ -83,7 +87,6 @@ class CursoController extends Controller
      */
     public function create()
     {
-        $this->ensurePlanEstudiosColumns();
         $programas = Programa::orderBy('categoria', 'asc')->orderBy('nombre_programa', 'asc')->get();
 
         // 15 semanas por defecto para el cronograma
@@ -312,38 +315,47 @@ class CursoController extends Controller
      */
     public function edit($id)
     {
-        $this->ensurePlanEstudiosColumns();
         $curso = PlanEstudio::findOrFail($id);
         $programas = Programa::orderBy('categoria', 'asc')->orderBy('nombre_programa', 'asc')->get();
 
         // Cargar datos de sílabo si existen
         $id_silabo = null;
-        if (Schema::hasTable('silabos')) {
+        try {
             $silabo = DB::table('silabos')
                 ->where('id_plan', $id)
                 ->orderBy('id_silabo', 'desc')
                 ->first();
             if ($silabo) $id_silabo = $silabo->id_silabo;
+        } catch (\Throwable $e) {
+            $id_silabo = null;
         }
 
         $evaluaciones = [];
-        if ($id_silabo && Schema::hasTable('silabo_evaluacion')) {
-            $evaluaciones = DB::table('silabo_evaluacion')
-                ->where('id_silabo', $id_silabo)
-                ->orderBy('id_evaluacion', 'asc')
-                ->get()
-                ->map(fn($item) => (array)$item)
-                ->toArray();
+        if ($id_silabo) {
+            try {
+                $evaluaciones = DB::table('silabo_evaluacion')
+                    ->where('id_silabo', $id_silabo)
+                    ->orderBy('id_evaluacion', 'asc')
+                    ->get()
+                    ->map(fn($item) => (array)$item)
+                    ->toArray();
+            } catch (\Throwable $e) {
+                $evaluaciones = [];
+            }
         }
 
         $cronograma_data = [];
-        if ($id_silabo && Schema::hasTable('silabo_cronograma')) {
-            $cronograma_data = DB::table('silabo_cronograma')
-                ->where('id_silabo', $id_silabo)
-                ->orderBy('semana', 'asc')
-                ->get()
-                ->map(fn($item) => (array)$item)
-                ->toArray();
+        if ($id_silabo) {
+            try {
+                $cronograma_data = DB::table('silabo_cronograma')
+                    ->where('id_silabo', $id_silabo)
+                    ->orderBy('semana', 'asc')
+                    ->get()
+                    ->map(fn($item) => (array)$item)
+                    ->toArray();
+            } catch (\Throwable $e) {
+                $cronograma_data = [];
+            }
         }
         if (empty($cronograma_data)) {
             for ($i = 1; $i <= 15; $i++) {
@@ -359,13 +371,17 @@ class CursoController extends Controller
         }
 
         $rubricas_data = [];
-        if ($id_silabo && Schema::hasTable('silabo_rubricas')) {
-            $rubricas_data = DB::table('silabo_rubricas')
-                ->where('id_silabo', $id_silabo)
-                ->orderBy('id_rubrica', 'asc')
-                ->get()
-                ->map(fn($item) => (array)$item)
-                ->toArray();
+        if ($id_silabo) {
+            try {
+                $rubricas_data = DB::table('silabo_rubricas')
+                    ->where('id_silabo', $id_silabo)
+                    ->orderBy('id_rubrica', 'asc')
+                    ->get()
+                    ->map(fn($item) => (array)$item)
+                    ->toArray();
+            } catch (\Throwable $e) {
+                $rubricas_data = [];
+            }
         }
 
         return view('cursos.edit', compact('curso', 'programas', 'cronograma_data', 'evaluaciones', 'rubricas_data'));
@@ -594,7 +610,6 @@ class CursoController extends Controller
      */
     public function destroy($id)
     {
-        $this->ensurePlanEstudiosColumns();
         $curso = PlanEstudio::findOrFail($id);
 
         $activosCount = \App\Models\CursoActivo::where('id_plan', $id)->count();
@@ -612,7 +627,6 @@ class CursoController extends Controller
      */
     public function generarDescriptorDoc($id)
     {
-        $this->ensurePlanEstudiosColumns();
         return \App\Services\DescriptorDocService::generar((int)$id);
     }
 
@@ -621,7 +635,6 @@ class CursoController extends Controller
      */
     public function generarDescriptorPdf($id)
     {
-        $this->ensurePlanEstudiosColumns();
         return \App\Services\DescriptorPdfService::generar((int)$id);
     }
 }

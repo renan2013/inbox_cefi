@@ -246,7 +246,7 @@
                                         <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver Descriptor PDF">
                                             <i class="bi bi-file-earmark-pdf"></i>
                                         </a>
-                                        <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" class="btn btn-sm btn-outline-primary" title="Descargar Descriptor Word (.doc)">
+                                        <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Descargar Descriptor Word (.doc)">
                                             <i class="bi bi-file-earmark-word"></i>
                                         </a>
                                         <a href="{{ route('cursos.edit', $curso->id_plan) }}" class="btn btn-sm btn-outline-success" title="Editar">

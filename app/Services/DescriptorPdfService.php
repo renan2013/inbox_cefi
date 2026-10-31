@@ -185,9 +185,7 @@ class DescriptorPdfService
         // Cargar sílabo de respaldo si algún campo del plan está vacío
         $silabo = null;
         try {
-            if (\Illuminate\Support\Facades\Schema::hasTable('silabos')) {
-                $silabo = DB::table('silabos')->where('id_plan', $id_plan)->orderBy('id_silabo', 'desc')->first();
-            }
+            $silabo = DB::table('silabos')->where('id_plan', $id_plan)->orderBy('id_silabo', 'desc')->first();
         } catch (\Throwable $e) {
             $silabo = null;
         }
@@ -302,22 +300,22 @@ class DescriptorPdfService
         $pdf->renderSeccion('X', 'Las guías de evaluación', (string)$prop('guias_evaluacion', ''));
         $pdf->renderSeccion('XI', 'Bibliografía', (string)$prop('bibliografia', $silabo->bibliografia ?? ''));
 
-        // Guardar copia
-        $dir = public_path('uploads/descriptores_cursos');
-        if (!file_exists($dir)) {
-            @mkdir($dir, 0777, true);
-        }
-        $ruta_disco = $dir . "/descriptor_curso_{$id_plan}.pdf";
-        @$pdf->Output('F', $ruta_disco);
-
         $filename = "descriptor_curso_{$id_plan}.pdf";
+        $pdfContent = $pdf->Output('S');
 
         if ($dest === 'F') {
+            $dir = public_path('uploads/descriptores_cursos');
+            if (!file_exists($dir)) {
+                @mkdir($dir, 0777, true);
+            }
+            $ruta_disco = $dir . "/{$filename}";
+            @file_put_contents($ruta_disco, $pdfContent);
             return $ruta_disco;
         }
 
-        return response($pdf->Output('S'), 200)
+        return response($pdfContent, 200)
             ->header('Content-Type', 'application/pdf')
+            ->header('Content-Length', (string)strlen($pdfContent))
             ->header('Content-Disposition', ($dest === 'D' ? 'attachment' : 'inline') . '; filename="' . $filename . '"')
             ->header('Cache-Control', 'private, max-age=0, must-revalidate')
             ->header('Pragma', 'public');

@@ -190,7 +190,7 @@
             <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-outline-danger rounded-pill px-3 shadow-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i> Descriptor PDF
             </a>
-            <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
+            <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" target="_blank" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
                 <i class="bi bi-file-earmark-word me-1"></i> Descriptor Word
             </a>
             <a href="{{ route('cursos.index') }}" class="btn btn-outline-secondary rounded-pill px-4">

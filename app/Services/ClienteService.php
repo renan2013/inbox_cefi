@@ -10,6 +10,23 @@ class ClienteService
      * Cache en memoria de valores de cliente para alto rendimiento.
      */
     protected static ?array $config = null;
+    protected static ?array $dbItems = null;
+
+    /**
+     * Obtiene los pares clave/valor de configuracion_sistema con caché en memoria por petición.
+     */
+    public static function dbItems(): array
+    {
+        if (self::$dbItems !== null) {
+            return self::$dbItems;
+        }
+
+        try {
+            return self::$dbItems = ConfiguracionSistema::pluck('valor', 'clave')->all();
+        } catch (\Throwable $e) {
+            return self::$dbItems = [];
+        }
+    }
 
     /**
      * Carga y resuelve la configuración del cliente (combinando config/cliente.php con base de datos si existe).
@@ -23,9 +40,8 @@ class ClienteService
         $base = config('cliente', []);
 
         try {
-            if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
-                $dbItems = ConfiguracionSistema::pluck('valor', 'clave')->all();
-
+            $dbItems = self::dbItems();
+            if (!empty($dbItems)) {
                 foreach ($dbItems as $k => $val) {
                     if (str_starts_with($k, 'cliente_')) {
                         $prop = str_replace('cliente_', '', $k);

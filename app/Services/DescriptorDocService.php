@@ -44,9 +44,7 @@ class DescriptorDocService
         // Cargar sílabo de respaldo si algún campo del plan está vacío
         $silabo = null;
         try {
-            if (\Illuminate\Support\Facades\Schema::hasTable('silabos')) {
-                $silabo = DB::table('silabos')->where('id_plan', $id_plan)->orderBy('id_silabo', 'desc')->first();
-            }
+            $silabo = DB::table('silabos')->where('id_plan', $id_plan)->orderBy('id_silabo', 'desc')->first();
         } catch (\Throwable $e) {
             $silabo = null;
         }
@@ -254,6 +252,7 @@ class DescriptorDocService
 
         return response($doc_html, 200)
             ->header('Content-Type', 'application/vnd.ms-word; charset=utf-8')
+            ->header('Content-Length', (string)strlen($doc_html))
             ->header('Content-Disposition', 'attachment; filename="' . $nombre_archivo . '"')
             ->header('Cache-Control', 'max-age=0, no-cache, must-revalidate, proxy-revalidate')
             ->header('Pragma', 'public');
