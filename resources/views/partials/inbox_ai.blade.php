@@ -3,8 +3,9 @@
 <style>
     .inbox-ai-fab {
         position: fixed;
-        bottom: 24px;
-        right: 24px;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
         width: 60px;
         height: 60px;
         border-radius: 50%;
@@ -21,7 +22,7 @@
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .inbox-ai-fab:hover {
-        transform: scale(1.1) rotate(5deg);
+        transform: translateY(-50%) scale(1.1) rotate(5deg);
         box-shadow: 0 15px 30px rgba(95, 178, 48, 0.5);
     }
     .inbox-ai-fab .ai-badge {
@@ -40,12 +41,13 @@
     /* Modal de Chat */
     .inbox-ai-card {
         position: fixed;
-        bottom: 96px;
-        right: 24px;
+        top: 50%;
+        right: 92px;
+        transform: translateY(-50%);
         width: 380px;
         height: 520px;
-        max-width: calc(100vw - 32px);
-        max-height: calc(100vh - 120px);
+        max-width: calc(100vw - 110px);
+        max-height: calc(100vh - 80px);
         background: var(--card-dark, #ffffff);
         border-radius: 1.5rem;
         border: 1px solid var(--border-dark, #e2e8f0);
@@ -57,9 +59,16 @@
         animation: aiSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    @media (max-width: 576px) {
+        .inbox-ai-card {
+            right: 16px;
+            max-width: calc(100vw - 32px);
+        }
+    }
+
     @keyframes aiSlideUp {
-        from { opacity: 0; transform: translateY(20px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
+        from { opacity: 0; transform: translateY(-45%) scale(0.95); }
+        to { opacity: 1; transform: translateY(-50%) scale(1); }
     }
 
     .inbox-ai-header {
