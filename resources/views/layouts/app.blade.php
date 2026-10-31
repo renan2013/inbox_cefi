@@ -426,7 +426,7 @@
                     @module('dashboard')
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom {{ Route::is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            Dashboard
                         </a>
                     </li>
                     @endmodule
@@ -596,7 +596,7 @@
                     @if(Auth::check() && Auth::user()->id_rol == 1)
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom nav-link-config dropdown-toggle {{ Request::is('configuracion*') || Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-sliders2-vertical me-1"></i> Configuración
+                            Configuración
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom dropdown-menu-end">
                             <li><h6 class="dropdown-header-custom"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Administración General</h6></li>
