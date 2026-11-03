@@ -353,6 +353,7 @@ class CursoController extends Controller
                     ->get()
                     ->map(fn($item) => (array)$item)
                     ->toArray();
+                $this->depurarCronogramaSegunEvaluacion($cronograma_data, $evaluaciones);
             } catch (\Throwable $e) {
                 $cronograma_data = [];
             }
@@ -636,5 +637,81 @@ class CursoController extends Controller
     public function generarDescriptorPdf($id)
     {
         return \App\Services\DescriptorPdfService::generar((int)$id);
+    }
+
+    /**
+     * Depura actividades Moodle huérfanas o excedentes respecto a la tabla de evaluación.
+     */
+    private function depurarCronogramaSegunEvaluacion(array &$cronograma_data, array $evaluaciones): void
+    {
+        if (empty($evaluaciones) || empty($cronograma_data)) {
+            return;
+        }
+
+        $rubrosCanon = [];
+        $rubrosMax = [];
+        foreach ($evaluaciones as $ev) {
+            $nom = trim($ev['rubro'] ?? '');
+            $cant = intval($ev['cantidad'] ?? 0);
+            if ($nom !== '' && $cant > 0) {
+                $key = mb_strtolower($nom, 'UTF-8');
+                $rubrosCanon[$key] = $nom;
+                $rubrosMax[$nom] = ($rubrosMax[$nom] ?? 0) + $cant;
+            }
+        }
+
+        if (empty($rubrosCanon)) {
+            return;
+        }
+
+        $usados = [];
+        foreach ($cronograma_data as &$cro) {
+            $jsonRaw = $cro['actividades_moodle'] ?? '';
+            if (empty($jsonRaw) || $jsonRaw === '[]') {
+                continue;
+            }
+
+            $acts = json_decode($jsonRaw, true);
+            if (!is_array($acts)) {
+                continue;
+            }
+
+            $actsValidas = [];
+            $modificado = false;
+
+            foreach ($acts as $act) {
+                $kTipo = mb_strtolower(trim($act['tipo'] ?? ''), 'UTF-8');
+                $kNom = mb_strtolower(trim($act['nombre'] ?? ''), 'UTF-8');
+                $canon = $rubrosCanon[$kTipo] ?? ($rubrosCanon[$kNom] ?? null);
+
+                if ($canon !== null && ($usados[$canon] ?? 0) < ($rubrosMax[$canon] ?? 0)) {
+                    $usados[$canon] = ($usados[$canon] ?? 0) + 1;
+                    $act['tipo'] = $canon;
+                    if (mb_strtolower(trim($act['nombre'] ?? ''), 'UTF-8') === mb_strtolower($canon, 'UTF-8')) {
+                        $act['nombre'] = '';
+                    }
+                    $actsValidas[] = $act;
+                } else {
+                    $modificado = true;
+                }
+            }
+
+            if ($modificado) {
+                $nuevoJson = !empty($actsValidas) ? json_encode($actsValidas, JSON_UNESCAPED_UNICODE) : '';
+                $cro['actividades_moodle'] = $nuevoJson;
+                if (empty($actsValidas)) {
+                    $cro['tareas'] = '';
+                }
+                if (!empty($cro['id_cronograma'])) {
+                    DB::table('silabo_cronograma')
+                        ->where('id_cronograma', $cro['id_cronograma'])
+                        ->update([
+                            'actividades_moodle' => $nuevoJson,
+                            'tareas' => $cro['tareas'] ?? '',
+                        ]);
+                }
+            }
+        }
+        unset($cro);
     }
 }
