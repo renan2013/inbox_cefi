@@ -902,6 +902,57 @@
         });
     }
 
+    function depurarActividadesCronogramaSegunEvaluacion() {
+        const rubrosSet = new Set();
+        const rubrosCantidades = {};
+
+        document.querySelectorAll('#tablaEvaluacion tbody tr').forEach(tr => {
+            const nom = tr.querySelector('input[name="rubros[]"]')?.value.trim();
+            const cant = parseInt(tr.querySelector('input[name="cantidades_eval[]"]')?.value) || 0;
+            if (nom && cant > 0) {
+                rubrosSet.add(nom);
+                rubrosCantidades[nom] = (rubrosCantidades[nom] || 0) + cant;
+            }
+        });
+
+        if (rubrosSet.size === 0) return;
+
+        const conteoAcumulado = {};
+        document.querySelectorAll('#tablaCronograma tbody tr').forEach(tr => {
+            const input = tr.querySelector('.moodle-data-input');
+            if (!input || !input.value) return;
+            try {
+                const acts = JSON.parse(input.value);
+                if (!Array.isArray(acts)) return;
+
+                const actsValidas = [];
+                let modificado = false;
+
+                acts.forEach(a => {
+                    const rubro = (a.tipo || a.nombre || '').trim();
+                    const maxPermitido = rubrosCantidades[rubro] || 0;
+                    const usado = conteoAcumulado[rubro] || 0;
+
+                    if (rubrosSet.has(rubro) && usado < maxPermitido) {
+                        conteoAcumulado[rubro] = usado + 1;
+                        actsValidas.push({
+                            tipo: rubro,
+                            nombre: rubro,
+                            intro: a.intro || ''
+                        });
+                    } else {
+                        modificado = true;
+                    }
+                });
+
+                if (modificado) {
+                    input.value = actsValidas.length > 0 ? JSON.stringify(actsValidas) : '';
+                    actualizarResumenFila(tr, actsValidas);
+                }
+            } catch (e) {}
+        });
+    }
+
     function obtenerEstadisticasUsoMoodle(excluirFilaActual = false) {
         const rubrosSet = new Set();
         const rubrosCantidades = {};
@@ -913,7 +964,7 @@
             const mType = tr.querySelector('select[name="tipos_moodle_eval[]"]')?.value || '';
             if (nom) {
                 rubrosSet.add(nom);
-                rubrosCantidades[nom] = cant;
+                rubrosCantidades[nom] = (rubrosCantidades[nom] || 0) + cant;
                 rubroMoodleTypes[nom] = mType;
             }
         });
@@ -926,7 +977,9 @@
                 try {
                     JSON.parse(input.value).forEach(a => {
                         const rubroKey = a.tipo;
-                        usoActual[rubroKey] = (usoActual[rubroKey] || 0) + 1;
+                        if (rubrosSet.has(rubroKey)) {
+                            usoActual[rubroKey] = (usoActual[rubroKey] || 0) + 1;
+                        }
                     });
                 } catch(e) {}
             }
@@ -936,27 +989,22 @@
     }
 
     function actualizarContadorReversoCronograma() {
+        depurarActividadesCronogramaSegunEvaluacion();
+
         const subtituloEl = document.getElementById('progresoActividadesSubtitulo');
         const badgeEl = document.getElementById('badgeProgresoActividades');
         const progressBar = document.getElementById('barraProgresoActividades');
         if (!badgeEl || !progressBar) return;
 
+        const stats = obtenerEstadisticasUsoMoodle(false);
         let totalPlanificadas = 0;
-        document.querySelectorAll('#tablaEvaluacion tbody tr').forEach(tr => {
-            const nom = tr.querySelector('input[name="rubros[]"]')?.value.trim();
-            const cant = parseInt(tr.querySelector('input[name="cantidades_eval[]"]')?.value) || 0;
-            if (nom) totalPlanificadas += cant;
+        stats.rubrosSet.forEach(r => {
+            totalPlanificadas += (stats.rubrosCantidades[r] || 0);
         });
 
         let totalAsignadas = 0;
-        document.querySelectorAll('#tablaCronograma tbody tr').forEach(tr => {
-            const input = tr.querySelector('.moodle-data-input');
-            if (input && input.value) {
-                try {
-                    const acts = JSON.parse(input.value);
-                    if (Array.isArray(acts)) totalAsignadas += acts.length;
-                } catch(e) {}
-            }
+        Object.keys(stats.usoActual).forEach(r => {
+            totalAsignadas += (stats.usoActual[r] || 0);
         });
 
         if (totalPlanificadas === 0) {
@@ -974,11 +1022,17 @@
         progressBar.style.width = pct + "%";
         progressBar.setAttribute('aria-valuenow', pct);
 
-        if (totalAsignadas >= totalPlanificadas) {
+        if (totalAsignadas === totalPlanificadas) {
             badgeEl.className = "badge bg-success px-3 py-2 rounded-pill fw-bold shadow-sm";
             badgeEl.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${totalAsignadas} de ${totalPlanificadas} Actividades (100% Completado)`;
-            if (subtituloEl) subtituloEl.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check2-all me-1"></i> Todas las actividades han sido programadas en el cronograma.</span>`;
+            if (subtituloEl) subtituloEl.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check2-all me-1"></i> Todas las actividades han sido programadas correctamente en el cronograma.</span>`;
             progressBar.className = "progress-bar bg-success";
+        } else if (totalAsignadas > totalPlanificadas) {
+            const exceso = totalAsignadas - totalPlanificadas;
+            badgeEl.className = "badge bg-danger px-3 py-2 rounded-pill fw-bold shadow-sm";
+            badgeEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${totalAsignadas} de ${totalPlanificadas} Actividades (Exceso de ${exceso})`;
+            if (subtituloEl) subtituloEl.innerHTML = `<span class="text-danger fw-bold"><i class="bi bi-exclamation-circle me-1"></i> Hay ${exceso} actividad(es) de más en el cronograma respecto a los rubros declarados.</span>`;
+            progressBar.className = "progress-bar bg-danger";
         } else {
             badgeEl.className = "badge bg-primary px-3 py-2 rounded-pill fw-bold shadow-sm";
             badgeEl.innerHTML = `<i class="bi bi-hourglass-split me-1"></i> ${totalAsignadas} de ${totalPlanificadas} (${pct}%) — Faltan ${faltantes}`;
@@ -1042,14 +1096,33 @@
 
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = `btn btn-sm ${btnClass} rounded-pill px-3 shadow-sm`;
+                btn.className = `btn btn-sm ${btnClass} rounded-pill px-3 shadow-sm ${faltan <= 0 ? 'opacity-50' : ''}`;
+                btn.disabled = (faltan <= 0);
                 btn.innerHTML = `<i class="bi ${icon} me-1"></i> + ${r} <span class="badge ${faltan <= 0 ? 'bg-secondary' : 'bg-dark'} ms-1">${faltan > 0 ? faltan : 0}</span>`;
                 btn.onclick = () => {
-                    agregarActividadMoodle(mType, r);
+                    if (faltan > 0) {
+                        agregarActividadMoodle(mType, r);
+                    }
                 };
                 footer.appendChild(btn);
             });
         }
+
+        // Actualizar opciones deshabilitadas en los selects del modal para impedir duplicados
+        document.querySelectorAll('#contenedorActividadesMoodle .moodle-tipo').forEach(sel => {
+            const valActual = sel.value;
+            Array.from(sel.options).forEach(opt => {
+                if (!opt.value) return;
+                const r = opt.value;
+                const cantMax = stats.rubrosCantidades[r] || 0;
+                let cantEnModal = 0;
+                document.querySelectorAll('#contenedorActividadesMoodle .moodle-tipo').forEach(s2 => {
+                    if (s2.value === r) cantEnModal++;
+                });
+                const totalUsado = (stats.usoActual[r] || 0) + cantEnModal;
+                opt.disabled = (r !== valActual && totalUsado >= cantMax);
+            });
+        });
 
         const btnGuardar = document.createElement('button');
         btnGuardar.type = 'button';
@@ -1091,9 +1164,22 @@
     }
 
     function agregarActividadMoodle(tipo, rubroDefault = '') {
+        const rubro = rubroDefault || tipo;
+        const stats = obtenerEstadisticasUsoMoodle(true);
+        if (rubro && stats.rubrosSet.has(rubro)) {
+            const cantMax = stats.rubrosCantidades[rubro] || 0;
+            let cantEnModal = 0;
+            document.querySelectorAll('#contenedorActividadesMoodle .moodle-tipo').forEach(sel => {
+                if (sel.value === rubro) cantEnModal++;
+            });
+            const usado = (stats.usoActual[rubro] || 0) + cantEnModal;
+            if (usado >= cantMax) {
+                return;
+            }
+        }
+
         const cont = document.getElementById('contenedorActividadesMoodle');
         if (cont.querySelector('p.text-muted')) cont.innerHTML = "";
-        const rubro = rubroDefault || tipo;
         crearTarjetaActividadMoodle({
             tipo: rubro,
             nombre: rubro,
