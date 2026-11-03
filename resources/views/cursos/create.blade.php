@@ -1077,15 +1077,9 @@
                 <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.moodle-item').remove(); actualizarBotonesFooterMoodle();"><i class="bi bi-trash fs-6"></i></button>
             </div>
             <div class="card-body p-3">
-                <div class="row g-2 mb-2">
-                    <div class="col-md-6">
-                        <label class="form-label small mb-1 fw-bold">Rubro / Tipo:</label>
-                        <select class="form-select form-select-sm moodle-tipo" onchange="actualizarBotonesFooterMoodle()">${optionsRubros}</select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small mb-1 fw-bold">Nombre de la Actividad:</label>
-                        <input type="text" class="form-control form-control-sm moodle-nombre" value="${act.nombre || ''}" placeholder="Ej: Ensayo sobre el tema">
-                    </div>
+                <div class="mb-2">
+                    <label class="form-label small mb-1 fw-bold">Rubro / Tipo:</label>
+                    <select class="form-select form-select-sm moodle-tipo" onchange="actualizarBotonesFooterMoodle()">${optionsRubros}</select>
                 </div>
                 <div class="mb-0">
                     <label class="form-label small mb-1 fw-bold">Instrucciones / Descripción:</label>
@@ -1099,9 +1093,10 @@
     function agregarActividadMoodle(tipo, rubroDefault = '') {
         const cont = document.getElementById('contenedorActividadesMoodle');
         if (cont.querySelector('p.text-muted')) cont.innerHTML = "";
+        const rubro = rubroDefault || tipo;
         crearTarjetaActividadMoodle({
-            tipo: rubroDefault || tipo,
-            nombre: '',
+            tipo: rubro,
+            nombre: rubro,
             intro: ''
         }, cont.querySelectorAll('.moodle-item').length);
         actualizarBotonesFooterMoodle();
@@ -1114,9 +1109,8 @@
 
         items.forEach(it => {
             const t = it.querySelector('.moodle-tipo')?.value.trim();
-            const n = it.querySelector('.moodle-nombre')?.value.trim();
             const i = it.querySelector('.moodle-intro')?.value.trim();
-            if (t || n) acts.push({ tipo: t, nombre: n, intro: i });
+            if (t) acts.push({ tipo: t, nombre: t, intro: i });
         });
 
         const input = filaActualMoodle.querySelector('.moodle-data-input');
@@ -1133,13 +1127,14 @@
     function actualizarResumenFila(fila, acts) {
         const summary = fila.querySelector('.moodle-summary');
         const tareaDisplay = fila.querySelector('.tarea-display-only');
+        const tareaInput = fila.querySelector('textarea[name="c_tareas[]"]');
         if (summary) summary.innerHTML = "";
 
         if (acts.length > 0) {
             acts.forEach(a => {
                 const tag = document.createElement('span');
                 tag.className = 'badge bg-primary me-1 mb-1';
-                tag.textContent = a.tipo || 'Actividad';
+                tag.textContent = a.tipo || a.nombre || 'Actividad';
                 if (summary) summary.appendChild(tag);
             });
 
@@ -1147,17 +1142,20 @@
                 let html = "";
                 acts.forEach(a => {
                     const introHtml = a.intro ? a.intro.replace(/\r\n|\r|\n/g, '<br>') : '';
+                    const titulo = a.tipo || a.nombre || 'Actividad';
                     html += `<div class="mb-2 p-2 border-start border-4 border-primary bg-white rounded-2">
-                        <p class="mb-0 fw-bold small text-primary">${a.tipo || 'Actividad'}: ${a.nombre || 'Sin título'}</p>
+                        <p class="mb-0 fw-bold small text-primary">${titulo}</p>
                         ${introHtml ? `<p class="mb-0 text-muted small mt-1" style="line-height: 1.4;">${introHtml}</p>` : ''}
                     </div>`;
                 });
                 tareaDisplay.innerHTML = html;
+                if (tareaInput) tareaInput.value = html;
             }
         } else {
             if (tareaDisplay) {
                 tareaDisplay.innerHTML = '<span class="text-muted small italic"><i class="bi bi-info-circle me-1"></i> Sin actividades configuradas. Utilice el botón "Config."</span>';
             }
+            if (tareaInput) tareaInput.value = '';
         }
     }
 

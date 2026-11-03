@@ -1089,20 +1089,16 @@ function abrirConfigMoodle(btn) {
         div.className = "mb-3 p-3 bg-light rounded-3 text-dark";
         div.innerHTML = `
             <div class="mb-2">
-                <label class="form-label small fw-bold text-dark">Tipo de Actividad</label>
+                <label class="form-label small fw-bold text-dark">Rubro / Tipo de Actividad</label>
                 <select class="form-select form-select-sm val-tipo text-dark bg-white">
                     <option value="assign" ${act.tipo === 'assign' ? 'selected' : ''}>📄 Tarea</option>
                     <option value="quiz" ${act.tipo === 'quiz' ? 'selected' : ''}>📝 Quiz / Examen</option>
                     <option value="forum" ${act.tipo === 'forum' ? 'selected' : ''}>💬 Foro</option>
                 </select>
             </div>
-            <div class="mb-2">
-                <label class="form-label small fw-bold text-dark">Título</label>
-                <input type="text" class="form-control form-control-sm val-nombre text-dark bg-white" value="${act.nombre || ''}">
-            </div>
             <div>
-                <label class="form-label small fw-bold text-dark">Instrucciones</label>
-                <textarea class="form-control form-control-sm val-intro text-dark bg-white" rows="3">${act.intro || ''}</textarea>
+                <label class="form-label small fw-bold text-dark">Instrucciones / Descripción</label>
+                <textarea class="form-control form-control-sm val-intro text-dark bg-white" rows="3" placeholder="Instrucciones para el estudiante...">${act.intro || ''}</textarea>
             </div>
         `;
         contenedor.appendChild(div);
@@ -1115,10 +1111,10 @@ function guardarConfigMoodle() {
     const acts = [];
     document.querySelectorAll('#contenedorActividadesMoodle > div').forEach(div => {
         const t = div.querySelector('.val-tipo').value;
-        const n = div.querySelector('.val-nombre').value.trim();
+        const labelTipo = div.querySelector('.val-tipo option:checked')?.textContent.replace(/^[^\w\s]+\s*/, '').trim() || t;
         const d = div.querySelector('.val-intro').value.trim();
-        if (n) {
-            acts.push({ tipo: t, nombre: n, intro: d });
+        if (t) {
+            acts.push({ tipo: t, nombre: labelTipo, intro: d });
         }
     });
 
