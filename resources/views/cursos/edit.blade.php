@@ -578,8 +578,8 @@
                                         </td>
                                         <td class="text-center">
                                             <input type="hidden" name="c_moodle[]" class="moodle-data-input" value="{{ $cro['actividades_moodle'] ?? '' }}">
-                                            <div class="moodle-summary mb-1"></div>
                                             <button type="button" class="btn btn-moodle w-100" onclick="abrirConfigMoodle(this)"><i class="bi bi-gear-fill me-1"></i> Config.</button>
+                                            <div class="moodle-summary mt-2 d-flex flex-wrap justify-content-center gap-1"></div>
                                         </td>
                                         <td class="text-center td-modalidad {{ ($cro['modalidad_trabajo'] ?? '') === 'Sincrónico' ? 'td-sincronico' : 'td-asincronico' }}">
                                             <select name="c_modalidad[]" class="form-select modalidad-select {{ ($cro['modalidad_trabajo'] ?? '') === 'Sincrónico' ? 'select-sincronico' : 'select-asincronico' }}" onchange="actualizarEstiloModalidad(this)">
@@ -891,8 +891,8 @@
             </td>
             <td class="text-center">
                 <input type="hidden" name="c_moodle[]" class="moodle-data-input" value=''>
-                <div class="moodle-summary mb-1"></div>
                 <button type="button" class="btn btn-moodle w-100" onclick="abrirConfigMoodle(this)"><i class="bi bi-gear-fill me-1"></i> Config.</button>
+                <div class="moodle-summary mt-2 d-flex flex-wrap justify-content-center gap-1"></div>
             </td>
             <td class="text-center td-modalidad td-asincronico">
                 <select name="c_modalidad[]" class="form-select modalidad-select select-asincronico" onchange="actualizarEstiloModalidad(this)">
@@ -1267,6 +1267,22 @@
         actualizarContadorReversoCronograma();
     }
 
+    function resolverEstiloActividadMoodle(act) {
+        const stats = obtenerEstadisticasUsoMoodle(false);
+        const rawTipo = String(act?.tipo || '').trim();
+        const rawNom = String(act?.nombre || '').trim();
+        const mType = (stats.rubroMoodleTypes && stats.rubroMoodleTypes[rawTipo]) ? stats.rubroMoodleTypes[rawTipo] : '';
+        const combined = (mType + ' ' + rawTipo + ' ' + rawNom).toLowerCase();
+
+        if (mType === 'quiz' || /quiz|prueba|examen|cuestionario|corto|autoevaluaci/.test(combined)) {
+            return { tipo: 'quiz', colorClass: 'badge-quiz', bgColor: '#ff9800', textColor: '#212529', icon: 'question-circle-fill', borderColor: '#ff9800' };
+        }
+        if (mType === 'forum' || /foro|forum|debate|discusi/.test(combined)) {
+            return { tipo: 'forum', colorClass: 'badge-forum', bgColor: '#007bff', textColor: '#ffffff', icon: 'chat-dots-fill', borderColor: '#007bff' };
+        }
+        return { tipo: 'assign', colorClass: 'badge-assign', bgColor: '#dc3545', textColor: '#ffffff', icon: 'file-earmark-arrow-up-fill', borderColor: '#dc3545' };
+    }
+
     function actualizarResumenFila(fila, acts) {
         const summary = fila.querySelector('.moodle-summary');
         const tareaDisplay = fila.querySelector('.tarea-display-only');
@@ -1275,20 +1291,24 @@
 
         if (acts.length > 0) {
             acts.forEach(a => {
-                const tag = document.createElement('span');
-                tag.className = 'badge bg-primary me-1 mb-1';
-                tag.textContent = a.tipo || a.nombre || 'Actividad';
-                if (summary) summary.appendChild(tag);
+                const info = resolverEstiloActividadMoodle(a);
+                const span = document.createElement('span');
+                span.className = `moodle-activity-badge ${info.colorClass} shadow-sm`;
+                span.title = a.tipo || a.nombre || 'Actividad Moodle';
+                span.style.cssText = `border-radius: 6px; padding: 4px 8px; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; background-color: ${info.bgColor}; color: ${info.textColor};`;
+                span.innerHTML = `<i class="bi bi-${info.icon}"></i>`;
+                if (summary) summary.appendChild(span);
             });
 
             if (tareaDisplay) {
                 let html = "";
-                acts.forEach(a => {
+                acts.forEach((a, idx) => {
+                    const info = resolverEstiloActividadMoodle(a);
                     const introHtml = a.intro ? a.intro.replace(/\r\n|\r|\n/g, '<br>') : '';
-                    const titulo = a.tipo || a.nombre || 'Actividad';
-                    html += `<div class="mb-2 p-2 border-start border-4 border-primary bg-white rounded-2">
-                        <p class="mb-0 fw-bold small text-primary">${titulo}</p>
-                        ${introHtml ? `<p class="mb-0 text-muted small mt-1" style="line-height: 1.4;">${introHtml}</p>` : ''}
+                    const labelDisplay = (a.tipo || a.nombre || 'TAREA').toUpperCase() + ' ' + (idx + 1);
+                    html += `<div style="margin-bottom: 15px; border-left: 4px solid ${info.borderColor}; padding-left: 12px;">
+                        <p style="margin: 0; font-weight: 800; font-size: 0.75rem; text-transform: uppercase;"><span style="background-color: #ffff00; color: #000000; padding: 1px 4px; border-radius: 3px;">${labelDisplay}</span></p>
+                        ${introHtml ? `<p style="margin: 5px 0 0 0; font-weight: 400; font-size: 0.9rem; color: #000000; line-height: 1.4;">${introHtml}</p>` : ''}
                     </div>`;
                 });
                 tareaDisplay.innerHTML = html;
