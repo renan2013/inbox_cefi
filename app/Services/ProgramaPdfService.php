@@ -779,30 +779,46 @@ class ProgramaPdfService
         // =====================================================================
         $pdf->AddPage();
 
-        // 1. Franja Azul Marino (#082947): DURACIÓN DEL PLAN DE ESTUDIOS
+        // 1. Franja Azul Marino (#082947): DURACIÓN DEL PLAN DE ESTUDIOS (repite lo del header)
+        $durClean = rtrim(trim($pdf->duracion), '.');
+        if ($durClean === '') {
+            $durClean = '12 meses';
+        }
+        $modClean = rtrim(trim($pdf->modalidad), '.');
+        if ($modClean === '') {
+            $modClean = 'Presencial';
+        }
+        $textoHeaderDuracion = "Duración: {$durClean}  -  Modalidad: {$modClean}";
+
+        $duracionPlan = $pdf->cleanText($programa->duracion_plan_estudios ?? '');
+        if (
+            $duracionPlan === '' ||
+            stripos($duracionPlan, 'Leer y aceptar') !== false ||
+            stripos($duracionPlan, 'formulario de matrícula') !== false ||
+            stripos($duracionPlan, 'políticas institucionales') !== false
+        ) {
+            $duracionPlan = $textoHeaderDuracion;
+        }
+
         $stripY = $pdf->header_h;
-        $stripH = 24;
+        $stripH = 20;
         $pdf->SetFillColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Rect(0, $stripY, 210, $stripH, 'F');
 
         // Acento verde lima a la izquierda de la franja
+        $textOffsetY = (mb_strlen($duracionPlan, 'UTF-8') > 75) ? 4.2 : 6.8;
         $pdf->SetFillColor($pdf->verde_lima[0], $pdf->verde_lima[1], $pdf->verde_lima[2]);
-        $pdf->Rect(0, $stripY + 5, 7, 6.5, 'F');
+        $pdf->Rect(0, $stripY + $textOffsetY, 7, 6.5, 'F');
 
-        $duracionPlan = $pdf->cleanText($programa->duracion_plan_estudios ?? ($programa->detalles_programa ?? ''));
-        if ($duracionPlan === '') {
-            $duracionPlan = 'El programa tiene una duración de ' . ($pdf->duracion ?: '12 meses') . ', con dos horas y media de clase y dos horas y media de trabajo/estudio en casa por semana.';
-        }
-
-        $pdf->SetXY(9, $stripY + 5);
+        $pdf->SetXY(9, $stripY + $textOffsetY);
         $pdf->SetFont('Arial', 'B', 12.5);
         $pdf->SetTextColor(255, 255, 255);
         $labelW = $pdf->GetStringWidth($pdf->toPdf('DURACIÓN DEL PLAN DE ESTUDIOS: ')) + 2;
-        $pdf->Cell($labelW, 6, $pdf->toPdf('DURACIÓN DEL PLAN DE ESTUDIOS: '), 0, 0, 'L');
+        $pdf->Cell($labelW, 6.5, $pdf->toPdf('DURACIÓN DEL PLAN DE ESTUDIOS: '), 0, 0, 'L');
 
-        $pdf->SetFont('Arial', '', 10);
+        $pdf->SetFont('Arial', '', 10.5);
         $restW = 192 - $labelW;
-        $words = explode(' ', $duracionPlan);
+        $words = explode(' ', str_replace("\n", ' ', $duracionPlan));
         $firstLine = '';
         $remainWords = [];
         $inFirst = true;
@@ -814,9 +830,9 @@ class ProgramaPdfService
                 $remainWords[] = $w;
             }
         }
-        $pdf->Cell($restW, 6, $pdf->toPdf($firstLine), 0, 1, 'L');
+        $pdf->Cell($restW, 6.5, $pdf->toPdf($firstLine), 0, 1, 'L');
         if (!empty($remainWords)) {
-            $pdf->SetXY(9, $stripY + 12);
+            $pdf->SetXY(9, $stripY + $textOffsetY + 6.5);
             $pdf->MultiCell(192, 5, $pdf->toPdf(implode(' ', $remainWords)), 0, 'L');
         }
 
@@ -896,7 +912,7 @@ class ProgramaPdfService
             $perfilDocentes = 'Los docentes que participan de este programa poseen un grado académico de licenciatura e ingenierías, especializados en su área profesional.';
         }
 
-        $requisitosIngreso = $pdf->cleanText($programa->requisitos_ingreso ?? '');
+        $requisitosIngreso = $pdf->cleanText($programa->requisitos_ingreso ?? ($programa->detalles_programa ?? ''));
         if ($requisitosIngreso === '') {
             $requisitosIngreso = "1- Leer y aceptar las políticas institucionales.\n2- Completar el formulario de matrícula.\n3- Foto tamaño pasaporte física o digital.\n4- Copia de la cédula de identidad.";
         }

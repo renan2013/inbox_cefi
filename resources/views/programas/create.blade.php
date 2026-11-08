@@ -357,7 +357,7 @@
 
                     <div class="mb-4">
                         <label for="duracion_plan_estudios" class="form-label-custom">Duración del Plan de Estudios (DURACIÓN DEL PLAN DE ESTUDIOS:)</label>
-                        <textarea name="duracion_plan_estudios" id="duracion_plan_estudios" class="form-control form-control-custom w-100" rows="2" placeholder="Ej: El programa tiene una duración de 12 meses, con dos horas y media de clase y dos horas y media de trabajo/estudio en casa por semana">{{ old('duracion_plan_estudios', 'El programa tiene una duración de 12 meses, con dos horas y media de clase y dos horas y media de trabajo/estudio en casa por semana') }}</textarea>
+                        <textarea name="duracion_plan_estudios" id="duracion_plan_estudios" class="form-control form-control-custom w-100" rows="2" placeholder="Si se deja vacío, repite automáticamente la Duración y Modalidad del encabezado (Ej: Duración: 12 meses - Modalidad: Presencial)">{{ old('duracion_plan_estudios') }}</textarea>
                     </div>
 
                     <!-- Constructor dinámico de cursos del Plan de Estudios -->

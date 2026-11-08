@@ -38,6 +38,19 @@ class ProgramaController extends Controller
                             DB::statement("ALTER TABLE programas ADD COLUMN `{$col}` {$type}");
                         }
                     }
+
+                    // Limpiar registros donde duracion_plan_estudios haya heredado por error los requisitos de detalles_programa
+                    DB::table('programas')
+                        ->whereNotNull('duracion_plan_estudios')
+                        ->where(function ($q) {
+                            $q->where('duracion_plan_estudios', 'like', '%Leer y aceptar%')
+                              ->orWhere('duracion_plan_estudios', 'like', '%formulario de matrícula%')
+                              ->orWhere('duracion_plan_estudios', 'like', '%políticas institucionales%');
+                        })
+                        ->update([
+                            'requisitos_ingreso' => DB::raw('COALESCE(requisitos_ingreso, duracion_plan_estudios)'),
+                            'duracion_plan_estudios' => null,
+                        ]);
                 }
             }
 
@@ -152,10 +165,10 @@ class ProgramaController extends Controller
             $data['oferta'] = $data['opciones_laborales'];
         }
 
-        if (!empty($data['duracion_plan_estudios']) && empty($data['detalles_programa'])) {
-            $data['detalles_programa'] = $data['duracion_plan_estudios'];
-        } elseif (!empty($data['detalles_programa']) && empty($data['duracion_plan_estudios'])) {
-            $data['duracion_plan_estudios'] = $data['detalles_programa'];
+        if (!empty($data['requisitos_ingreso']) && empty($data['detalles_programa'])) {
+            $data['detalles_programa'] = $data['requisitos_ingreso'];
+        } elseif (!empty($data['detalles_programa']) && empty($data['requisitos_ingreso'])) {
+            $data['requisitos_ingreso'] = $data['detalles_programa'];
         }
 
         // Manejo de la subida de imágenes
@@ -275,8 +288,8 @@ class ProgramaController extends Controller
         if (array_key_exists('opciones_laborales', $data)) {
             $data['oferta'] = $data['opciones_laborales'];
         }
-        if (array_key_exists('duracion_plan_estudios', $data)) {
-            $data['detalles_programa'] = $data['duracion_plan_estudios'];
+        if (array_key_exists('requisitos_ingreso', $data)) {
+            $data['detalles_programa'] = $data['requisitos_ingreso'];
         }
 
         // Manejo de la subida de imágenes

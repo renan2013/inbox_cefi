@@ -365,9 +365,19 @@
                         <span class="badge-page-ref">Página 3 del PDF</span>
                     </div>
 
+                    @php
+                        $durPlanEdit = $programa->duracion_plan_estudios ?? '';
+                        if (
+                            stripos($durPlanEdit, 'Leer y aceptar') !== false ||
+                            stripos($durPlanEdit, 'formulario de matrícula') !== false ||
+                            stripos($durPlanEdit, 'políticas institucionales') !== false
+                        ) {
+                            $durPlanEdit = '';
+                        }
+                    @endphp
                     <div class="mb-4">
                         <label for="duracion_plan_estudios" class="form-label-custom">Duración del Plan de Estudios (DURACIÓN DEL PLAN DE ESTUDIOS:)</label>
-                        <textarea name="duracion_plan_estudios" id="duracion_plan_estudios" class="form-control form-control-custom w-100" rows="2" placeholder="Ej: El programa tiene una duración de 12 meses, con dos horas y media de clase y dos horas y media de trabajo/estudio en casa por semana">{{ old('duracion_plan_estudios', $programa->duracion_plan_estudios ?? $programa->detalles_programa) }}</textarea>
+                        <textarea name="duracion_plan_estudios" id="duracion_plan_estudios" class="form-control form-control-custom w-100" rows="2" placeholder="Si se deja vacío, repite automáticamente la Duración y Modalidad del encabezado (Ej: Duración: {{ rtrim($programa->duracion ?? '12 meses', '.') }} - Modalidad: {{ rtrim($programa->modalidad ?? 'Presencial', '.') }})">{{ old('duracion_plan_estudios', $durPlanEdit) }}</textarea>
                     </div>
 
                     <!-- Constructor dinámico de cursos del Plan de Estudios -->
@@ -449,7 +459,7 @@
                         </div>
                         <div class="col-md-6">
                             <label for="requisitos_ingreso" class="form-label-custom">Requisitos de ingreso:</label>
-                            <textarea name="requisitos_ingreso" id="requisitos_ingreso" class="form-control form-control-custom w-100" rows="4" placeholder="1- Leer y aceptar las políticas institucionales...">{{ old('requisitos_ingreso', $programa->requisitos_ingreso) }}</textarea>
+                            <textarea name="requisitos_ingreso" id="requisitos_ingreso" class="form-control form-control-custom w-100" rows="4" placeholder="1- Leer y aceptar las políticas institucionales...">{{ old('requisitos_ingreso', $programa->requisitos_ingreso ?? $programa->detalles_programa) }}</textarea>
                         </div>
                     </div>
 
