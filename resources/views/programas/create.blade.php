@@ -468,34 +468,34 @@
                     <div class="row g-4 mb-5">
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Banner Encabezado PDF</label>
+                                <label class="form-label-custom d-block">1. Encabezado (Franja Superior)</label>
                                 <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
                                 <input type="file" name="imagen_encabezado" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Fondo superior del PDF (Opcional)</small>
+                                <small class="text-white-50 d-block mt-1">Franja verde/azul CEFI sin texto (Sugerido: 2100x380px)</small>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Imagen Principal</label>
+                                <label class="form-label-custom d-block">2. Imagen Principal (Hero Pág. 1)</label>
                                 <i class="bi bi-image text-white-50 display-6 d-block mb-3"></i>
                                 <input type="file" name="imagen_principal" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Portada / Respaldo de Banner</small>
+                                <small class="text-white-50 d-block mt-1">Ilustración central debajo del encabezado (Sugerido: 2100x820px)</small>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Imagen Secundaria</label>
+                                <label class="form-label-custom d-block">3. Imagen Secundaria (Opcional)</label>
                                 <i class="bi bi-image text-white-50 display-6 d-block mb-3"></i>
                                 <input type="file" name="imagen_secundaria" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Recurso secundario opcional</small>
+                                <small class="text-white-50 d-block mt-1">Recurso visual adicional</small>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Imagen Footer PDF</label>
+                                <label class="form-label-custom d-block">4. Pie de Página (Footer PDF)</label>
                                 <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
                                 <input type="file" name="imagen_footer" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Pie de página personalizado (Opcional)</small>
+                                <small class="text-white-50 d-block mt-1">Barra inferior redes + WhatsApp (Sugerido: 2100x160px)</small>
                             </div>
                         </div>
                     </div>

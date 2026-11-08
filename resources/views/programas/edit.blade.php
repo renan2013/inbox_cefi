@@ -501,50 +501,50 @@
                     <div class="row g-4 mb-5">
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Banner Encabezado PDF</label>
+                                <label class="form-label-custom d-block">1. Encabezado (Franja Superior)</label>
                                 @if(!empty($programa->imagen_encabezado) && file_exists(public_path($programa->imagen_encabezado)))
                                     <img src="{{ asset($programa->imagen_encabezado) }}" class="img-current-preview d-block mx-auto" alt="Encabezado">
                                 @else
                                     <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
                                 @endif
                                 <input type="file" name="imagen_encabezado" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Subir para reemplazar</small>
+                                <small class="text-white-50 d-block mt-1">Franja verde/azul CEFI sin texto (2100x380px)</small>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Imagen Principal</label>
+                                <label class="form-label-custom d-block">2. Imagen Principal (Hero Pág. 1)</label>
                                 @if(!empty($programa->imagen_principal) && file_exists(public_path($programa->imagen_principal)))
                                     <img src="{{ asset($programa->imagen_principal) }}" class="img-current-preview d-block mx-auto" alt="Principal">
                                 @else
                                     <i class="bi bi-image text-white-50 display-6 d-block mb-3"></i>
                                 @endif
                                 <input type="file" name="imagen_principal" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Subir para reemplazar</small>
+                                <small class="text-white-50 d-block mt-1">Ilustración central Pág. 1 (2100x820px)</small>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Imagen Secundaria</label>
+                                <label class="form-label-custom d-block">3. Imagen Secundaria (Opcional)</label>
                                 @if(!empty($programa->imagen_secundaria) && file_exists(public_path($programa->imagen_secundaria)))
                                     <img src="{{ asset($programa->imagen_secundaria) }}" class="img-current-preview d-block mx-auto" alt="Secundaria">
                                 @else
                                     <i class="bi bi-image text-white-50 display-6 d-block mb-3"></i>
                                 @endif
                                 <input type="file" name="imagen_secundaria" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Subir para reemplazar</small>
+                                <small class="text-white-50 d-block mt-1">Recurso visual adicional</small>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Imagen Footer PDF</label>
+                                <label class="form-label-custom d-block">4. Pie de Página (Footer PDF)</label>
                                 @if(!empty($programa->imagen_footer) && file_exists(public_path($programa->imagen_footer)))
                                     <img src="{{ asset($programa->imagen_footer) }}" class="img-current-preview d-block mx-auto" alt="Footer">
                                 @else
                                     <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
                                 @endif
                                 <input type="file" name="imagen_footer" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Subir para reemplazar</small>
+                                <small class="text-white-50 d-block mt-1">Barra inferior redes + WhatsApp (2100x160px)</small>
                             </div>
                         </div>
                     </div>
