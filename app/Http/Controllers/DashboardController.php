@@ -106,15 +106,29 @@ class DashboardController extends Controller
         }
 
         // 6. Cumpleaños del Mes
-        $cumpleaneros = DB::table('usuarios')
-            ->whereRaw('MONTH(fecha_nacimiento) = MONTH(CURDATE())')
-            ->whereRaw('DAY(fecha_nacimiento) >= DAY(CURDATE())')
-            ->orderByRaw('DAY(fecha_nacimiento) ASC')
-            ->get();
+        $cumpleaneros = collect([]);
+        try {
+            $driver = DB::getDriverName();
+            if ($driver === 'sqlite') {
+                $cumpleaneros = DB::table('usuarios')
+                    ->whereNotNull('fecha_nacimiento')
+                    ->whereRaw("strftime('%m', fecha_nacimiento) = strftime('%m', 'now')")
+                    ->orderByRaw("strftime('%d', fecha_nacimiento) ASC")
+                    ->get();
+            } else {
+                $cumpleaneros = DB::table('usuarios')
+                    ->whereRaw('MONTH(fecha_nacimiento) = MONTH(CURDATE())')
+                    ->whereRaw('DAY(fecha_nacimiento) >= DAY(CURDATE())')
+                    ->orderByRaw('DAY(fecha_nacimiento) ASC')
+                    ->get();
+            }
+        } catch (\Throwable $e) {
+            $cumpleaneros = collect([]);
+        }
 
-        // 7. Mis Cursos Asignados (Exclusivo para Profesores / Docentes, NUNCA para el Administrador General)
+        // 7. Mis Cursos Asignados (Exclusivo para Profesores / Docentes)
         $mis_cursos_asignados = collect([]);
-        if (!$es_admin && in_array($usuario->id_rol ?? 0, [2, 4])) {
+        if (!$es_admin && in_array($user->id_rol ?? 0, [2, 4])) {
             $mis_cursos_asignados = DB::table('cursos_activos as ca')
                 ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
                 ->join('programas as p', 'pe.id_programa', '=', 'p.id_programa')
@@ -124,33 +138,6 @@ class DashboardController extends Controller
                 ->limit(6)
                 ->get();
         }
-
-        // Si existen cursos asignados erróneamente al Administrador (ej: tras ejecutar sembradores), corregir y reasignar a docente
-        try {
-            if ($es_admin && Schema::hasTable('cursos_activos') && Schema::hasTable('usuarios')) {
-                $cursosConAdmin = DB::table('cursos_activos')->where('id_profesor', $user_id)->count();
-                if ($cursosConAdmin > 0) {
-                    $docente = DB::table('usuarios')->whereIn('id_rol', [2, 4])->first();
-                    if (!$docente) {
-                        $docenteId = DB::table('usuarios')->insertGetId([
-                            'nombre'    => 'Lic. Fernando',
-                            'apellidos' => 'Solano Valverde',
-                            'cedula'    => '1-0987-0654',
-                            'email'     => 'profesor.solano@ceficr.com',
-                            'telefono'  => '50683334455',
-                            'password'  => bcrypt('cefi2026'),
-                            'id_rol'    => 2,
-                            'origen'    => 'inbox',
-                            'created_at'=> now(),
-                            'updated_at'=> now(),
-                        ]);
-                    } else {
-                        $docenteId = $docente->id;
-                    }
-                    DB::table('cursos_activos')->where('id_profesor', $user_id)->update(['id_profesor' => $docenteId]);
-                }
-            }
-        } catch (\Throwable $e) {}
 
         // 8. Listas de apoyo para modal de edición completa
         $usuarios_disponibles = DB::table('usuarios')->orderBy('nombre', 'asc')->get();

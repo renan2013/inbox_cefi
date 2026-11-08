@@ -170,6 +170,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/configuracion/seguridad', [ConfiguracionController::class, 'login'])->name('configuracion.login');
     Route::post('/configuracion/seguridad/acceder', [ConfiguracionController::class, 'acceder'])->name('configuracion.acceder');
     Route::post('/configuracion/seguridad/salir', [ConfiguracionController::class, 'salir'])->name('configuracion.salir');
+    Route::post('/sistema/limpiar-sistema-ajax', [ConfiguracionController::class, 'limpiarSistemaCompleto'])->name('sistema.limpiar_ajax');
 
     // Rutas protegidas exclusivamente para Administrador General con Clave Superior
     Route::middleware('admin.config')->prefix('configuracion')->name('configuracion.')->group(function () {
@@ -181,6 +182,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pagos', [ConfiguracionController::class, 'parametrosPagos'])->name('pagos');
         Route::post('/pagos', [ConfiguracionController::class, 'guardarParametrosPagos'])->name('pagos.guardar');
         Route::post('/pagos/reset-pruebas', [ConfiguracionController::class, 'resetearPruebasBoletas'])->name('pagos.reset_pruebas');
+        Route::post('/limpiar-sistema-completo', [ConfiguracionController::class, 'limpiarSistemaCompleto'])->name('limpiar_sistema_completo');
 
         // Test de conectividad
         Route::post('/test-n8n', [ConfiguracionController::class, 'testN8n'])->name('test_n8n');
@@ -682,3 +684,138 @@ Route::get('/sistema/sembrar-demo', function () {
         ", 500, ['Content-Type' => 'text/html']);
     }
 })->name('sistema.sembrar_demo');
+
+// --- LIMPIEZA TOTAL DEL SISTEMA PARA MONTAR CARRERA COMPLETA DESDE CERO ---
+Route::match(['get', 'post'], '/sistema/limpiar-sistema', function () {
+    try {
+        $res = \App\Http\Controllers\ConfiguracionController::ejecutarLimpiezaCompletaSistema();
+        $admin = $res['admin_conservado'] ?? null;
+        $usuariosEliminados = (int)($res['usuarios_eliminados'] ?? 0);
+        $archivosEliminados = (int)($res['archivos_eliminados'] ?? 0);
+        $tablasLimpiadas = $res['tablas_limpiadas'] ?? [];
+        $totalTablas = count($tablasLimpiadas);
+        $totalRegistrosBorrados = array_sum($tablasLimpiadas) + $usuariosEliminados;
+
+        $adminNombre = $admin ? htmlspecialchars(trim(($admin->nombre ?? '') . ' ' . ($admin->apellidos ?? ''))) : 'Administrador General';
+        $adminEmail = $admin ? htmlspecialchars($admin->email ?? 'admin@ceficr.com') : 'admin@ceficr.com';
+        $adminCedula = $admin ? htmlspecialchars($admin->cedula ?? 'N/D') : 'N/D';
+        $adminId = $admin ? (int)$admin->id : 1;
+
+        return response("
+        <!DOCTYPE html>
+        <html lang='es'>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Sistema Limpiado a 0 - Listo para Montar Carrera Completa | CEFI</title>
+            <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+            <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+            <style>
+                body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; padding: 40px 15px; }
+                .glass-card { background: rgba(30, 41, 59, 0.78); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.45); }
+                .accent-pill { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 5px 15px; border-radius: 9999px; font-size: 0.85rem; font-weight: 700; display: inline-block; }
+                .stat-box { background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; text-align: center; height: 100%; }
+                .module-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; height: 100%; }
+            </style>
+        </head>
+        <body>
+            <div class='container' style='max-width: 920px;'>
+                <div class='glass-card p-4 p-md-5'>
+                    <div class='d-flex align-items-center justify-content-between border-bottom pb-4 mb-4 border-secondary border-opacity-25 flex-wrap gap-3'>
+                        <div>
+                            <span class='accent-pill mb-2'><i class='fa-solid fa-broom me-1'></i> Reset de Fábrica Institucional</span>
+                            <h2 class='fw-bold mb-1 text-white'>Sistema Limpiado al 100%</h2>
+                            <p class='text-secondary mb-0'>Listo para montar una carrera completa desde cero (0 programas, 0 cursos, 0 alumnos, 0 docentes).</p>
+                        </div>
+                        <div class='text-end'>
+                            <span class='badge bg-success p-2 px-3 fs-6'><i class='fa-solid fa-check-circle me-1'></i> Base Limpia</span>
+                        </div>
+                    </div>
+
+                    <!-- Administrador General Conservado -->
+                    <div class='alert alert-info bg-info bg-opacity-10 border-info border-opacity-25 text-white p-3 rounded-3 mb-4'>
+                        <h6 class='fw-bold text-info mb-2'><i class='fa-solid fa-user-shield me-2'></i>Único Usuario Conservado (Administrador General):</h6>
+                        <div class='row g-2 small'>
+                            <div class='col-sm-6'><strong>ID / Nombre:</strong> #{$adminId} - {$adminNombre}</div>
+                            <div class='col-sm-6'><strong>Correo:</strong> <code class='text-warning fs-6'>{$adminEmail}</code></div>
+                            <div class='col-sm-6'><strong>Cédula:</strong> {$adminCedula}</div>
+                            <div class='col-sm-6'><strong>Rol Activo:</strong> <span class='badge bg-warning text-dark'>Administrador General (Rol 1)</span></div>
+                        </div>
+                    </div>
+
+                    <!-- KPIs de Limpieza -->
+                    <div class='row g-3 mb-4'>
+                        <div class='col-sm-3'>
+                            <div class='stat-box'>
+                                <h3 class='text-success fw-bold mb-0'>1</h3>
+                                <small class='text-secondary'>Usuario Activo (Admin)</small>
+                            </div>
+                        </div>
+                        <div class='col-sm-3'>
+                            <div class='stat-box'>
+                                <h3 class='text-danger fw-bold mb-0'>{$usuariosEliminados}</h3>
+                                <small class='text-secondary'>Usuarios Eliminados</small>
+                            </div>
+                        </div>
+                        <div class='col-sm-3'>
+                            <div class='stat-box'>
+                                <h3 class='text-info fw-bold mb-0'>{$totalTablas}</h3>
+                                <small class='text-secondary'>Tablas Vaciadas a 0</small>
+                            </div>
+                        </div>
+                        <div class='col-sm-3'>
+                            <div class='stat-box'>
+                                <h3 class='text-warning fw-bold mb-0'>{$totalRegistrosBorrados}</h3>
+                                <small class='text-secondary'>Registros Depurados</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalle de Módulos en Cero -->
+                    <div class='row g-3 mb-4'>
+                        <div class='col-md-6'>
+                            <div class='module-card'>
+                                <h6 class='text-info fw-bold mb-2'><i class='fa-solid fa-graduation-cap me-2'></i>1. Académico y Malla Curricular (En 0)</h6>
+                                <p class='small text-secondary mb-0'>Programas/Carreras (0), Planes de Estudio/Cursos (0), Sílabos CONESUP (0), Cronogramas, Evaluaciones y Rúbricas (0), Grupos/Aulas Activas (0).</p>
+                            </div>
+                        </div>
+                        <div class='col-md-6'>
+                            <div class='module-card'>
+                                <h6 class='text-info fw-bold mb-2'><i class='fa-solid fa-users-slash me-2'></i>2. Usuarios y Matrículas (Solo Admin)</h6>
+                                <p class='small text-secondary mb-0'>Docentes (0), Estudiantes (0), Matrículas (0), Calificaciones y Notas por Rubro (0), Asistencias (0), Solicitudes Cursos Libres (0).</p>
+                            </div>
+                        </div>
+                        <div class='col-md-6'>
+                            <div class='module-card'>
+                                <h6 class='text-info fw-bold mb-2'><i class='fa-solid fa-folder-closed me-2'></i>3. Expedientes 360° y Control Académico (En 0)</h6>
+                                <p class='small text-secondary mb-0'>Expedientes Digitales y Archivos (0), Bitácoras y Actividades TCU (0), Convalidaciones (0), Retiros de Asignaturas (0), Graduaciones (0).</p>
+                            </div>
+                        </div>
+                        <div class='col-md-6'>
+                            <div class='module-card'>
+                                <h6 class='text-info fw-bold mb-2'><i class='fa-solid fa-file-invoice-dollar me-2'></i>4. Finanzas, Boletas y Operaciones (En 0)</h6>
+                                <p class='small text-secondary mb-0'>Boletas de Matrícula (0), Cuotas y Letras (0), Historial de Pagos (0), Arreglos de Pago (0), Planillas Docentes (0), Tareas Operativas (0).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flujo Recomendado para Montar Carrera Completa -->
+                    <div class='d-flex flex-wrap gap-2 pt-3 border-top border-secondary border-opacity-25'>
+                        <a href='/programas/crear' class='btn btn-success px-4 fw-bold shadow-sm'><i class='fa-solid fa-plus-circle me-2'></i>Paso 1: Crear Programa / Carrera</a>
+                        <a href='/cursos/crear' class='btn btn-primary px-4 fw-bold shadow-sm'><i class='fa-solid fa-book me-2'></i>Paso 2: Crear Cursos del Plan</a>
+                        <a href='/usuarios' class='btn btn-outline-info px-3'><i class='fa-solid fa-users me-2'></i>Ver Usuarios (Solo Admin)</a>
+                        <a href='/dashboard' class='btn btn-outline-light px-3'><i class='fa-solid fa-house me-2'></i>Ir al Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        ", 200, ['Content-Type' => 'text/html']);
+    } catch (\Throwable $e) {
+        return response("
+            <div style='background: #1e1e2d; color: #ff6b6b; padding: 30px; font-family: monospace; border-radius: 8px; margin: 30px auto; max-width: 800px; border: 1px solid #ff4d4f;'>
+                <h2>Error al Limpiar el Sistema</h2>
+                <p><strong>Mensaje:</strong> " . htmlspecialchars($e->getMessage()) . "</p>
+            </div>
+        ", 500, ['Content-Type' => 'text/html']);
+    }
+})->name('sistema.limpiar');

@@ -427,7 +427,12 @@
                 </h1>
                 <p class="text-white-50 mb-0">Directorio institucional ordenado por apellidos con búsqueda universal en vivo y borrado seguro.</p>
             </div>
-            <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                @if(auth()->check() && auth()->user()->id_rol == 1)
+                    <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="limpiarSistemaCompleto()">
+                        <i class="bi bi-radioactive"></i> Limpiar Sistema (Montar Carrera)
+                    </button>
+                @endif
                 <a href="{{ route('usuarios.create') }}" class="btn btn-search">
                     <i class="bi bi-person-plus-fill me-1"></i> Registrar Nuevo Usuario
                 </a>
@@ -1184,6 +1189,78 @@
                         text: err.message
                     });
                 }
+            };
+
+            // Limpiar Sistema Completo (Conservar solo Administrador General)
+            window.limpiarSistemaCompleto = function() {
+                Swal.fire({
+                    title: '¿Limpiar Sistema al 100%?',
+                    html: `
+                        <div class="text-start">
+                            <div class="alert alert-danger py-2 px-3 small fw-bold mb-3">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> ¡ADVERTENCIA DE RESET TOTAL!
+                                <br>Esta acción dejará el sistema en cero para montar una carrera completa:
+                                <ul class="mb-0 ps-3 mt-1">
+                                    <li>Elimina <strong>todos los usuarios</strong> excepto el <strong>Administrador General</strong>.</li>
+                                    <li>Vacía programas, planes de estudio, sílabos, grupos y matrículas.</li>
+                                    <li>Vacía expedientes digitales, boletas, pagos, TCU, convalidaciones y tareas.</li>
+                                </ul>
+                            </div>
+                            <label class="form-label fw-bold small text-uppercase mb-1">Ingrese su contraseña o clave maestra:</label>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    input: 'password',
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                        placeholder: 'Contraseña de administrador...'
+                    },
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="bi bi-trash-fill me-1"></i> Sí, Limpiar Todo el Sistema',
+                    cancelButtonText: 'Cancelar',
+                    showLoaderOnConfirm: true,
+                    preConfirm: async (password) => {
+                        if (!password || password.trim() === '') {
+                            Swal.showValidationMessage('Debe ingresar su contraseña.');
+                            return false;
+                        }
+                        try {
+                            const fd = new FormData();
+                            fd.append('password', password);
+                            const resp = await fetch("{{ route('sistema.limpiar_ajax') }}", {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                                body: fd
+                            });
+                            const res = await resp.json();
+                            if (!res.success) {
+                                throw new Error(res.message || 'Error al limpiar el sistema');
+                            }
+                            return res;
+                        } catch (err) {
+                            Swal.showValidationMessage(err.message || 'Error de conexión con el servidor');
+                            return false;
+                        }
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed && result.value && result.value.success) {
+                        Swal.fire({
+                            title: '¡Sistema Limpiado al 100%!',
+                            text: result.value.message,
+                            icon: 'success',
+                            confirmButtonColor: '#5fb230',
+                            confirmButtonText: 'Continuar'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                });
             };
         });
     </script>

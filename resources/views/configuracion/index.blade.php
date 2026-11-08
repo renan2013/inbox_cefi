@@ -1102,6 +1102,27 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Tarjeta de Limpieza Total del Sistema para Montar Carrera Completa -->
+                        <div class="config-card border-danger border-opacity-50 mt-4">
+                            <div class="config-card-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-radioactive text-danger fs-5"></i>
+                                    <h5 class="fw-bold mb-0 text-white">Limpieza Total del Sistema (Montar Carrera desde Cero)</h5>
+                                </div>
+                                <span class="badge bg-danger">Reset de Fábrica</span>
+                            </div>
+                            <div class="config-card-body">
+                                <p class="text-white-50 small mb-3">
+                                    Esta utilidad vacía completamente todas las carreras/programas, planes de estudio, sílabos, aulas activas, matrículas, expedientes digitales, boletas, pagos, TCU, convalidaciones y tareas, y <strong>elimina a todos los usuarios excepto al Administrador General</strong>.
+                                </p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="{{ route('sistema.limpiar') }}" class="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2" onclick="return confirm('¿Está seguro de limpiar completamente el sistema y conservar únicamente al Administrador General?');">
+                                        <i class="bi bi-trash3-fill"></i> Limpiar Sistema Completo Ahora
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </form>

@@ -618,6 +618,27 @@ class CursoController extends Controller
             return redirect()->route('cursos.index')->with('error', "No se puede eliminar '{$curso->materia}' porque tiene {$activosCount} grupo(s) o curso(s) activo(s) vinculados.");
         }
 
+        // Limpiar plantillas de sílabo asociadas al plan
+        try {
+            if (Schema::hasTable('silabos')) {
+                $silabosIds = DB::table('silabos')->where('id_plan', $id)->pluck('id_silabo')->toArray();
+                if (!empty($silabosIds)) {
+                    if (Schema::hasTable('silabo_evaluacion')) {
+                        DB::table('silabo_evaluacion')->whereIn('id_silabo', $silabosIds)->delete();
+                    }
+                    if (Schema::hasTable('silabo_cronograma')) {
+                        DB::table('silabo_cronograma')->whereIn('id_silabo', $silabosIds)->delete();
+                    }
+                    if (Schema::hasTable('silabo_rubricas')) {
+                        DB::table('silabo_rubricas')->whereIn('id_silabo', $silabosIds)->delete();
+                    }
+                    DB::table('silabos')->whereIn('id_silabo', $silabosIds)->delete();
+                }
+            }
+        } catch (\Throwable $e) {
+            // Continuar
+        }
+
         $curso->delete();
 
         return redirect()->route('cursos.index')->with('success', 'Materia eliminada del plan de estudios exitosamente.');

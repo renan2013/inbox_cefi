@@ -33,7 +33,11 @@ class UsuarioController extends Controller
 
         // Filtro por Rol
         if ($request->filled('rol_id')) {
-            $query->where('id_rol', $request->rol_id);
+            if ((int)$request->rol_id === 2) {
+                $query->whereIn('id_rol', [2, 4]);
+            } else {
+                $query->where('id_rol', $request->rol_id);
+            }
         }
 
         // Filtro por Origen
@@ -62,7 +66,7 @@ class UsuarioController extends Controller
         try {
             $totalUsuarios = Usuario::count();
             $adminsCount = Usuario::where('id_rol', 1)->count();
-            $docentesCount = Usuario::where('id_rol', 2)->count();
+            $docentesCount = Usuario::whereIn('id_rol', [2, 4])->count();
             $estudiantesCount = Usuario::where('id_rol', 3)->count();
             $moodleCount = Usuario::where('origen', 'moodle')->count();
             $inboxCount = Usuario::where('origen', 'inbox')->count();

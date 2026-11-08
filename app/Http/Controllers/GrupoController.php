@@ -18,7 +18,7 @@ class GrupoController extends Controller
     public function index()
     {
         $programas = Programa::orderBy('nombre_programa', 'asc')->get();
-        $profesores = Usuario::whereIn('id_rol', [1, 4]) // Admin (1) o Profesor (4)
+        $profesores = Usuario::whereIn('id_rol', [1, 2, 4]) // Admin (1) o Profesor (2 / 4)
                              ->orderBy('apellidos', 'asc')
                              ->get();
 
