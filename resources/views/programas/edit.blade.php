@@ -549,21 +549,35 @@
                         </div>
                     </div>
 
-                    <!-- Vista previa de barra de redes sociales incluida por defecto en el PDF -->
+                    <!-- Vista previa de barra de redes sociales (SVG + Enlaces Directos) incluida en el PDF -->
                     <div class="p-3 rounded-4 mb-5 d-flex flex-wrap align-items-center justify-content-between gap-3" style="background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-dark);">
-                        <div class="d-flex flex-wrap align-items-center gap-3 small text-white-50">
-                            <span class="fw-bold text-white"><i class="bi bi-share-fill text-success me-1"></i> Redes en Pie de Página PDF:</span>
-                            <span><i class="bi bi-facebook text-info me-1"></i> CEFI.</span>
-                            <span><i class="bi bi-instagram text-danger me-1"></i> cefi_cr</span>
-                            <span><i class="bi bi-whatsapp text-success me-1"></i> +506 8992 9180</span>
-                            <span><i class="bi bi-telephone-fill text-secondary me-1"></i> 2711 1010</span>
-                            <span><i class="bi bi-envelope-fill text-warning me-1"></i> info@ceficr.com</span>
-                            <span><i class="bi bi-youtube text-danger me-1"></i> @ceficr</span>
-                            <span><i class="bi bi-tiktok text-light me-1"></i> @cefi_cr</span>
+                        <div class="d-flex flex-wrap align-items-center gap-3 small">
+                            <span class="fw-bold text-white"><i class="bi bi-share-fill text-success me-1"></i> Redes en Pie de Página PDF (Con Enlace Activo):</span>
+                            <a href="https://www.facebook.com/CEFI." target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook" width="20" height="20"> <span>CEFI.</span>
+                            </a>
+                            <a href="https://www.instagram.com/cefi_cr/" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="20" height="20"> <span>cefi_cr</span>
+                            </a>
+                            <a href="https://wa.me/50689929180" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/whatsapp.svg') }}" alt="WhatsApp" width="20" height="20"> <span>+506 8992 9180</span>
+                            </a>
+                            <a href="tel:+50627111010" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="20" height="20"> <span>2711 1010</span>
+                            </a>
+                            <a href="mailto:info@ceficr.com" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/email.svg') }}" alt="Correo" width="20" height="20"> <span>info@ceficr.com</span>
+                            </a>
+                            <a href="https://www.youtube.com/@ceficr" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube" width="20" height="20"> <span>@ceficr</span>
+                            </a>
+                            <a href="https://www.tiktok.com/@cefi_cr" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="20" height="20"> <span>@cefi_cr</span>
+                            </a>
                         </div>
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2">
-                            <i class="bi bi-whatsapp me-1"></i> +506 8992 9180
-                        </span>
+                        <a href="https://wa.me/50689929180" target="_blank" rel="noopener" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 text-decoration-none d-inline-flex align-items-center gap-1">
+                            <img src="{{ asset('imgs/social/whatsapp_green.svg') }}" alt="WhatsApp" width="18" height="18"> +506 8992 9180
+                        </a>
                     </div>
 
                     <!-- NORMATIVA VIRTUAL OPCIONAL -->

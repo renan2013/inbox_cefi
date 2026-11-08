@@ -229,6 +229,190 @@ class ProgramaPDF extends FPDF
         $this->Cell(190, 8, $this->toPdf($titulo), 0, 1, 'L');
     }
 
+    function drawVectorCircle(float $cx, float $cy, float $r, string $style = 'D'): void
+    {
+        $k = $this->k;
+        $hp = $this->h;
+        $c = 0.552284749831 * $r;
+
+        $op = 'S';
+        if ($style === 'F') {
+            $op = 'f';
+        } elseif ($style === 'FD' || $style === 'DF') {
+            $op = 'B';
+        }
+
+        $this->_out(sprintf('%.2F %.2F m', $cx * $k, ($hp - ($cy - $r)) * $k));
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
+            ($cx + $c) * $k, ($hp - ($cy - $r)) * $k,
+            ($cx + $r) * $k, ($hp - ($cy - $c)) * $k,
+            ($cx + $r) * $k, ($hp - $cy) * $k
+        ));
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
+            ($cx + $r) * $k, ($hp - ($cy + $c)) * $k,
+            ($cx + $c) * $k, ($hp - ($cy + $r)) * $k,
+            $cx * $k, ($hp - ($cy + $r)) * $k
+        ));
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
+            ($cx - $c) * $k, ($hp - ($cy + $r)) * $k,
+            ($cx - $r) * $k, ($hp - ($cy + $c)) * $k,
+            ($cx - $r) * $k, ($hp - $cy) * $k
+        ));
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c %s',
+            ($cx - $r) * $k, ($hp - ($cy - $c)) * $k,
+            ($cx - $c) * $k, ($hp - ($cy - $r)) * $k,
+            $cx * $k, ($hp - ($cy - $r)) * $k,
+            $op
+        ));
+    }
+
+    function drawVectorRoundedRect(float $x, float $y, float $w, float $h, float $r, string $style = 'D'): void
+    {
+        $k = $this->k;
+        $hp = $this->h;
+        $myArc = 4 / 3 * (sqrt(2) - 1);
+
+        $op = 'S';
+        if ($style === 'F') {
+            $op = 'f';
+        } elseif ($style === 'FD' || $style === 'DF') {
+            $op = 'B';
+        }
+
+        $this->_out(sprintf('%.2F %.2F m', ($x + $r) * $k, ($hp - $y) * $k));
+        $xc = $x + $w - $r;
+        $yc = $y + $r;
+        $this->_out(sprintf('%.2F %.2F l', $xc * $k, ($hp - $y) * $k));
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
+            ($xc + $r * $myArc) * $k, ($hp - $y) * $k,
+            ($x + $w) * $k, ($hp - ($yc - $r * $myArc)) * $k,
+            ($x + $w) * $k, ($hp - $yc) * $k
+        ));
+
+        $xc = $x + $w - $r;
+        $yc = $y + $h - $r;
+        $this->_out(sprintf('%.2F %.2F l', ($x + $w) * $k, ($hp - $yc) * $k));
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
+            ($x + $w) * $k, ($hp - ($yc + $r * $myArc)) * $k,
+            ($xc + $r * $myArc) * $k, ($hp - ($y + $h)) * $k,
+            $xc * $k, ($hp - ($y + $h)) * $k
+        ));
+
+        $xc = $x + $r;
+        $yc = $y + $h - $r;
+        $this->_out(sprintf('%.2F %.2F l', $xc * $k, ($hp - ($y + $h)) * $k));
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
+            ($xc - $r * $myArc) * $k, ($hp - ($y + $h)) * $k,
+            $x * $k, ($hp - ($yc + $r * $myArc)) * $k,
+            $x * $k, ($hp - $yc) * $k
+        ));
+
+        $xc = $x + $r;
+        $yc = $y + $r;
+        $this->_out(sprintf('%.2F %.2F l', $x * $k, ($hp - $yc) * $k));
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c %s',
+            $x * $k, ($hp - ($yc - $r * $myArc)) * $k,
+            ($xc - $r * $myArc) * $k, ($hp - $y) * $k,
+            $xc * $k, ($hp - $y) * $k,
+            $op
+        ));
+    }
+
+    function drawVectorPolygon(array $pts, string $style = 'F'): void
+    {
+        if (count($pts) < 3) {
+            return;
+        }
+        $k = $this->k;
+        $hp = $this->h;
+        $op = ($style === 'F') ? 'f' : (($style === 'FD' || $style === 'DF') ? 'B' : 's');
+
+        $this->_out(sprintf('%.2F %.2F m', $pts[0][0] * $k, ($hp - $pts[0][1]) * $k));
+        for ($i = 1, $n = count($pts); $i < $n; $i++) {
+            $this->_out(sprintf('%.2F %.2F l', $pts[$i][0] * $k, ($hp - $pts[$i][1]) * $k));
+        }
+        $this->_out($op);
+    }
+
+    function drawSocialIconVector(string $type, float $cx, float $cy, float $r, array $rgb): void
+    {
+        // Círculo exterior vectorial con fondo blanco y borde del color indicado
+        $this->SetFillColor(255, 255, 255);
+        $this->SetDrawColor($rgb[0], $rgb[1], $rgb[2]);
+        $this->SetLineWidth(0.35);
+        $this->drawVectorCircle($cx, $cy, $r, 'DF');
+
+        $this->SetFillColor($rgb[0], $rgb[1], $rgb[2]);
+        $this->SetDrawColor($rgb[0], $rgb[1], $rgb[2]);
+
+        switch ($type) {
+            case 'facebook':
+                $this->SetFont('Arial', 'B', 9.5);
+                $this->SetTextColor($rgb[0], $rgb[1], $rgb[2]);
+                $this->SetXY($cx - $r, $cy - 1.65);
+                $this->Cell($r * 2, 3.5, $this->toPdf('f'), 0, 0, 'C');
+                break;
+
+            case 'instagram':
+                $this->SetLineWidth(0.32);
+                $this->drawVectorRoundedRect($cx - 1.5, $cy - 1.5, 3.0, 3.0, 0.72, 'D');
+                $this->drawVectorCircle($cx, $cy, 0.72, 'D');
+                $this->drawVectorCircle($cx + 0.85, $cy - 0.85, 0.2, 'F');
+                break;
+
+            case 'whatsapp':
+                $this->SetLineWidth(0.3);
+                $this->drawVectorCircle($cx, $cy - 0.08, 1.62, 'D');
+                // Colita inferior izquierda de la burbuja
+                $this->drawVectorPolygon([
+                    [$cx - 1.1, $cy + 0.95],
+                    [$cx - 1.6, $cy + 1.75],
+                    [$cx - 0.55, $cy + 1.4],
+                ], 'F');
+                // Auricular interno
+                $this->drawVectorCircle($cx - 0.48, $cy - 0.45, 0.32, 'F');
+                $this->drawVectorCircle($cx + 0.48, $cy + 0.38, 0.32, 'F');
+                $this->SetLineWidth(0.45);
+                $this->Line($cx - 0.48, $cy - 0.25, $cx - 0.08, $cy + 0.25);
+                $this->Line($cx - 0.08, $cy + 0.25, $cx + 0.45, $cy + 0.42);
+                break;
+
+            case 'phone':
+                $this->drawVectorCircle($cx - 0.75, $cy - 0.65, 0.42, 'F');
+                $this->drawVectorCircle($cx + 0.75, $cy + 0.65, 0.42, 'F');
+                $this->SetLineWidth(0.58);
+                $this->Line($cx - 0.75, $cy - 0.38, $cx - 0.15, $cy + 0.42);
+                $this->Line($cx - 0.15, $cy + 0.42, $cx + 0.72, $cy + 0.72);
+                break;
+
+            case 'email':
+                $this->SetLineWidth(0.32);
+                $this->drawVectorRoundedRect($cx - 1.6, $cy - 1.05, 3.2, 2.1, 0.28, 'D');
+                $this->Line($cx - 1.5, $cy - 0.95, $cx, $cy + 0.15);
+                $this->Line($cx, $cy + 0.15, $cx + 1.5, $cy - 0.95);
+                break;
+
+            case 'youtube':
+                $this->drawVectorRoundedRect($cx - 1.65, $cy - 1.12, 3.3, 2.24, 0.55, 'F');
+                $this->SetFillColor(255, 255, 255);
+                $this->drawVectorPolygon([
+                    [$cx - 0.42, $cy - 0.58],
+                    [$cx - 0.42, $cy + 0.58],
+                    [$cx + 0.68, $cy],
+                ], 'F');
+                break;
+
+            case 'tiktok':
+                $this->SetLineWidth(0.42);
+                $this->drawVectorCircle($cx - 0.35, $cy + 0.62, 0.65, 'D');
+                $this->Line($cx + 0.3, $cy + 0.62, $cx + 0.3, $cy - 1.25);
+                $this->Line($cx + 0.3, $cy - 1.25, $cx + 1.15, $cy - 0.65);
+                break;
+        }
+
+        $this->SetLineWidth(0.2);
+    }
+
     function Footer()
     {
         $hasFooterBg = false;
@@ -251,71 +435,52 @@ class ProgramaPDF extends FPDF
             $this->Rect(164, 281.2, 46, 15.8, 'F');
         }
 
-        // Íconos y textos de redes sociales sobre la franja blanca izquierda
-        $y = 283.8;
+        // Íconos vectoriales generados y enlaces activos sobre la franja blanca izquierda
+        $y = 283.6;
+        $iconColor = [85, 88, 92];
         $items = [
-            ['img' => 'imgs/social/facebook.png',  'icon' => 'f',  'text' => 'CEFI.',           'w' => 18.5],
-            ['img' => 'imgs/social/instagram.png', 'icon' => 'IG', 'text' => 'cefi_cr',         'w' => 21.5],
-            ['img' => 'imgs/social/whatsapp.png',  'icon' => 'WA', 'text' => '+506 8992 9180',  'w' => 30.5],
-            ['img' => 'imgs/social/phone.png',     'icon' => 'T',  'text' => '2711 1010',       'w' => 22.5],
-            ['img' => 'imgs/social/email.png',     'icon' => 'M',  'text' => 'info@ceficr.com', 'w' => 30.5],
-            ['img' => 'imgs/social/youtube.png',   'icon' => 'YT', 'text' => '@ceficr',         'w' => 20.5],
-            ['img' => 'imgs/social/tiktok.png',    'icon' => 'TK', 'text' => '@cefi_cr',        'w' => 20.5],
+            ['type' => 'facebook',  'text' => 'CEFI.',           'w' => 18.5, 'url' => 'https://www.facebook.com/CEFI.'],
+            ['type' => 'instagram', 'text' => 'cefi_cr',         'w' => 21.5, 'url' => 'https://www.instagram.com/cefi_cr/'],
+            ['type' => 'whatsapp',  'text' => '+506 8992 9180',  'w' => 30.5, 'url' => 'https://wa.me/50689929180'],
+            ['type' => 'phone',     'text' => '2711 1010',       'w' => 22.5, 'url' => 'tel:+50627111010'],
+            ['type' => 'email',     'text' => 'info@ceficr.com', 'w' => 30.5, 'url' => 'mailto:info@ceficr.com'],
+            ['type' => 'youtube',   'text' => '@ceficr',         'w' => 20.5, 'url' => 'https://www.youtube.com/@ceficr'],
+            ['type' => 'tiktok',    'text' => '@cefi_cr',        'w' => 20.5, 'url' => 'https://www.tiktok.com/@cefi_cr'],
         ];
 
         $x = 6.0;
         foreach ($items as $it) {
-            $iconPath = public_path($it['img']);
-            $iconDrawn = false;
-            if (file_exists($iconPath)) {
-                try {
-                    @$this->Image($iconPath, $x, $y - 0.3, 5.8, 5.8);
-                    $iconDrawn = true;
-                } catch (\Throwable $e) {
-                    $iconDrawn = false;
-                }
-            }
+            // Dibujar ícono vectorial circular
+            $this->drawSocialIconVector($it['type'], $x + 2.8, $y + 2.6, 2.75, $iconColor);
 
-            if (!$iconDrawn) {
-                $this->SetFillColor(90, 95, 100);
-                $this->SetDrawColor(90, 95, 100);
-                $this->SetTextColor(255, 255, 255);
-                $this->SetFont('Arial', 'B', 6);
-                $this->SetXY($x, $y);
-                $this->Cell(5.5, 5.5, $this->toPdf($it['icon']), 1, 0, 'C', true);
-            }
-
-            $this->SetTextColor(90, 95, 100);
+            // Texto de la red social
+            $this->SetTextColor(85, 88, 92);
             $this->SetFont('Arial', '', 6.7);
-            $this->SetXY($x + 6.3, $y + 0.3);
-            $this->Cell($it['w'] - 6.5, 5, $this->toPdf($it['text']), 0, 0, 'L');
+            $this->SetXY($x + 6.1, $y + 0.2);
+            $this->Cell($it['w'] - 6.3, 5, $this->toPdf($it['text']), 0, 0, 'L');
+
+            // Área clicable con hipervínculo en el PDF
+            $this->Link($x, $y - 0.5, $it['w'], 6.5, $it['url']);
 
             $x += $it['w'];
         }
 
-        // Recuadro blanco interno sobre la curva verde derecha para el WhatsApp destacado
+        // Recuadro blanco redondeado sobre la curva verde derecha para el WhatsApp destacado
         $this->SetFillColor(255, 255, 255);
         $this->SetDrawColor(0, 160, 77);
         $this->SetLineWidth(0.35);
-        $this->Rect(169.5, 284.0, 35, 8.8, 'DF');
+        $this->drawVectorRoundedRect(169.5, 283.8, 35.5, 8.8, 1.8, 'DF');
 
-        $waGreenPath = public_path('imgs/social/whatsapp_green.png');
-        if (file_exists($waGreenPath)) {
-            try {
-                @$this->Image($waGreenPath, 171.0, 285.3, 6.0, 6.0);
-            } catch (\Throwable $e) {
-                // Continuar
-            }
-            $this->SetXY(177.8, 285.8);
-            $this->SetFont('Arial', 'B', 7.2);
-            $this->SetTextColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
-            $this->Cell(25.5, 5.2, $this->toPdf('+506 8992 9180'), 0, 0, 'L');
-        } else {
-            $this->SetXY(171, 285.8);
-            $this->SetFont('Arial', 'B', 7.2);
-            $this->SetTextColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
-            $this->Cell(32, 5.2, $this->toPdf('WA +506 8992 9180'), 0, 0, 'C');
-        }
+        // Ícono vectorial verde de WhatsApp + número clicable
+        $this->drawSocialIconVector('whatsapp', 173.8, 288.2, 2.75, $this->verde_cefi);
+
+        $this->SetXY(177.5, 285.7);
+        $this->SetFont('Arial', 'B', 7.2);
+        $this->SetTextColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
+        $this->Cell(26.5, 5.2, $this->toPdf('+506 8992 9180'), 0, 0, 'L');
+
+        // Enlace directo a WhatsApp en el botón derecho
+        $this->Link(169.5, 283.8, 35.5, 8.8, 'https://wa.me/50689929180');
     }
 
     function toPdf($txt): string
