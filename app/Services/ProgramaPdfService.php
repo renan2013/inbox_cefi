@@ -747,48 +747,46 @@ class ProgramaPdfService
         $colTopY = $pdf->header_h + 8;
 
         // --- COLUMNA IZQUIERDA: OPCIONES LABORALES ---
-        $pdf->drawHeadingWithSquare($colTopY, 'Opciones laborales:', $pdf->verde_lima, $pdf->azul_marino, 15);
+        $pdf->drawHeadingWithSquare($colTopY, 'Opciones laborales:', $pdf->verde_lima, $pdf->azul_marino, 16);
 
         $linesLeft = $pdf->parseRichColumnLines($programa->opciones_laborales ?? ($programa->oferta ?? ''));
         $yLeft = $colTopY + 11;
         if (!empty($linesLeft)) {
             foreach ($linesLeft as $item) {
                 if (!empty($item['empty'])) {
-                    $yLeft += 1.2;
+                    $yLeft += 1.0;
                     continue;
                 }
-                if ($yLeft > 272) {
+                if ($yLeft > 274) {
                     break;
                 }
 
                 $line = $item['text'];
                 if ($item['numbered'] || ($item['bold'] && !$item['bullet'])) {
                     $pdf->SetXY(9, $yLeft);
-                    $pdf->SetFont('Arial', 'B', 9.2);
+                    $pdf->SetFont('Arial', 'B', 10.2);
                     $pdf->SetTextColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
-                    $pdf->MultiCell(90, 4.5, $pdf->toPdf($line), 0, 'L');
+                    $pdf->MultiCell(90, 4.8, $pdf->toPdf($line), 0, 'L');
                 } elseif ($item['bullet']) {
                     $cleanBullet = ltrim($line, "•-* \t");
-                    $pdf->SetXY(9, $yLeft);
-                    $pdf->SetFont('Arial', 'B', 9);
-                    $pdf->SetTextColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
-                    $pdf->Cell(4, 4.4, $pdf->toPdf('•'), 0, 0, 'L');
+                    $pdf->SetFillColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
+                    $pdf->drawVectorCircle(10.5, $yLeft + 2.3, 0.7, 'F');
 
-                    $pdf->SetXY(13.5, $yLeft);
-                    $pdf->SetFont('Arial', $item['bold'] ? 'B' : '', 8.8);
+                    $pdf->SetXY(13.0, $yLeft);
+                    $pdf->SetFont('Arial', $item['bold'] ? 'B' : '', 9.8);
                     $pdf->SetTextColor(30, 45, 65);
-                    $pdf->MultiCell(85.5, 4.4, $pdf->toPdf($cleanBullet), 0, 'L');
+                    $pdf->MultiCell(86, 4.7, $pdf->toPdf($cleanBullet), 0, 'L');
                 } else {
                     $pdf->SetXY(9, $yLeft);
-                    $pdf->SetFont('Arial', '', 8.8);
+                    $pdf->SetFont('Arial', '', 9.8);
                     $pdf->SetTextColor(30, 45, 65);
-                    $pdf->MultiCell(90, 4.4, $pdf->toPdf($line), 0, 'L');
+                    $pdf->MultiCell(90, 4.7, $pdf->toPdf($line), 0, 'L');
                 }
-                $yLeft = $pdf->GetY() + 0.8;
+                $yLeft = $pdf->GetY() + 0.7;
             }
         } else {
             $pdf->SetXY(9, $yLeft);
-            $pdf->SetFont('Arial', 'I', 9.5);
+            $pdf->SetFont('Arial', 'I', 10.5);
             $pdf->SetTextColor(120, 130, 140);
             $pdf->MultiCell(90, 5, $pdf->toPdf('No se han especificado opciones laborales para este programa.'), 0, 'L');
         }
@@ -797,7 +795,7 @@ class ProgramaPdfService
         $pdf->SetFillColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
         $pdf->Rect(106, $colTopY, 5.5, 7.2, 'F');
         $pdf->SetXY(113.5, $colTopY - 0.3);
-        $pdf->SetFont('Arial', 'B', 15);
+        $pdf->SetFont('Arial', 'B', 16);
         $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Cell(90, 8, $pdf->toPdf('Lo que obtendrás:'), 0, 1, 'L');
 
@@ -806,39 +804,37 @@ class ProgramaPdfService
         if (!empty($linesRight)) {
             foreach ($linesRight as $item) {
                 if (!empty($item['empty'])) {
-                    $yRight += 1.2;
+                    $yRight += 1.0;
                     continue;
                 }
-                if ($yRight > 272) {
+                if ($yRight > 274) {
                     break;
                 }
 
                 $line = $item['text'];
-                $isIntro = str_ends_with($line, ':') && !$item['bold'];
+                $isIntro = (str_ends_with($line, ':') || str_ends_with($line, '.')) && !$item['bold'] && !$item['numbered'];
 
                 if ($item['bullet']) {
                     $cleanBullet = ltrim($line, "•-* \t");
-                    $pdf->SetXY(106, $yRight);
-                    $pdf->SetFont('Arial', 'B', 9);
-                    $pdf->SetTextColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
-                    $pdf->Cell(4, 4.4, $pdf->toPdf('•'), 0, 0, 'L');
+                    $pdf->SetFillColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
+                    $pdf->drawVectorCircle(107.5, $yRight + 2.3, 0.7, 'F');
 
-                    $pdf->SetXY(110.5, $yRight);
-                    $pdf->SetFont('Arial', $item['bold'] ? 'B' : '', 8.8);
+                    $pdf->SetXY(110.2, $yRight);
+                    $pdf->SetFont('Arial', $item['bold'] ? 'B' : '', 9.8);
                     $pdf->SetTextColor(30, 45, 65);
-                    $pdf->MultiCell(91, 4.4, $pdf->toPdf($cleanBullet), 0, 'L');
+                    $pdf->MultiCell(91.3, 4.7, $pdf->toPdf($cleanBullet), 0, 'L');
                 } elseif ($isIntro) {
                     $pdf->SetXY(106, $yRight);
-                    $pdf->SetFont('Arial', '', 9);
+                    $pdf->SetFont('Arial', '', 9.8);
                     $pdf->SetTextColor(30, 45, 65);
-                    $pdf->MultiCell(95, 4.5, $pdf->toPdf($line), 0, 'L');
+                    $pdf->MultiCell(95, 4.7, $pdf->toPdf($line), 0, 'L');
                 } else {
                     $pdf->SetXY(106, $yRight + 0.5);
-                    $pdf->SetFont('Arial', 'B', 9.2);
+                    $pdf->SetFont('Arial', 'B', 10.2);
                     $pdf->SetTextColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
-                    $pdf->MultiCell(95, 4.6, $pdf->toPdf($line), 0, 'L');
+                    $pdf->MultiCell(95, 4.8, $pdf->toPdf($line), 0, 'L');
                 }
-                $yRight = $pdf->GetY() + 0.8;
+                $yRight = $pdf->GetY() + 0.7;
             }
         } else {
             $pdf->SetXY(106, $yRight);
