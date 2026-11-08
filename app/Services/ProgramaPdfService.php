@@ -526,6 +526,70 @@ class ProgramaPDF extends FPDF
         $html = str_replace("\r", "\n", $html);
         return trim(preg_replace('/\n{3,}/', "\n\n", $html));
     }
+
+    /**
+     * Convierte texto plano o HTML enriquecido (TinyMCE: <p>, <strong>, <b>, <ul>, <ol>, <li>, <br>)
+     * en líneas estructuradas con indicadores de negrita, viñeta y numeración para el PDF.
+     */
+    function parseRichColumnLines(?string $html): array
+    {
+        if ($html === null || trim($html) === '') {
+            return [];
+        }
+
+        $str = str_replace(['&nbsp;', "\xc2\xa0"], ' ', $html);
+
+        // Convertir listas numeradas <ol><li>...</li></ol> a "1. ...", "2. ..."
+        $str = preg_replace_callback('/<ol[^>]*>(.*?)<\/ol>/is', function ($m) {
+            $idx = 1;
+            return preg_replace_callback('/<li[^>]*>(.*?)<\/li>/is', function ($lm) use (&$idx) {
+                return "\n[[B]]" . ($idx++) . ". " . trim($lm[1]) . "[[/B]]\n";
+            }, $m[1]);
+        }, $str);
+
+        // Convertir listas con viñetas <li> a "• "
+        $str = preg_replace('/<li[^>]*>/i', "\n• ", $str);
+
+        // Marcar bloques en negrita (<strong>, <b>, <h1>..<h6>)
+        $str = preg_replace('/<(strong|b|h[1-6])[^>]*>(.*?)<\/\1>/is', '[[B]]$2[[/B]]', $str);
+
+        // Saltos de línea por etiquetas de bloque
+        $str = str_ireplace(['<br>', '<br/>', '<br />', '</p>', '</li>', '</div>', '</ul>', '</ol>'], "\n", $str);
+        $str = strip_tags($str);
+        $str = html_entity_decode($str, ENT_QUOTES, 'UTF-8');
+        $str = str_replace(["\r\n", "\r"], "\n", $str);
+
+        $rawLines = explode("\n", $str);
+        $parsed = [];
+
+        foreach ($rawLines as $rawLine) {
+            $line = trim($rawLine);
+            if ($line === '') {
+                $parsed[] = ['empty' => true];
+                continue;
+            }
+
+            $isBold = str_contains($line, '[[B]]');
+            $line = str_replace(['[[B]]', '[[/B]]'], '', $line);
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            $isBullet = str_starts_with($line, '•') || str_starts_with($line, '-') || str_starts_with($line, '*');
+            $isNumbered = (bool)preg_match('/^\d+[\.\-\)]\s+/', $line);
+
+            $parsed[] = [
+                'empty'    => false,
+                'text'     => $line,
+                'bold'     => $isBold,
+                'bullet'   => $isBullet,
+                'numbered' => $isNumbered,
+            ];
+        }
+
+        return $parsed;
+    }
 }
 
 class ProgramaPdfService
@@ -685,26 +749,37 @@ class ProgramaPdfService
         // --- COLUMNA IZQUIERDA: OPCIONES LABORALES ---
         $pdf->drawHeadingWithSquare($colTopY, 'Opciones laborales:', $pdf->verde_lima, $pdf->azul_marino, 15);
 
-        $opcionesTxt = $pdf->cleanText($programa->opciones_laborales ?? ($programa->oferta ?? ''));
+        $linesLeft = $pdf->parseRichColumnLines($programa->opciones_laborales ?? ($programa->oferta ?? ''));
         $yLeft = $colTopY + 11;
-        if ($opcionesTxt !== '') {
-            $linesLeft = explode("\n", $opcionesTxt);
-            foreach ($linesLeft as $line) {
-                $line = trim($line);
-                if ($line === '') {
-                    $yLeft += 1.5;
+        if (!empty($linesLeft)) {
+            foreach ($linesLeft as $item) {
+                if (!empty($item['empty'])) {
+                    $yLeft += 1.2;
                     continue;
                 }
                 if ($yLeft > 272) {
                     break;
                 }
 
-                $pdf->SetXY(9, $yLeft);
-                if (preg_match('/^\d+[\.\-\)]\s+/', $line)) {
+                $line = $item['text'];
+                if ($item['numbered'] || ($item['bold'] && !$item['bullet'])) {
+                    $pdf->SetXY(9, $yLeft);
                     $pdf->SetFont('Arial', 'B', 9.2);
                     $pdf->SetTextColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
                     $pdf->MultiCell(90, 4.5, $pdf->toPdf($line), 0, 'L');
+                } elseif ($item['bullet']) {
+                    $cleanBullet = ltrim($line, "•-* \t");
+                    $pdf->SetXY(9, $yLeft);
+                    $pdf->SetFont('Arial', 'B', 9);
+                    $pdf->SetTextColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
+                    $pdf->Cell(4, 4.4, $pdf->toPdf('•'), 0, 0, 'L');
+
+                    $pdf->SetXY(13.5, $yLeft);
+                    $pdf->SetFont('Arial', $item['bold'] ? 'B' : '', 8.8);
+                    $pdf->SetTextColor(30, 45, 65);
+                    $pdf->MultiCell(85.5, 4.4, $pdf->toPdf($cleanBullet), 0, 'L');
                 } else {
+                    $pdf->SetXY(9, $yLeft);
                     $pdf->SetFont('Arial', '', 8.8);
                     $pdf->SetTextColor(30, 45, 65);
                     $pdf->MultiCell(90, 4.4, $pdf->toPdf($line), 0, 'L');
@@ -726,24 +801,22 @@ class ProgramaPdfService
         $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Cell(90, 8, $pdf->toPdf('Lo que obtendrás:'), 0, 1, 'L');
 
-        $obtendrasTxt = $pdf->cleanText($programa->lo_que_obtendras ?? ($programa->perfil ?? ''));
+        $linesRight = $pdf->parseRichColumnLines($programa->lo_que_obtendras ?? ($programa->perfil ?? ''));
         $yRight = $colTopY + 11;
-        if ($obtendrasTxt !== '') {
-            $linesRight = explode("\n", $obtendrasTxt);
-            foreach ($linesRight as $line) {
-                $line = trim($line);
-                if ($line === '') {
-                    $yRight += 1.5;
+        if (!empty($linesRight)) {
+            foreach ($linesRight as $item) {
+                if (!empty($item['empty'])) {
+                    $yRight += 1.2;
                     continue;
                 }
                 if ($yRight > 272) {
                     break;
                 }
 
-                $isBullet = str_starts_with($line, '•') || str_starts_with($line, '-') || str_starts_with($line, '*');
-                $isIntro = str_ends_with($line, ':');
+                $line = $item['text'];
+                $isIntro = str_ends_with($line, ':') && !$item['bold'];
 
-                if ($isBullet) {
+                if ($item['bullet']) {
                     $cleanBullet = ltrim($line, "•-* \t");
                     $pdf->SetXY(106, $yRight);
                     $pdf->SetFont('Arial', 'B', 9);
@@ -751,7 +824,7 @@ class ProgramaPdfService
                     $pdf->Cell(4, 4.4, $pdf->toPdf('•'), 0, 0, 'L');
 
                     $pdf->SetXY(110.5, $yRight);
-                    $pdf->SetFont('Arial', '', 8.8);
+                    $pdf->SetFont('Arial', $item['bold'] ? 'B' : '', 8.8);
                     $pdf->SetTextColor(30, 45, 65);
                     $pdf->MultiCell(91, 4.4, $pdf->toPdf($cleanBullet), 0, 'L');
                 } elseif ($isIntro) {

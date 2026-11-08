@@ -346,15 +346,25 @@
                         <span class="badge-page-ref">Página 2 del PDF</span>
                     </div>
 
+                    @php
+                        $opEditVal = old('opciones_laborales', $programa->opciones_laborales ?? $programa->oferta ?? '');
+                        if ($opEditVal !== '' && $opEditVal === strip_tags($opEditVal)) {
+                            $opEditVal = nl2br(e($opEditVal));
+                        }
+                        $loEditVal = old('lo_que_obtendras', $programa->lo_que_obtendras ?? $programa->perfil ?? '');
+                        if ($loEditVal !== '' && $loEditVal === strip_tags($loEditVal)) {
+                            $loEditVal = nl2br(e($loEditVal));
+                        }
+                    @endphp
                     <div class="row g-4 mb-5">
                         <div class="col-md-6">
                             <label for="opciones_laborales" class="form-label-custom">Opciones Laborales (OPCIONES LABORALES:)</label>
-                            <textarea name="opciones_laborales" id="opciones_laborales" class="form-control form-control-custom w-100" rows="12" placeholder="1. Agencias de publicidad y marketing digital...">{{ old('opciones_laborales', $programa->opciones_laborales ?? $programa->oferta) }}</textarea>
+                            <textarea name="opciones_laborales" id="opciones_laborales" class="form-control form-control-custom editor-rico w-100" rows="12" placeholder="1. Agencias de publicidad y marketing digital...">{{ $opEditVal }}</textarea>
                             <small class="text-white-50 d-block mt-1">Columna izquierda de la página 2 del folleto/programa PDF.</small>
                         </div>
                         <div class="col-md-6">
                             <label for="lo_que_obtendras" class="form-label-custom">Lo Que Obtendrás / Perfil de Salida (LO QUE OBTENDRÁS)</label>
-                            <textarea name="lo_que_obtendras" id="lo_que_obtendras" class="form-control form-control-custom w-100" rows="12" placeholder="Al finalizar este programa, el estudiante contará con...">{{ old('lo_que_obtendras', $programa->lo_que_obtendras ?? $programa->perfil) }}</textarea>
+                            <textarea name="lo_que_obtendras" id="lo_que_obtendras" class="form-control form-control-custom editor-rico w-100" rows="12" placeholder="Al finalizar este programa, el estudiante contará con...">{{ $loEditVal }}</textarea>
                             <small class="text-white-50 d-block mt-1">Columna derecha de la página 2 del folleto/programa PDF.</small>
                         </div>
                     </div>
@@ -607,8 +617,28 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    if (typeof tinymce !== 'undefined') {
+        tinymce.init({
+            license_key: 'gpl',
+            selector: '.editor-rico',
+            plugins: 'lists link autolink',
+            toolbar: 'bold italic underline | bullist numlist | link | removeformat',
+            menubar: false,
+            statusbar: false,
+            height: 320,
+            branding: false,
+            promotion: false,
+            setup: function (editor) {
+                editor.on('change keyup', function () {
+                    editor.save();
+                });
+            }
+        });
+    }
+
     const tbody = document.getElementById('tbodyPlanEstudios');
     const btnAdd = document.getElementById('btnAgregarCursoPlan');
     const contenedorEliminados = document.getElementById('contenedorEliminadosPlan');

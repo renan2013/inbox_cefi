@@ -128,8 +128,14 @@
                                     @endif
 
                                     @if ($p->lo_que_obtendras || $p->perfil)
+                                        @php
+                                            $loWeb = $p->lo_que_obtendras ?? $p->perfil;
+                                            if ($loWeb && $loWeb === strip_tags($loWeb)) {
+                                                $loWeb = nl2br(e($loWeb));
+                                            }
+                                        @endphp
                                         <h6 class="text-white fw-bold mb-2"><i class="bi bi-award me-1 text-success"></i> Lo Que Obtendrás / Perfil del Egresado</h6>
-                                        <p class="text-white-50 mb-0" style="white-space: pre-line;">{{ $p->lo_que_obtendras ?? $p->perfil }}</p>
+                                        <div class="text-white-50 mb-0">{!! $loWeb !!}</div>
                                     @endif
                                 </div>
                                 <div class="col-lg-4">

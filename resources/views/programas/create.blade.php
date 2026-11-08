@@ -339,12 +339,24 @@
                     <div class="row g-4 mb-5">
                         <div class="col-md-6">
                             <label for="opciones_laborales" class="form-label-custom">Opciones Laborales (OPCIONES LABORALES:)</label>
-                            <textarea name="opciones_laborales" id="opciones_laborales" class="form-control form-control-custom w-100" rows="12" placeholder="1. Agencias de publicidad y marketing digital&#10;Creación de campañas, contenido visual, diseño para redes sociales y material publicitario.&#10;2. Estudios de diseño gráfico&#10;Realización de identidades visuales, branding, diseño editorial, ilustración y proyectos corporativos...">{{ old('opciones_laborales') }}</textarea>
+                            @php
+                                $opCreateVal = old('opciones_laborales', '');
+                                if ($opCreateVal !== '' && $opCreateVal === strip_tags($opCreateVal)) {
+                                    $opCreateVal = nl2br(e($opCreateVal));
+                                }
+                            @endphp
+                            <textarea name="opciones_laborales" id="opciones_laborales" class="form-control form-control-custom editor-rico w-100" rows="12" placeholder="1. Agencias de publicidad y marketing digital&#10;Creación de campañas, contenido visual, diseño para redes sociales y material publicitario...">{{ $opCreateVal }}</textarea>
                             <small class="text-white-50 d-block mt-1">Columna izquierda de la página 2 del folleto/programa PDF.</small>
                         </div>
                         <div class="col-md-6">
                             <label for="lo_que_obtendras" class="form-label-custom">Lo Que Obtendrás / Perfil de Salida (LO QUE OBTENDRÁS)</label>
-                            <textarea name="lo_que_obtendras" id="lo_que_obtendras" class="form-control form-control-custom w-100" rows="12" placeholder="Al finalizar este programa, el estudiante contará con:&#10;Habilidades Técnicas y Creativas&#10;• Dominio de herramientas de retoque fotográfico básico y avanzado.&#10;• Creación de imágenes, composiciones, filtros, capas y objetos inteligentes...">{{ old('lo_que_obtendras') }}</textarea>
+                            @php
+                                $loCreateVal = old('lo_que_obtendras', '');
+                                if ($loCreateVal !== '' && $loCreateVal === strip_tags($loCreateVal)) {
+                                    $loCreateVal = nl2br(e($loCreateVal));
+                                }
+                            @endphp
+                            <textarea name="lo_que_obtendras" id="lo_que_obtendras" class="form-control form-control-custom editor-rico w-100" rows="12" placeholder="Al finalizar este programa, el estudiante contará con:&#10;Habilidades Técnicas y Creativas...">{{ $loCreateVal }}</textarea>
                             <small class="text-white-50 d-block mt-1">Columna derecha de la página 2 del folleto/programa PDF.</small>
                         </div>
                     </div>
@@ -548,8 +560,28 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    if (typeof tinymce !== 'undefined') {
+        tinymce.init({
+            license_key: 'gpl',
+            selector: '.editor-rico',
+            plugins: 'lists link autolink',
+            toolbar: 'bold italic underline | bullist numlist | link | removeformat',
+            menubar: false,
+            statusbar: false,
+            height: 320,
+            branding: false,
+            promotion: false,
+            setup: function (editor) {
+                editor.on('change keyup', function () {
+                    editor.save();
+                });
+            }
+        });
+    }
+
     const tbody = document.getElementById('tbodyPlanEstudios');
     const btnAdd = document.getElementById('btnAgregarCursoPlan');
     const btnDemo = document.getElementById('btnCargarEjemploCefi');
@@ -611,39 +643,56 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('objetivo_curso').value =
                 "El objetivo de este programa anual es desarrollar en el estudiante las competencias esenciales y avanzadas del diseño digital, abarcando retoque fotográfico, creación vectorial, maquetación profesional y el uso estratégico de herramientas de inteligencia artificial. Al finalizar, el alumno será capaz de crear proyectos visuales completos, integrando procesos creativos, técnicos y automatizados para responder a las necesidades del entorno profesional actual.";
 
-            document.getElementById('opciones_laborales').value =
-                "1. Agencias de publicidad y marketing digital\nCreación de campañas, contenido visual, diseño para redes sociales y material publicitario.\n" +
-                "2. Estudios de diseño gráfico\nRealización de identidades visuales, branding, diseño editorial, ilustración y proyectos corporativos.\n" +
-                "3. Empresas de comunicación y medios\nTrabajo en departamentos de imagen para revistas, periódicos digitales, productoras de contenido y plataformas multimedia.\n" +
-                "4. Departamentos de diseño interno en corporaciones\nCreación de materiales internos, marcas, presentaciones, diseño de contenido institucional y comunicación visual.\n" +
-                "5. Empresas de desarrollo tecnológico y startups\nDiseño de interfaces, prototipos en Figma, creación de elementos visuales para apps o sitios web.\n" +
-                "6. Productoras audiovisuales\nEdición fotográfica, composición visual, diseño de elementos gráficos para videos y contenido multimedia.\n" +
-                "7. Editoriales y empresas de contenido impreso o digital\nMaquetación de revistas, libros, boletines, catálogos y publicaciones digitales.\n" +
-                "8. Agencias de redes sociales y community management\nDiseño de contenido estratégico, automatización con IA y creación de materiales para campañas.\n" +
-                "9. Empresas de impresión y servicios gráficos\nDiseño de empaques, tarjetas, folletos, banners, anuncios y piezas para impresión digital.\n" +
-                "10. Emprendimiento o estudio propio\nServicios de branding, retoque fotográfico, diseño web, diseño corporativo, ilustración o contenido para redes.";
+            const demoOpciones =
+                "<p><strong>1. Agencias de publicidad y marketing digital</strong><br>• Creación de campañas, contenido visual, diseño para redes sociales y material publicitario.</p>" +
+                "<p><strong>2. Estudios de diseño gráfico</strong><br>• Realización de identidades visuales, branding, diseño editorial, ilustración y proyectos corporativos.</p>" +
+                "<p><strong>3. Empresas de comunicación y medios</strong><br>• Trabajo en departamentos de imagen para revistas, periódicos digitales, productoras de contenido y plataformas multimedia.</p>" +
+                "<p><strong>4. Departamentos de diseño interno en corporaciones</strong><br>• Creación de materiales internos, marcas, presentaciones, diseño de contenido institucional y comunicación visual.</p>" +
+                "<p><strong>5. Empresas de desarrollo tecnológico y startups</strong><br>• Diseño de interfaces, prototipos en Figma, creación de elementos visuales para apps o sitios web.</p>" +
+                "<p><strong>6. Productoras audiovisuales</strong><br>• Edición fotográfica, composición visual, diseño de elementos gráficos para videos y contenido multimedia.</p>" +
+                "<p><strong>7. Editoriales y empresas de contenido impreso o digital</strong><br>• Maquetación de revistas, libros, boletines, catálogos y publicaciones digitales.</p>" +
+                "<p><strong>8. Agencias de redes sociales y community management</strong><br>• Diseño de contenido estratégico, automatización con IA y creación de materiales para campañas.</p>" +
+                "<p><strong>9. Empresas de impresión y servicios gráficos</strong><br>• Diseño de empaques, tarjetas, folletos, banners, anuncios y piezas para impresión digital.</p>" +
+                "<p><strong>10. Emprendimiento o estudio propio</strong><br>• Servicios de branding, retoque fotográfico, diseño web, diseño corporativo, ilustración o contenido para redes.</p>";
 
-            document.getElementById('lo_que_obtendras').value =
-                "Al finalizar este programa, el estudiante contará con:\n" +
-                "Habilidades Técnicas y Creativas\n" +
-                "• Dominio de herramientas de retoque fotográfico básico y avanzado.\n" +
-                "• Creación de imágenes, composiciones, filtros, capas y objetos inteligentes.\n" +
-                "• Conocimiento sólido en diseño vectorial, logos, ilustración y branding corporativo.\n" +
-                "• Uso profesional de software de diseño: Photoshop, Illustrator, Figma y Affinity.\n" +
-                "Competencias en IA Aplicada al Diseño\n" +
-                "• Uso de ChatGPT como asistente creativo y técnico.\n" +
-                "• Aplicación de Perplexity para generación de contenido visual y conceptual.\n" +
-                "• Integración de Gemini como soporte en creación de aplicaciones y automatizaciones.\n" +
-                "• Utilización de Qwen como herramienta multitarea para flujos de trabajo avanzados.\n" +
-                "Dominio de Maquetación y Creación de Contenidos\n" +
-                "• Diseño de revistas, boletines y materiales digitales profesionales.\n" +
-                "• Desarrollo de proyectos completos para redes sociales y entornos digitales.\n" +
-                "• Creación de sistemas gráficos con coherencia visual.\n" +
-                "Proyecto Final\n" +
-                "• Un proyecto integral que reúne diseño fotográfico, vectorial, maquetación y automatización con IA, demostrando todas las habilidades del programa.\n" +
-                "Desarrollo Profesional\n" +
-                "• Preparación para trabajar en estudios de diseño, agencias creativas, marketing digital o emprendimientos personales.\n" +
-                "• Portafolio completo y funcional con trabajos desarrollados durante los 12 meses.";
+            const demoObtendras =
+                "<p>Al finalizar este programa, el estudiante contará con:</p>" +
+                "<p><strong>Habilidades Técnicas y Creativas</strong></p>" +
+                "<ul>" +
+                "<li>Dominio de herramientas de retoque fotográfico básico y avanzado.</li>" +
+                "<li>Creación de imágenes, composiciones, filtros, capas y objetos inteligentes.</li>" +
+                "<li>Conocimiento sólido en diseño vectorial, logos, ilustración y branding corporativo.</li>" +
+                "<li>Uso profesional de software de diseño: Photoshop, Illustrator, Figma y Affinity.</li>" +
+                "</ul>" +
+                "<p><strong>Competencias en IA Aplicada al Diseño</strong></p>" +
+                "<ul>" +
+                "<li>Uso de ChatGPT como asistente creativo y técnico.</li>" +
+                "<li>Aplicación de Perplexity para generación de contenido visual y conceptual.</li>" +
+                "<li>Integración de Gemini como soporte en creación de aplicaciones y automatizaciones.</li>" +
+                "<li>Utilización de Qwen como herramienta multitarea para flujos de trabajo avanzados.</li>" +
+                "</ul>" +
+                "<p><strong>Dominio de Maquetación y Creación de Contenidos</strong></p>" +
+                "<ul>" +
+                "<li>Diseño de revistas, boletines y materiales digitales profesionales.</li>" +
+                "<li>Desarrollo de proyectos completos para redes sociales y entornos digitales.</li>" +
+                "<li>Creación de sistemas gráficos con coherencia visual.</li>" +
+                "</ul>" +
+                "<p><strong>Proyecto Final</strong></p>" +
+                "<ul>" +
+                "<li>Un proyecto integral que reúne diseño fotográfico, vectorial, maquetación y automatización con IA, demostrando todas las habilidades del programa.</li>" +
+                "</ul>" +
+                "<p><strong>Desarrollo Profesional</strong></p>" +
+                "<ul>" +
+                "<li>Preparación para trabajar en estudios de diseño, agencias creativas, marketing digital o emprendimientos personales.</li>" +
+                "<li>Portafolio completo y funcional con trabajos desarrollados durante los 12 meses.</li>" +
+                "</ul>";
+
+            document.getElementById('opciones_laborales').value = demoOpciones;
+            document.getElementById('lo_que_obtendras').value = demoObtendras;
+            if (typeof tinymce !== 'undefined') {
+                if (tinymce.get('opciones_laborales')) tinymce.get('opciones_laborales').setContent(demoOpciones);
+                if (tinymce.get('lo_que_obtendras')) tinymce.get('lo_que_obtendras').setContent(demoObtendras);
+            }
 
             document.getElementById('duracion_plan_estudios').value =
                 "El programa tiene una duración de 12 meses, con dos horas y media de clase y dos horas y media de trabajo/estudio en casa por semana";
