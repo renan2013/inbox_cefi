@@ -288,7 +288,16 @@
                                     <label for="cuatrimestre" class="form-label">Periodo / Ubicación Curricular <span class="text-danger">*</span></label>
                                     <select name="cuatrimestre" id="cuatrimestre" class="form-select" required>
                                         <option value="">Seleccione...</option>
-                                        @foreach (['I Cuatrimestre', 'II Cuatrimestre', 'III Cuatrimestre', 'IV Cuatrimestre', 'V Cuatrimestre', 'VI Cuatrimestre', 'VII Cuatrimestre', 'VIII Cuatrimestre'] as $c)
+                                        @php
+                                            $opcionesPeriodo = [
+                                                'I Cuatrimestre', 'II Cuatrimestre', 'III Cuatrimestre', 'IV Cuatrimestre',
+                                                'V Cuatrimestre', 'VI Cuatrimestre', 'VII Cuatrimestre', 'VIII Cuatrimestre',
+                                                'I Bimestre', 'II Bimestre', 'III Bimestre', 'IV Bimestre',
+                                                'V Bimestre', 'VI Bimestre',
+                                                'Mes',
+                                            ];
+                                        @endphp
+                                        @foreach ($opcionesPeriodo as $c)
                                             <option value="{{ $c }}" {{ old('cuatrimestre') === $c ? 'selected' : '' }}>{{ $c }}</option>
                                         @endforeach
                                     </select>

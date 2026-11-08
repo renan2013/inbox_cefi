@@ -295,8 +295,21 @@
                                     <label for="cuatrimestre" class="form-label">Periodo / Ubicación Curricular <span class="text-danger">*</span></label>
                                     <select name="cuatrimestre" id="cuatrimestre" class="form-select" required>
                                         <option value="">Seleccione...</option>
-                                        @foreach (['I Cuatrimestre', 'II Cuatrimestre', 'III Cuatrimestre', 'IV Cuatrimestre', 'V Cuatrimestre', 'VI Cuatrimestre', 'VII Cuatrimestre', 'VIII Cuatrimestre'] as $c)
-                                            <option value="{{ $c }}" {{ old('cuatrimestre', $curso->cuatrimestre) === $c ? 'selected' : '' }}>{{ $c }}</option>
+                                        @php
+                                            $opcionesPeriodo = [
+                                                'I Cuatrimestre', 'II Cuatrimestre', 'III Cuatrimestre', 'IV Cuatrimestre',
+                                                'V Cuatrimestre', 'VI Cuatrimestre', 'VII Cuatrimestre', 'VIII Cuatrimestre',
+                                                'I Bimestre', 'II Bimestre', 'III Bimestre', 'IV Bimestre',
+                                                'V Bimestre', 'VI Bimestre',
+                                                'Mes',
+                                            ];
+                                            $valPeriodo = old('cuatrimestre', $curso->cuatrimestre);
+                                            if ($valPeriodo && !in_array($valPeriodo, $opcionesPeriodo, true)) {
+                                                $opcionesPeriodo[] = $valPeriodo;
+                                            }
+                                        @endphp
+                                        @foreach ($opcionesPeriodo as $c)
+                                            <option value="{{ $c }}" {{ $valPeriodo === $c ? 'selected' : '' }}>{{ $c }}</option>
                                         @endforeach
                                     </select>
                                 </div>
