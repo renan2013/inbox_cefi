@@ -14,6 +14,7 @@ class ProgramaPDF extends FPDF
     public string $duracion = '12 meses';
     public string $modalidad = 'Presencial';
     public ?string $header_path = null;
+    public float $header_h = 35.0;
     public ?string $hero_path = null;
     public ?string $secondary_path = null;
     public ?string $footer_path = null;
@@ -30,12 +31,17 @@ class ProgramaPDF extends FPDF
 
     function Header()
     {
-        $headerH = 38;
+        $headerH = $this->header_h;
         $headerDrawn = false;
 
-        // 1. Si existe imagen_encabezado personalizada o plantilla global, dibujarla
+        // 1. Si existe imagen_encabezado personalizada o plantilla global, dibujarla respetando su proporción real
         if (!empty($this->header_path) && file_exists($this->header_path)) {
             try {
+                $info = @getimagesize($this->header_path);
+                if ($info && !empty($info[0]) && !empty($info[1])) {
+                    $headerH = max(26.0, min(46.0, round(210 * ($info[1] / $info[0]), 2)));
+                    $this->header_h = $headerH;
+                }
                 @$this->Image($this->header_path, 0, 0, 210, $headerH);
                 $headerDrawn = true;
             } catch (\Throwable $e) {
@@ -74,24 +80,28 @@ class ProgramaPDF extends FPDF
             // Línea vertical blanca divisoria
             $this->SetDrawColor(255, 255, 255);
             $this->SetLineWidth(0.35);
-            $this->Line(174, 5.5, 174, 32.5);
+            $this->Line(174, 5.5, 174, $headerH - 5.5);
 
             // Sello circular CEFI PARAUNIVERSITARIO a la derecha
-            $this->drawCefiBadgeRight(191, 19);
+            $this->drawCefiBadgeRight(191, $headerH / 2);
         }
 
-        // 2. Textos dinámicos del Programa a la izquierda (sobre el bloque verde oscuro)
+        // 2. Textos dinámicos del Programa a la izquierda (sobre el bloque verde oscuro, más abajo y con título más grande)
         [$prefijoCat, $tituloLimpio] = $this->splitTituloModerno($this->nombre_programa, $this->categoria);
 
+        $yCat      = round($headerH * 0.22, 2);
+        $yTitulo   = round($headerH * 0.43, 2);
+        $yDuracion = round($headerH * 0.74, 2);
+
         $this->SetTextColor(255, 255, 255);
-        $this->SetXY(7.5, 4.5);
-        $this->SetFont('Arial', '', 12.5);
+        $this->SetXY(8.0, $yCat);
+        $this->SetFont('Arial', '', 13);
         $this->Cell(122, 5.5, $this->toPdf($prefijoCat), 0, 1, 'L');
 
-        // Título principal grande (ej. "Diseño Gráfico Digital con IA")
-        $this->SetXY(7.5, 11.5);
+        // Título principal más grande (ej. "Diseño Gráfico" / "Diseño Gráfico Digital con IA")
+        $this->SetXY(8.0, $yTitulo);
         $lenTitulo = mb_strlen($tituloLimpio, 'UTF-8');
-        $fontSizeTitulo = $lenTitulo > 34 ? 15.5 : ($lenTitulo > 26 ? 18.5 : 21);
+        $fontSizeTitulo = $lenTitulo > 34 ? 18.0 : ($lenTitulo > 26 ? 21.0 : 24.5);
         $this->SetFont('Arial', 'B', $fontSizeTitulo);
         $this->Cell(124, 9.5, $this->toPdf($tituloLimpio), 0, 1, 'L');
 
@@ -105,8 +115,8 @@ class ProgramaPDF extends FPDF
             $modClean = 'Presencial';
         }
 
-        $this->SetXY(7.5, 27.5);
-        $this->SetFont('Arial', '', 9.5);
+        $this->SetXY(8.0, $yDuracion);
+        $this->SetFont('Arial', '', 9.8);
         $this->SetTextColor(240, 248, 242);
         $this->Cell(124, 5, $this->toPdf("Duración: {$durClean}  -  Modalidad: {$modClean}"), 0, 1, 'L');
 
@@ -583,7 +593,7 @@ class ProgramaPdfService
         // =====================================================================
         $pdf->AddPage();
 
-        $currentY = 38;
+        $currentY = $pdf->header_h;
 
         // Si el programa tiene Imagen Principal (Hero), se dibuja de borde a borde debajo del encabezado
         if (!empty($pdf->hero_path) && file_exists($pdf->hero_path)) {
@@ -670,7 +680,7 @@ class ProgramaPdfService
         // =====================================================================
         $pdf->AddPage();
 
-        $colTopY = 46;
+        $colTopY = $pdf->header_h + 8;
 
         // --- COLUMNA IZQUIERDA: OPCIONES LABORALES ---
         $pdf->drawHeadingWithSquare($colTopY, 'Opciones laborales:', $pdf->verde_lima, $pdf->azul_marino, 15);
@@ -770,7 +780,7 @@ class ProgramaPdfService
         $pdf->AddPage();
 
         // 1. Franja Azul Marino (#082947): DURACIÓN DEL PLAN DE ESTUDIOS
-        $stripY = 38;
+        $stripY = $pdf->header_h;
         $stripH = 24;
         $pdf->SetFillColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Rect(0, $stripY, 210, $stripH, 'F');
