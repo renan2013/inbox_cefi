@@ -449,22 +449,22 @@ class ProgramaPDF extends FPDF
         $y = 283.6;
         $iconColor = [85, 88, 92];
         $items = [
-            ['type' => 'facebook',  'text' => 'CEFI.',           'w' => 21.0, 'url' => 'https://www.facebook.com/CEFI.'],
-            ['type' => 'instagram', 'text' => 'cefi_cr',         'w' => 24.0, 'url' => 'https://www.instagram.com/cefi_cr/'],
-            ['type' => 'phone',     'text' => '2711 1010',       'w' => 25.0, 'url' => 'tel:+50627111010'],
-            ['type' => 'email',     'text' => 'info@ceficr.com', 'w' => 33.0, 'url' => 'mailto:info@ceficr.com'],
-            ['type' => 'youtube',   'text' => '@ceficr',         'w' => 23.0, 'url' => 'https://www.youtube.com/@ceficr'],
-            ['type' => 'tiktok',    'text' => '@cefi_cr',        'w' => 23.0, 'url' => 'https://www.tiktok.com/@cefi_cr'],
+            ['type' => 'facebook',  'text' => 'CEFI.',           'w' => 21.5, 'url' => 'https://www.facebook.com/CEFI.'],
+            ['type' => 'instagram', 'text' => 'cefi_cr',         'w' => 24.5, 'url' => 'https://www.instagram.com/cefi_cr/'],
+            ['type' => 'phone',     'text' => '2711 1010',       'w' => 25.5, 'url' => 'tel:+50627111010'],
+            ['type' => 'email',     'text' => 'info@ceficr.com', 'w' => 35.0, 'url' => 'mailto:info@ceficr.com'],
+            ['type' => 'youtube',   'text' => '@ceficr',         'w' => 23.5, 'url' => 'https://www.youtube.com/@ceficr'],
+            ['type' => 'tiktok',    'text' => '@cefi_cr',        'w' => 23.5, 'url' => 'https://www.tiktok.com/@cefi_cr'],
         ];
 
-        $x = 8.0;
+        $x = 6.5;
         foreach ($items as $it) {
             // Dibujar ícono vectorial circular
             $this->drawSocialIconVector($it['type'], $x + 2.8, $y + 2.6, 2.75, $iconColor);
 
-            // Texto de la red social
+            // Texto de la red social (+1 punto: 7.7pt)
             $this->SetTextColor(85, 88, 92);
-            $this->SetFont('Arial', '', 6.7);
+            $this->SetFont('Arial', '', 7.7);
             $this->SetXY($x + 6.1, $y + 0.2);
             $this->Cell($it['w'] - 6.3, 5, $this->toPdf($it['text']), 0, 0, 'L');
 
@@ -474,13 +474,13 @@ class ProgramaPDF extends FPDF
             $x += $it['w'];
         }
 
-        // Ícono vectorial en blanco de WhatsApp + número de celular en blanco sobre la curva verde derecha (sin forma de botón)
+        // Ícono vectorial en blanco de WhatsApp + número de celular en blanco sobre la curva verde derecha (+1 punto: 8.5pt)
         $this->drawSocialIconVector('whatsapp', 173.8, 288.2, 2.75, [255, 255, 255], false);
 
         $this->SetXY(177.5, 285.7);
-        $this->SetFont('Arial', 'B', 7.5);
+        $this->SetFont('Arial', 'B', 8.5);
         $this->SetTextColor(255, 255, 255);
-        $this->Cell(26.5, 5.2, $this->toPdf('+506 8992 9180'), 0, 0, 'L');
+        $this->Cell(28.5, 5.2, $this->toPdf('+506 8992 9180'), 0, 0, 'L');
 
         // Enlace directo a WhatsApp en el área derecha
         $this->Link(169.5, 283.8, 35.5, 8.8, 'https://wa.me/50689929180');
@@ -916,17 +916,19 @@ class ProgramaPdfService
         $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Cell(190, 6, $pdf->toPdf(mb_strtoupper($pdf->nombre_programa, 'UTF-8')), 0, 1, 'C');
 
-        // 3. Tabla de Cursos (Código | Nombre del Curso | Duración | Requisito)
+        // 3. Tabla de Cursos (Código | Nombre del Curso | Duración | Requisito) con franja azul a todo lo ancho
         $tableY = 86;
-        $pdf->SetXY(11, $tableY);
         $pdf->SetFillColor($pdf->teal_tabla[0], $pdf->teal_tabla[1], $pdf->teal_tabla[2]);
+        $pdf->Rect(0, $tableY, 210, 8.5, 'F');
+
+        $pdf->SetXY(11, $tableY);
         $pdf->SetTextColor(255, 255, 255);
         $pdf->SetFont('Arial', 'B', 10);
 
-        $pdf->Cell(38, 8.5, $pdf->toPdf('Código'), 0, 0, 'C', true);
-        $pdf->Cell(78, 8.5, $pdf->toPdf('Nombre del Curso'), 0, 0, 'L', true);
-        $pdf->Cell(36, 8.5, $pdf->toPdf('Duración'), 0, 0, 'C', true);
-        $pdf->Cell(36, 8.5, $pdf->toPdf('Requisito'), 0, 1, 'C', true);
+        $pdf->Cell(38, 8.5, $pdf->toPdf('Código'), 0, 0, 'C', false);
+        $pdf->Cell(78, 8.5, $pdf->toPdf('Nombre del Curso'), 0, 0, 'L', false);
+        $pdf->Cell(36, 8.5, $pdf->toPdf('Duración'), 0, 0, 'C', false);
+        $pdf->Cell(36, 8.5, $pdf->toPdf('Requisito'), 0, 1, 'C', false);
 
         $rowY = $tableY + 8.5;
         $pdf->SetFont('Arial', '', 9.5);
