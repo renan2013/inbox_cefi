@@ -1212,15 +1212,15 @@ class MisCursosController extends Controller
                 ->where('id_profesor', $target_profesor)
                 ->first();
 
-            $desc = $request->input('descripcion');
-            $metodo = $request->input('metodologia');
+            $desc = $request->input('descripcion', $request->input('descripcion_curso', ''));
+            $metodo = $request->input('metodologia', $request->input('metodologia_ensenanza', ''));
             $estrategias = $request->input('estrategias_aprendizaje', '');
-            $recursos_apr = $request->input('recursos_aprendizaje', '');
-            $contenidos = $request->input('contenidos');
+            $recursos_apr = $request->input('recursos_aprendizaje', $request->input('recursos_didacticos', ''));
+            $contenidos = $request->input('contenidos', $request->input('contenidos_tematicos', ''));
             $cronograma_txt = $request->input('cronograma_txt', '');
-            $biblio = $request->input('bibliografia');
-            $mod = $request->input('modalidad', 'Virtual');
-            $tipo_curso = $request->input('tipo_curso', '');
+            $biblio = $request->input('bibliografia', '');
+            $mod = $request->input('modalidad', 'Virtual (aprendizaje electrónico)');
+            $tipo_curso = $request->input('tipo_curso', $request->input('naturaleza', 'Teórico-práctica'));
             $obj_gen_post = $request->input('objetivo_general', '');
             $obj_esp_post = $request->input('objetivos_especificos', '');
             $anexos = $request->input('anexos', '');
@@ -1229,6 +1229,30 @@ class MisCursosController extends Controller
             $h_inicio = $request->input('horario_hora_inicio', '');
             $h_fin = $request->input('horario_hora_fin', '');
             $horario = trim("$h_dia $h_inicio - $h_fin");
+
+            // Sincronizar ficha técnica con plan_estudios si vienen los campos CONESUP
+            if ($curso->id_plan) {
+                $planUpdate = [
+                    'descripcion_curso' => $desc,
+                    'objetivo_general' => $obj_gen_post,
+                    'objetivos_especificos' => $obj_esp_post,
+                    'contenidos_tematicos' => $contenidos,
+                    'metodologia_ensenanza' => $metodo,
+                    'estrategias_aprendizaje' => $estrategias,
+                    'recursos_didacticos' => $recursos_apr,
+                    'bibliografia' => $biblio,
+                ];
+                foreach (['creditos', 'duracion', 'modalidad', 'naturaleza', 'requisitos', 'correquisitos', 'horas_teoricas', 'horas_practicas', 'horas_independientes', 'horas_totales', 'distribucion_horas'] as $colPlan) {
+                    if ($request->has($colPlan)) {
+                        $planUpdate[$colPlan] = $request->input($colPlan);
+                    }
+                }
+                try {
+                    DB::table('plan_estudios')->where('id_plan', $curso->id_plan)->update($planUpdate);
+                } catch (\Throwable $ePlan) {
+                    // Continuar si alguna columna opcional no existe
+                }
+            }
 
             $silaboData = [
                 'descripcion' => $desc,
@@ -1442,5 +1466,71 @@ class MisCursosController extends Controller
     public function generarActaPdf($id)
     {
         return \App\Services\ActaOficialPdfService::generar((int)$id);
+    }
+
+    /**
+     * Genera el Acta Oficial de Calificaciones en PDF y la remite automáticamente por correo a Registro Académico y al docente.
+     */
+    public function remitirActaEmail(Request $request, $id)
+    {
+        try {
+            $curso = CursoActivo::with(['planEstudio.programa', 'profesor'])->findOrFail($id);
+            $pdfPath = \App\Services\ActaOficialPdfService::generar((int)$id, 'F');
+
+            $institucion = config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'));
+            $emailRegistro = $request->input('email_destino') ?: config('cliente.email_registro', config('cliente.email_finanzas', 'registro@ceficr.com'));
+            $emailDocente = $curso->profesor->email ?? (Auth::user()->email ?? null);
+            $nombreDocente = trim(($curso->profesor->nombre ?? 'Docente') . ' ' . ($curso->profesor->apellidos ?? ''));
+            $materia = $curso->planEstudio->materia ?? "Curso #{$id}";
+            $codigo = $curso->planEstudio->codigo ?? 'S/C';
+            $programa = $curso->planEstudio->programa->nombre_programa ?? 'Programa Académico';
+            $periodo = $curso->periodo ?? 'Activo';
+
+            $asunto = "Remisión Oficial de Acta Final - {$codigo} {$materia} ({$periodo}) | {$institucion}";
+
+            $html = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;'>
+                <div style='background: #0f172a; color: #ffffff; padding: 24px; text-align: center;'>
+                    <h2 style='margin: 0; font-size: 20px;'>{$institucion}</h2>
+                    <p style='margin: 6px 0 0 0; color: #94a3b8; font-size: 13px;'>Departamento de Registro Académico — Remisión de Acta Final</p>
+                </div>
+                <div style='padding: 24px; color: #334155; line-height: 1.6;'>
+                    <p>Se ha generado y remitido oficialmente el <strong>Acta Final de Calificaciones</strong> con el siguiente detalle:</p>
+                    <table style='width: 100%; border-collapse: collapse; margin: 16px 0; background: #f8fafc; border-radius: 8px;'>
+                        <tr><td style='padding: 8px 12px; font-weight: bold;'>Curso:</td><td style='padding: 8px 12px;'>{$codigo} - {$materia}</td></tr>
+                        <tr><td style='padding: 8px 12px; font-weight: bold;'>Programa:</td><td style='padding: 8px 12px;'>{$programa}</td></tr>
+                        <tr><td style='padding: 8px 12px; font-weight: bold;'>Período:</td><td style='padding: 8px 12px;'>{$periodo}</td></tr>
+                        <tr><td style='padding: 8px 12px; font-weight: bold;'>Docente:</td><td style='padding: 8px 12px;'>{$nombreDocente}</td></tr>
+                        <tr><td style='padding: 8px 12px; font-weight: bold;'>Fecha de Remisión:</td><td style='padding: 8px 12px;'>" . date('d/m/Y H:i') . "</td></tr>
+                    </table>
+                    <p style='font-size: 13px; color: #64748b;'>El documento oficial en formato PDF se encuentra adjunto a este correo para su archivo y validación en Registro Académico.</p>
+                </div>
+            </div>";
+
+            Mail::html($html, function ($message) use ($emailRegistro, $emailDocente, $asunto, $pdfPath, $codigo, $id) {
+                $message->to($emailRegistro)->subject($asunto);
+                if (!empty($emailDocente) && $emailDocente !== $emailRegistro) {
+                    $message->cc($emailDocente);
+                }
+                if (file_exists($pdfPath)) {
+                    $message->attach($pdfPath, [
+                        'as' => "Acta_Final_{$codigo}_Curso_{$id}.pdf",
+                        'mime' => 'application/pdf',
+                    ]);
+                }
+            });
+
+            $curso->update(['check_acta' => 1]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Acta Final generada y remitida oficialmente por correo a {$emailRegistro}" . ($emailDocente ? " (con copia a {$emailDocente})" : "") . "."
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al remitir el Acta Final por correo: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

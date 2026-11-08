@@ -330,6 +330,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/boletas/estado-cuenta', [BoletaController::class, 'estadoCuenta'])->name('boletas.estado_cuenta');
         Route::get('/boletas/estado-cuenta/{id}/ajax', [BoletaController::class, 'getEstadoCuentaAjax'])->name('boletas.estado_cuenta_ajax');
         Route::get('/boletas/morosidad', [BoletaController::class, 'morosidad'])->name('boletas.morosidad');
+        Route::post('/boletas/cuotas/{id}/ajustar-interes', [BoletaController::class, 'ajustarInteresManual'])->name('boletas.ajustar_interes_manual');
+        Route::post('/boletas/morosidad/enviar-alerta-email', [BoletaController::class, 'enviarAlertaMoraEmail'])->name('boletas.enviar_alerta_mora_email');
         Route::post('/finanzas/estudiante/{id}/enviar-whatsapp-mora', [WhatsAppController::class, 'enviarMora'])->name('finanzas.enviar_whatsapp_mora');
     });
 
@@ -496,6 +498,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/docente/cursos/{id}/gestionar-silabo/guardar', [MisCursosController::class, 'guardarSilabo'])->name('mis_cursos.gestionar_silabo.guardar');
         Route::get('/docente/cursos/{id}/silabo-pdf', [MisCursosController::class, 'verSilaboPdf'])->name('mis_cursos.silabo_pdf');
         Route::get('/docente/cursos/{id}/acta-pdf', [MisCursosController::class, 'generarActaPdf'])->name('mis_cursos.acta_pdf');
+        Route::post('/docente/cursos/{id}/remitir-acta-email', [MisCursosController::class, 'remitirActaEmail'])->name('mis_cursos.remitir_acta_email');
         
         Route::get('/docente/cursos/{id}/recursos-drive', [MisCursosController::class, 'verRecursosDrive'])->name('mis_cursos.recursos_drive');
         Route::post('/docente/cursos/{id}/recursos-drive/guardar', [MisCursosController::class, 'guardarRecursoDrive'])->name('mis_cursos.recursos_drive.guardar');

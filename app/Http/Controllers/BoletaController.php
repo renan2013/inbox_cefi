@@ -2067,4 +2067,147 @@ class BoletaController extends Controller
             return false;
         }
     }
+
+    /**
+     * Ajuste manual de intereses por mora sobre una cuota específica (Fase 5).
+     */
+    public function ajustarInteresManual(Request $request, $id_cuota)
+    {
+        try {
+            $cuota = SeguimientoPago::findOrFail($id_cuota);
+            $nuevoInteres = max(0, floatval($request->input('interes_acumulado', 0)));
+
+            $cuota->update([
+                'interes_acumulado' => round($nuevoInteres, 2),
+                'ultimo_recalculo_interes' => Carbon::now()
+            ]);
+
+            if ($cuota->id_boleta) {
+                InteresesService::actualizarTotalesBoleta($cuota->id_boleta);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'El interés por mora de la cuota #' . $cuota->numero_cuota . ' ha sido ajustado manualmente a ₡' . number_format($nuevoInteres, 2) . '.'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al ajustar manualmente el interés: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Envía alerta financiera automatizada por correo electrónico a un estudiante en mora (Fase 5).
+     */
+    public function enviarAlertaMoraEmail(Request $request)
+    {
+        try {
+            $id_estudiante = intval($request->input('id_estudiante', 0));
+            $estudiante = Usuario::findOrFail($id_estudiante);
+
+            if (empty($estudiante->email)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El estudiante no posee un correo electrónico registrado.'
+                ], 422);
+            }
+
+            InteresesService::recalcularInteresesEstudiante($id_estudiante);
+
+            $hoy = Carbon::today();
+            $cuotasVencidas = SeguimientoPago::with('boleta')
+                ->where('id_estudiante', $id_estudiante)
+                ->where('estado', 'pendiente')
+                ->whereDate('fecha_vencimiento', '<', $hoy)
+                ->orderBy('fecha_vencimiento', 'asc')
+                ->get();
+
+            if ($cuotasVencidas->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El estudiante no presenta cuotas vencidas en este momento.'
+                ], 422);
+            }
+
+            $institucion = config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'));
+            $telefonoSinpe = config('cliente.telefono_display', '+506 8777-7849');
+            $nombreEstudiante = trim($estudiante->nombre . ' ' . ($estudiante->apellidos ?? ''));
+            $configPagos = InteresesService::getConfiguracionPagos();
+            $tasaMora = $configPagos['tasa_interes_mora'] ?? 2.0;
+
+            $totalCapital = 0;
+            $totalMora = 0;
+            $filasHtml = '';
+
+            foreach ($cuotasVencidas as $c) {
+                $cap = floatval($c->monto_cuota);
+                $mora = floatval($c->interes_acumulado);
+                $sub = $cap + $mora;
+                $dias = Carbon::parse($c->fecha_vencimiento)->startOfDay()->diffInDays($hoy);
+                $numBoleta = $c->boleta->numero_boleta ?? ('#' . $c->id_boleta);
+                $vencFmt = Carbon::parse($c->fecha_vencimiento)->format('d/m/Y');
+
+                $totalCapital += $cap;
+                $totalMora += $mora;
+
+                $filasHtml .= "
+                <tr style='border-bottom: 1px solid #e2e8f0;'>
+                    <td style='padding: 8px; font-weight: bold;'>{$numBoleta} (Cuota #{$c->numero_cuota})</td>
+                    <td style='padding: 8px; text-align: center;'>{$vencFmt} ({$dias} d)</td>
+                    <td style='padding: 8px; text-align: right;'>₡" . number_format($cap, 2) . "</td>
+                    <td style='padding: 8px; text-align: right; color: #ea580c;'>+₡" . number_format($mora, 2) . "</td>
+                    <td style='padding: 8px; text-align: right; font-weight: bold; color: #dc2626;'>₡" . number_format($sub, 2) . "</td>
+                </tr>";
+            }
+
+            $granTotal = $totalCapital + $totalMora;
+            $asunto = "Alerta Financiera de Estado de Cuenta | {$institucion}";
+
+            $html = "
+            <div style='font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #ffffff;'>
+                <div style='background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%); color: #ffffff; padding: 24px; text-align: center;'>
+                    <h2 style='margin: 0; font-size: 20px;'>{$institucion}</h2>
+                    <p style='margin: 6px 0 0 0; font-size: 13px; opacity: 0.9;'>Departamento de Gestión Financiera — Recordatorio de Cuotas Vencidas</p>
+                </div>
+                <div style='padding: 24px; color: #334155; line-height: 1.6;'>
+                    <p>Estimado/a <strong>{$nombreEstudiante}</strong>,</p>
+                    <p>Le saludamos cordialmente. Por este medio le informamos que su estado de cuenta registra cuota(s) de colegiatura vencida(s) con recargo por mora acumulada ({$tasaMora}%):</p>
+                    <table style='width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0;'>
+                        <thead>
+                            <tr style='background: #f8fafc; border-bottom: 2px solid #cbd5e1; color: #475569;'>
+                                <th style='padding: 8px; text-align: left;'>Boleta / Cuota</th>
+                                <th style='padding: 8px; text-align: center;'>Vencimiento</th>
+                                <th style='padding: 8px; text-align: right;'>Capital</th>
+                                <th style='padding: 8px; text-align: right;'>Mora</th>
+                                <th style='padding: 8px; text-align: right;'>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>{$filasHtml}</tbody>
+                    </table>
+                    <div style='background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px; margin: 18px 0; text-align: right;'>
+                        <div style='font-size: 13px; color: #64748b;'>Capital pendiente: <strong>₡" . number_format($totalCapital, 2) . "</strong> | Mora acumulada: <strong style='color:#ea580c;'>₡" . number_format($totalMora, 2) . "</strong></div>
+                        <div style='font-size: 18px; font-weight: bold; color: #b91c1c; margin-top: 4px;'>Total a Cancelar: ₡" . number_format($granTotal, 2) . "</div>
+                    </div>
+                    <p style='font-size: 13px;'><strong>Medios de pago autorizados:</strong><br>• SINPE Móvil: {$telefonoSinpe}<br>• Transferencia bancaria institucional.</p>
+                    <p style='font-size: 12px; color: #64748b;'>Si ya realizó su pago recientemente, por favor omita este aviso o remita su comprobante al Departamento Financiero.</p>
+                </div>
+            </div>";
+
+            Mail::html($html, function ($message) use ($estudiante, $nombreEstudiante, $asunto) {
+                $message->to($estudiante->email, $nombreEstudiante)->subject($asunto);
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => "Alerta financiera enviada exitosamente por correo electrónico a {$estudiante->email}."
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar la alerta financiera por correo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

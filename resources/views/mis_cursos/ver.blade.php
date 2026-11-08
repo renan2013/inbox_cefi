@@ -366,6 +366,9 @@
                                 <button type="button" id="btnActaCalificaciones" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm fw-bold">
                                     <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generar Acta
                                 </button>
+                                <button type="button" id="btnRemitirActaEmail" class="btn btn-info btn-sm text-white rounded-pill px-3 shadow-sm fw-bold" onclick="remitirActaFinalEmail()">
+                                    <i class="bi bi-envelope-paper-fill me-1"></i> Remitir Acta Final
+                                </button>
                             </div>
                         </div>
                         
@@ -1106,6 +1109,47 @@
                 window.open(actaUrl, '_blank');
             }
         });
+
+        function remitirActaFinalEmail() {
+            Swal.fire({
+                title: '📩 Remitir Acta Final Oficial',
+                html: `
+                    <p class="small text-muted mb-3">Se generará el PDF oficial del <b>Acta Final de Calificaciones</b> y se enviará automáticamente por correo electrónico al Departamento de Registro Académico con copia a su correo.</p>
+                    <div class="text-start">
+                        <label class="form-label small fw-bold">Correo de Registro Académico:</label>
+                        <input type="email" id="swal_email_registro_acta" class="form-control form-control-sm" value="{{ config('cliente.email_registro', config('cliente.email_finanzas', 'registro@ceficr.com')) }}">
+                    </div>
+                `,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#0284c7',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="bi bi-send-check-fill me-1"></i> Generar y Remitir Acta',
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    const emailDestino = document.getElementById('swal_email_registro_acta').value.trim();
+                    return $.ajax({
+                        url: "{{ route('mis_cursos.remitir_acta_email', $curso->id_curso_activo) }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            email_destino: emailDestino
+                        }
+                    }).then(res => {
+                        if (!res.success) throw new Error(res.message);
+                        return res;
+                    }).catch(xhr => {
+                        const msg = xhr.responseJSON ? xhr.responseJSON.message : (xhr.message || 'Error al remitir el acta.');
+                        Swal.showValidationMessage(msg);
+                    });
+                }
+            }).then(result => {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire('¡Acta Remitida!', result.value.message, 'success');
+                }
+            });
+        }
 
         function sincronizarNotasMoodle(idCurso) {
             Swal.fire({

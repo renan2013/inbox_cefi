@@ -326,19 +326,42 @@
         </button>
 
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white p-0">
-                <ul class="nav nav-tabs border-0" id="silaboTab" role="tablist">
-                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#general" type="button">General</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#academic" type="button">Académico</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#content" type="button">Contenidos</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#eval" type="button">Evaluación</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cronograma_tab" type="button">Cronograma</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#rubricas_tab" type="button">Rúbricas</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#biblio_tab" type="button">Referencias.</button></li>
-                    <li class="nav-item ms-auto pe-3 pt-2">
-                        <a href="{{ route('mis_cursos.silabo_pdf', $curso->id_curso_activo) }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill fw-bold">
-                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generar Silabo PDF
-                        </a>
+            <div class="card-header bg-white p-0 border-bottom">
+                <ul class="nav nav-tabs border-0 flex-nowrap overflow-auto" id="silaboTab" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#ficha_tecnica" type="button">
+                            <i class="bi bi-table"></i> Ficha Técnica del Curso
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#general" type="button">
+                            <i class="bi bi-bullseye"></i> I-III. Descripción & Objetivos
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#content" type="button">
+                            <i class="bi bi-journal-bookmark-fill"></i> IV-VI. Contenidos & Metodología
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#eval" type="button">
+                            <i class="bi bi-check2-square"></i> VII. Evaluación
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#cronograma_tab" type="button">
+                            <i class="bi bi-calendar3"></i> VIII. Cronograma
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#rubricas_tab" type="button">
+                            <i class="bi bi-card-checklist"></i> IX. Rúbricas de Evaluación
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#biblio_tab" type="button">
+                            <i class="bi bi-book-half"></i> X-XI. Recursos & Bibliografía
+                        </button>
                     </li>
                 </ul>
             </div>
@@ -346,51 +369,159 @@
             <div class="card-body p-4">
                 <div class="tab-content">
                     
-                    <!-- Tab General -->
-                    <div class="tab-pane fade show active" id="general">
+                    <!-- PESTAÑA 1: FICHA TÉCNICA CONESUP -->
+                    <div class="tab-pane fade show active" id="ficha_tecnica">
+                        <div class="p-3 rounded-4 border bg-light bg-opacity-50 mb-4">
+                            <h6 class="fw-bold text-primary mb-3"><i class="bi bi-card-checklist me-1"></i> Datos Oficiales del Curso (Estándar CONESUP)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Programa / Carrera</label>
+                                    <input type="text" class="form-control bg-white" value="{{ $curso->planEstudio->programa->nombre_programa ?? 'Programa General' }}" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">Código</label>
+                                    <input type="text" class="form-control bg-white font-monospace fw-bold" value="{{ $curso->planEstudio->codigo }}" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Nombre de la Materia / Curso</label>
+                                    <input type="text" class="form-control bg-white fw-bold" value="{{ $curso->planEstudio->materia }}" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">Créditos</label>
+                                    <input type="number" name="creditos" class="form-control text-center fw-bold" value="{{ $curso->planEstudio->creditos ?? 4 }}">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold">Duración (Semanas)</label>
+                                    <div class="input-group">
+                                        <input type="number" name="duracion" class="form-control text-center fw-bold" value="{{ preg_replace('/[^0-9]/', '', $curso->planEstudio->duracion ?? '15') ?: 15 }}">
+                                        <span class="input-group-text">semanas</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small fw-bold">Modalidad</label>
+                                    <input type="text" name="modalidad" class="form-control" value="{{ $silabo->modalidad ?? $curso->planEstudio->modalidad ?? 'Virtual (aprendizaje electrónico)' }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Naturaleza</label>
+                                    <input type="text" name="naturaleza" class="form-control" value="{{ $curso->planEstudio->naturaleza ?? 'Teórico-práctica' }}">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Requisitos Previos</label>
+                                    <input type="text" name="requisitos" class="form-control" value="{{ $curso->planEstudio->requisitos ?? 'No tiene' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Correquisitos</label>
+                                    <input type="text" name="correquisitos" class="form-control" value="{{ $curso->planEstudio->correquisitos ?? 'No tiene' }}">
+                                </div>
+
+                                <div class="col-12 mt-3">
+                                    <label class="form-label fw-bold text-dark"><i class="bi bi-clock-history text-primary me-1"></i> Distribución de Horas por Semana</label>
+                                    <div class="p-3 bg-white rounded-3 border">
+                                        <div class="row g-2 align-items-center mb-3">
+                                            <div class="col-md-3 col-6">
+                                                <label class="form-label small mb-1 fw-bold text-secondary">Horas Teóricas</label>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" name="horas_teoricas" id="horas_teoricas" class="form-control text-center fw-bold" min="0" value="{{ $curso->planEstudio->horas_teoricas ?? 3 }}" oninput="calcularDistribucionHoras()">
+                                                    <span class="input-group-text">hrs</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-6">
+                                                <label class="form-label small mb-1 fw-bold text-secondary">Horas Prácticas</label>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" name="horas_practicas" id="horas_practicas" class="form-control text-center fw-bold" min="0" value="{{ $curso->planEstudio->horas_practicas ?? 1 }}" oninput="calcularDistribucionHoras()">
+                                                    <span class="input-group-text">hrs</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-6">
+                                                <label class="form-label small mb-1 fw-bold text-secondary">Estudio Independiente</label>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" name="horas_independientes" id="horas_independientes" class="form-control text-center fw-bold" min="0" value="{{ $curso->planEstudio->horas_independientes ?? 8 }}" oninput="calcularDistribucionHoras()">
+                                                    <span class="input-group-text">hrs</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-6">
+                                                <label class="form-label small mb-1 fw-bold text-primary">Total Horas / Sem.</label>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" name="horas_totales" id="horas_totales" class="form-control text-center fw-bold text-primary bg-light border-primary" value="{{ $curso->planEstudio->horas_totales ?? 12 }}" readonly>
+                                                    <span class="input-group-text bg-primary text-white">hrs</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <textarea name="distribucion_horas" id="distribucion_horas" class="form-control form-control-sm text-muted bg-light" rows="2" readonly>{{ $curso->planEstudio->distribucion_horas ?? 'Este curso comprende un total de 12 horas distribuidas en 3 horas teóricas, 1 hora práctica y 8 horas de estudio independiente.' }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PESTAÑA 2: I-III. DESCRIPCIÓN Y OBJETIVOS -->
+                    <div class="tab-pane fade" id="general">
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Descripción del Curso</label>
-                            <textarea name="descripcion" id="descripcion" class="form-control editor-rico-normal">{{ $silabo->descripcion ?? '' }}</textarea>
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">I</span> Descripción del Curso</label>
+                            <textarea name="descripcion" id="descripcion" class="form-control editor-rico-normal">{{ $silabo->descripcion ?? $curso->planEstudio->descripcion_curso ?? '' }}</textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">II</span> Objetivo General</label>
+                            <textarea name="objetivo_general" id="objetivo_general" class="form-control editor-rico-normal">{{ $silabo->objetivo_general ?? $curso->planEstudio->objetivo_general ?? '' }}</textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">III</span> Objetivos Específicos</label>
+                            <textarea name="objetivos_especificos" id="objetivos_especificos" class="form-control editor-rico-normal">{{ $silabo->objetivos_especificos ?? $curso->planEstudio->objetivos_especificos ?? '' }}</textarea>
                         </div>
                     </div>
                     
-                    <!-- Tab Académico -->
-                    <div class="tab-pane fade" id="academic">
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Objetivo General</label>
-                            <textarea name="objetivo_general" id="objetivo_general" class="form-control editor-rico-normal">{{ $silabo->objetivo_general ?? $curso->planEstudio->objetivo_general }}</textarea>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Objetivos Específicos</label>
-                            <textarea name="objetivos_especificos" id="objetivos_especificos" class="form-control editor-rico-normal">{{ $silabo->objetivos_especificos ?? $curso->planEstudio->objetivos_especificos }}</textarea>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Metodología</label>
-                            <textarea name="metodologia" id="metodologia" class="form-control editor-rico-normal">{{ $silabo->metodologia ?? '' }}</textarea>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Estrategias de Aprendizaje</label>
-                            <textarea name="estrategias_aprendizaje" id="estrategias_aprendizaje" class="form-control editor-rico-normal">{{ $silabo->estrategias_aprendizaje ?? '' }}</textarea>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Recursos de Aprendizaje</label>
-                            <textarea name="recursos_aprendizaje" id="recursos_aprendizaje" class="form-control editor-rico-normal">{{ $silabo->recursos_aprendizaje ?? '' }}</textarea>
-                        </div>
-                    </div>
-                    
-                    <!-- Tab Contenidos -->
+                    <!-- PESTAÑA 3: IV-VI. CONTENIDOS Y METODOLOGÍA -->
                     <div class="tab-pane fade" id="content">
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Contenidos Temáticos</label>
-                            <textarea name="contenidos" id="contenidos" class="form-control editor-rico-normal">{{ $silabo->contenidos ?? '' }}</textarea>
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">IV</span> Contenidos Temáticos</label>
+                            <textarea name="contenidos" id="contenidos" class="form-control editor-rico-normal">{{ $silabo->contenidos ?? $curso->planEstudio->contenidos_tematicos ?? '' }}</textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">V</span> Metodología de Enseñanza</label>
+                            <textarea name="metodologia" id="metodologia" class="form-control editor-rico-normal">{{ $silabo->metodologia ?? $curso->planEstudio->metodologia_ensenanza ?? '' }}</textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">VI</span> Estrategias de Aprendizaje</label>
+                            <textarea name="estrategias_aprendizaje" id="estrategias_aprendizaje" class="form-control editor-rico-normal">{{ $silabo->estrategias_aprendizaje ?? $curso->planEstudio->estrategias_aprendizaje ?? '' }}</textarea>
                         </div>
                     </div>
                     
-                    <!-- Tab Cronograma -->
+                    <!-- PESTAÑA 5: VIII. CRONOGRAMA -->
                     <div class="tab-pane fade" id="cronograma_tab">
-                        <div class="mb-4">
-                            <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-calendar3 me-2"></i>Cronograma de Actividades</h5>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-calendar3 me-2"></i>Cronograma Semanal de Actividades</h5>
+                            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="agregarFilaCronograma()">
+                                <i class="bi bi-plus-circle me-1"></i> Añadir Semana
+                            </button>
                         </div>
+
+                        <!-- Barra de Progreso de Actividades -->
+                        <div class="card mb-4 border-0 shadow-sm" style="background-color: rgba(248, 250, 252, 0.8);">
+                            <div class="card-body p-3">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-calendar-check-fill text-primary fs-5"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark" id="progresoActividadesTitulo">
+                                                Progreso de Actividades del Cronograma
+                                            </h6>
+                                            <small class="text-muted" id="progresoActividadesSubtitulo">Calculando actividades implementadas...</small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span id="badgeProgresoActividades" class="badge bg-primary px-3 py-2 rounded-pill fw-bold" style="font-size: 0.85rem;">
+                                            0 / 0 Actividades (0%)
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="progress" style="height: 10px; border-radius: 6px; background-color: #e9ecef;" title="Progreso de actividades programadas">
+                                    <div id="barraProgresoActividades" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle" id="tablaCronograma">
                                 <thead class="text-center">
@@ -426,16 +557,16 @@
                                             </td>
                                             <td class="text-center">
                                                 <input type="hidden" name="c_moodle[]" class="moodle-data-input" value="{{ $cro_array['actividades_moodle'] }}">
-                                                <div class="moodle-summary mb-1"></div>
                                                 <button type="button" class="btn btn-moodle w-100" onclick="abrirConfigMoodle(this)"><i class="bi bi-gear-fill me-1"></i> Config.</button>
+                                                <div class="moodle-summary mt-2 d-flex flex-wrap justify-content-center gap-1"></div>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center td-modalidad {{ ($cro_array['modalidad_trabajo'] ?? '') == 'Sincrónico' ? 'td-sincronico' : 'td-asincronico' }}">
                                                 <select name="c_modalidad[]" class="form-select modalidad-select {{ ($cro_array['modalidad_trabajo'] ?? '') == 'Sincrónico' ? 'select-sincronico' : 'select-asincronico' }}" onchange="actualizarEstiloModalidad(this)">
                                                     <option value="Sincrónico" {{ ($cro_array['modalidad_trabajo'] ?? '') == 'Sincrónico' ? 'selected' : '' }}>Sincrónico</option>
                                                     <option value="Asincrónico" {{ (($cro_array['modalidad_trabajo'] ?? '') == 'Asincrónico' || empty($cro_array['modalidad_trabajo'])) ? 'selected' : '' }}>Asincrónico</option>
                                                 </select>
                                                 <div class="mt-1 zoom-logo-container {{ ($cro_array['modalidad_trabajo'] ?? '') == 'Sincrónico' ? '' : 'd-none' }}">
-                                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Zoom_Video_Communications_Logo.svg/1200px-Zoom_Video_Communications_Logo.svg.png" class="zoom-logo-mini" alt="Zoom">
+                                                    <img src="{{ asset('imgs/zoom_logo.png') }}" class="zoom-logo-mini" alt="Zoom">
                                                 </div>
                                             </td>
                                             <td class="text-center"><button type="button" class="btn btn-link text-danger p-0" onclick="eliminarFilaCronograma(this)"><i class="bi bi-trash fs-5"></i></button></td>
@@ -556,9 +687,16 @@
                         <button type="button" class="btn btn-info text-white rounded-pill px-4 ms-2 mt-3 shadow-sm fw-bold" onclick="abrirGeneradorRubricaIA()"><i class="bi bi-cpu-fill me-2"></i> Crear con IA (Gemini)</button>
                     </div>
                     
-                    <!-- Tab Referencias -->
+                    <!-- Tab X-XI. Recursos & Bibliografía -->
                     <div class="tab-pane fade" id="biblio_tab">
-                        <textarea name="bibliografia" id="bibliografia" class="form-control editor-rico-normal">{{ $silabo->bibliografia ?? '' }}</textarea>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">X</span> Recursos Didácticos y de Aprendizaje</label>
+                            <textarea name="recursos_aprendizaje" id="recursos_aprendizaje" class="form-control editor-rico-normal">{{ $silabo->recursos_aprendizaje ?? $curso->planEstudio->recursos_didacticos ?? '' }}</textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">XI</span> Bibliografía Oficial</label>
+                            <textarea name="bibliografia" id="bibliografia" class="form-control editor-rico-normal">{{ $silabo->bibliografia ?? $curso->planEstudio->bibliografia ?? '' }}</textarea>
+                        </div>
                     </div>
 
                 </div>
@@ -619,10 +757,29 @@
 const IS_ADMIN = {{ Auth::user()->id_rol == 1 ? 'true' : 'false' }};
 let filaActualMoodle = null;
 
+function calcularDistribucionHoras() {
+    const teoEl = document.getElementById('horas_teoricas');
+    const pracEl = document.getElementById('horas_practicas');
+    const indEl = document.getElementById('horas_independientes');
+    if (!teoEl || !pracEl || !indEl) return;
+    const teo = parseInt(teoEl.value) || 0;
+    const prac = parseInt(pracEl.value) || 0;
+    const ind = parseInt(indEl.value) || 0;
+    const tot = teo + prac + ind;
+    const totEl = document.getElementById('horas_totales');
+    if (totEl) totEl.value = tot;
+    const textoPrac = (prac === 1) ? "1 hora práctica" : `${prac} horas prácticas`;
+    const textoTeo = (teo === 1) ? "1 hora teórica" : `${teo} horas teóricas`;
+    const textoIndep = (ind === 1) ? "1 hora de estudio independiente" : `${ind} horas de estudio independiente`;
+    const distEl = document.getElementById('distribucion_horas');
+    if (distEl) distEl.value = `Este curso comprende un total de ${tot} horas distribuidas en ${textoTeo}, ${textoPrac} y ${textoIndep}.`;
+}
+
 function sincronizarSilabo() {
     actualizarOpcionesNombresEnRubricas();
     actualizarSelectsRubricas();
     calcularTotal();
+    actualizarContadorReversoCronograma();
 }
 
 function actualizarOpcionesNombresEnRubricas() {
@@ -1040,14 +1197,22 @@ function agregarFilaCronograma() {
             </div>
             <textarea name="c_tareas[]" class="d-none"></textarea>
         </td>
-        <td class="text-center"><input type="hidden" name="c_moodle[]" class="moodle-data-input" value=""><div class="moodle-summary mb-1"></div><button type="button" class="btn btn-moodle w-100" onclick="abrirConfigMoodle(this)"><i class="bi bi-gear-fill me-1"></i> Config.</button></td>
-        <td><select name="c_modalidad[]" class="form-select modalidad-select select-asincronico" onchange="actualizarEstiloModalidad(this)"><option value="Sincrónico">Sincrónico</option><option value="Asincrónico" selected>Asincrónico</option></select><div class="mt-1 zoom-logo-container d-none"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Zoom_Video_Communications_Logo.svg/1200px-Zoom_Video_Communications_Logo.svg.png" class="zoom-logo-mini" alt="Zoom"></div></td>
+        <td class="text-center">
+            <input type="hidden" name="c_moodle[]" class="moodle-data-input" value="">
+            <button type="button" class="btn btn-moodle w-100" onclick="abrirConfigMoodle(this)"><i class="bi bi-gear-fill me-1"></i> Config.</button>
+            <div class="moodle-summary mt-2 d-flex flex-wrap justify-content-center gap-1"></div>
+        </td>
+        <td class="text-center td-modalidad td-asincronico">
+            <select name="c_modalidad[]" class="form-select modalidad-select select-asincronico" onchange="actualizarEstiloModalidad(this)"><option value="Sincrónico">Sincrónico</option><option value="Asincrónico" selected>Asincrónico</option></select>
+            <div class="mt-1 zoom-logo-container d-none"><img src="{{ asset('imgs/zoom_logo.png') }}" class="zoom-logo-mini" alt="Zoom"></div>
+        </td>
         <td class="text-center"><button type="button" class="btn btn-link text-danger p-0" onclick="eliminarFilaCronograma(this)"><i class="bi bi-trash fs-5"></i></button></td>
     `;
     tinymce.init({
         license_key: 'gpl', selector: `#${idAct}`, min_height: 150, menubar: false, language: 'es',
         plugins: 'lists link code autoresize', toolbar: 'bold italic | bullist numlist | code | removeformat', branding: false, promotion: false, autoresize_bottom_margin: 10
     });
+    actualizarContadorReversoCronograma();
 }
 
 function eliminarFilaCronograma(btn) {
@@ -1057,6 +1222,7 @@ function eliminarFilaCronograma(btn) {
     document.querySelectorAll('#tablaCronograma tbody tr').forEach((row, index) => {
         row.querySelector('.crono-semana-num').innerHTML = `${index + 1}<input type="hidden" name="c_semana[]" value="${index + 1}">`;
     });
+    actualizarContadorReversoCronograma();
 }
 
 function actualizarEstiloModalidad(select) {
@@ -1067,101 +1233,320 @@ function actualizarEstiloModalidad(select) {
     container.classList.toggle('d-none', select.value !== 'Sincrónico');
 }
 
-let currentMoodleInput = null;
-function abrirConfigMoodle(btn) {
-    filaActualMoodle = btn.closest('tr');
-    currentMoodleInput = filaActualMoodle.querySelector('.moodle-data-input');
-    
-    const contenedor = document.getElementById('contenedorActividadesMoodle');
-    contenedor.innerHTML = "";
-    
-    // Simplificado
-    const val = currentMoodleInput.value || '[]';
-    let acts = [];
-    try { acts = JSON.parse(val); } catch(e) {}
-    
-    if (acts.length === 0) {
-        acts.push({ tipo: 'assign', nombre: '', intro: '' });
-    }
-    
-    acts.forEach(act => {
-        const div = document.createElement('div');
-        div.className = "mb-3 p-3 bg-light rounded-3 text-dark";
-        div.innerHTML = `
-            <div class="mb-2">
-                <label class="form-label small fw-bold text-dark">Rubro / Tipo de Actividad</label>
-                <select class="form-select form-select-sm val-tipo text-dark bg-white">
-                    <option value="assign" ${act.tipo === 'assign' ? 'selected' : ''}>📄 Tarea</option>
-                    <option value="quiz" ${act.tipo === 'quiz' ? 'selected' : ''}>📝 Quiz / Examen</option>
-                    <option value="forum" ${act.tipo === 'forum' ? 'selected' : ''}>💬 Foro</option>
-                </select>
-            </div>
-            <div>
-                <label class="form-label small fw-bold text-dark">Instrucciones / Descripción</label>
-                <textarea class="form-control form-control-sm val-intro text-dark bg-white" rows="3" placeholder="Instrucciones para el estudiante...">${act.intro || ''}</textarea>
-            </div>
-        `;
-        contenedor.appendChild(div);
-    });
-    
-    new bootstrap.Modal(document.getElementById('modalMoodle')).show();
-}
+function obtenerEstadisticasUsoMoodle(excluirFilaActual = false) {
+    const rubrosSet = new Set();
+    const rubrosCantidades = {};
+    const rubroMoodleTypes = {};
 
-function guardarConfigMoodle() {
-    const acts = [];
-    document.querySelectorAll('#contenedorActividadesMoodle > div').forEach(div => {
-        const t = div.querySelector('.val-tipo').value;
-        const labelTipo = div.querySelector('.val-tipo option:checked')?.textContent.replace(/^[^\w\s]+\s*/, '').trim() || t;
-        const d = div.querySelector('.val-intro').value.trim();
-        if (t) {
-            acts.push({ tipo: t, nombre: labelTipo, intro: d });
+    document.querySelectorAll('#tablaEvaluacion tbody tr').forEach(tr => {
+        const nom = tr.querySelector('input[name="rubros[]"]')?.value.trim();
+        const cant = parseInt(tr.querySelector('input[name="cantidades_eval[]"]')?.value) || 0;
+        const mType = tr.querySelector('select[name="tipos_moodle_eval[]"]')?.value || '';
+        if (nom) {
+            rubrosSet.add(nom);
+            rubrosCantidades[nom] = (rubrosCantidades[nom] || 0) + cant;
+            rubroMoodleTypes[nom] = mType;
         }
     });
 
-    currentMoodleInput.value = JSON.stringify(acts);
-    
-    // Update summary badge
-    const summary = filaActualMoodle.querySelector('.moodle-summary');
-    summary.innerHTML = "";
-    acts.forEach(a => {
-        const span = document.createElement('span');
-        span.className = `moodle-activity-badge ${a.tipo === 'forum' ? 'badge-forum' : 'badge-assign'}`;
-        span.innerHTML = `<i class="bi bi-${a.tipo === 'forum' ? 'chat' : 'file-earmark-arrow-up'}"></i>`;
-        summary.appendChild(span);
+    const usoActual = {};
+    document.querySelectorAll('#tablaCronograma tbody tr').forEach(tr => {
+        if (excluirFilaActual && filaActualMoodle && tr === filaActualMoodle) return;
+        const input = tr.querySelector('.moodle-data-input');
+        if (input && input.value) {
+            try {
+                JSON.parse(input.value).forEach(a => {
+                    const rubroKey = a.tipo;
+                    if (rubrosSet.has(rubroKey)) {
+                        usoActual[rubroKey] = (usoActual[rubroKey] || 0) + 1;
+                    }
+                });
+            } catch(e) {}
+        }
     });
 
-    // Generate text in display area
-    let htmlText = "";
-    acts.forEach((a, i) => {
-        const color = a.tipo === 'forum' ? '#007bff' : '#dc3545';
-        htmlText += `<div style="margin-bottom: 12px; border-left: 4px solid ${color}; padding-left: 8px;">
-            <span class="badge bg-warning text-dark mb-1">${a.tipo.toUpperCase()}</span>
-            <p class="mb-0 fw-bold text-dark">${a.nombre}</p>
-            <p class="mb-0 small text-muted">${a.intro}</p>
-        </div>`;
-    });
-    
-    filaActualMoodle.querySelector('.tarea-display-only').innerHTML = htmlText || '<span class="text-muted small italic">Sin actividades.</span>';
-    filaActualMoodle.querySelector('textarea[name="c_tareas[]"]').value = htmlText;
+    return { rubrosSet, rubrosCantidades, rubroMoodleTypes, usoActual };
+}
 
-    bootstrap.Modal.getInstance(document.getElementById('modalMoodle')).hide();
+function actualizarContadorReversoCronograma() {
+    const subtituloEl = document.getElementById('progresoActividadesSubtitulo');
+    const badgeEl = document.getElementById('badgeProgresoActividades');
+    const progressBar = document.getElementById('barraProgresoActividades');
+    if (!badgeEl || !progressBar) return;
+
+    const stats = obtenerEstadisticasUsoMoodle(false);
+    let totalPlanificadas = 0;
+    stats.rubrosSet.forEach(r => {
+        totalPlanificadas += (stats.rubrosCantidades[r] || 0);
+    });
+
+    let totalAsignadas = 0;
+    Object.keys(stats.usoActual).forEach(r => {
+        totalAsignadas += (stats.usoActual[r] || 0);
+    });
+
+    if (totalPlanificadas === 0) {
+        if (subtituloEl) subtituloEl.textContent = "Defina los rubros y cantidades en la pestaña de Evaluación.";
+        badgeEl.className = "badge bg-secondary px-3 py-2 rounded-pill fw-bold";
+        badgeEl.textContent = "0 Actividades definidas";
+        progressBar.style.width = "0%";
+        progressBar.className = "progress-bar bg-secondary";
+        return;
+    }
+
+    const pct = Math.min(100, Math.round((totalAsignadas / totalPlanificadas) * 100));
+    const faltantes = Math.max(0, totalPlanificadas - totalAsignadas);
+
+    progressBar.style.width = pct + "%";
+    progressBar.setAttribute('aria-valuenow', pct);
+
+    if (totalAsignadas === totalPlanificadas) {
+        badgeEl.className = "badge bg-success px-3 py-2 rounded-pill fw-bold shadow-sm";
+        badgeEl.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${totalAsignadas} de ${totalPlanificadas} Actividades (100% Completado)`;
+        if (subtituloEl) subtituloEl.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check2-all me-1"></i> Todas las actividades han sido programadas correctamente en el cronograma.</span>`;
+        progressBar.className = "progress-bar bg-success";
+    } else if (totalAsignadas > totalPlanificadas) {
+        const exceso = totalAsignadas - totalPlanificadas;
+        badgeEl.className = "badge bg-danger px-3 py-2 rounded-pill fw-bold shadow-sm";
+        badgeEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${totalAsignadas} de ${totalPlanificadas} Actividades (Exceso de ${exceso})`;
+        if (subtituloEl) subtituloEl.innerHTML = `<span class="text-danger fw-bold"><i class="bi bi-exclamation-circle me-1"></i> Hay ${exceso} actividad(es) de más en el cronograma respecto a los rubros declarados.</span>`;
+        progressBar.className = "progress-bar bg-danger";
+    } else {
+        badgeEl.className = "badge bg-primary px-3 py-2 rounded-pill fw-bold shadow-sm";
+        badgeEl.innerHTML = `<i class="bi bi-hourglass-split me-1"></i> ${totalAsignadas} de ${totalPlanificadas} (${pct}%) — Faltan ${faltantes}`;
+        if (subtituloEl) subtituloEl.textContent = `Quedan ${faltantes} actividades pendientes por asignar en las semanas del curso.`;
+        progressBar.className = "progress-bar bg-primary progress-bar-striped progress-bar-animated";
+    }
+}
+
+function abrirConfigMoodle(btn) {
+    filaActualMoodle = btn.closest('tr');
+    const cont = document.getElementById('contenedorActividadesMoodle');
+    cont.innerHTML = "";
+
+    const input = filaActualMoodle.querySelector('.moodle-data-input');
+    let acts = [];
+    if (input && input.value) {
+        try { acts = JSON.parse(input.value); } catch(e) {}
+    }
+
+    if (acts.length === 0) {
+        cont.innerHTML = '<p class="text-muted text-center py-4">No hay actividades Moodle en esta semana. Añada una usando los botones inferiores.</p>';
+    } else {
+        acts.forEach((act, idx) => {
+            crearTarjetaActividadMoodle(act, idx);
+        });
+    }
+
+    actualizarBotonesFooterMoodle();
+    new bootstrap.Modal(document.getElementById('modalMoodle')).show();
+}
+
+function actualizarBotonesFooterMoodle() {
+    const footer = document.querySelector('#modalMoodle .modal-footer');
+    if (!footer) return;
+    footer.innerHTML = "";
+
+    const stats = obtenerEstadisticasUsoMoodle(true);
+    const rubros = Array.from(stats.rubrosSet);
+
+    if (rubros.length === 0) {
+        footer.innerHTML = `<div class="alert alert-warning w-100 mb-0 py-2 small shadow-sm"><i class="bi bi-exclamation-triangle-fill me-2"></i> Debe definir rubros en la pestaña de <b>Evaluación</b> para añadir actividades.</div>`;
+    } else {
+        rubros.forEach(r => {
+            const cantMax = stats.rubrosCantidades[r] || 0;
+            const modalActs = document.querySelectorAll('#contenedorActividadesMoodle .moodle-item');
+            let cantEnModal = 0;
+            modalActs.forEach(ma => {
+                const selTipo = ma.querySelector('.moodle-tipo');
+                if (selTipo && selTipo.value === r) cantEnModal++;
+            });
+
+            const cantEnUso = (stats.usoActual[r] || 0) + cantEnModal;
+            const faltan = cantMax - cantEnUso;
+            const mType = stats.rubroMoodleTypes[r] || 'assign';
+
+            let btnClass = "btn-outline-danger";
+            let icon = "bi-file-earmark-text";
+            if (mType === 'forum') { btnClass = "btn-outline-primary"; icon = "bi-chat-left-text"; }
+            else if (mType === 'quiz') { btnClass = "btn-outline-warning text-dark"; icon = "bi-question-circle"; }
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `btn btn-sm ${btnClass} rounded-pill px-3 shadow-sm ${faltan <= 0 ? 'opacity-50' : ''}`;
+            btn.disabled = (faltan <= 0);
+            btn.innerHTML = `<i class="bi ${icon} me-1"></i> + ${r} <span class="badge ${faltan <= 0 ? 'bg-secondary' : 'bg-dark'} ms-1">${faltan > 0 ? faltan : 0}</span>`;
+            btn.onclick = () => {
+                if (faltan > 0) {
+                    agregarActividadMoodle(mType, r);
+                }
+            };
+            footer.appendChild(btn);
+        });
+    }
+
+    document.querySelectorAll('#contenedorActividadesMoodle .moodle-tipo').forEach(sel => {
+        const valActual = sel.value;
+        Array.from(sel.options).forEach(opt => {
+            if (!opt.value) return;
+            const r = opt.value;
+            const cantMax = stats.rubrosCantidades[r] || 0;
+            let cantEnModal = 0;
+            document.querySelectorAll('#contenedorActividadesMoodle .moodle-tipo').forEach(s2 => {
+                if (s2.value === r) cantEnModal++;
+            });
+            const totalUsado = (stats.usoActual[r] || 0) + cantEnModal;
+            opt.disabled = (r !== valActual && totalUsado >= cantMax);
+        });
+    });
+
+    const btnGuardar = document.createElement('button');
+    btnGuardar.type = 'button';
+    btnGuardar.className = 'btn btn-primary px-4 ms-auto rounded-pill';
+    btnGuardar.textContent = 'Guardar y Sincronizar';
+    btnGuardar.onclick = guardarConfigMoodle;
+    footer.appendChild(btnGuardar);
+}
+
+function crearTarjetaActividadMoodle(act, idx) {
+    const cont = document.getElementById('contenedorActividadesMoodle');
+    const div = document.createElement('div');
+    div.className = "card mb-3 moodle-item border-0 shadow-sm rounded-3 overflow-hidden";
+    div.dataset.index = idx;
+
+    const stats = obtenerEstadisticasUsoMoodle(true);
+    let optionsRubros = `<option value="">-- Seleccionar Rubro --</option>`;
+    stats.rubrosSet.forEach(r => {
+        optionsRubros += `<option value="${r}" ${act.tipo === r ? 'selected' : ''}>${r}</option>`;
+    });
+
+    div.innerHTML = `
+        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 px-3">
+            <span class="fw-bold small text-primary"><i class="bi bi-mortarboard-fill me-1"></i> Actividad Moodle</span>
+            <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.moodle-item').remove(); actualizarBotonesFooterMoodle();"><i class="bi bi-trash fs-6"></i></button>
+        </div>
+        <div class="card-body p-3">
+            <div class="mb-2">
+                <label class="form-label small mb-1 fw-bold">Rubro / Tipo:</label>
+                <select class="form-select form-select-sm moodle-tipo" onchange="actualizarBotonesFooterMoodle()">${optionsRubros}</select>
+            </div>
+            <div class="mb-0">
+                <label class="form-label small mb-1 fw-bold">Instrucciones / Descripción:</label>
+                <textarea class="form-control form-control-sm moodle-intro" rows="2" placeholder="Instrucciones para el estudiante...">${act.intro || ''}</textarea>
+            </div>
+        </div>
+    `;
+    cont.appendChild(div);
+}
+
+function agregarActividadMoodle(tipo, rubroDefault = '') {
+    const rubro = rubroDefault || tipo;
+    const stats = obtenerEstadisticasUsoMoodle(true);
+    if (rubro && stats.rubrosSet.has(rubro)) {
+        const cantMax = stats.rubrosCantidades[rubro] || 0;
+        let cantEnModal = 0;
+        document.querySelectorAll('#contenedorActividadesMoodle .moodle-tipo').forEach(sel => {
+            if (sel.value === rubro) cantEnModal++;
+        });
+        const usado = (stats.usoActual[rubro] || 0) + cantEnModal;
+        if (usado >= cantMax) return;
+    }
+
+    const cont = document.getElementById('contenedorActividadesMoodle');
+    if (cont.querySelector('p.text-muted')) cont.innerHTML = "";
+    crearTarjetaActividadMoodle({
+        tipo: rubro,
+        nombre: rubro,
+        intro: ''
+    }, cont.querySelectorAll('.moodle-item').length);
+    actualizarBotonesFooterMoodle();
+}
+
+function resolverEstiloActividadMoodle(act) {
+    const stats = obtenerEstadisticasUsoMoodle(false);
+    const rawTipo = String(act?.tipo || '').trim();
+    const rawNom = String(act?.nombre || '').trim();
+    const mType = (stats.rubroMoodleTypes && stats.rubroMoodleTypes[rawTipo]) ? stats.rubroMoodleTypes[rawTipo] : '';
+    const combined = (mType + ' ' + rawTipo + ' ' + rawNom).toLowerCase();
+
+    if (mType === 'quiz' || /quiz|prueba|examen|cuestionario|corto|autoevaluaci/.test(combined)) {
+        return { tipo: 'quiz', colorClass: 'badge-quiz', bgColor: '#ff9800', textColor: '#212529', icon: 'question-circle-fill', borderColor: '#ff9800' };
+    }
+    if (mType === 'forum' || /foro|forum|debate|discusi/.test(combined)) {
+        return { tipo: 'forum', colorClass: 'badge-forum', bgColor: '#007bff', textColor: '#ffffff', icon: 'chat-dots-fill', borderColor: '#007bff' };
+    }
+    return { tipo: 'assign', colorClass: 'badge-assign', bgColor: '#dc3545', textColor: '#ffffff', icon: 'file-earmark-arrow-up-fill', borderColor: '#dc3545' };
+}
+
+function actualizarResumenFila(fila, acts) {
+    const summary = fila.querySelector('.moodle-summary');
+    const tareaDisplay = fila.querySelector('.tarea-display-only');
+    const tareaInput = fila.querySelector('textarea[name="c_tareas[]"]');
+    if (summary) summary.innerHTML = "";
+
+    if (acts.length > 0) {
+        acts.forEach(a => {
+            const info = resolverEstiloActividadMoodle(a);
+            const span = document.createElement('span');
+            span.className = `moodle-activity-badge ${info.colorClass} shadow-sm`;
+            span.title = a.tipo || a.nombre || 'Actividad Moodle';
+            span.style.cssText = `border-radius: 6px; padding: 4px 8px; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; background-color: ${info.bgColor}; color: ${info.textColor};`;
+            span.innerHTML = `<i class="bi bi-${info.icon}"></i>`;
+            if (summary) summary.appendChild(span);
+        });
+
+        if (tareaDisplay) {
+            let html = "";
+            acts.forEach((a, idx) => {
+                const info = resolverEstiloActividadMoodle(a);
+                const introHtml = a.intro ? a.intro.replace(/\r\n|\r|\n/g, '<br>') : '';
+                const labelDisplay = (a.tipo || a.nombre || 'TAREA').toUpperCase() + ' ' + (idx + 1);
+                html += `<div style="margin-bottom: 15px; border-left: 4px solid ${info.borderColor}; padding-left: 12px;">
+                    <p style="margin: 0; font-weight: 800; font-size: 0.75rem; text-transform: uppercase;"><span style="background-color: #ffff00; color: #000000; padding: 1px 4px; border-radius: 3px;">${labelDisplay}</span></p>
+                    ${introHtml ? `<p style="margin: 5px 0 0 0; font-weight: 400; font-size: 0.9rem; color: #000000; line-height: 1.4;">${introHtml}</p>` : ''}
+                </div>`;
+            });
+            tareaDisplay.innerHTML = html;
+            if (tareaInput) tareaInput.value = html;
+        }
+    } else {
+        if (tareaDisplay) {
+            tareaDisplay.innerHTML = '<span class="text-muted small italic"><i class="bi bi-info-circle me-1"></i> Sin actividades configuradas. Utilice el botón "Config."</span>';
+        }
+        if (tareaInput) tareaInput.value = '';
+    }
+}
+
+function guardarConfigMoodle() {
+    if (!filaActualMoodle) return;
+    const items = document.querySelectorAll('#contenedorActividadesMoodle .moodle-item');
+    const acts = [];
+
+    items.forEach(it => {
+        const t = it.querySelector('.moodle-tipo')?.value.trim();
+        const i = it.querySelector('.moodle-intro')?.value.trim();
+        if (t) acts.push({ tipo: t, nombre: t, intro: i });
+    });
+
+    const input = filaActualMoodle.querySelector('.moodle-data-input');
+    if (input) input.value = JSON.stringify(acts);
+
+    actualizarResumenFila(filaActualMoodle, acts);
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalMoodle'));
+    if (modal) modal.hide();
+
+    actualizarContadorReversoCronograma();
 }
 
 function inicializarResumenesMoodle() {
     document.querySelectorAll('#tablaCronograma tbody tr').forEach(tr => {
         const inp = tr.querySelector('.moodle-data-input');
         if (inp && inp.value) {
-            let acts = [];
-            try { acts = JSON.parse(inp.value); } catch(e) {}
-            const summary = tr.querySelector('.moodle-summary');
-            if (summary) {
-                acts.forEach(a => {
-                    const span = document.createElement('span');
-                    span.className = `moodle-activity-badge ${a.tipo === 'forum' ? 'badge-forum' : 'badge-assign'}`;
-                    span.innerHTML = `<i class="bi bi-${a.tipo === 'forum' ? 'chat' : 'file-earmark-arrow-up'}"></i>`;
-                    summary.appendChild(span);
-                });
-            }
+            try {
+                const acts = JSON.parse(inp.value);
+                if (Array.isArray(acts)) actualizarResumenFila(tr, acts);
+            } catch(e) {}
         }
     });
 }

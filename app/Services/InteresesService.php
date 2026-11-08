@@ -66,6 +66,11 @@ class InteresesService
             $id_boleta = $cuota->id_boleta;
             $boletas_a_actualizar[$id_boleta] = true;
 
+            // Si ya fue recalculada o ajustada manualmente en el día de hoy, respetar el valor actual
+            if (!empty($cuota->ultimo_recalculo_interes) && Carbon::parse($cuota->ultimo_recalculo_interes)->isToday()) {
+                continue;
+            }
+
             $hoy = Carbon::today();
             $vencimiento = Carbon::parse($cuota->fecha_vencimiento)->startOfDay();
 

@@ -446,6 +446,7 @@
                                     <th>Total Letra</th>
                                     <th>Vencimiento</th>
                                     <th>Estado</th>
+                                    <th class="text-end">Ajuste Manual</th>
                                 </tr>
                             </thead>
                             <tbody id="tabla_cuotas"></tbody>
@@ -709,13 +710,18 @@
                 // 2. Render Cuotas
                 let tCuotas = $('#tabla_cuotas').empty();
                 if (data.letras.length === 0) {
-                    tCuotas.append('<tr><td colspan="7" class="text-center py-4 text-white-50">No hay cuotas programadas.</td></tr>');
+                    tCuotas.append('<tr><td colspan="8" class="text-center py-4 text-white-50">No hay cuotas programadas.</td></tr>');
                 } else {
                     data.letras.forEach(function(l) {
                         let badge = l.estado === 'pendiente' ? 'status-pendiente' : 'status-pagada';
                         let capital = parseFloat(l.monto_cuota);
                         let mora = parseFloat(l.interes_acumulado);
                         let total = capital + mora;
+                        let btnAjuste = l.estado === 'pendiente'
+                            ? `<button type="button" class="btn btn-outline-warning btn-action-sm" onclick="abrirModalAjustarMora(${l.id}, ${l.numero_cuota}, '${l.boleta_numero}', ${capital}, ${mora})" title="Ajustar interés por mora manualmente">
+                                  <i class="bi bi-sliders me-1"></i>Ajustar Mora
+                               </button>`
+                            : '<span class="text-white-50 small">—</span>';
                         tCuotas.append(`
                             <tr>
                                 <td><strong>Cuota #${l.numero_cuota}</strong></td>
@@ -725,6 +731,7 @@
                                 <td class="fw-bold text-white">${formatCurrency(total)}</td>
                                 <td>${l.fecha_vencimiento}</td>
                                 <td><span class="status-badge ${badge}">${l.estado}</span></td>
+                                <td class="text-end">${btnAjuste}</td>
                             </tr>
                         `);
                     });
@@ -949,6 +956,62 @@
             } else {
                 window.location.href = '/boletas/generar';
             }
+        }
+
+        function abrirModalAjustarMora(cuotaId, numCuota, boletaNumero, capital, moraActual) {
+            Swal.fire({
+                title: `<span class="text-warning"><i class="bi bi-sliders me-2"></i>Ajuste Manual de Interés</span>`,
+                html: `
+                    <div class="text-start p-2" style="font-size: 0.9rem;">
+                        <div class="p-3 bg-dark bg-opacity-50 border border-secondary rounded-3 mb-3">
+                            <div><strong>Boleta:</strong> ${boletaNumero} — <strong>Cuota #${numCuota}</strong></div>
+                            <div><strong>Capital de Cuota:</strong> ${formatCurrency(capital)}</div>
+                            <div><strong>Mora Actual:</strong> <span class="text-warning fw-bold">${formatCurrency(moraActual)}</span></div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-white-50 small">Nuevo Monto de Interés por Mora (₡):</label>
+                            <input type="number" step="0.01" min="0" id="swal-interes-manual" class="form-control form-control-custom" value="${parseFloat(moraActual || 0).toFixed(2)}">
+                            <small class="text-muted d-block mt-1">Coloque 0.00 si desea exonerar manualmente el recargo de esta cuota.</small>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="bi bi-check-circle me-1"></i> Guardar Ajuste',
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const val = parseFloat(document.getElementById('swal-interes-manual').value);
+                    if (isNaN(val) || val < 0) {
+                        Swal.showValidationMessage('Ingrese un monto de interés válido (mayor o igual a 0).');
+                        return false;
+                    }
+                    return val;
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'Aplicando ajuste...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                    try {
+                        const res = await fetch(`/boletas/cuotas/${cuotaId}/ajustar-interes`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ interes_acumulado: result.value })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            Swal.fire({ icon: 'success', title: '¡Ajuste Aplicado!', text: data.message, confirmButtonColor: '#5fb230' })
+                                .then(() => recargarEstadoCuentaActual());
+                        } else {
+                            Swal.fire('Error', data.message || 'No se pudo ajustar el interés.', 'error');
+                        }
+                    } catch (err) {
+                        Swal.fire('Error de Red', err.message, 'error');
+                    }
+                }
+            });
         }
     </script>
 @endsection

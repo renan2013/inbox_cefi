@@ -410,7 +410,12 @@
                     <p class="header-subtitle mb-0">Gestión de estudiantes con cuotas vencidas, cálculo de mora y herramientas de cobro rápido.</p>
                 </div>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
+                @if ($global_deudores_count > 0)
+                    <button type="button" class="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm" onclick="enviarAlertasEmailTodos()">
+                        <i class="bi bi-envelope-exclamation-fill me-1"></i> Enviar Alertas por Correo ({{ $global_deudores_count }})
+                    </button>
+                @endif
                 <a href="{{ route('boletas.estado_cuenta') }}" class="btn btn-action-outline px-4 py-2 fw-bold">
                     <i class="bi bi-wallet2 me-1"></i> Ir a Estados de Cuenta
                 </a>
@@ -643,6 +648,17 @@
                                             <i class="bi bi-telephone-x me-1"></i> Sin WA
                                         </button>
                                     @endif
+
+                                    <!-- Botón Alerta por Correo Electrónico -->
+                                    <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-1 fw-bold btn-enviar-email-mora"
+                                        style="font-size: 0.82rem;"
+                                        data-id="{{ $deudor['id_estudiante'] }}"
+                                        data-nombre="{{ $deudor['nombre'] }}"
+                                        data-email="{{ $deudor['email'] }}"
+                                        onclick="enviarAlertaEmailDeudor({{ $deudor['id_estudiante'] }}, '{{ addslashes($deudor['nombre']) }}', '{{ addslashes($deudor['email']) }}')"
+                                        title="Enviar Alerta Financiera por Correo Electrónico">
+                                        <i class="bi bi-envelope-paper-fill me-1"></i> Email
+                                    </button>
 
                                     <!-- Botón Estado de Cuenta -->
                                     <a href="{{ route('boletas.estado_cuenta', ['estudiante_id' => $deudor['id_estudiante']]) }}" 
@@ -991,5 +1007,86 @@
                 });
             }
         });
+
+        function enviarAlertaEmailDeudor(idEstudiante, nombre, email) {
+            if (!email) {
+                Swal.fire('Sin Correo', `El estudiante ${nombre} no tiene correo electrónico registrado.`, 'warning');
+                return;
+            }
+            Swal.fire({
+                title: '📧 Enviar Alerta Financiera',
+                html: `¿Desea enviar un recordatorio formal de estado de cuenta y cuotas vencidas por correo electrónico a <strong>${nombre}</strong> (${email})?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="bi bi-send-check-fill me-1"></i> Sí, enviar alerta',
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                preConfirm: async () => {
+                    try {
+                        const res = await fetch("{{ route('boletas.enviar_alerta_mora_email') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ id_estudiante: idEstudiante })
+                        });
+                        const data = await res.json();
+                        if (!data.success) throw new Error(data.message || 'Error al enviar correo.');
+                        return data;
+                    } catch (err) {
+                        Swal.showValidationMessage(err.message);
+                    }
+                }
+            }).then(result => {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire('¡Alerta Enviada!', result.value.message, 'success');
+                }
+            });
+        }
+
+        function enviarAlertasEmailTodos() {
+            const botones = Array.from(document.querySelectorAll('.btn-enviar-email-mora')).filter(b => b.closest('.deudor-row').style.display !== 'none');
+            if (botones.length === 0) {
+                Swal.fire('Sin destinatarios', 'No hay estudiantes en mora visibles para notificar.', 'info');
+                return;
+            }
+            Swal.fire({
+                title: '📧 Enviar Alertas Masivas por Correo',
+                html: `Se enviarán alertas financieras automatizadas por correo electrónico a <strong>${botones.length}</strong> estudiante(s) con cuotas vencidas.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="bi bi-envelope-check-fill me-1"></i> Enviar a Todos',
+                cancelButtonText: 'Cancelar'
+            }).then(async (res) => {
+                if (!res.isConfirmed) return;
+                Swal.fire({ title: 'Enviando alertas por correo...', html: `Procesando 1 de ${botones.length}...`, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                let ok = 0, fail = 0;
+                for (let i = 0; i < botones.length; i++) {
+                    const b = botones[i];
+                    Swal.update({ html: `Enviando a <strong>${b.dataset.nombre}</strong> (${i + 1} de ${botones.length})...` });
+                    try {
+                        const r = await fetch("{{ route('boletas.enviar_alerta_mora_email') }}", {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                            body: JSON.stringify({ id_estudiante: b.dataset.id })
+                        });
+                        const d = await r.json();
+                        if (d.success) ok++; else fail++;
+                    } catch (e) {
+                        fail++;
+                    }
+                }
+                Swal.fire({
+                    icon: fail === 0 ? 'success' : 'info',
+                    title: 'Proceso Completado',
+                    html: `Alertas enviadas con éxito: <strong>${ok}</strong><br>${fail > 0 ? `<span class="text-danger">Fallidas: ${fail}</span>` : ''}`
+                });
+            });
+        }
     </script>
 @endsection
