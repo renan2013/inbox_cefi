@@ -321,7 +321,8 @@
                         <tr>
                             <th>Nombre del Programa</th>
                             <th>Categoría</th>
-                            <th>Total Materias</th>
+                            <th>Duración / Modalidad</th>
+                            <th>Plan de Estudios</th>
                             <th>Costos base</th>
                             <th class="text-end">Acciones</th>
                         </tr>
@@ -337,7 +338,13 @@
                                     <span class="text-white-50">{{ $prog->categoria ?? 'N/D' }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge-count">{{ $prog->planes_estudio_count }} materias</span>
+                                    <div style="font-size: 0.85rem;">
+                                        <div><i class="bi bi-clock me-1 text-info"></i>{{ $prog->duracion ?? '12 meses.' }}</div>
+                                        <span class="text-white-50"><i class="bi bi-geo-alt me-1"></i>{{ $prog->modalidad ?? 'Presencial.' }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge-count">{{ $prog->planes_estudio_count }} cursos</span>
                                 </td>
                                 <td>
                                     <div style="font-size: 0.85rem;">
@@ -347,7 +354,7 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="{{ route('programas.pdf', $prog->id_programa) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver PDF del Programa">
+                                        <a href="{{ route('programas.pdf', $prog->id_programa) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver PDF del Programa (Modelo CEFI)">
                                             <i class="bi bi-file-earmark-pdf"></i>
                                         </a>
                                         <a href="{{ route('programas.edit', $prog->id_programa) }}" class="btn btn-sm btn-outline-success" title="Editar">
@@ -364,7 +371,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-white-50">
+                                <td colspan="6" class="text-center py-5 text-white-50">
                                     <i class="bi bi-journal-x display-4 d-block mb-3 text-muted"></i>
                                     No se encontraron programas con los criterios de búsqueda especificados.
                                 </td>

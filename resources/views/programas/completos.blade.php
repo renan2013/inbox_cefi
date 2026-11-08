@@ -105,14 +105,31 @@
                         <div class="accordion-body p-4 p-md-5">
                             
                             <!-- DETALLES DEL PROGRAMA -->
-                            <div class="row g-4 mb-5">
+                            <div class="row g-4 mb-4">
                                 <div class="col-lg-8">
-                                    <h6 class="text-white fw-bold mb-3"><i class="bi bi-info-circle me-1 text-success"></i> Resumen del Programa</h6>
-                                    <p class="text-white-50 mb-4">{{ $p->informacion ?? 'Sin resumen descriptivo cargado.' }}</p>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2">
+                                            <i class="bi bi-clock me-1"></i> Duración: {{ $p->duracion ?? '12 meses.' }}
+                                        </span>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2">
+                                            <i class="bi bi-geo-alt me-1"></i> Modalidad: {{ $p->modalidad ?? 'Presencial.' }}
+                                        </span>
+                                        <a href="{{ route('programas.pdf', $p->id_programa) }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                            <i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF Modelo CEFI
+                                        </a>
+                                    </div>
+
+                                    <h6 class="text-white fw-bold mb-2"><i class="bi bi-info-circle me-1 text-success"></i> Descripción del Curso</h6>
+                                    <p class="text-white-50 mb-3" style="white-space: pre-line;">{{ $p->informacion ?? 'Sin descripción cargada.' }}</p>
                                     
-                                    @if ($p->perfil)
-                                        <h6 class="text-white fw-bold mb-3"><i class="bi bi-award me-1 text-success"></i> Perfil del Egresado</h6>
-                                        <p class="text-white-50">{{ $p->perfil }}</p>
+                                    @if ($p->objetivo_curso)
+                                        <h6 class="text-white fw-bold mb-2"><i class="bi bi-bullseye me-1 text-success"></i> Objetivo del Curso</h6>
+                                        <p class="text-white-50 mb-3" style="white-space: pre-line;">{{ $p->objetivo_curso }}</p>
+                                    @endif
+
+                                    @if ($p->lo_que_obtendras || $p->perfil)
+                                        <h6 class="text-white fw-bold mb-2"><i class="bi bi-award me-1 text-success"></i> Lo Que Obtendrás / Perfil del Egresado</h6>
+                                        <p class="text-white-50 mb-0" style="white-space: pre-line;">{{ $p->lo_que_obtendras ?? $p->perfil }}</p>
                                     @endif
                                 </div>
                                 <div class="col-lg-4">
@@ -130,25 +147,29 @@
                                             <span class="text-white-50 small">Costo Biblioteca:</span>
                                             <span class="fw-bold text-white">₡{{ number_format($p->costo_biblioteca, 2) }}</span>
                                         </div>
-                                        <div class="d-flex justify-content-between border-top border-secondary pt-2 mt-2">
+                                        <div class="d-flex justify-content-between border-top border-secondary pt-2 mt-2 mb-3">
                                             <span class="text-white-50 small">Inscripción Única:</span>
                                             <span class="fw-bold text-success">₡{{ number_format($p->costo_inscripcion_unica, 2) }}</span>
                                         </div>
+
+                                        @if ($p->requisitos_ingreso)
+                                            <h6 class="text-white fw-bold mb-2 border-top border-secondary pt-3"><i class="bi bi-card-checklist me-1 text-success"></i> Requisitos de Ingreso</h6>
+                                            <p class="text-white-50 small mb-0" style="white-space: pre-line;">{{ $p->requisitos_ingreso }}</p>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
 
                             <!-- MALLA CURRICULAR -->
-                            <h6 class="text-white fw-bold mb-3"><i class="bi bi-book-half me-1 text-success"></i> Malla Curricular / Plan de Estudios</h6>
+                            <h6 class="text-white fw-bold mb-3"><i class="bi bi-book-half me-1 text-success"></i> Plan de Estudios ({{ $p->duracion_plan_estudios ?? 'Malla Oficial' }})</h6>
                             <div class="table-responsive rounded-3 border border-secondary">
                                 <table class="table table-custom mb-0">
                                     <thead>
                                         <tr class="bg-dark">
                                             <th class="ps-4">Código</th>
-                                            <th>Curso / Materia</th>
-                                            <th>Nivel / Cuatrimestre</th>
-                                            <th class="text-center">Créditos</th>
-                                            <th>Requisitos</th>
+                                            <th>Nombre del Curso</th>
+                                            <th>Duración</th>
+                                            <th>Requisito</th>
                                             <th class="text-end pe-4">Descriptor Oficial</th>
                                         </tr>
                                     </thead>
@@ -158,9 +179,8 @@
                                                 <tr>
                                                     <td class="ps-4 font-monospace text-success fw-bold">{{ $pe->codigo }}</td>
                                                     <td class="fw-bold text-white">{{ $pe->materia }}</td>
-                                                    <td>{{ $pe->cuatrimestre }}</td>
-                                                    <td class="text-center"><span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-bold">{{ $pe->creditos }}</span></td>
-                                                    <td class="text-white-50 small">{{ $pe->requisitos ?? 'Sin requisitos' }}</td>
+                                                    <td>{{ $pe->duracion ?? ($pe->cuatrimestre ?: '8 semanas') }}</td>
+                                                    <td class="text-white-50 small">{{ $pe->requisitos ?? 'N/A' }}</td>
                                                     <td class="text-end pe-4">
                                                         <a href="{{ route('cursos.descriptor_pdf', $pe->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1" title="Generar Descriptor PDF">
                                                             <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
@@ -173,7 +193,7 @@
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="6" class="text-center py-4 text-white-50">
+                                                <td colspan="5" class="text-center py-4 text-white-50">
                                                     No se han registrado materias para esta carrera académica.
                                                 </td>
                                             </tr>

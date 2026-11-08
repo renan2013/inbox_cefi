@@ -14,9 +14,14 @@ class Programa extends Model
     protected $fillable = [
         'nombre_programa',
         'categoria',
+        'duracion',
+        'modalidad',
         'informacion',
+        'objetivo_curso',
         'oferta',
+        'opciones_laborales',
         'perfil',
+        'lo_que_obtendras',
         'costo_materia',
         'costo_matricula',
         'costo_biblioteca',
@@ -25,6 +30,8 @@ class Programa extends Model
         'imagen_secundaria',
         'imagen_encabezado',
         'imagen_footer',
+        'duracion_plan_estudios',
+        'perfil_docentes',
         'requisitos_ingreso',
         'detalles_programa',
         'normas_netiqueta'

@@ -27,9 +27,22 @@
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 0.75rem;
             border-bottom: 2px solid var(--border-dark);
             padding-bottom: 0.75rem;
+        }
+
+        .badge-page-ref {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 0.3rem 0.75rem;
+            border-radius: 50rem;
         }
 
         .form-control-custom, .form-select-custom {
@@ -63,6 +76,13 @@
             border: 1px dashed var(--primary);
             border-radius: 1.25rem;
             padding: 2rem;
+        }
+
+        .plan-card {
+            background-color: rgba(15, 23, 42, 0.35);
+            border: 1px solid var(--border-dark);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
         }
 
         .img-upload-box {
@@ -109,6 +129,21 @@
         .btn-outline-custom:hover {
             background: rgba(255, 255, 255, 0.1);
             color: #ffffff;
+        }
+
+        .table-plan th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #94a3b8;
+            border-bottom: 1px solid var(--border-dark);
+            padding-bottom: 0.75rem;
+        }
+
+        .table-plan td {
+            padding: 0.5rem 0.4rem;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         /* Soporte para Modo Día (Light Theme) */
@@ -159,6 +194,11 @@
             border-color: #16a34a !important;
         }
 
+        [data-theme="light"] .plan-card {
+            background-color: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+        }
+
         [data-theme="light"] .img-upload-box {
             background-color: #f8fafc !important;
             border-color: #cbd5e1 !important;
@@ -199,12 +239,15 @@
         </nav>
 
         <!-- Header -->
-        <div class="page-header d-flex justify-content-between align-items-center flex-wrap g-3">
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <h1 class="display-6 fw-bold mb-1">Registrar Nuevo Programa</h1>
-                <p class="text-white-50 mb-0">Configure los detalles, costos y recursos visuales para un nuevo nivel o carrera.</p>
+                <p class="text-white-50 mb-0">Configure la ficha institucional CEFI (Descripción, Objetivo, Opciones Laborales, Lo que obtendrás y Plan de Estudios).</p>
             </div>
-            <div>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" id="btnCargarEjemploCefi" class="btn btn-outline-info rounded-pill px-3">
+                    <i class="bi bi-magic me-1"></i> Cargar Ejemplo Modelo CEFI
+                </button>
                 <a href="{{ route('programas.index') }}" class="btn btn-outline-custom">
                     <i class="bi bi-arrow-left me-1"></i> Volver a Programas
                 </a>
@@ -227,49 +270,166 @@
                 <form action="{{ route('programas.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     
-                    <!-- SECCIÓN 1: INFORMACIÓN BÁSICA -->
+                    <!-- SECCIÓN 1: ENCABEZADO DEL PROGRAMA -->
                     <div class="section-divider">
-                        <i class="bi bi-info-circle-fill"></i> Información Básica
+                        <span><i class="bi bi-award-fill me-1"></i> 1. Datos de Encabezado del Programa</span>
+                        <span class="badge-page-ref">Encabezado PDF (Págs. 1 - 3)</span>
                     </div>
                     
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-8">
-                            <label for="nombre_programa" class="form-label-custom">Nombre del Programa / Carrera</label>
-                            <input type="text" name="nombre_programa" id="nombre_programa" class="form-control form-control-custom w-100" placeholder="Ej: Bachillerato en Teología" required value="{{ old('nombre_programa') }}">
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <label for="nombre_programa" class="form-label-custom">Nombre del Programa / Carrera *</label>
+                            <input type="text" name="nombre_programa" id="nombre_programa" class="form-control form-control-custom w-100" placeholder="Ej: TÉCNICO EN DISEÑO GRÁFICO CON IA" required value="{{ old('nombre_programa') }}">
                         </div>
-                        <div class="col-md-4">
-                            <label for="categoria" class="form-label-custom">Categoría Académica</label>
+                        <div class="col-md-2">
+                            <label for="categoria" class="form-label-custom">Categoría Académica *</label>
+                            @php $catOld = old('categoria', 'Carrera Técnica'); @endphp
                             <select name="categoria" id="categoria" class="form-select form-select-custom w-100" required>
                                 <option value="">Seleccione...</option>
-                                <option value="Bachillerato" {{ old('categoria') === 'Bachillerato' ? 'selected' : '' }}>Bachillerato</option>
-                                <option value="Licenciatura" {{ old('categoria') === 'Licenciatura' ? 'selected' : '' }}>Licenciatura</option>
-                                <option value="Maestría" {{ old('categoria') === 'Maestría' ? 'selected' : '' }}>Maestría</option>
-                                <option value="Doctorado" {{ old('categoria') === 'Doctorado' ? 'selected' : '' }}>Doctorado</option>
-                                <option value="Carrera Técnica" {{ old('categoria') === 'Carrera Técnica' ? 'selected' : '' }}>Carrera Técnica</option>
-                                <option value="Curso Libre" {{ old('categoria') === 'Curso Libre' ? 'selected' : '' }}>Curso Libre</option>
+                                <option value="Técnico Parauniversitario" {{ $catOld === 'Técnico Parauniversitario' ? 'selected' : '' }}>Técnico Parauniversitario</option>
+                                <option value="Carrera Técnica" {{ $catOld === 'Carrera Técnica' ? 'selected' : '' }}>Carrera Técnica</option>
+                                <option value="Diplomado" {{ $catOld === 'Diplomado' ? 'selected' : '' }}>Diplomado</option>
+                                <option value="Curso Libre" {{ $catOld === 'Curso Libre' ? 'selected' : '' }}>Curso Libre</option>
+                                <option value="Certificación" {{ $catOld === 'Certificación' ? 'selected' : '' }}>Certificación</option>
+                                <option value="Bachillerato" {{ $catOld === 'Bachillerato' ? 'selected' : '' }}>Bachillerato</option>
+                                <option value="Licenciatura" {{ $catOld === 'Licenciatura' ? 'selected' : '' }}>Licenciatura</option>
+                                <option value="Maestría" {{ $catOld === 'Maestría' ? 'selected' : '' }}>Maestría</option>
+                                <option value="Doctorado" {{ $catOld === 'Doctorado' ? 'selected' : '' }}>Doctorado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="duracion" class="form-label-custom">Duración *</label>
+                            <input type="text" name="duracion" id="duracion" class="form-control form-control-custom w-100" placeholder="Ej: 12 meses." value="{{ old('duracion', '12 meses.') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="modalidad" class="form-label-custom">Modalidad *</label>
+                            @php $modOld = old('modalidad', 'Presencial.'); @endphp
+                            <select name="modalidad" id="modalidad" class="form-select form-select-custom w-100">
+                                <option value="Presencial." {{ $modOld === 'Presencial.' || $modOld === 'Presencial' ? 'selected' : '' }}>Presencial.</option>
+                                <option value="Virtual." {{ $modOld === 'Virtual.' || $modOld === 'Virtual' ? 'selected' : '' }}>Virtual.</option>
+                                <option value="Bimodal / Híbrida." {{ $modOld === 'Bimodal / Híbrida.' ? 'selected' : '' }}>Bimodal / Híbrida.</option>
+                                <option value="Sincrónica." {{ $modOld === 'Sincrónica.' ? 'selected' : '' }}>Sincrónica.</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label for="informacion" class="form-label-custom">Resumen Informativo (Portada)</label>
-                        <textarea name="informacion" id="informacion" class="form-control form-control-custom w-100" rows="3" placeholder="Información descriptiva para la oferta académica...">{{ old('informacion') }}</textarea>
-                    </div>
-
-                    <div class="mb-5">
-                        <label for="perfil" class="form-label-custom">Perfil Profesional</label>
-                        <textarea name="perfil" id="perfil" class="form-control form-control-custom w-100" rows="3" placeholder="Habilidades y capacidades del egresado...">{{ old('perfil') }}</textarea>
-                    </div>
-
-                    <!-- SECCIÓN 2: ESTRUCTURA DE COSTOS -->
+                    <!-- SECCIÓN 2: PÁGINA 1 DEL MODELO CEFI (DESCRIPCIÓN Y OBJETIVO) -->
                     <div class="section-divider">
-                        <i class="bi bi-wallet2"></i> Configuración Financiera (Costos)
+                        <span><i class="bi bi-file-earmark-text-fill me-1"></i> 2. Descripción y Objetivo del Curso</span>
+                        <span class="badge-page-ref">Página 1 del PDF</span>
+                    </div>
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-12">
+                            <label for="informacion" class="form-label-custom">Descripción del Curso (DESCRIPCIÓN DEL CURSO:)</label>
+                            <textarea name="informacion" id="informacion" class="form-control form-control-custom w-100" rows="5" placeholder="Ej: Este programa integral de 12 meses combina formación técnica, creativa y tecnológica para preparar a los nuevos diseñadores digitales en un entorno moderno y competitivo...">{{ old('informacion') }}</textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="objetivo_curso" class="form-label-custom">Objetivo del Curso (OBJETIVO CURSO:)</label>
+                            <textarea name="objetivo_curso" id="objetivo_curso" class="form-control form-control-custom w-100" rows="4" placeholder="Ej: El objetivo de este programa anual es desarrollar en el estudiante las competencias esenciales y avanzadas del diseño digital, abarcando retoque fotográfico, creación vectorial...">{{ old('objetivo_curso') }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 3: PÁGINA 2 DEL MODELO CEFI (OPCIONES LABORALES Y LO QUE OBTENDRÁS) -->
+                    <div class="section-divider">
+                        <span><i class="bi bi-briefcase-fill me-1"></i> 3. Opciones Laborales y Lo Que Obtendrás</span>
+                        <span class="badge-page-ref">Página 2 del PDF</span>
+                    </div>
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <label for="opciones_laborales" class="form-label-custom">Opciones Laborales (OPCIONES LABORALES:)</label>
+                            <textarea name="opciones_laborales" id="opciones_laborales" class="form-control form-control-custom w-100" rows="12" placeholder="1. Agencias de publicidad y marketing digital&#10;Creación de campañas, contenido visual, diseño para redes sociales y material publicitario.&#10;2. Estudios de diseño gráfico&#10;Realización de identidades visuales, branding, diseño editorial, ilustración y proyectos corporativos...">{{ old('opciones_laborales') }}</textarea>
+                            <small class="text-white-50 d-block mt-1">Columna izquierda de la página 2 del folleto/programa PDF.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="lo_que_obtendras" class="form-label-custom">Lo Que Obtendrás / Perfil de Salida (LO QUE OBTENDRÁS)</label>
+                            <textarea name="lo_que_obtendras" id="lo_que_obtendras" class="form-control form-control-custom w-100" rows="12" placeholder="Al finalizar este programa, el estudiante contará con:&#10;Habilidades Técnicas y Creativas&#10;• Dominio de herramientas de retoque fotográfico básico y avanzado.&#10;• Creación de imágenes, composiciones, filtros, capas y objetos inteligentes...">{{ old('lo_que_obtendras') }}</textarea>
+                            <small class="text-white-50 d-block mt-1">Columna derecha de la página 2 del folleto/programa PDF.</small>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 4: PÁGINA 3 DEL MODELO CEFI (PLAN DE ESTUDIOS, DOCENTES Y REQUISITOS) -->
+                    <div class="section-divider">
+                        <span><i class="bi bi-journal-bookmark-fill me-1"></i> 4. Plan de Estudios, Perfil Docente y Requisitos de Ingreso</span>
+                        <span class="badge-page-ref">Página 3 del PDF</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="duracion_plan_estudios" class="form-label-custom">Duración del Plan de Estudios (DURACIÓN DEL PLAN DE ESTUDIOS:)</label>
+                        <textarea name="duracion_plan_estudios" id="duracion_plan_estudios" class="form-control form-control-custom w-100" rows="2" placeholder="Ej: El programa tiene una duración de 12 meses, con dos horas y media de clase y dos horas y media de trabajo/estudio en casa por semana">{{ old('duracion_plan_estudios', 'El programa tiene una duración de 12 meses, con dos horas y media de clase y dos horas y media de trabajo/estudio en casa por semana') }}</textarea>
+                    </div>
+
+                    <!-- Constructor dinámico de cursos del Plan de Estudios -->
+                    <div class="plan-card mb-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <div>
+                                <h6 class="fw-bold text-white mb-0"><i class="bi bi-table me-2 text-success"></i>Cursos del Plan de Estudios</h6>
+                                <small class="text-white-50">Agregue las materias que conforman la tabla del Plan de Estudios (Código, Nombre del Curso, Duración y Requisito).</small>
+                            </div>
+                            <button type="button" id="btnAgregarCursoPlan" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                <i class="bi bi-plus-circle me-1"></i> Agregar Curso al Plan
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-borderless table-plan mb-0" id="tablaPlanEstudios">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 18%;">Código</th>
+                                        <th style="width: 42%;">Nombre del Curso</th>
+                                        <th style="width: 18%;">Duración</th>
+                                        <th style="width: 16%;">Requisito</th>
+                                        <th style="width: 6%;" class="text-end">Quitar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyPlanEstudios">
+                                    <tr>
+                                        <td>
+                                            <input type="hidden" name="plan_id[]" value="">
+                                            <input type="text" name="plan_codigo[]" class="form-control form-control-custom form-control-sm" placeholder="Ej: TDG-IA01">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="plan_materia[]" class="form-control form-control-custom form-control-sm" placeholder="Ej: Diseño Fotográfico Básico">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="plan_duracion[]" class="form-control form-control-custom form-control-sm" placeholder="Ej: 8 semanas" value="8 semanas">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="plan_requisito[]" class="form-control form-control-custom form-control-sm" placeholder="Ej: N/A" value="N/A">
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-quitar-fila-plan" title="Quitar fila">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <label for="perfil_docentes" class="form-label-custom">Perfil de los docentes a cargo del programa:</label>
+                            <textarea name="perfil_docentes" id="perfil_docentes" class="form-control form-control-custom w-100" rows="4" placeholder="Ej: Los docentes que participan de este programa poseen un grado académico de licenciatura e ingenierías, especializados en desarrollo de software y diseño gráfico digital.">{{ old('perfil_docentes', 'Los docentes que participan de este programa poseen un grado académico de licenciatura e ingenierías, especializados en desarrollo de software y diseño gráfico digital.') }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="requisitos_ingreso" class="form-label-custom">Requisitos de ingreso:</label>
+                            <textarea name="requisitos_ingreso" id="requisitos_ingreso" class="form-control form-control-custom w-100" rows="4" placeholder="1- Leer y aceptar las políticas institucionales.&#10;2- Completar el formulario de matrícula.&#10;3- Foto tamaño pasaporte física o digital.&#10;4- Copia de la cédula de identidad.">{{ old('requisitos_ingreso', "1- Leer y aceptar las políticas institucionales.\n2- Completar el formulario de matrícula.\n3- Foto tamaño pasaporte física o digital.\n4- Copia de la cédula de identidad.") }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 5: ESTRUCTURA DE COSTOS -->
+                    <div class="section-divider">
+                        <span><i class="bi bi-wallet2 me-1"></i> 5. Configuración Financiera (Costos de Matrícula y Boletas)</span>
+                        <span class="badge-page-ref">Uso Interno / Facturación</span>
                     </div>
 
                     <div class="cost-card mb-5">
                         <div class="row g-4">
                             <div class="col-md-3">
-                                <label for="costo_materia" class="form-label-custom">Costo por Materia</label>
+                                <label for="costo_materia" class="form-label-custom">Costo por Materia / Módulo</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-dark border-secondary text-white-50">₡</span>
                                     <input type="number" step="0.01" name="costo_materia" id="costo_materia" class="form-control form-control-custom" required value="{{ old('costo_materia', '0.00') }}">
@@ -283,7 +443,7 @@
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <label for="costo_biblioteca" class="form-label-custom">Costo de Biblioteca</label>
+                                <label for="costo_biblioteca" class="form-label-custom">Costo de Biblioteca / Plataforma</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-dark border-secondary text-white-50">₡</span>
                                     <input type="number" step="0.01" name="costo_biblioteca" id="costo_biblioteca" class="form-control form-control-custom" required value="{{ old('costo_biblioteca', '0.00') }}">
@@ -299,55 +459,51 @@
                         </div>
                     </div>
 
-                    <!-- SECCIÓN 3: ARCHIVOS PORTADAS E IMÁGENES -->
+                    <!-- SECCIÓN 6: ARCHIVOS PORTADAS E IMÁGENES -->
                     <div class="section-divider">
-                        <i class="bi bi-images"></i> Recursos Visuales (Imágenes)
+                        <span><i class="bi bi-images me-1"></i> 6. Recursos Visuales (Banner PDF e Imágenes)</span>
+                        <span class="badge-page-ref">Diseño Visual</span>
                     </div>
 
                     <div class="row g-4 mb-5">
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
+                                <label class="form-label-custom d-block">Banner Encabezado PDF</label>
+                                <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
+                                <input type="file" name="imagen_encabezado" class="form-control form-control-custom w-100" accept="image/*">
+                                <small class="text-white-50 d-block mt-1">Fondo superior del PDF (Opcional)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="img-upload-box h-100">
                                 <label class="form-label-custom d-block">Imagen Principal</label>
                                 <i class="bi bi-image text-white-50 display-6 d-block mb-3"></i>
-                                <input type="file" name="imagen_principal" class="form-control form-control-custom w-100">
+                                <input type="file" name="imagen_principal" class="form-control form-control-custom w-100" accept="image/*">
+                                <small class="text-white-50 d-block mt-1">Portada / Respaldo de Banner</small>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
                                 <label class="form-label-custom d-block">Imagen Secundaria</label>
                                 <i class="bi bi-image text-white-50 display-6 d-block mb-3"></i>
-                                <input type="file" name="imagen_secondary" class="form-control form-control-custom w-100">
+                                <input type="file" name="imagen_secundaria" class="form-control form-control-custom w-100" accept="image/*">
+                                <small class="text-white-50 d-block mt-1">Recurso secundario opcional</small>
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3">
                             <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Imagen Encabezado</label>
+                                <label class="form-label-custom d-block">Imagen Footer PDF</label>
                                 <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
-                                <input type="file" name="imagen_encabezado" class="form-control form-control-custom w-100">
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-3">
-                            <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">Imagen Footer</label>
-                                <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
-                                <input type="file" name="imagen_footer" class="form-control form-control-custom w-100">
+                                <input type="file" name="imagen_footer" class="form-control form-control-custom w-100" accept="image/*">
+                                <small class="text-white-50 d-block mt-1">Pie de página personalizado (Opcional)</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- DETALLES COMPLEMENTARIOS -->
-                    <div class="section-divider">
-                        <i class="bi bi-file-earmark-ruled"></i> Regulaciones y Detalles
-                    </div>
-                    <div class="row g-4 mb-5">
-                        <div class="col-md-6">
-                            <label for="detalles_programa" class="form-label-custom">Detalles del Plan / Requisitos</label>
-                            <textarea name="detalles_programa" id="detalles_programa" class="form-control form-control-custom w-100" rows="4" placeholder="Regulaciones académicas específicas...">{{ old('detalles_programa') }}</textarea>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="normas_netiqueta" class="form-label-custom">Normas de Netiqueta</label>
-                            <textarea name="normas_netiqueta" id="normas_netiqueta" class="form-control form-control-custom w-100" rows="4" placeholder="Normas de convivencia virtual sugeridas...">{{ old('normas_netiqueta') }}</textarea>
-                        </div>
+                    <!-- NORMATIVA VIRTUAL OPCIONAL -->
+                    <div class="mb-5">
+                        <label for="normas_netiqueta" class="form-label-custom">Normas de Netiqueta (Para Sílabos Virtuales - Opcional)</label>
+                        <textarea name="normas_netiqueta" id="normas_netiqueta" class="form-control form-control-custom w-100" rows="3" placeholder="Normas de convivencia virtual sugeridas para los sílabos del programa...">{{ old('normas_netiqueta') }}</textarea>
                     </div>
 
                     <div class="d-grid">
@@ -361,4 +517,131 @@
         </div>
 
     </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tbody = document.getElementById('tbodyPlanEstudios');
+    const btnAdd = document.getElementById('btnAgregarCursoPlan');
+    const btnDemo = document.getElementById('btnCargarEjemploCefi');
+
+    function crearFilaCurso(codigo = '', materia = '', duracion = '8 semanas', requisito = 'N/A') {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <input type="hidden" name="plan_id[]" value="">
+                <input type="text" name="plan_codigo[]" class="form-control form-control-custom form-control-sm" placeholder="Ej: TDG-IA01" value="${codigo}">
+            </td>
+            <td>
+                <input type="text" name="plan_materia[]" class="form-control form-control-custom form-control-sm" placeholder="Nombre del Curso" value="${materia}">
+            </td>
+            <td>
+                <input type="text" name="plan_duracion[]" class="form-control form-control-custom form-control-sm" placeholder="Ej: 8 semanas" value="${duracion}">
+            </td>
+            <td>
+                <input type="text" name="plan_requisito[]" class="form-control form-control-custom form-control-sm" placeholder="Ej: N/A" value="${requisito}">
+            </td>
+            <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-danger btn-quitar-fila-plan" title="Quitar fila">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        return tr;
+    }
+
+    if (btnAdd && tbody) {
+        btnAdd.addEventListener('click', function () {
+            tbody.appendChild(crearFilaCurso());
+        });
+
+        tbody.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-quitar-fila-plan');
+            if (!btn) return;
+            const rows = tbody.querySelectorAll('tr');
+            if (rows.length > 1) {
+                btn.closest('tr').remove();
+            } else {
+                const inputs = btn.closest('tr').querySelectorAll('input[type="text"]');
+                inputs.forEach(i => i.value = '');
+            }
+        });
+    }
+
+    if (btnDemo) {
+        btnDemo.addEventListener('click', function () {
+            document.getElementById('nombre_programa').value = 'TÉCNICO EN DISEÑO GRÁFICO CON IA';
+            document.getElementById('categoria').value = 'Técnico Parauniversitario';
+            document.getElementById('duracion').value = '12 meses.';
+            document.getElementById('modalidad').value = 'Presencial.';
+
+            document.getElementById('informacion').value =
+                "Este programa integral de 12 meses combina formación técnica, creativa y tecnológica para preparar a los nuevos diseñadores digitales en un entorno moderno y competitivo. A lo largo de tres módulos progresivos, el estudiante aprenderá desde los fundamentos del diseño fotográfico y vectorial, hasta técnicas avanzadas de composición, automatización de procesos, creación de contenido corporativo y desarrollo de proyectos completos.\n" +
+                "El curso incluye el uso de plataformas líderes como Photoshop, Illustrator, Figma y Affinity, además de la integración de herramientas de inteligencia artificial como ChatGPT, Perplexity, Gemini y Qwen, aplicadas al diseño, creación de contenido, generación de imágenes, prototipado y automatización. El estudiante concluirá con un proyecto final que demuestra todas las habilidades adquiridas durante el año.";
+
+            document.getElementById('objetivo_curso').value =
+                "El objetivo de este programa anual es desarrollar en el estudiante las competencias esenciales y avanzadas del diseño digital, abarcando retoque fotográfico, creación vectorial, maquetación profesional y el uso estratégico de herramientas de inteligencia artificial. Al finalizar, el alumno será capaz de crear proyectos visuales completos, integrando procesos creativos, técnicos y automatizados para responder a las necesidades del entorno profesional actual.";
+
+            document.getElementById('opciones_laborales').value =
+                "1. Agencias de publicidad y marketing digital\nCreación de campañas, contenido visual, diseño para redes sociales y material publicitario.\n" +
+                "2. Estudios de diseño gráfico\nRealización de identidades visuales, branding, diseño editorial, ilustración y proyectos corporativos.\n" +
+                "3. Empresas de comunicación y medios\nTrabajo en departamentos de imagen para revistas, periódicos digitales, productoras de contenido y plataformas multimedia.\n" +
+                "4. Departamentos de diseño interno en corporaciones\nCreación de materiales internos, marcas, presentaciones, diseño de contenido institucional y comunicación visual.\n" +
+                "5. Empresas de desarrollo tecnológico y startups\nDiseño de interfaces, prototipos en Figma, creación de elementos visuales para apps o sitios web.\n" +
+                "6. Productoras audiovisuales\nEdición fotográfica, composición visual, diseño de elementos gráficos para videos y contenido multimedia.\n" +
+                "7. Editoriales y empresas de contenido impreso o digital\nMaquetación de revistas, libros, boletines, catálogos y publicaciones digitales.\n" +
+                "8. Agencias de redes sociales y community management\nDiseño de contenido estratégico, automatización con IA y creación de materiales para campañas.\n" +
+                "9. Empresas de impresión y servicios gráficos\nDiseño de empaques, tarjetas, folletos, banners, anuncios y piezas para impresión digital.\n" +
+                "10. Emprendimiento o estudio propio\nServicios de branding, retoque fotográfico, diseño web, diseño corporativo, ilustración o contenido para redes.";
+
+            document.getElementById('lo_que_obtendras').value =
+                "Al finalizar este programa, el estudiante contará con:\n" +
+                "Habilidades Técnicas y Creativas\n" +
+                "• Dominio de herramientas de retoque fotográfico básico y avanzado.\n" +
+                "• Creación de imágenes, composiciones, filtros, capas y objetos inteligentes.\n" +
+                "• Conocimiento sólido en diseño vectorial, logos, ilustración y branding corporativo.\n" +
+                "• Uso profesional de software de diseño: Photoshop, Illustrator, Figma y Affinity.\n" +
+                "Competencias en IA Aplicada al Diseño\n" +
+                "• Uso de ChatGPT como asistente creativo y técnico.\n" +
+                "• Aplicación de Perplexity para generación de contenido visual y conceptual.\n" +
+                "• Integración de Gemini como soporte en creación de aplicaciones y automatizaciones.\n" +
+                "• Utilización de Qwen como herramienta multitarea para flujos de trabajo avanzados.\n" +
+                "Dominio de Maquetación y Creación de Contenidos\n" +
+                "• Diseño de revistas, boletines y materiales digitales profesionales.\n" +
+                "• Desarrollo de proyectos completos para redes sociales y entornos digitales.\n" +
+                "• Creación de sistemas gráficos con coherencia visual.\n" +
+                "Proyecto Final\n" +
+                "• Un proyecto integral que reúne diseño fotográfico, vectorial, maquetación y automatización con IA, demostrando todas las habilidades del programa.\n" +
+                "Desarrollo Profesional\n" +
+                "• Preparación para trabajar en estudios de diseño, agencias creativas, marketing digital o emprendimientos personales.\n" +
+                "• Portafolio completo y funcional con trabajos desarrollados durante los 12 meses.";
+
+            document.getElementById('duracion_plan_estudios').value =
+                "El programa tiene una duración de 12 meses, con dos horas y media de clase y dos horas y media de trabajo/estudio en casa por semana";
+
+            document.getElementById('perfil_docentes').value =
+                "Los docentes que participan de este programa poseen un grado académico de licenciatura e ingenierías, especializados en desarrollado de software y diseñado gráfico digital.";
+
+            document.getElementById('requisitos_ingreso').value =
+                "1- Leer y aceptar las políticas institucionales.\n2- Completar el formulario de matrícula.\n3- Foto tamaño pasaporte física o digital.\n4- Copia de la cédula de identidad.";
+
+            if (tbody) {
+                tbody.innerHTML = '';
+                const cursosDemo = [
+                    ['TDG-IA01', 'Diseño Fotográfico Básico', '8 semanas', 'N/A'],
+                    ['TDG-IA02', 'Diseño Fotográfico Avanzado', '8 semanas', 'TDG-IA01'],
+                    ['TDG-IA03', 'Diseño Vectorial Básico', '8 semanas', 'N/A'],
+                    ['TDG-IA04', 'Diseño Vectorial Avanzado', '8 semanas', 'TDG-IA03'],
+                    ['TDG-IA05', 'Maquetación Digital', '8 semanas', 'N/A'],
+                    ['TDG-IA06', 'Figma y Affinity', '8 semanas', 'N/A']
+                ];
+                cursosDemo.forEach(c => {
+                    tbody.appendChild(crearFilaCurso(c[0], c[1], c[2], c[3]));
+                });
+            }
+        });
+    }
+});
+</script>
 @endsection
