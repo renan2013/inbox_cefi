@@ -224,8 +224,8 @@
                                         <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="20" height="20"> <span>@cefi_cr</span>
                                     </a>
                                 </div>
-                                <a href="https://wa.me/50689929180" target="_blank" rel="noopener" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 text-decoration-none d-inline-flex align-items-center gap-1">
-                                    <img src="{{ asset('imgs/social/whatsapp_green.svg') }}" alt="WhatsApp" width="18" height="18"> +506 8992 9180
+                                <a href="https://wa.me/50689929180" target="_blank" rel="noopener" class="text-white fw-bold small text-decoration-none d-inline-flex align-items-center gap-1">
+                                    <img src="{{ asset('imgs/social/whatsapp_white.svg') }}" alt="WhatsApp" width="20" height="20"> <span>+506 8992 9180</span>
                                 </a>
                             </div>
 

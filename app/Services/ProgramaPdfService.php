@@ -334,13 +334,13 @@ class ProgramaPDF extends FPDF
         $this->_out($op);
     }
 
-    function drawSocialIconVector(string $type, float $cx, float $cy, float $r, array $rgb): void
+    function drawSocialIconVector(string $type, float $cx, float $cy, float $r, array $rgb, bool $fillCircle = true): void
     {
-        // Círculo exterior vectorial con fondo blanco y borde del color indicado
+        // Círculo exterior vectorial con fondo blanco (opcional) y borde del color indicado
         $this->SetFillColor(255, 255, 255);
         $this->SetDrawColor($rgb[0], $rgb[1], $rgb[2]);
         $this->SetLineWidth(0.35);
-        $this->drawVectorCircle($cx, $cy, $r, 'DF');
+        $this->drawVectorCircle($cx, $cy, $r, $fillCircle ? 'DF' : 'D');
 
         $this->SetFillColor($rgb[0], $rgb[1], $rgb[2]);
         $this->SetDrawColor($rgb[0], $rgb[1], $rgb[2]);
@@ -464,21 +464,15 @@ class ProgramaPDF extends FPDF
             $x += $it['w'];
         }
 
-        // Recuadro blanco redondeado sobre la curva verde derecha para el WhatsApp destacado
-        $this->SetFillColor(255, 255, 255);
-        $this->SetDrawColor(0, 160, 77);
-        $this->SetLineWidth(0.35);
-        $this->drawVectorRoundedRect(169.5, 283.8, 35.5, 8.8, 1.8, 'DF');
-
-        // Ícono vectorial verde de WhatsApp + número clicable
-        $this->drawSocialIconVector('whatsapp', 173.8, 288.2, 2.75, $this->verde_cefi);
+        // Ícono vectorial en blanco de WhatsApp + número de celular en blanco sobre la curva verde derecha (sin forma de botón)
+        $this->drawSocialIconVector('whatsapp', 173.8, 288.2, 2.75, [255, 255, 255], false);
 
         $this->SetXY(177.5, 285.7);
-        $this->SetFont('Arial', 'B', 7.2);
-        $this->SetTextColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
+        $this->SetFont('Arial', 'B', 7.5);
+        $this->SetTextColor(255, 255, 255);
         $this->Cell(26.5, 5.2, $this->toPdf('+506 8992 9180'), 0, 0, 'L');
 
-        // Enlace directo a WhatsApp en el botón derecho
+        // Enlace directo a WhatsApp en el área derecha
         $this->Link(169.5, 283.8, 35.5, 8.8, 'https://wa.me/50689929180');
     }
 
