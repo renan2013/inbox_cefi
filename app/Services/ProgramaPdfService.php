@@ -245,30 +245,43 @@ class ProgramaPDF extends FPDF
         $this->SetLineWidth(0.3);
         $this->Line(0, 281, 210, 281);
 
-        $y = 285.5;
+        $y = 285.2;
         $items = [
-            ['icon' => 'f',  'text' => 'CEFI.',           'w' => 19],
-            ['icon' => 'IG', 'text' => 'cefi_cr',         'w' => 22],
-            ['icon' => 'WA', 'text' => '+506 8992 9180',  'w' => 31],
-            ['icon' => 'T',  'text' => '2711 1010',       'w' => 23],
-            ['icon' => 'M',  'text' => 'info@ceficr.com', 'w' => 31],
-            ['icon' => 'YT', 'text' => '@ceficr',         'w' => 21],
-            ['icon' => 'TK', 'text' => '@cefi_cr',        'w' => 21],
+            ['img' => 'imgs/social/facebook.png',  'icon' => 'f',  'text' => 'CEFI.',           'w' => 19],
+            ['img' => 'imgs/social/instagram.png', 'icon' => 'IG', 'text' => 'cefi_cr',         'w' => 22],
+            ['img' => 'imgs/social/whatsapp.png',  'icon' => 'WA', 'text' => '+506 8992 9180',  'w' => 31],
+            ['img' => 'imgs/social/phone.png',     'icon' => 'T',  'text' => '2711 1010',       'w' => 23],
+            ['img' => 'imgs/social/email.png',     'icon' => 'M',  'text' => 'info@ceficr.com', 'w' => 31],
+            ['img' => 'imgs/social/youtube.png',   'icon' => 'YT', 'text' => '@ceficr',         'w' => 21],
+            ['img' => 'imgs/social/tiktok.png',    'icon' => 'TK', 'text' => '@cefi_cr',        'w' => 21],
         ];
 
-        $x = 7;
+        $x = 6.5;
         foreach ($items as $it) {
-            $this->SetFillColor(90, 95, 100);
-            $this->SetDrawColor(90, 95, 100);
-            $this->SetTextColor(255, 255, 255);
-            $this->SetFont('Arial', 'B', 6);
-            $this->SetXY($x, $y);
-            $this->Cell(5.5, 5.5, $this->toPdf($it['icon']), 1, 0, 'C', true);
+            $iconPath = public_path($it['img']);
+            $iconDrawn = false;
+            if (file_exists($iconPath)) {
+                try {
+                    @$this->Image($iconPath, $x, $y - 0.4, 6.2, 6.2);
+                    $iconDrawn = true;
+                } catch (\Throwable $e) {
+                    $iconDrawn = false;
+                }
+            }
+
+            if (!$iconDrawn) {
+                $this->SetFillColor(90, 95, 100);
+                $this->SetDrawColor(90, 95, 100);
+                $this->SetTextColor(255, 255, 255);
+                $this->SetFont('Arial', 'B', 6);
+                $this->SetXY($x, $y);
+                $this->Cell(5.5, 5.5, $this->toPdf($it['icon']), 1, 0, 'C', true);
+            }
 
             $this->SetTextColor(95, 100, 105);
             $this->SetFont('Arial', '', 6.8);
-            $this->SetXY($x + 6.2, $y + 0.3);
-            $this->Cell($it['w'] - 6.5, 5, $this->toPdf($it['text']), 0, 0, 'L');
+            $this->SetXY($x + 6.8, $y + 0.4);
+            $this->Cell($it['w'] - 7, 5, $this->toPdf($it['text']), 0, 0, 'L');
 
             $x += $it['w'];
         }
@@ -280,12 +293,25 @@ class ProgramaPDF extends FPDF
         // Recuadro blanco interno para el WhatsApp destacado
         $this->SetFillColor(255, 255, 255);
         $this->SetDrawColor(255, 255, 255);
-        $this->Rect(171, 283.5, 32, 9.5, 'DF');
+        $this->Rect(169.5, 283.5, 35, 9.5, 'DF');
 
-        $this->SetXY(172, 285.5);
-        $this->SetFont('Arial', 'B', 7.2);
-        $this->SetTextColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
-        $this->Cell(30, 5.5, $this->toPdf('WA +506 8992 9180'), 0, 0, 'C');
+        $waGreenPath = public_path('imgs/social/whatsapp_green.png');
+        if (file_exists($waGreenPath)) {
+            try {
+                @$this->Image($waGreenPath, 171, 285.1, 6.2, 6.2);
+            } catch (\Throwable $e) {
+                // Continuar
+            }
+            $this->SetXY(177.8, 285.6);
+            $this->SetFont('Arial', 'B', 7.2);
+            $this->SetTextColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
+            $this->Cell(25.5, 5.5, $this->toPdf('+506 8992 9180'), 0, 0, 'L');
+        } else {
+            $this->SetXY(171, 285.5);
+            $this->SetFont('Arial', 'B', 7.2);
+            $this->SetTextColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
+            $this->Cell(32, 5.5, $this->toPdf('WA +506 8992 9180'), 0, 0, 'C');
+        }
     }
 
     function toPdf($txt): string
