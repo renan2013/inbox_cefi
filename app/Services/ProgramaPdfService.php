@@ -22,11 +22,11 @@ class ProgramaPDF extends FPDF
     // Paleta de colores del nuevo diseño CEFI
     public array $verde_oscuro_hdr = [24, 74, 44];     // #184a2c (fondo izquierdo header)
     public array $verde_curva_hdr  = [76, 166, 76];    // #4ca64c (acento curva header)
-    public array $azul_hdr         = [10, 92, 150];    // #0a5c96 (fondo derecho header y acentos)
-    public array $azul_marino      = [8, 41, 71];      // #082947 (bloque descripción del curso)
+    public array $azul_hdr         = [17, 97, 155];    // #11619b (azul oscuro institucional para todo el documento)
+    public array $azul_marino      = [17, 97, 155];    // #11619b (bloques azules oscuros y títulos en todo el documento)
     public array $verde_lima       = [120, 184, 51];   // #78b833 (cuadro acento título descripción)
     public array $verde_cefi       = [0, 160, 77];     // #00a04d (footer WhatsApp tab y sello)
-    public array $teal_tabla       = [45, 106, 128];   // #2d6a80 (tabla plan de estudios)
+    public array $teal_tabla       = [17, 97, 155];    // #11619b (encabezado tabla plan de estudios)
     public array $gris_texto       = [75, 85, 99];
 
     function Header()
@@ -140,13 +140,13 @@ class ProgramaPDF extends FPDF
         // Subtítulo interno
         $this->SetXY($cx - 11, $cy - 2);
         $this->SetFont('Arial', 'B', 3.8);
-        $this->SetTextColor(11, 68, 103);
+        $this->SetTextColor(17, 97, 155);
         $this->Cell(22, 2, $this->toPdf('Centro de Enseñanza'), 0, 1, 'C');
         $this->SetX($cx - 11);
         $this->Cell(22, 2, $this->toPdf('y Formación Integral'), 0, 1, 'C');
 
         // Cinta PARAUNIVERSITARIO
-        $this->SetFillColor(11, 68, 103);
+        $this->SetFillColor(17, 97, 155);
         $this->Rect($cx - 12, $cy + 4.5, 24, 4.8, 'F');
         $this->SetXY($cx - 12, $cy + 5);
         $this->SetFont('Arial', 'B', 4.6);
