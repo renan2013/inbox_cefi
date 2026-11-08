@@ -793,8 +793,8 @@ class ProgramaPdfService
 
         // --- COLUMNA DERECHA: LO QUE OBTENDRÁS ---
         $pdf->SetFillColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
-        $pdf->Rect(106, $colTopY, 5.5, 7.2, 'F');
-        $pdf->SetXY(113.5, $colTopY - 0.3);
+        $pdf->Rect(106, $colTopY, 7, 7.5, 'F');
+        $pdf->SetXY(115, $colTopY - 0.3);
         $pdf->SetFont('Arial', 'B', 16);
         $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Cell(90, 8, $pdf->toPdf('Lo que obtendrás:'), 0, 1, 'L');
@@ -1003,13 +1003,13 @@ class ProgramaPdfService
 
         // Columna Derecha: Requisitos de ingreso
         $pdf->SetFillColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
-        $pdf->Rect(106, $bottomY, 4.5, 5.5, 'F');
-        $pdf->SetXY(112.5, $bottomY);
+        $pdf->Rect(106, $bottomY, 6, 5.5, 'F');
+        $pdf->SetXY(115, $bottomY);
         $pdf->SetFont('Arial', 'B', 10);
         $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Cell(88, 5.5, $pdf->toPdf('Requisitos de ingreso:'), 0, 1, 'L');
 
-        $pdf->SetXY(112.5, $bottomY + 7);
+        $pdf->SetXY(115, $bottomY + 7);
         $pdf->SetFont('Arial', '', 9.5);
         $pdf->SetTextColor($pdf->gris_texto[0], $pdf->gris_texto[1], $pdf->gris_texto[2]);
         $pdf->MultiCell(88, 4.8, $pdf->toPdf($requisitosIngreso), 0, 'L');
