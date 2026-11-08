@@ -559,9 +559,6 @@
                             <a href="https://www.instagram.com/cefi_cr/" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
                                 <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="20" height="20"> <span>cefi_cr</span>
                             </a>
-                            <a href="https://wa.me/50689929180" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                <img src="{{ asset('imgs/social/whatsapp.svg') }}" alt="WhatsApp" width="20" height="20"> <span>+506 8992 9180</span>
-                            </a>
                             <a href="tel:+50627111010" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
                                 <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="20" height="20"> <span>2711 1010</span>
                             </a>

@@ -439,16 +439,15 @@ class ProgramaPDF extends FPDF
         $y = 283.6;
         $iconColor = [85, 88, 92];
         $items = [
-            ['type' => 'facebook',  'text' => 'CEFI.',           'w' => 18.5, 'url' => 'https://www.facebook.com/CEFI.'],
-            ['type' => 'instagram', 'text' => 'cefi_cr',         'w' => 21.5, 'url' => 'https://www.instagram.com/cefi_cr/'],
-            ['type' => 'whatsapp',  'text' => '+506 8992 9180',  'w' => 30.5, 'url' => 'https://wa.me/50689929180'],
-            ['type' => 'phone',     'text' => '2711 1010',       'w' => 22.5, 'url' => 'tel:+50627111010'],
-            ['type' => 'email',     'text' => 'info@ceficr.com', 'w' => 30.5, 'url' => 'mailto:info@ceficr.com'],
-            ['type' => 'youtube',   'text' => '@ceficr',         'w' => 20.5, 'url' => 'https://www.youtube.com/@ceficr'],
-            ['type' => 'tiktok',    'text' => '@cefi_cr',        'w' => 20.5, 'url' => 'https://www.tiktok.com/@cefi_cr'],
+            ['type' => 'facebook',  'text' => 'CEFI.',           'w' => 21.0, 'url' => 'https://www.facebook.com/CEFI.'],
+            ['type' => 'instagram', 'text' => 'cefi_cr',         'w' => 24.0, 'url' => 'https://www.instagram.com/cefi_cr/'],
+            ['type' => 'phone',     'text' => '2711 1010',       'w' => 25.0, 'url' => 'tel:+50627111010'],
+            ['type' => 'email',     'text' => 'info@ceficr.com', 'w' => 33.0, 'url' => 'mailto:info@ceficr.com'],
+            ['type' => 'youtube',   'text' => '@ceficr',         'w' => 23.0, 'url' => 'https://www.youtube.com/@ceficr'],
+            ['type' => 'tiktok',    'text' => '@cefi_cr',        'w' => 23.0, 'url' => 'https://www.tiktok.com/@cefi_cr'],
         ];
 
-        $x = 6.0;
+        $x = 8.0;
         foreach ($items as $it) {
             // Dibujar ícono vectorial circular
             $this->drawSocialIconVector($it['type'], $x + 2.8, $y + 2.6, 2.75, $iconColor);
