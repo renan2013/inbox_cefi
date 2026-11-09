@@ -397,12 +397,19 @@ class DescriptorPdfService
         $pdf->SetTextColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
         $pdf->Cell(186, 5.5, $pdf->toPdf($pdf->programa), 0, 1, 'C');
 
-        $pdf->SetFont('Arial', 'BI', 9);
+        // Nombre del Curso en letras grandes con espacio superior e inferior
+        $pdf->Ln(4.5);
+        $pdf->SetFont('Arial', 'B', 16);
+        $pdf->SetTextColor($pdf->oscuro_cefi[0], $pdf->oscuro_cefi[1], $pdf->oscuro_cefi[2]);
+        $pdf->MultiCell(186, 7.5, $pdf->toPdf(mb_strtoupper($pdf->materia, 'UTF-8')), 0, 'C');
+        $pdf->Ln(3.5);
+
+        $pdf->SetFont('Arial', 'BI', 9.5);
         $pdf->SetTextColor(100, 116, 139);
         $pdf->Cell(186, 5, $pdf->toPdf('Descriptor Oficial del Curso'), 0, 1, 'C');
 
         // Barra divisoria institucional bicolor (Azul Marino CEFI + Verde CEFI)
-        $y_div = $pdf->GetY() + 1.5;
+        $y_div = $pdf->GetY() + 2;
         $pdf->SetLineWidth(0.7);
         $pdf->SetDrawColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
         $pdf->Line(45, $y_div, 105, $y_div);
@@ -410,22 +417,22 @@ class DescriptorPdfService
         $pdf->Line(105, $y_div, 165, $y_div);
         $pdf->SetLineWidth(0.2);
 
-        $pdf->Ln(4.5);
+        $pdf->Ln(6.5);
 
         // Encabezado Institucional de la Tabla Ficha Técnica
         $y_head = $pdf->GetY();
         $pdf->SetFillColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
         $pdf->SetDrawColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
-        $pdf->Rect(12, $y_head, 186, 6.5, 'DF');
+        $pdf->Rect(12, $y_head, 186, 7.5, 'DF');
 
         // Acento lateral verde en el encabezado de la Ficha Técnica
         $pdf->SetFillColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
-        $pdf->Rect(12, $y_head, 3.0, 6.5, 'F');
+        $pdf->Rect(12, $y_head, 3.0, 7.5, 'F');
 
         $pdf->SetXY(16, $y_head);
-        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetFont('Arial', 'B', 9.5);
         $pdf->SetTextColor(255, 255, 255);
-        $pdf->Cell(182, 6.5, $pdf->toPdf('FICHA TÉCNICA E INFORMACIÓN GENERAL DEL CURSO'), 0, 1, 'L', false);
+        $pdf->Cell(182, 7.5, $pdf->toPdf('FICHA TÉCNICA E INFORMACIÓN GENERAL DEL CURSO'), 0, 1, 'L', false);
 
         $creditos_val = (int)$prop('creditos', 0) > 0 ? (string)$prop('creditos') : '4';
 
@@ -451,15 +458,15 @@ class DescriptorPdfService
             $label_txt = $pdf->toPdf($row[0]);
             $val_txt = $pdf->toPdf($row[1]);
 
-            $pdf->SetFont('Arial', 'B', 8.5);
+            $pdf->SetFont('Arial', 'B', 9);
             $lines_label = $pdf->NbLines($w_label - 6, $label_txt);
 
-            $pdf->SetFont('Arial', ($idx <= 1) ? 'B' : '', 8.5);
+            $pdf->SetFont('Arial', ($idx <= 1) ? 'B' : '', 9);
             $lines_val = $pdf->NbLines($w_value - 6, $val_txt);
 
             $max_lines = max($lines_label, $lines_val);
-            $line_h = 4.6;
-            $row_h = ($max_lines === 1) ? 5.8 : ($max_lines * $line_h + 2.2);
+            $line_h = 5.0;
+            $row_h = ($max_lines === 1) ? 7.2 : ($max_lines * $line_h + 3.0);
 
             $pdf->CheckPageBreak($row_h);
 
@@ -487,32 +494,49 @@ class DescriptorPdfService
             // Imprimir texto de la etiqueta (centrado verticalmente si la fila tiene más de 1 línea)
             $pad_label = ($row_h - ($lines_label * $line_h)) / 2;
             $pdf->SetXY($x + 3.5, $y + $pad_label);
-            $pdf->SetFont('Arial', 'B', 8.5);
+            $pdf->SetFont('Arial', 'B', 9);
             $pdf->SetTextColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
             $pdf->MultiCell($w_label - 6, $line_h, $label_txt, 0, 'L');
 
             // Imprimir texto del valor (con salto automático a segunda línea cuando es largo)
             $pad_val = ($row_h - ($lines_val * $line_h)) / 2;
             $pdf->SetXY($x + $w_label + 3, $y + $pad_val);
-            $pdf->SetFont('Arial', ($idx <= 1) ? 'B' : '', 8.5);
+            $pdf->SetFont('Arial', ($idx <= 1) ? 'B' : '', 9);
             $pdf->SetTextColor(15, 23, 42);
             $pdf->MultiCell($w_value - 6, $line_h, $val_txt, 0, 'L');
 
             $pdf->SetY($y + $row_h);
         }
 
-        // Secciones Curriculares I a XI
-        $pdf->renderSeccion('I', 'Descripción del curso', (string)$prop('descripcion_curso', $silabo->descripcion ?? ''));
-        $pdf->renderSeccion('II', 'Objetivos generales', (string)$prop('objetivo_general', $silabo->objetivo_general ?? ''));
-        $pdf->renderSeccion('III', 'Objetivos específicos', (string)$prop('objetivos_especificos', $silabo->objetivos_especificos ?? ''));
-        $pdf->renderSeccion('IV', 'Contenidos temáticos', (string)$prop('contenidos_tematicos', $silabo->contenidos ?? ''));
-        $pdf->renderSeccion('V', 'Metodología de enseñanza', (string)$prop('metodologia_ensenanza', $silabo->metodologia ?? ''));
-        $pdf->renderSeccion('VI', 'Estrategias de aprendizaje', (string)$prop('estrategias_aprendizaje', $silabo->estrategias_aprendizaje ?? ''));
-        $pdf->renderSeccion('VII', 'Evaluación de los aprendizajes', (string)$prop('evaluacion_aprendizajes', ''));
-        $pdf->renderSeccion('VIII', 'Recursos didácticos', (string)$prop('recursos_didacticos', $silabo->recursos_aprendizaje ?? ''));
-        $pdf->renderSeccion('IX', 'Cronograma', (string)$prop('cronograma', $silabo->cronograma ?? ''));
-        $pdf->renderSeccion('X', 'Las guías de evaluación', (string)$prop('guias_evaluacion', ''));
-        $pdf->renderSeccion('XI', 'Bibliografía', (string)$prop('bibliografia', $silabo->bibliografia ?? ''));
+        // Pasar las secciones curriculares a la segunda página para que la Ficha Técnica quede independiente en la primera página
+        $secciones = [
+            ['I', 'Descripción del curso', (string)$prop('descripcion_curso', $silabo->descripcion ?? '')],
+            ['II', 'Objetivos generales', (string)$prop('objetivo_general', $silabo->objetivo_general ?? '')],
+            ['III', 'Objetivos específicos', (string)$prop('objetivos_especificos', $silabo->objetivos_especificos ?? '')],
+            ['IV', 'Contenidos temáticos', (string)$prop('contenidos_tematicos', $silabo->contenidos ?? '')],
+            ['V', 'Metodología de enseñanza', (string)$prop('metodologia_ensenanza', $silabo->metodologia ?? '')],
+            ['VI', 'Estrategias de aprendizaje', (string)$prop('estrategias_aprendizaje', $silabo->estrategias_aprendizaje ?? '')],
+            ['VII', 'Evaluación de los aprendizajes', (string)$prop('evaluacion_aprendizajes', '')],
+            ['VIII', 'Recursos didácticos', (string)$prop('recursos_didacticos', $silabo->recursos_aprendizaje ?? '')],
+            ['IX', 'Cronograma', (string)$prop('cronograma', $silabo->cronograma ?? '')],
+            ['X', 'Las guías de evaluación', (string)$prop('guias_evaluacion', '')],
+            ['XI', 'Bibliografía', (string)$prop('bibliografia', $silabo->bibliografia ?? '')],
+        ];
+
+        $tieneSecciones = false;
+        foreach ($secciones as $sec) {
+            if (!empty(trim(strip_tags($sec[2] ?? '')))) {
+                $tieneSecciones = true;
+                break;
+            }
+        }
+
+        if ($tieneSecciones) {
+            $pdf->AddPage();
+            foreach ($secciones as $sec) {
+                $pdf->renderSeccion($sec[0], $sec[1], $sec[2]);
+            }
+        }
 
         $filename = "descriptor_curso_{$id_plan}.pdf";
         $pdfContent = $pdf->Output('S');
