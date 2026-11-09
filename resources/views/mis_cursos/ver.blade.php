@@ -205,9 +205,15 @@
                             <span><i class="bi bi-people-fill me-1 text-primary"></i> <strong>{{ count($alumnos) }}</strong> Estudiantes</span>
                             @if ($es_admin)
                                 <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-xs btn-outline-success py-1 px-2 rounded-pill" onclick="sincronizarAlumnos()" title="Sincronizar Estudiantes desde Moodle">
-                                        <i class="bi bi-arrow-repeat me-1"></i> Sincronizar
-                                    </button>
+                                    @if (\App\Services\ModuleService::isEnabled('moodle_sync'))
+                                        <button type="button" class="btn btn-xs btn-outline-success py-1 px-2 rounded-pill" onclick="sincronizarAlumnos()" title="Sincronizar Estudiantes desde Moodle">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Sincronizar
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2 rounded-pill opacity-50" disabled title="Integración con Moodle inactiva">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Sincronizar
+                                        </button>
+                                    @endif
                                 </div>
                             @endif
                             
@@ -278,10 +284,17 @@
                                 </a>
 
                                 @if ($es_admin)
-                                    <button type="button" class="btn btn-action-vertical" onclick="sincronizarMoodle()" title="Sincronizar Moodle">
-                                        <i class="bi bi-cloud-arrow-up text-success fs-4 d-block mb-1"></i>
-                                        <span class="small fw-bold">Moodle</span>
-                                    </button>
+                                    @if (\App\Services\ModuleService::isEnabled('moodle_sync'))
+                                        <button type="button" class="btn btn-action-vertical" onclick="sincronizarMoodle()" title="Sincronizar Moodle">
+                                            <i class="bi bi-cloud-arrow-up text-success fs-4 d-block mb-1"></i>
+                                            <span class="small fw-bold">Moodle</span>
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-action-vertical opacity-50" disabled title="Integración con Moodle inactiva">
+                                            <i class="bi bi-cloud-arrow-up text-muted fs-4 d-block mb-1"></i>
+                                            <span class="small fw-bold text-muted">Moodle</span>
+                                        </button>
+                                    @endif
                                 @endif
 
                                 <a href="{{ route('mis_cursos.crear_portada', $curso->id_curso_activo) }}" class="btn btn-action-vertical" title="Creador de Portada">
@@ -352,11 +365,15 @@
                                 <i class="bi bi-info-circle me-1"></i> Ingrese las notas por rubro. El sistema calcula el total y habilita el envío automático.
                             </span>
                             <div class="d-flex gap-2">
-                                @module('moodle_sync')
-                                <button type="button" id="btnSincronizarNotasMoodle" class="btn btn-success btn-sm text-white rounded-pill px-3 shadow-sm fw-bold" onclick="sincronizarNotasMoodle({{ $curso->id_curso_activo }})" title="Importar calificaciones directamente desde Moodle Virtual">
-                                    <i class="bi bi-mortarboard-fill me-1"></i> Sincronizar Moodle
-                                </button>
-                                @endmodule
+                                @if (\App\Services\ModuleService::isEnabled('moodle_sync'))
+                                    <button type="button" id="btnSincronizarNotasMoodle" class="btn btn-success btn-sm text-white rounded-pill px-3 shadow-sm fw-bold" onclick="sincronizarNotasMoodle({{ $curso->id_curso_activo }})" title="Importar calificaciones directamente desde Moodle Virtual">
+                                        <i class="bi bi-mortarboard-fill me-1"></i> Sincronizar Moodle
+                                    </button>
+                                @else
+                                    <button type="button" id="btnSincronizarNotasMoodle" class="btn btn-secondary btn-sm text-white rounded-pill px-3 shadow-sm fw-bold opacity-50" disabled title="Integración con Moodle inactiva">
+                                        <i class="bi bi-mortarboard-fill me-1"></i> Sincronizar Moodle
+                                    </button>
+                                @endif
                                 <button type="submit" id="btnGuardarTodasNotas" form="formNotas" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" style="background-color: var(--primary); border: none;">
                                     <i class="bi bi-save2-fill me-1"></i> Guardar Cambios
                                 </button>

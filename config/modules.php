@@ -23,7 +23,7 @@ return [
         'gestion_cursos' => true,
         'registro_academico' => true,
         'expedientes_360' => true,
-        'moodle_sync' => true,
+        'moodle_sync' => false,
         'estudiante_tcu' => true,
 
         // --- FACTURACIÓN Y FINANZAS (CONTRATADO POR CEFI) ---
