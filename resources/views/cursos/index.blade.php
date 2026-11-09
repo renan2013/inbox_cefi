@@ -354,7 +354,7 @@
                                             <tr>
                                                 <th class="ps-4">Código</th>
                                                 <th>Nombre de la Materia</th>
-                                                <th>Periodo / Cuatrimestre</th>
+                                                <th>Descriptor / Sílabo</th>
                                                 <th>Modalidad / Duración</th>
                                                 <th class="text-center">Créditos</th>
                                                 <th class="text-center">Precio</th>
@@ -369,10 +369,32 @@
                                                     </td>
                                                     <td>
                                                         <div class="fw-bold" style="color: #f8fafc;">{{ $curso->materia }}</div>
-                                                        <small class="text-white-50">ID Plan: {{ $curso->id_plan }}</small>
+                                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                                            @if ($curso->cuatrimestre)
+                                                                <span class="badge-cuatri py-0 px-2" style="font-size: 0.7rem;">{{ $curso->cuatrimestre }}</span>
+                                                            @endif
+                                                            <small class="text-white-50" style="font-size: 0.75rem;">ID: {{ $curso->id_plan }}</small>
+                                                        </div>
                                                     </td>
                                                     <td>
-                                                        <span class="badge-cuatri">{{ $curso->cuatrimestre ?: 'Regular' }}</span>
+                                                        @if ($curso->fecha_descriptor_pdf)
+                                                            <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
+                                                                <i class="bi bi-patch-check-fill me-1 text-success"></i> Oficial Generado
+                                                            </span>
+                                                            <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">
+                                                                <i class="bi bi-calendar3 me-1"></i>{{ \Carbon\Carbon::parse($curso->fecha_descriptor_pdf)->format('d/m/Y') }}
+                                                            </small>
+                                                        @elseif (!empty($curso->contenidos_tematicos) || !empty($curso->descripcion_curso) || !empty($curso->cronograma))
+                                                            <span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
+                                                                <i class="bi bi-journal-check me-1 text-info"></i> Sílabo Completo
+                                                            </span>
+                                                            <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">Listo para emitir</small>
+                                                        @else
+                                                            <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
+                                                                <i class="bi bi-clock-history me-1 text-warning"></i> Ficha Básica
+                                                            </span>
+                                                            <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">Sin contenidos cargados</small>
+                                                        @endif
                                                     </td>
                                                     <td>
                                                         <span class="small text-white-50">{{ $curso->modalidad ?? 'Virtual' }}</span>
@@ -388,7 +410,7 @@
                                                     </td>
                                                     <td class="text-end pe-4">
                                                         <div class="d-flex justify-content-end gap-1">
-                                                            <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver Descriptor PDF">
+                                                            <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver Descriptor PDF Oficial">
                                                                 <i class="bi bi-file-earmark-pdf"></i>
                                                             </a>
                                                             <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Descargar Descriptor Word (.doc)">
@@ -451,8 +473,8 @@
                                         <tr>
                                             <th class="ps-4">Código</th>
                                             <th>Nombre de la Materia</th>
-                                            <th>Periodo</th>
-                                            <th>Modalidad</th>
+                                            <th>Descriptor / Sílabo</th>
+                                            <th>Modalidad / Duración</th>
                                             <th class="text-center">Créditos</th>
                                             <th class="text-center">Precio</th>
                                             <th class="text-end pe-4">Acciones</th>
@@ -464,10 +486,39 @@
                                                 <td class="ps-4"><strong class="text-white">{{ $curso->codigo ?: 'S/C' }}</strong></td>
                                                 <td>
                                                     <div class="fw-bold" style="color: #f8fafc;">{{ $curso->materia }}</div>
-                                                    <small class="text-white-50">ID Plan: {{ $curso->id_plan }}</small>
+                                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                                        @if ($curso->cuatrimestre)
+                                                            <span class="badge-cuatri py-0 px-2" style="font-size: 0.7rem;">{{ $curso->cuatrimestre }}</span>
+                                                        @endif
+                                                        <small class="text-white-50" style="font-size: 0.75rem;">ID: {{ $curso->id_plan }}</small>
+                                                    </div>
                                                 </td>
-                                                <td><span class="badge-cuatri">{{ $curso->cuatrimestre ?: 'Regular' }}</span></td>
-                                                <td><span class="small text-white-50">{{ $curso->modalidad ?? 'Virtual' }}</span></td>
+                                                <td>
+                                                    @if ($curso->fecha_descriptor_pdf)
+                                                        <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
+                                                            <i class="bi bi-patch-check-fill me-1 text-success"></i> Oficial Generado
+                                                        </span>
+                                                        <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">
+                                                            <i class="bi bi-calendar3 me-1"></i>{{ \Carbon\Carbon::parse($curso->fecha_descriptor_pdf)->format('d/m/Y') }}
+                                                        </small>
+                                                    @elseif (!empty($curso->contenidos_tematicos) || !empty($curso->descripcion_curso) || !empty($curso->cronograma))
+                                                        <span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
+                                                            <i class="bi bi-journal-check me-1 text-info"></i> Sílabo Completo
+                                                        </span>
+                                                        <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">Listo para emitir</small>
+                                                    @else
+                                                        <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
+                                                            <i class="bi bi-clock-history me-1 text-warning"></i> Ficha Básica
+                                                        </span>
+                                                        <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">Sin contenidos cargados</small>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="small text-white-50">{{ $curso->modalidad ?? 'Virtual' }}</span>
+                                                    @if ($curso->duracion)
+                                                        <small class="d-block text-white-50 opacity-75">{{ $curso->duracion }}</small>
+                                                    @endif
+                                                </td>
                                                 <td class="text-center"><strong class="text-white">{{ $curso->creditos ?? 'N/D' }}</strong></td>
                                                 <td class="text-center"><span class="text-success fw-bold">₡{{ number_format($curso->precio, 2) }}</span></td>
                                                 <td class="text-end pe-4">

@@ -303,6 +303,12 @@ class DescriptorPdfService
         $filename = "descriptor_curso_{$id_plan}.pdf";
         $pdfContent = $pdf->Output('S');
 
+        try {
+            DB::table('plan_estudios')->where('id_plan', $id_plan)->update(['fecha_descriptor_pdf' => now()]);
+        } catch (\Throwable $e) {
+            // Ignorar si no existe columna
+        }
+
         if ($dest === 'F') {
             $dir = public_path('uploads/descriptores_cursos');
             if (!file_exists($dir)) {
