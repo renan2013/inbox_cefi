@@ -277,7 +277,7 @@
                                                 @php $curr_cat = $prog->categoria; @endphp
                                                 <optgroup label="{{ $curr_cat ?: 'Programas' }}">
                                             @endif
-                                            <option value="{{ $prog->id_programa }}" data-costo="{{ $prog->costo_materia ?? 0 }}" {{ (old('id_programa', request('programa_id')) == $prog->id_programa) ? 'selected' : '' }}>
+                                            <option value="{{ $prog->id_programa }}" data-costo="{{ $prog->costo_materia ?? 0 }}" data-categoria="{{ $prog->categoria ?? '' }}" {{ (old('id_programa', request('programa_id')) == $prog->id_programa) ? 'selected' : '' }}>
                                                 {{ $prog->nombre_programa }}
                                             </option>
                                         @endforeach
@@ -324,17 +324,17 @@
                                     <label for="codigo" class="form-label">Código del Curso <span class="text-danger">*</span></label>
                                     <input type="text" name="codigo" id="codigo" class="form-control" placeholder="Ej: MLSC - 01" value="{{ old('codigo') }}" required>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6" id="col_materia">
                                     <label for="materia" class="form-label">Nombre de la Materia / Curso <span class="text-danger">*</span></label>
                                     <input type="text" name="materia" id="materia" class="form-control fw-bold" placeholder="Ej: Cultura, etnicidad y diversidad." value="{{ old('materia') }}" required>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-3" id="col_creditos">
                                     <label for="creditos" class="form-label">Créditos</label>
                                     <div class="input-group">
                                         <button class="btn btn-outline-secondary" type="button" onclick="cambiarCreditos(-1)" title="Disminuir créditos">
                                             <i class="bi bi-dash-lg"></i>
                                         </button>
-                                        <input type="number" name="creditos" id="creditos" class="form-control text-center fw-bold" placeholder="4" min="0" max="50" value="{{ old('creditos', '4') }}">
+                                        <input type="number" name="creditos" id="creditos" class="form-control text-center fw-bold" placeholder="0" min="0" max="50" value="{{ old('creditos', '0') }}">
                                         <button class="btn btn-outline-secondary" type="button" onclick="cambiarCreditos(1)" title="Aumentar créditos">
                                             <i class="bi bi-plus-lg"></i>
                                         </button>
@@ -800,12 +800,36 @@
         document.getElementById('distribucion_horas').value = `Este curso comprende un total de ${tot} horas distribuidas en ${textoTeo}, ${textoPrac} y ${textoIndep}.`;
     }
 
+    function verificarVisibilidadCreditos() {
+        const select = document.getElementById('id_programa');
+        const colCreditos = document.getElementById('col_creditos');
+        const colMateria = document.getElementById('col_materia');
+        const inpCreditos = document.getElementById('creditos');
+        if (!select || !colCreditos || !colMateria) return;
+
+        const selected = select.options[select.selectedIndex];
+        const cat = (selected ? (selected.getAttribute('data-categoria') || '') : '').toLowerCase();
+        const esTecnica = cat.includes('técnica') || cat.includes('tecnica') || cat.includes('libre') || cat.includes('certificación') || cat.includes('certificacion');
+
+        if (esTecnica) {
+            colCreditos.classList.add('d-none');
+            colMateria.classList.remove('col-md-6');
+            colMateria.classList.add('col-md-9');
+            if (inpCreditos) inpCreditos.value = 0;
+        } else {
+            colCreditos.classList.remove('d-none');
+            colMateria.classList.remove('col-md-9');
+            colMateria.classList.add('col-md-6');
+        }
+    }
+
     function actualizarPrecioPrograma(select) {
         const selected = select.options[select.selectedIndex];
         const costo = selected.getAttribute('data-costo') || 0;
         const formatted = parseFloat(costo).toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         document.getElementById('precio_display').value = formatted;
         document.getElementById('precio_input').value = costo;
+        verificarVisibilidadCreditos();
     }
 
     function calcularTotal() {

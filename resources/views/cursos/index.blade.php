@@ -473,7 +473,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="text-center">
-                                                        <strong class="text-white">{{ $curso->creditos ?? 'N/D' }}</strong>
+                                                        <strong class="text-white">{{ ($curso->creditos ?? 0) > 0 ? $curso->creditos : 'N/A' }}</strong>
                                                     </td>
                                                     <td class="text-center">
                                                         <span class="text-success fw-bold">₡{{ number_format($curso->precio, 2) }}</span>

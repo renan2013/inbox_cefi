@@ -466,12 +466,16 @@ class DescriptorPdfService
         $pdf->SetTextColor(255, 255, 255);
         $pdf->Cell(182, 7.5, $pdf->toPdf('FICHA TÉCNICA E INFORMACIÓN GENERAL DEL CURSO'), 0, 1, 'L', false);
 
-        $creditos_val = (int)$prop('creditos', 0) > 0 ? (string)$prop('creditos') : '4';
+        $creditos_num = (int)$prop('creditos', 0);
 
         $ficha = [
             ['Código', (string)$prop('codigo', '')],
             ['Nombre del Curso', (string)$prop('materia', '')],
-            ['Créditos', $creditos_val],
+        ];
+        if ($creditos_num > 0) {
+            $ficha[] = ['Créditos', (string)$creditos_num];
+        }
+        $ficha = array_merge($ficha, [
             ['Duración', (string)$prop('duracion', '15 semanas')],
             ['Distribución horas por semana', (string)$prop('distribucion_horas', '12 horas (3 teóricas, 1 práctica, 8 independientes)')],
             ['Modalidad', (string)$prop('modalidad', 'Virtual')],
@@ -481,7 +485,7 @@ class DescriptorPdfService
             ['Correquisitos', (string)$prop('correquisitos', 'No tiene')],
             ['Nivel', (string)$prop('nivel', $prop('facultad_programa', 'Carrera Técnica'))],
             ['Profesor', (string)$prop('profesor', '--')],
-        ];
+        ]);
 
         $w_label = 60;
         $w_value = 126;

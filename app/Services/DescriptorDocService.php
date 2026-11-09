@@ -173,7 +173,7 @@ class DescriptorDocService
         }
         $doc_html .= "
         <h4 style='font-size: 11pt; font-weight: bold; color: #5fb230; margin-bottom: 4pt;'>{$programa}</h4>
-        <p style='font-size: 9.5pt; color: #64748b; margin-top: 2pt;'>Descriptor Oficial del Curso</p>
+        <p style='font-size: 9.5pt; color: #64748b; margin-top: 2pt;'>Programa del Curso</p>
     </div>
 
     <!-- FICHA TÉCNICA OFICIAL -->
@@ -185,11 +185,11 @@ class DescriptorDocService
         <tr>
             <td class='label'>Nombre del Curso</td>
             <td class='value'><strong>{$materia}</strong></td>
-        </tr>
+        </tr>" . ((int)$prop('creditos', 0) > 0 ? "
         <tr>
             <td class='label'>Créditos</td>
-            <td class='value'>" . htmlspecialchars((string)$prop('creditos', '4')) . "</td>
-        </tr>
+            <td class='value'>" . htmlspecialchars((string)$prop('creditos')) . "</td>
+        </tr>" : "") . "
         <tr>
             <td class='label'>Duración</td>
             <td class='value'>" . htmlspecialchars((string)$prop('duracion', '15 semanas')) . "</td>
