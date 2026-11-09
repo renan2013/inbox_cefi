@@ -23,20 +23,69 @@
         }
 
         .form-control-custom, .form-select-custom {
-            background-color: rgba(15, 23, 42, 0.5);
+            background-color: var(--card-dark);
             border: 2px solid var(--border-dark);
             border-radius: 0.75rem;
-            color: #f8fafc;
+            color: var(--text-light);
             padding: 0.7rem 1rem;
             transition: all 0.3s;
         }
 
         .form-control-custom:focus, .form-select-custom:focus {
-            background-color: rgba(15, 23, 42, 0.7);
+            background-color: var(--card-dark);
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(95, 178, 48, 0.15);
-            color: #f8fafc;
+            color: var(--text-light);
             outline: none;
+        }
+
+        [data-theme="light"] .form-control-custom, 
+        [data-theme="light"] .form-select-custom {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .form-control-custom:focus, 
+        [data-theme="light"] .form-select-custom:focus {
+            background-color: #ffffff !important;
+            border-color: var(--primary) !important;
+            color: #0f172a !important;
+        }
+
+        /* Modal adaptación tema claro y oscuro */
+        .modal-custom-content {
+            background-color: var(--card-dark) !important;
+            border: 1px solid var(--border-dark) !important;
+            border-radius: 1.25rem !important;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] .modal-custom-content {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15) !important;
+        }
+
+        [data-theme="light"] .modal-custom-content .modal-header,
+        [data-theme="light"] .modal-custom-content .modal-footer {
+            border-color: #e2e8f0 !important;
+        }
+
+        [data-theme="light"] .modal-custom-content .modal-body {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .modal-custom-content .form-label-custom {
+            color: #475569 !important;
+        }
+
+        [data-theme="light"] .modal-custom-content .btn-close-custom {
+            filter: none !important;
+        }
+
+        [data-theme="dark"] .modal-custom-content .btn-close-custom {
+            filter: invert(1) grayscale(100%) brightness(200%);
         }
 
         .form-label-custom {
@@ -419,16 +468,16 @@
         <!-- MODAL DE EDICIÓN DE GRUPO -->
         <div class="modal fade" id="modalEditarGrupo" tabindex="-1" aria-labelledby="modalEditarGrupoLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content glass-card" style="background-color: #1e293b; border: 1px solid var(--border-dark); border-radius: 1.25rem;">
+                <div class="modal-content modal-custom-content">
                     <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
-                        <h5 class="modal-title text-white fw-bold" id="modalEditarGrupoLabel">
+                        <h5 class="modal-title fw-bold" id="modalEditarGrupoLabel">
                             <i class="bi bi-pencil-square text-success me-2"></i> Editar Grupo de Estudio
                         </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        <button type="button" class="btn-close btn-close-custom" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form id="form-editar-grupo" method="POST" action="">
                         @csrf
-                        <div class="modal-body p-4 text-white">
+                        <div class="modal-body p-4">
                             <div class="mb-3">
                                 <label class="form-label-custom text-success fw-bold">Materia / Curso</label>
                                 <input type="text" id="edit_materia_display" class="form-control form-control-custom w-100" readonly style="opacity: 0.85;">
