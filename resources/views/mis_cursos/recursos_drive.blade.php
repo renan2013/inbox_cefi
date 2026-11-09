@@ -255,8 +255,8 @@
     let currentMaxMb = {{ $maxMb ?? 20 }};
     function cambiarLimiteMb() {
         Swal.fire({
-            title: 'Límite de Subida (MB)',
-            text: 'Defina el tamaño máximo permitido por archivo en el repositorio de cursos:',
+            title: 'Límite de Subida para este Curso (MB)',
+            text: 'Todos los demás cursos mantienen 20 MB por defecto. Defina el límite exclusivo para este curso:',
             input: 'number',
             inputValue: currentMaxMb,
             inputAttributes: {
@@ -265,7 +265,7 @@
                 step: 1
             },
             showCancelButton: true,
-            confirmButtonText: 'Guardar Límite',
+            confirmButtonText: 'Guardar para este Curso',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#0d6efd'
         }).then((result) => {
@@ -277,7 +277,10 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ max_mb: parseInt(result.value, 10) })
+                    body: JSON.stringify({
+                        id_curso: {{ (int) $curso->id_curso_activo }},
+                        max_mb: parseInt(result.value, 10)
+                    })
                 })
                 .then(res => res.json())
                 .then(data => {

@@ -1386,7 +1386,9 @@ class MisCursosController extends Controller
             ->orderBy('fecha_subida', 'desc')
             ->get();
 
-        $maxMb = (int) (\App\Models\ConfiguracionSistema::where('clave', 'max_upload_recursos_mb')->value('valor') ?: 20);
+        $cursoMaxMb = \App\Models\ConfiguracionSistema::where('clave', 'max_upload_recursos_mb_curso_' . (int)$id)->value('valor');
+        $defaultMaxMb = \App\Models\ConfiguracionSistema::where('clave', 'max_upload_recursos_mb')->value('valor');
+        $maxMb = (int) ($cursoMaxMb ?: ($defaultMaxMb ?: 20));
         if ($maxMb < 1) {
             $maxMb = 20;
         }
@@ -1399,7 +1401,9 @@ class MisCursosController extends Controller
      */
     public function guardarRecursoDrive(Request $request, $id)
     {
-        $maxMb = (int) (\App\Models\ConfiguracionSistema::where('clave', 'max_upload_recursos_mb')->value('valor') ?: 20);
+        $cursoMaxMb = \App\Models\ConfiguracionSistema::where('clave', 'max_upload_recursos_mb_curso_' . (int)$id)->value('valor');
+        $defaultMaxMb = \App\Models\ConfiguracionSistema::where('clave', 'max_upload_recursos_mb')->value('valor');
+        $maxMb = (int) ($cursoMaxMb ?: ($defaultMaxMb ?: 20));
         if ($maxMb < 1) {
             $maxMb = 20;
         }
@@ -1409,7 +1413,7 @@ class MisCursosController extends Controller
         $request->validate([
             'archivo_drive' => 'required|file|max:' . ($maxMb * 1024),
         ], [
-            'archivo_drive.max' => "El archivo supera el tamaño máximo configurado de {$maxMb} MB.",
+            'archivo_drive.max' => "El archivo supera el tamaño máximo permitido para este curso ({$maxMb} MB).",
         ]);
 
         $curso = CursoActivo::findOrFail($id);
@@ -1447,7 +1451,7 @@ class MisCursosController extends Controller
     }
 
     /**
-     * Permite al Administrador ajustar el límite máximo (en MB) de subida de recursos.
+     * Permite al Administrador ajustar el límite máximo (en MB) de subida de recursos exclusivamente para este curso.
      */
     public function configurarLimiteRecursoDrive(Request $request)
     {
@@ -1455,16 +1459,19 @@ class MisCursosController extends Controller
             return response()->json(['success' => false, 'message' => 'Solo el Administrador puede modificar este parámetro.'], 403);
         }
 
+        $idCurso = (int) $request->input('id_curso', 0);
         $maxMb = max(1, min(1024, (int) $request->input('max_mb', 20)));
+        $clave = $idCurso > 0 ? ('max_upload_recursos_mb_curso_' . $idCurso) : 'max_upload_recursos_mb';
+
         \App\Models\ConfiguracionSistema::updateOrCreate(
-            ['clave' => 'max_upload_recursos_mb'],
+            ['clave' => $clave],
             ['valor' => (string) $maxMb]
         );
 
         return response()->json([
             'success' => true,
             'max_mb' => $maxMb,
-            'message' => "Límite actualizado a {$maxMb} MB correctamente."
+            'message' => "Límite de este curso actualizado a {$maxMb} MB correctamente."
         ]);
     }
 
