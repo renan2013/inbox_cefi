@@ -355,8 +355,8 @@ class DescriptorPdfService
         if (file_exists($logo_cliente)) {
             try {
                 $imgSize = @getimagesize($logo_cliente);
-                $maxW = 50;
-                $maxH = 22;
+                $maxW = 100;
+                $maxH = 44;
                 $imgW = $maxW;
                 $imgH = 0;
 
@@ -370,19 +370,19 @@ class DescriptorPdfService
                         $imgH = $maxW / $ratio;
                     }
                 } else {
-                    $imgH = 22;
-                    $imgW = 22;
+                    $imgH = 44;
+                    $imgW = 44;
                 }
 
                 $posX = 12 + ((186 - $imgW) / 2);
-                $posY = 14 + (($maxH - $imgH) / 2);
+                $posY = 12 + (($maxH - $imgH) / 2);
                 @$pdf->Image($logo_cliente, $posX, $posY, $imgW, $imgH);
             } catch (\Throwable $e) {
                 // Continuar si el logo tiene un formato no soportado por FPDF
             }
         }
 
-        $pdf->SetY(38);
+        $pdf->SetY(59);
         $pdf->SetFont('Arial', 'B', 13);
         $pdf->SetTextColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
         $pdf->Cell(186, 6, $pdf->toPdf(mb_strtoupper(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')), 'UTF-8')), 0, 1, 'C');
