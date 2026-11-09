@@ -18,11 +18,61 @@ use Carbon\Carbon;
 class EncuestaController extends Controller
 {
     /**
+     * Asegura que existan preguntas base en el banco de encuestas si está vacío.
+     */
+    protected static function ensureDefaultPreguntas(): void
+    {
+        try {
+            if (EncuestaPregunta::count() > 0) {
+                return;
+            }
+
+            $defaults = [
+                ['categoria' => 'institucion', 'orden' => 1, 'texto' => '¿Cómo califica la atención y el soporte brindado por la institución durante el curso?'],
+                ['categoria' => 'institucion', 'orden' => 2, 'texto' => '¿Cómo evalúa la organización general, horarios y recursos tecnológicos facilitados?'],
+                ['categoria' => 'institucion', 'orden' => 3, 'texto' => '¿En qué medida el programa del curso cumplió con sus expectativas académicas?'],
+                ['categoria' => 'docente',     'orden' => 4, 'texto' => '¿El docente demostró dominio del tema y claridad al explicar los contenidos?'],
+                ['categoria' => 'docente',     'orden' => 5, 'texto' => '¿El docente fomentó la participación, resolvió dudas oportunamente y mantuvo un trato respetuoso?'],
+                ['categoria' => 'docente',     'orden' => 6, 'texto' => '¿Las actividades prácticas y evaluaciones estuvieron acordes con los temas vistos en clase?'],
+                ['categoria' => 'docente',     'orden' => 7, 'texto' => '¿El docente cumplió puntualmente con el horario y la planificación semanal del curso?'],
+            ];
+
+            $opcionesDefault = [
+                ['texto' => 'Malo',      'emoji' => '😞', 'puntaje' => 25,  'orden' => 1],
+                ['texto' => 'Regular',   'emoji' => '😐', 'puntaje' => 50,  'orden' => 2],
+                ['texto' => 'Bueno',     'emoji' => '🙂', 'puntaje' => 75,  'orden' => 3],
+                ['texto' => 'Excelente', 'emoji' => '😃', 'puntaje' => 100, 'orden' => 4],
+            ];
+
+            foreach ($defaults as $item) {
+                $pregunta = EncuestaPregunta::create([
+                    'texto'     => $item['texto'],
+                    'categoria' => $item['categoria'],
+                    'orden'     => $item['orden'],
+                    'activo'    => 1,
+                ]);
+                foreach ($opcionesDefault as $op) {
+                    EncuestaOpcion::create([
+                        'id_pregunta' => $pregunta->id,
+                        'texto'       => $op['texto'],
+                        'emoji'       => $op['emoji'],
+                        'puntaje'     => $op['puntaje'],
+                        'orden'       => $op['orden'],
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Silencioso si las tablas aún no existen
+        }
+    }
+
+    /**
      * Muestra el formulario público para responder la encuesta de un curso.
      * Acceso público sin requerir inicio de sesión.
      */
     public function responder(Request $request, $id_curso)
     {
+        self::ensureDefaultPreguntas();
         $id_curso = intval($id_curso);
         $cookie_key = 'enc_resp_' . $id_curso;
         $session_key = 'enc_resp_' . $id_curso;
@@ -172,6 +222,8 @@ class EncuestaController extends Controller
         if (Auth::user()->id_rol != 1) {
             return redirect()->route('dashboard')->with('error', 'Acceso denegado.');
         }
+
+        self::ensureDefaultPreguntas();
 
         $preguntas = EncuestaPregunta::with('opciones')
             ->orderBy('orden', 'asc')
