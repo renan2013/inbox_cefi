@@ -14,6 +14,7 @@ class CursoActivo extends Model
     protected $fillable = [
         'id_plan',
         'id_profesor',
+        'nombre_grupo',
         'periodo',
         'fecha_inicio',
         'fecha_final',

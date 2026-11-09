@@ -9,24 +9,75 @@ use App\Models\Usuario;
 use App\Models\Matricula;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class GrupoController extends Controller
 {
+    /**
+     * Asegura que la tabla cursos_activos permita id_profesor NULL y cuente con nombre_grupo opcional.
+     */
+    protected static function ensureCursosActivosColumns(): void
+    {
+        try {
+            if (!Schema::hasTable('cursos_activos')) {
+                return;
+            }
+            if (!Schema::hasColumn('cursos_activos', 'nombre_grupo')) {
+                DB::statement("ALTER TABLE `cursos_activos` ADD COLUMN `nombre_grupo` VARCHAR(100) NULL DEFAULT NULL AFTER `id_profesor`");
+            }
+            DB::statement("ALTER TABLE `cursos_activos` MODIFY COLUMN `id_profesor` INT(11) NULL DEFAULT NULL");
+        } catch (\Throwable $e) {
+            // Ignorar si ya existe o si el motor no requiere alteración
+        }
+    }
+
+    /**
+     * Construye el texto de horario manteniendo el día al inicio para el cuadro semanal.
+     */
+    protected function buildHorario(?string $dia, ?string $inicio, ?string $fin): string
+    {
+        $dia = trim((string)$dia);
+        $inicio = trim((string)$inicio);
+        $fin = trim((string)$fin);
+
+        if ($dia === '' || $dia === 'Asincrónico' || $dia === 'Por definir') {
+            return $dia !== '' ? $dia : 'Por definir';
+        }
+        if ($inicio !== '' && $fin !== '') {
+            return "{$dia} {$inicio} - {$fin}";
+        }
+        if ($inicio !== '') {
+            return "{$dia} {$inicio}";
+        }
+        return $dia;
+    }
+
     /**
      * Muestra el panel para gestionar grupos académicos.
      */
     public function index()
     {
+        self::ensureCursosActivosColumns();
+
         $programas = Programa::orderBy('nombre_programa', 'asc')->get();
         $profesores = Usuario::whereIn('id_rol', [1, 2, 4]) // Admin (1) o Profesor (2 / 4)
                              ->orderBy('apellidos', 'asc')
                              ->get();
 
-        $grupos = CursoActivo::with(['planEstudio.programa', 'profesor'])
-            ->get()
-            ->groupBy(function ($item) {
-                return $item->planEstudio->programa->nombre_programa ?? 'Sin Programa';
-            });
+        $listaGrupos = CursoActivo::with(['planEstudio.programa', 'profesor'])->get();
+
+        // Contar alumnos matriculados por cada grupo (excluyendo al docente asignado si figura en matrículas)
+        foreach ($listaGrupos as $g) {
+            $qMat = Matricula::where('id_curso_activo', $g->id_curso_activo);
+            if (!empty($g->id_profesor)) {
+                $qMat->where('id_estudiante', '!=', $g->id_profesor);
+            }
+            $g->total_estudiantes = $qMat->count();
+        }
+
+        $grupos = $listaGrupos->groupBy(function ($item) {
+            return $item->planEstudio->programa->nombre_programa ?? 'Sin Programa';
+        });
 
         // Resumen de períodos
         $resumen_periodos = CursoActivo::select('periodo', DB::raw('count(id_curso_activo) as total_cursos'))
@@ -49,7 +100,7 @@ class GrupoController extends Controller
     public function cursosPorProgramaAjax($id)
     {
         $materias = PlanEstudio::where('id_programa', $id)
-            ->select('id_plan', 'codigo', 'materia', 'cuatrimestre', 'modalidad')
+            ->select('id_plan', 'codigo', 'materia', 'cuatrimestre', 'modalidad', 'duracion')
             ->orderBy('id_plan', 'asc')
             ->get();
 
@@ -61,9 +112,12 @@ class GrupoController extends Controller
      */
     public function store(Request $request)
     {
+        self::ensureCursosActivosColumns();
+
         $request->validate([
             'id_plan' => 'required|exists:plan_estudios,id_plan',
             'id_profesor' => 'nullable|exists:usuarios,id',
+            'nombre_grupo' => 'nullable|string|max:100',
             'periodo' => 'required|string|max:100',
             'fecha_inicio' => 'required|date',
             'fecha_final' => 'required|date',
@@ -74,26 +128,16 @@ class GrupoController extends Controller
             'id_moodle' => 'nullable|integer',
             'enlace_zoom' => 'nullable|url',
             'horario_dia' => 'required|string',
-            'horario_inicio' => 'required',
-            'horario_fin' => 'required',
+            'horario_inicio' => 'nullable',
+            'horario_fin' => 'nullable',
         ]);
 
-        $horario = trim("{$request->horario_dia} {$request->horario_inicio} - {$request->horario_fin}");
+        $horario = $this->buildHorario($request->horario_dia, $request->horario_inicio, $request->horario_fin);
         $idProfesor = $request->filled('id_profesor') ? (int)$request->id_profesor : null;
-
-        // Asegurar que la columna id_profesor permita NULL cuando aún no se ha asignado docente
-        if ($idProfesor === null) {
-            try {
-                DB::statement("ALTER TABLE `cursos_activos` MODIFY COLUMN `id_profesor` INT(11) NULL DEFAULT NULL");
-            } catch (\Throwable $eCol) {
-                // Ignorar si ya es nullable o el motor no requiere alteración
-            }
-        }
 
         DB::beginTransaction();
         try {
-            // 1. Crear el curso activo / grupo
-            $grupo = CursoActivo::create([
+            $dataCreate = [
                 'id_plan' => $request->id_plan,
                 'id_profesor' => $idProfesor,
                 'periodo' => $request->periodo,
@@ -108,7 +152,13 @@ class GrupoController extends Controller
                 'id_moodle' => $request->id_moodle,
                 'check_proceso' => 1,
                 'en_supervision' => 1
-            ]);
+            ];
+            if (Schema::hasColumn('cursos_activos', 'nombre_grupo')) {
+                $dataCreate['nombre_grupo'] = $request->filled('nombre_grupo') ? trim($request->nombre_grupo) : null;
+            }
+
+            // 1. Crear el curso activo / grupo
+            $grupo = CursoActivo::create($dataCreate);
 
             // 2. Si se seleccionó un profesor, matricularlo y asegurar rol docente
             if ($idProfesor) {
@@ -129,6 +179,76 @@ class GrupoController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('grupos.index')->with('error', 'Error al crear el grupo: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Actualiza todos los datos de un grupo existente (profesor, horario, fechas, periodo, modalidad, Moodle, Zoom, etc.).
+     */
+    public function update(Request $request, $id)
+    {
+        self::ensureCursosActivosColumns();
+
+        $request->validate([
+            'id_profesor' => 'nullable|exists:usuarios,id',
+            'nombre_grupo' => 'nullable|string|max:100',
+            'periodo' => 'required|string|max:100',
+            'fecha_inicio' => 'required|date',
+            'fecha_final' => 'required|date',
+            'titulo_prefijo' => 'nullable|string|max:50',
+            'titulo_sufijo' => 'nullable|string|max:50',
+            'modalidad' => 'required|string|max:50',
+            'tipo_curso' => 'required|string|max:100',
+            'id_moodle' => 'nullable|integer',
+            'enlace_zoom' => 'nullable|url',
+            'horario_dia' => 'required|string',
+            'horario_inicio' => 'nullable',
+            'horario_fin' => 'nullable',
+        ]);
+
+        $horario = $this->buildHorario($request->horario_dia, $request->horario_inicio, $request->horario_fin);
+        $idProfesor = $request->filled('id_profesor') ? (int)$request->id_profesor : null;
+
+        DB::beginTransaction();
+        try {
+            $grupo = CursoActivo::findOrFail($id);
+
+            $dataUpdate = [
+                'id_profesor' => $idProfesor,
+                'periodo' => $request->periodo,
+                'fecha_inicio' => $request->fecha_inicio,
+                'fecha_final' => $request->fecha_final,
+                'titulo_prefijo' => $request->titulo_prefijo,
+                'titulo_sufijo' => $request->titulo_sufijo,
+                'modalidad' => $request->modalidad,
+                'tipo_curso' => $request->tipo_curso,
+                'horario' => $horario,
+                'enlace_zoom' => $request->enlace_zoom,
+                'id_moodle' => $request->id_moodle,
+            ];
+            if (Schema::hasColumn('cursos_activos', 'nombre_grupo')) {
+                $dataUpdate['nombre_grupo'] = $request->filled('nombre_grupo') ? trim($request->nombre_grupo) : null;
+            }
+
+            $grupo->update($dataUpdate);
+
+            if ($idProfesor) {
+                Matricula::firstOrCreate([
+                    'id_estudiante' => $idProfesor,
+                    'id_curso_activo' => $grupo->id_curso_activo
+                ]);
+
+                $profesor = Usuario::find($idProfesor);
+                if ($profesor && $profesor->id_rol != 1 && $profesor->id_rol != 4) {
+                    $profesor->update(['id_rol' => 4]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('grupos.index')->with('success', 'Grupo de estudio actualizado correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('grupos.index')->with('error', 'Error al actualizar el grupo: ' . $e->getMessage());
         }
     }
 

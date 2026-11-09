@@ -180,7 +180,7 @@
                     @csrf
                     
                     <div class="row g-4 mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label class="form-label-custom">Carrera / Programa Académico</label>
                             <select id="id_programa_select" class="form-select form-select-custom w-100" required>
                                 <option value="">Seleccione el Programa...</option>
@@ -189,11 +189,15 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label class="form-label-custom">Materia / Curso Específico</label>
                             <select name="id_plan" id="id_plan_select" class="form-select form-select-custom w-100" required disabled>
                                 <option value="">Seleccione un programa primero...</option>
                             </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label-custom">Identificador / Grupo</label>
+                            <input type="text" name="nombre_grupo" id="nombre_grupo" class="form-control form-control-custom w-100" placeholder="Ej: Grupo 01, Grupo 02...">
                         </div>
                     </div>
 
@@ -276,18 +280,31 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label-custom">Horario Sincrónico</label>
+                            <label class="form-label-custom">Horario Sincrónico / Día</label>
                             <div class="input-group">
-                                <select name="horario_dia" class="form-select form-select-custom">
-                                    <option value="Lunes">Lunes</option>
-                                    <option value="Martes">Martes</option>
-                                    <option value="Miércoles">Miércoles</option>
-                                    <option value="Jueves">Jueves</option>
-                                    <option value="Viernes">Viernes</option>
-                                    <option value="Sábado">Sábado</option>
+                                <select name="horario_dia" id="horario_dia_select" class="form-select form-select-custom">
+                                    <optgroup label="Día Individual">
+                                        <option value="Lunes">Lunes</option>
+                                        <option value="Martes">Martes</option>
+                                        <option value="Miércoles">Miércoles</option>
+                                        <option value="Jueves">Jueves</option>
+                                        <option value="Viernes">Viernes</option>
+                                        <option value="Sábado">Sábado</option>
+                                        <option value="Domingo">Domingo</option>
+                                    </optgroup>
+                                    <optgroup label="Combinaciones Frecuentes">
+                                        <option value="Lunes y Miércoles">Lunes y Miércoles</option>
+                                        <option value="Martes y Jueves">Martes y Jueves</option>
+                                        <option value="Lunes a Viernes">Lunes a Viernes (Diario)</option>
+                                        <option value="Sábado y Domingo">Sábado y Domingo</option>
+                                    </optgroup>
+                                    <optgroup label="Modalidad Flexible">
+                                        <option value="Asincrónico">100% Asincrónico (Sin Horario Fijo)</option>
+                                        <option value="Por definir">Por definir / Horario Flexible</option>
+                                    </optgroup>
                                 </select>
-                                <input type="time" name="horario_inicio" class="form-control form-control-custom" required>
-                                <input type="time" name="horario_fin" class="form-control form-control-custom" required>
+                                <input type="time" name="horario_inicio" id="horario_inicio_input" class="form-control form-control-custom">
+                                <input type="time" name="horario_fin" id="horario_fin_input" class="form-control form-control-custom">
                             </div>
                         </div>
                     </div>
@@ -320,6 +337,8 @@
                             <th class="ps-4">Materia / Curso</th>
                             <th>Profesor</th>
                             <th>Periodo</th>
+                            <th class="text-center">Horario</th>
+                            <th class="text-center">Estudiantes</th>
                             <th class="text-center">Modalidad</th>
                             <th class="text-center">ID Moodle</th>
                             <th class="text-center">Zoom</th>
@@ -329,14 +348,19 @@
                     <tbody>
                         @foreach ($grupos as $progName => $listaCursos)
                             <tr>
-                                <td colspan="7" class="program-group-header ps-4 py-3">
+                                <td colspan="9" class="program-group-header ps-4 py-3">
                                     <i class="bi bi-layers-half me-2"></i> {{ $progName }}
                                 </td>
                             </tr>
                             @foreach ($listaCursos as $g)
                                 <tr>
                                     <td class="ps-4">
-                                        <span class="d-block small text-white-50 fw-bold">{{ $g->planEstudio->codigo ?? 'N/A' }}</span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="d-block small text-white-50 fw-bold">{{ $g->planEstudio->codigo ?? 'N/A' }}</span>
+                                            @if (!empty($g->nombre_grupo))
+                                                <span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 rounded-pill px-2" style="font-size: 0.65rem;">{{ $g->nombre_grupo }}</span>
+                                            @endif
+                                        </div>
                                         <span class="fw-bold text-white">{{ $g->planEstudio->materia ?? 'N/A' }}</span>
                                     </td>
                                     <td>
@@ -351,6 +375,12 @@
                                         </span>
                                     </td>
                                     <td><span class="badge bg-light text-dark border border-light-subtle fw-bold px-3 py-2 rounded-pill">{{ $g->periodo }}</span></td>
+                                    <td class="text-center"><span class="small text-white-50"><i class="bi bi-clock me-1 text-success"></i>{{ $g->horario ?: 'Por definir' }}</span></td>
+                                    <td class="text-center">
+                                        <span class="badge {{ ($g->total_estudiantes ?? 0) > 0 ? 'bg-success text-white' : 'bg-secondary bg-opacity-25 text-white-50' }} rounded-pill px-3 py-1.5 fw-bold">
+                                            <i class="bi bi-people-fill me-1"></i>{{ $g->total_estudiantes ?? 0 }}
+                                        </span>
+                                    </td>
                                     <td class="text-center"><span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 fw-bold">{{ $g->modalidad }}</span></td>
                                     <td class="text-center">
                                         @if ($g->id_moodle)
@@ -368,6 +398,12 @@
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" 
+                                                    onclick='abrirModalEditarGrupo(@json($g))' 
+                                                    class="action-btn-custom text-info" 
+                                                    title="Editar Grupo Completo">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
                                             <button type="button" onclick="asignarProfesorGrupo({{ $g->id_curso_activo }}, '{{ $g->id_profesor ?? '' }}')" class="action-btn-custom" title="Asignar / Cambiar Profesor"><i class="bi bi-person-gear"></i></button>
                                             <button type="button" onclick="confirmarEliminarGrupo({{ $g->id_curso_activo }})" class="action-btn-custom action-btn-delete" title="Eliminar"><i class="bi bi-trash3-fill"></i></button>
                                         </div>
@@ -377,6 +413,120 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- MODAL DE EDICIÓN DE GRUPO -->
+        <div class="modal fade" id="modalEditarGrupo" tabindex="-1" aria-labelledby="modalEditarGrupoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content glass-card" style="background-color: #1e293b; border: 1px solid var(--border-dark); border-radius: 1.25rem;">
+                    <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                        <h5 class="modal-title text-white fw-bold" id="modalEditarGrupoLabel">
+                            <i class="bi bi-pencil-square text-success me-2"></i> Editar Grupo de Estudio
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <form id="form-editar-grupo" method="POST" action="">
+                        @csrf
+                        <div class="modal-body p-4 text-white">
+                            <div class="mb-3">
+                                <label class="form-label-custom text-success fw-bold">Materia / Curso</label>
+                                <input type="text" id="edit_materia_display" class="form-control form-control-custom w-100" readonly style="opacity: 0.85;">
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Identificador / Grupo</label>
+                                    <input type="text" name="nombre_grupo" id="edit_nombre_grupo" class="form-control form-control-custom w-100" placeholder="Ej: Grupo 01, Grupo 02...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Profesor Asignado</label>
+                                    <select name="id_profesor" id="edit_id_profesor" class="form-select form-select-custom w-100">
+                                        <option value="">Sin Profesor asignado...</option>
+                                        @foreach ($profesores as $prof)
+                                            <option value="{{ $prof->id }}">{{ $prof->apellidos }}, {{ $prof->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Periodo Académico</label>
+                                    <input type="text" name="periodo" id="edit_periodo" class="form-control form-control-custom w-100" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label-custom">Modalidad</label>
+                                    <select name="modalidad" id="edit_modalidad" class="form-select form-select-custom w-100">
+                                        <option value="Virtual">Virtual</option>
+                                        <option value="Presencial">Presencial</option>
+                                        <option value="Semi Presencial">Semi Presencial</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label-custom">Tipo Curso</label>
+                                    <select name="tipo_curso" id="edit_tipo_curso" class="form-select form-select-custom w-100">
+                                        <option value="Regular">Regular</option>
+                                        <option value="Tutoría">Tutoría</option>
+                                        <option value="Seminario">Seminario</option>
+                                        <option value="Taller">Taller</option>
+                                        <option value="Curso Libre">Curso Libre</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Horario Sincrónico / Día</label>
+                                    <div class="input-group">
+                                        <select name="horario_dia" id="edit_horario_dia" class="form-select form-select-custom">
+                                            <option value="Lunes">Lunes</option>
+                                            <option value="Martes">Martes</option>
+                                            <option value="Miércoles">Miércoles</option>
+                                            <option value="Jueves">Jueves</option>
+                                            <option value="Viernes">Viernes</option>
+                                            <option value="Sábado">Sábado</option>
+                                            <option value="Domingo">Domingo</option>
+                                            <option value="Lunes y Miércoles">Lunes y Miércoles</option>
+                                            <option value="Martes y Jueves">Martes y Jueves</option>
+                                            <option value="Lunes a Viernes">Lunes a Viernes</option>
+                                            <option value="Sábado y Domingo">Sábado y Domingo</option>
+                                            <option value="Asincrónico">100% Asincrónico</option>
+                                            <option value="Por definir">Por definir</option>
+                                        </select>
+                                        <input type="time" name="horario_inicio" id="edit_horario_inicio" class="form-control form-control-custom">
+                                        <input type="time" name="horario_fin" id="edit_horario_fin" class="form-control form-control-custom">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label-custom">Fecha Inicio</label>
+                                    <input type="date" name="fecha_inicio" id="edit_fecha_inicio" class="form-control form-control-custom w-100" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label-custom">Fecha Final</label>
+                                    <input type="date" name="fecha_final" id="edit_fecha_final" class="form-control form-control-custom w-100" required>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label-custom text-success fw-bold">ID Moodle</label>
+                                    <input type="number" name="id_moodle" id="edit_id_moodle" class="form-control form-control-custom w-100">
+                                </div>
+                                <div class="col-md-8">
+                                    <label class="form-label-custom text-success fw-bold">Enlace Zoom</label>
+                                    <input type="url" name="enlace_zoom" id="edit_enlace_zoom" class="form-control form-control-custom w-100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top border-secondary border-opacity-25 p-3">
+                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-submit rounded-pill px-4">
+                                <i class="bi bi-save me-1"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -414,16 +564,60 @@
             actPeriodo();
 
             // Cargar materias del programa vía AJAX
+            var materiasCargadas = {};
+
+            function parseSemanas(txt) {
+                if (!txt) return null;
+                var m = txt.match(/(\d+)\s*semana/i);
+                if (m) return parseInt(m[1], 10);
+                if (/cuatrimestre/i.test(txt)) return 15;
+                if (/bimestre/i.test(txt)) return 8;
+                if (/mes/i.test(txt)) return 4;
+                return null;
+            }
+
+            function calcularFechaFinal(fechaIni, semanas) {
+                if (!fechaIni || !semanas) return null;
+                var d = new Date(fechaIni + 'T00:00:00');
+                if (isNaN(d.getTime())) return null;
+                d.setDate(d.getDate() + (semanas * 7) - 1);
+                var mes = ('0' + (d.getMonth() + 1)).slice(-2);
+                var dia = ('0' + d.getDate()).slice(-2);
+                return d.getFullYear() + '-' + mes + '-' + dia;
+            }
+
+            function autoAjustarFechaFinal() {
+                var planId = $('#id_plan_select').val();
+                var fIni = $('input[name="fecha_inicio"]').val();
+                if (planId && fIni && materiasCargadas[planId]) {
+                    var mat = materiasCargadas[planId];
+                    var semanas = parseSemanas(mat.duracion) || parseSemanas(mat.cuatrimestre);
+                    if (!semanas) {
+                        var tipoPer = $('#cuatrimestre_select').val();
+                        semanas = parseSemanas(tipoPer);
+                    }
+                    if (semanas) {
+                        var fFinCalculada = calcularFechaFinal(fIni, semanas);
+                        if (fFinCalculada) {
+                            $('input[name="fecha_final"]').val(fFinCalculada);
+                            actPeriodo();
+                        }
+                    }
+                }
+            }
+
+            $('input[name="fecha_inicio"]').on('change', autoAjustarFechaFinal);
+
             $('#id_programa_select').change(function() {
                 var id = $(this).val();
                 var select = $('#id_plan_select');
+                materiasCargadas = {};
                 if (id) {
                     select.empty().append('<option value="">Cargando materias...</option>').prop('disabled', true);
                     var url = "{{ route('grupos.cursos_programa_ajax', ':id') }}".replace(':id', id);
                     $.getJSON(url, function(data) {
                         select.empty().append('<option value="">Seleccione Materia...</option>');
 
-                        // Soportar tanto arreglo plano como respuesta agrupada { success: true, cursos: { ... } }
                         var lista = [];
                         if (Array.isArray(data)) {
                             lista = data;
@@ -439,10 +633,12 @@
                             select.append('<option value="">No hay materias registradas para este programa</option>');
                         } else {
                             $.each(lista, function(i, m) {
+                                materiasCargadas[m.id_plan] = m;
                                 var cod = m.codigo ? (m.codigo + ' - ') : '';
                                 var nom = m.materia || 'Materia sin nombre';
                                 var per = m.cuatrimestre ? (' (' + m.cuatrimestre + ')') : '';
-                                select.append('<option value="' + m.id_plan + '">' + cod + nom + per + '</option>');
+                                var dur = m.duracion ? (' [' + m.duracion + ']') : '';
+                                select.append('<option value="' + m.id_plan + '">' + cod + nom + per + dur + '</option>');
                             });
                         }
                         select.prop('disabled', false);
@@ -453,6 +649,17 @@
                     select.empty().append('<option value="">Seleccione un programa primero...</option>').prop('disabled', true);
                 }
             });
+
+            $('#id_plan_select').change(function() {
+                var planId = $(this).val();
+                if (planId && materiasCargadas[planId]) {
+                    var mat = materiasCargadas[planId];
+                    if (mat.modalidad) {
+                        $('select[name="modalidad"]').val(mat.modalidad);
+                    }
+                    autoAjustarFechaFinal();
+                }
+            });
         });
 
         var opcionesProfesores = {
@@ -461,6 +668,59 @@
                 '{{ $prof->id }}': @json($prof->apellidos . ', ' . $prof->nombre),
             @endforeach
         };
+
+        function parseHorarioCadena(cadena) {
+            if (!cadena) return { dia: 'Lunes', inicio: '', fin: '' };
+            cadena = cadena.trim();
+            var partes = cadena.split(' ');
+            var diasValidos = [
+                'Lunes', 'Martes', 'Miércoles', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Sabado', 'Domingo',
+                'Lunes y Miércoles', 'Martes y Jueves', 'Lunes a Viernes', 'Sábado y Domingo',
+                'Asincrónico', 'Por definir'
+            ];
+            var diaEncontrado = 'Lunes';
+            for (var i = 0; i < diasValidos.length; i++) {
+                if (cadena.indexOf(diasValidos[i]) === 0) {
+                    diaEncontrado = diasValidos[i];
+                    break;
+                }
+            }
+            var resto = cadena.substring(diaEncontrado.length).trim();
+            var m = resto.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+            return {
+                dia: diaEncontrado,
+                inicio: m ? m[1] : '',
+                fin: m ? m[2] : ''
+            };
+        }
+
+        function abrirModalEditarGrupo(g) {
+            var urlUpdate = "{{ route('grupos.update', ':id') }}".replace(':id', g.id_curso_activo);
+            $('#form-editar-grupo').attr('action', urlUpdate);
+
+            var matTexto = (g.plan_estudio && g.plan_estudio.codigo ? (g.plan_estudio.codigo + ' - ') : '') + 
+                           (g.plan_estudio && g.plan_estudio.materia ? g.plan_estudio.materia : 'Curso #' + g.id_curso_activo);
+            $('#edit_materia_display').val(matTexto);
+
+            $('#edit_nombre_grupo').val(g.nombre_grupo || '');
+            $('#edit_id_profesor').val(g.id_profesor || '');
+            $('#edit_periodo').val(g.periodo || '');
+            $('#edit_modalidad').val(g.modalidad || 'Virtual');
+            $('#edit_tipo_curso').val(g.tipo_curso || 'Regular');
+
+            var hInfo = parseHorarioCadena(g.horario || '');
+            $('#edit_horario_dia').val(hInfo.dia);
+            $('#edit_horario_inicio').val(hInfo.inicio);
+            $('#edit_horario_fin').val(hInfo.fin);
+
+            $('#edit_fecha_inicio').val(g.fecha_inicio ? g.fecha_inicio.substring(0, 10) : '');
+            $('#edit_fecha_final').val(g.fecha_final ? g.fecha_final.substring(0, 10) : '');
+            $('#edit_id_moodle').val(g.id_moodle || '');
+            $('#edit_enlace_zoom').val(g.enlace_zoom || '');
+
+            var modal = new bootstrap.Modal(document.getElementById('modalEditarGrupo'));
+            modal.show();
+        }
 
         function asignarProfesorGrupo(idCursoActivo, idProfesorActual) {
             Swal.fire({
