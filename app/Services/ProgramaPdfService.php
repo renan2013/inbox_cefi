@@ -657,14 +657,14 @@ class ProgramaPdfService
         // =====================================================================
         $pdf->AddPage();
 
-        $currentY = $pdf->header_h;
+        $currentY = $pdf->header_h - 0.4;
 
         // Si el programa tiene Imagen Principal (Hero), se dibuja de borde a borde debajo del encabezado
         if (!empty($pdf->hero_path) && file_exists($pdf->hero_path)) {
             $heroH = 82;
             try {
                 @$pdf->Image($pdf->hero_path, 0, $currentY, 210, $heroH);
-                $currentY += $heroH;
+                $currentY += $heroH - 0.4;
             } catch (\Throwable $e) {
                 // Continuar si el formato de imagen no es soportado por FPDF
             }
@@ -705,24 +705,27 @@ class ProgramaPdfService
             $currentY += $heroH;
         }
 
-        // Bloque Azul Marino (#082947): Descripción del curso
+        // Bloque Azul Oscuro (#11619b): Descripción del curso con alto dinámico simétrico
         $descripcion = $pdf->cleanText($programa->informacion ?? '');
         if ($descripcion === '') {
             $descripcion = 'Sin descripción registrada para este programa académico.';
         }
 
-        $navyBoxH = (!empty($pdf->hero_path)) ? 86 : 104;
+        $approxLinesDesc = max(5, (int)ceil(mb_strlen($descripcion, 'UTF-8') / 95) + substr_count($descripcion, "\n"));
+        $minNavyH = (!empty($pdf->hero_path)) ? 84 : 100;
+        $navyBoxH = max($minNavyH, min(105, 32 + ($approxLinesDesc * 5.8)));
+
         $pdf->SetFillColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Rect(0, $currentY, 210, $navyBoxH, 'F');
 
         // Título con cuadro verde lima a la izquierda
-        $pdf->drawHeadingWithSquare($currentY + 9, 'Descripción del curso:', $pdf->verde_lima, [255, 255, 255], 17);
+        $pdf->drawHeadingWithSquare($currentY + 9.5, 'Descripción del curso:', $pdf->verde_lima, [255, 255, 255], 17);
 
-        // Texto de la descripción en blanco
-        $pdf->SetXY(9, $currentY + 21);
-        $pdf->SetFont('Arial', '', 10);
-        $pdf->SetTextColor(245, 248, 252);
-        $pdf->MultiCell(190, 5.2, $pdf->toPdf($descripcion), 0, 'L');
+        // Texto de la descripción en blanco (10.8pt con interlineado editorial 5.6mm)
+        $pdf->SetXY(9, $currentY + 21.5);
+        $pdf->SetFont('Arial', '', 10.8);
+        $pdf->SetTextColor(248, 250, 252);
+        $pdf->MultiCell(191, 5.6, $pdf->toPdf($descripcion), 0, 'L');
 
         $currentY += $navyBoxH;
 
@@ -735,9 +738,9 @@ class ProgramaPdfService
         $pdf->drawHeadingWithSquare($currentY + 10, 'Objetivo del curso:', $pdf->azul_hdr, $pdf->azul_marino, 17);
 
         $pdf->SetXY(9, $currentY + 22);
-        $pdf->SetFont('Arial', '', 10);
+        $pdf->SetFont('Arial', '', 10.8);
         $pdf->SetTextColor(25, 35, 50);
-        $pdf->MultiCell(190, 5.3, $pdf->toPdf($objetivo), 0, 'L');
+        $pdf->MultiCell(191, 5.6, $pdf->toPdf($objetivo), 0, 'L');
 
         // =====================================================================
         // PÁGINA 2: OPCIONES LABORALES Y LO QUE OBTENDRÁS (2 COLUMNAS)
@@ -750,11 +753,12 @@ class ProgramaPdfService
         $pdf->drawHeadingWithSquare($colTopY, 'Opciones laborales:', $pdf->verde_lima, $pdf->azul_marino, 16);
 
         $linesLeft = $pdf->parseRichColumnLines($programa->opciones_laborales ?? ($programa->oferta ?? ''));
-        $yLeft = $colTopY + 11;
+        $yLeft = $colTopY + 11.5;
+        $firstHeadingLeft = true;
         if (!empty($linesLeft)) {
             foreach ($linesLeft as $item) {
                 if (!empty($item['empty'])) {
-                    $yLeft += 1.0;
+                    $yLeft += 0.9;
                     continue;
                 }
                 if ($yLeft > 274) {
@@ -763,6 +767,10 @@ class ProgramaPdfService
 
                 $line = $item['text'];
                 if ($item['numbered'] || ($item['bold'] && !$item['bullet'])) {
+                    if (!$firstHeadingLeft) {
+                        $yLeft += 1.1;
+                    }
+                    $firstHeadingLeft = false;
                     $pdf->SetXY(9, $yLeft);
                     $pdf->SetFont('Arial', 'B', 10.2);
                     $pdf->SetTextColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
@@ -800,11 +808,12 @@ class ProgramaPdfService
         $pdf->Cell(90, 8, $pdf->toPdf('Lo que obtendrás:'), 0, 1, 'L');
 
         $linesRight = $pdf->parseRichColumnLines($programa->lo_que_obtendras ?? ($programa->perfil ?? ''));
-        $yRight = $colTopY + 11;
+        $yRight = $colTopY + 11.5;
+        $firstHeadingRight = true;
         if (!empty($linesRight)) {
             foreach ($linesRight as $item) {
                 if (!empty($item['empty'])) {
-                    $yRight += 1.0;
+                    $yRight += 0.9;
                     continue;
                 }
                 if ($yRight > 274) {
@@ -829,7 +838,11 @@ class ProgramaPdfService
                     $pdf->SetTextColor(30, 45, 65);
                     $pdf->MultiCell(95, 4.7, $pdf->toPdf($line), 0, 'L');
                 } else {
-                    $pdf->SetXY(106, $yRight + 0.5);
+                    if (!$firstHeadingRight) {
+                        $yRight += 1.0;
+                    }
+                    $firstHeadingRight = false;
+                    $pdf->SetXY(106, $yRight + 0.4);
                     $pdf->SetFont('Arial', 'B', 10.2);
                     $pdf->SetTextColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
                     $pdf->MultiCell(95, 4.8, $pdf->toPdf($line), 0, 'L');
@@ -843,12 +856,20 @@ class ProgramaPdfService
             $pdf->MultiCell(95, 5, $pdf->toPdf('No se han registrado competencias de salida para este programa.'), 0, 'L');
         }
 
+        // Línea divisoria vertical muy sutil entre ambas columnas de la Página 2
+        $sepBottomY = min(273, max($yLeft, $yRight));
+        if ($sepBottomY > $colTopY + 15) {
+            $pdf->SetDrawColor(226, 232, 240);
+            $pdf->SetLineWidth(0.25);
+            $pdf->Line(102.5, $colTopY + 1, 102.5, $sepBottomY);
+        }
+
         // =====================================================================
         // PÁGINA 3: DURACIÓN DEL PLAN, PLAN DE ESTUDIOS, DOCENTES Y REQUISITOS
         // =====================================================================
         $pdf->AddPage();
 
-        // 1. Franja Azul Marino (#082947): DURACIÓN DEL PLAN DE ESTUDIOS (repite lo del header)
+        // 1. Franja Azul Oscuro (#11619b): DURACIÓN DEL PLAN DE ESTUDIOS (repite lo del header sin costura)
         $durClean = rtrim(trim($pdf->duracion), '.');
         if ($durClean === '') {
             $durClean = '12 meses';
@@ -869,13 +890,13 @@ class ProgramaPdfService
             $duracionPlan = $textoHeaderDuracion;
         }
 
-        $stripY = $pdf->header_h;
-        $stripH = 20;
+        $stripY = $pdf->header_h - 0.4;
+        $stripH = 20.4;
         $pdf->SetFillColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Rect(0, $stripY, 210, $stripH, 'F');
 
         // Acento verde lima a la izquierda de la franja
-        $textOffsetY = (mb_strlen($duracionPlan, 'UTF-8') > 75) ? 4.2 : 6.8;
+        $textOffsetY = (mb_strlen($duracionPlan, 'UTF-8') > 75) ? 4.4 : 7.0;
         $pdf->SetFillColor($pdf->verde_lima[0], $pdf->verde_lima[1], $pdf->verde_lima[2]);
         $pdf->Rect(0, $stripY + $textOffsetY, 7, 6.5, 'F');
 
@@ -885,7 +906,7 @@ class ProgramaPdfService
         $labelW = $pdf->GetStringWidth($pdf->toPdf('DURACIÓN DEL PLAN DE ESTUDIOS: ')) + 2;
         $pdf->Cell($labelW, 6.5, $pdf->toPdf('DURACIÓN DEL PLAN DE ESTUDIOS: '), 0, 0, 'L');
 
-        $pdf->SetFont('Arial', '', 10.5);
+        $pdf->SetFont('Arial', '', 10.8);
         $restW = 192 - $labelW;
         $words = explode(' ', str_replace("\n", ' ', $duracionPlan));
         $firstLine = '';
@@ -906,45 +927,50 @@ class ProgramaPdfService
         }
 
         // 2. Título PLAN DE ESTUDIOS
-        $pdf->SetXY(10, 70);
-        $pdf->SetFont('Arial', 'B', 16);
+        $pdf->SetXY(10, 68.5);
+        $pdf->SetFont('Arial', 'B', 16.5);
         $pdf->SetTextColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
         $pdf->Cell(190, 7, $pdf->toPdf('PLAN DE ESTUDIOS'), 0, 1, 'C');
 
         $pdf->SetX(10);
-        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->SetFont('Arial', 'B', 11.5);
         $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
         $pdf->Cell(190, 6, $pdf->toPdf(mb_strtoupper($pdf->nombre_programa, 'UTF-8')), 0, 1, 'C');
 
-        // 3. Tabla de Cursos (Código | Nombre del Curso | Duración | Requisito) con franja azul a todo lo ancho
-        $tableY = 86;
+        // 3. Tabla de Cursos (Código | Nombre del Curso | Duración | Requisito) con franja azul a todo lo ancho y zebra striping
+        $tableY = 85;
         $pdf->SetFillColor($pdf->teal_tabla[0], $pdf->teal_tabla[1], $pdf->teal_tabla[2]);
-        $pdf->Rect(0, $tableY, 210, 8.5, 'F');
+        $pdf->Rect(0, $tableY, 210, 9, 'F');
 
         $pdf->SetXY(11, $tableY);
         $pdf->SetTextColor(255, 255, 255);
-        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->SetFont('Arial', 'B', 10.2);
 
-        $pdf->Cell(38, 8.5, $pdf->toPdf('Código'), 0, 0, 'C', false);
-        $pdf->Cell(78, 8.5, $pdf->toPdf('Nombre del Curso'), 0, 0, 'L', false);
-        $pdf->Cell(36, 8.5, $pdf->toPdf('Duración'), 0, 0, 'C', false);
-        $pdf->Cell(36, 8.5, $pdf->toPdf('Requisito'), 0, 1, 'C', false);
+        $pdf->Cell(38, 9, $pdf->toPdf('Código'), 0, 0, 'C', false);
+        $pdf->Cell(78, 9, $pdf->toPdf('  Nombre del Curso'), 0, 0, 'L', false);
+        $pdf->Cell(36, 9, $pdf->toPdf('Duración'), 0, 0, 'C', false);
+        $pdf->Cell(36, 9, $pdf->toPdf('Requisito'), 0, 1, 'C', false);
 
-        $rowY = $tableY + 8.5;
-        $pdf->SetFont('Arial', '', 9.5);
-        $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
-        $pdf->SetDrawColor(148, 163, 184);
-        $pdf->SetLineWidth(0.3);
+        $rowY = $tableY + 9;
+        $pdf->SetDrawColor(203, 213, 225);
+        $pdf->SetLineWidth(0.25);
 
         if ($materias->count() > 0) {
+            $rowIdx = 0;
             foreach ($materias as $mat) {
-                if ($rowY > 218) {
+                if ($rowY > 216) {
                     $pdf->AddPage();
                     $rowY = 48;
                 }
 
-                $codigo = (string)($mat->codigo ?? '');
-                $nombre = mb_substr((string)($mat->materia ?? ''), 0, 48, 'UTF-8');
+                // Fondo alternado sutil (Zebra striping) en filas pares
+                if ($rowIdx % 2 === 1) {
+                    $pdf->SetFillColor(245, 249, 253);
+                    $pdf->Rect(11, $rowY, 188, 10.5, 'F');
+                }
+
+                $codigo = trim((string)($mat->codigo ?? ''));
+                $nombre = mb_substr(trim((string)($mat->materia ?? '')), 0, 48, 'UTF-8');
                 $durCurso = trim((string)($mat->duracion ?? ''));
                 if ($durCurso === '') {
                     $durCurso = !empty($mat->cuatrimestre) ? (string)$mat->cuatrimestre : '8 semanas';
@@ -955,25 +981,30 @@ class ProgramaPdfService
                 }
 
                 $pdf->SetXY(11, $rowY);
-                $pdf->Cell(38, 10.5, $pdf->toPdf('    ' . $codigo), 0, 0, 'L');
-                $pdf->Cell(78, 10.5, $pdf->toPdf($nombre), 0, 0, 'L');
+                $pdf->SetFont('Arial', 'B', 9.6);
+                $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
+                $pdf->Cell(38, 10.5, $pdf->toPdf($codigo), 0, 0, 'C');
+
+                $pdf->SetFont('Arial', '', 9.8);
+                $pdf->Cell(78, 10.5, $pdf->toPdf('  ' . $nombre), 0, 0, 'L');
                 $pdf->Cell(36, 10.5, $pdf->toPdf($durCurso), 0, 0, 'C');
-                $pdf->Cell(36, 10.5, $pdf->toPdf($req), 0, 1, 'L');
+                $pdf->Cell(36, 10.5, $pdf->toPdf($req), 0, 1, 'C');
 
                 $rowY += 10.5;
                 $pdf->Line(11, $rowY, 199, $rowY);
+                $rowIdx++;
             }
         } else {
             $pdf->SetXY(11, $rowY + 2);
-            $pdf->SetFont('Arial', 'I', 9.5);
+            $pdf->SetFont('Arial', 'I', 10);
             $pdf->SetTextColor(120, 130, 140);
             $pdf->Cell(188, 10, $pdf->toPdf('No se han registrado cursos en el plan de estudios de este programa.'), 0, 1, 'C');
             $rowY += 12;
         }
 
-        // 4. Sección Inferior Página 3: Perfil Docente y Requisitos de Ingreso
-        $bottomY = max($rowY + 12, 224);
-        if ($bottomY > 255) {
+        // 4. Sección Inferior Página 3: Perfil Docente y Requisitos de Ingreso con mayor presencia tipográfica
+        $bottomY = max($rowY + 12, 222);
+        if ($bottomY > 252) {
             $pdf->AddPage();
             $bottomY = 50;
         }
@@ -990,29 +1021,36 @@ class ProgramaPdfService
 
         // Columna Izquierda: Perfil de los docentes a cargo del programa
         $pdf->SetFillColor($pdf->verde_lima[0], $pdf->verde_lima[1], $pdf->verde_lima[2]);
-        $pdf->Rect(0, $bottomY, 6, 5.5, 'F');
-        $pdf->SetXY(9, $bottomY);
-        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Rect(0, $bottomY, 6.5, 6.2, 'F');
+        $pdf->SetXY(9, $bottomY - 0.1);
+        $pdf->SetFont('Arial', 'B', 11.5);
         $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
-        $pdf->Cell(90, 5.5, $pdf->toPdf('Perfil de los docentes a cargo del programa:'), 0, 1, 'L');
+        $pdf->Cell(91, 6.2, $pdf->toPdf('Perfil de los docentes a cargo del programa:'), 0, 1, 'L');
 
-        $pdf->SetXY(9, $bottomY + 7);
-        $pdf->SetFont('Arial', '', 9.5);
-        $pdf->SetTextColor($pdf->gris_texto[0], $pdf->gris_texto[1], $pdf->gris_texto[2]);
-        $pdf->MultiCell(90, 4.8, $pdf->toPdf($perfilDocentes), 0, 'L');
+        $pdf->SetXY(9, $bottomY + 8);
+        $pdf->SetFont('Arial', '', 10);
+        $pdf->SetTextColor(55, 65, 81);
+        $pdf->MultiCell(90, 5.2, $pdf->toPdf($perfilDocentes), 0, 'L');
+        $endLeftBottom = $pdf->GetY();
 
-        // Columna Derecha: Requisitos de ingreso
+        // Columna Derecha: Requisitos de ingreso (bloque azul idéntico al bloque verde: 6.5 x 6.2)
         $pdf->SetFillColor($pdf->azul_hdr[0], $pdf->azul_hdr[1], $pdf->azul_hdr[2]);
-        $pdf->Rect(106, $bottomY, 6, 5.5, 'F');
-        $pdf->SetXY(115, $bottomY);
-        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->Rect(106, $bottomY, 6.5, 6.2, 'F');
+        $pdf->SetXY(115, $bottomY - 0.1);
+        $pdf->SetFont('Arial', 'B', 11.5);
         $pdf->SetTextColor($pdf->azul_marino[0], $pdf->azul_marino[1], $pdf->azul_marino[2]);
-        $pdf->Cell(88, 5.5, $pdf->toPdf('Requisitos de ingreso:'), 0, 1, 'L');
+        $pdf->Cell(88, 6.2, $pdf->toPdf('Requisitos de ingreso:'), 0, 1, 'L');
 
-        $pdf->SetXY(115, $bottomY + 7);
-        $pdf->SetFont('Arial', '', 9.5);
-        $pdf->SetTextColor($pdf->gris_texto[0], $pdf->gris_texto[1], $pdf->gris_texto[2]);
-        $pdf->MultiCell(88, 4.8, $pdf->toPdf($requisitosIngreso), 0, 'L');
+        $pdf->SetXY(115, $bottomY + 8);
+        $pdf->SetFont('Arial', '', 10);
+        $pdf->SetTextColor(55, 65, 81);
+        $pdf->MultiCell(88, 5.2, $pdf->toPdf($requisitosIngreso), 0, 'L');
+        $endRightBottom = $pdf->GetY();
+
+        // Línea divisoria vertical tenue entre Perfil Docente y Requisitos de Ingreso
+        $pdf->SetDrawColor(226, 232, 240);
+        $pdf->SetLineWidth(0.25);
+        $pdf->Line(102.5, $bottomY, 102.5, min(275, max($endLeftBottom, $endRightBottom)));
 
         $filename = "programa_cefi_{$id_programa}.pdf";
         $pdfContent = $pdf->Output('S');
