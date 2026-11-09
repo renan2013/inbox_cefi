@@ -267,9 +267,9 @@
 
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label-custom">Profesor Asignado</label>
-                            <select name="id_profesor" class="form-select form-select-custom w-100" required>
-                                <option value="">Seleccione Profesor...</option>
+                            <label class="form-label-custom">Profesor Asignado <span class="text-white-50 fw-normal">(Opcional)</span></label>
+                            <select name="id_profesor" class="form-select form-select-custom w-100">
+                                <option value="">Sin Profesor asignado (Asignar después)...</option>
                                 @foreach ($profesores as $prof)
                                     <option value="{{ $prof->id }}">{{ $prof->apellidos }}, {{ $prof->nombre }}</option>
                                 @endforeach
@@ -344,7 +344,9 @@
                                             @if ($g->profesor)
                                                 {{ $g->profesor->apellidos }}, {{ $g->profesor->nombre }}
                                             @else
-                                                <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Sin Profesor</span>
+                                                <button type="button" onclick="asignarProfesorGrupo({{ $g->id_curso_activo }}, '')" class="btn btn-sm btn-outline-warning rounded-pill px-2 py-0 fw-bold" style="font-size: 0.75rem;">
+                                                    <i class="bi bi-person-plus-fill me-1"></i> Sin Profesor (Asignar)
+                                                </button>
                                             @endif
                                         </span>
                                     </td>
@@ -366,7 +368,8 @@
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <button onclick="confirmarEliminarGrupo({{ $g->id_curso_activo }})" class="action-btn-custom action-btn-delete" title="Eliminar"><i class="bi bi-trash3-fill"></i></button>
+                                            <button type="button" onclick="asignarProfesorGrupo({{ $g->id_curso_activo }}, '{{ $g->id_profesor ?? '' }}')" class="action-btn-custom" title="Asignar / Cambiar Profesor"><i class="bi bi-person-gear"></i></button>
+                                            <button type="button" onclick="confirmarEliminarGrupo({{ $g->id_curso_activo }})" class="action-btn-custom action-btn-delete" title="Eliminar"><i class="bi bi-trash3-fill"></i></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -451,6 +454,37 @@
                 }
             });
         });
+
+        var opcionesProfesores = {
+            '': '— Sin Profesor Asignado —',
+            @foreach ($profesores as $prof)
+                '{{ $prof->id }}': @json($prof->apellidos . ', ' . $prof->nombre),
+            @endforeach
+        };
+
+        function asignarProfesorGrupo(idCursoActivo, idProfesorActual) {
+            Swal.fire({
+                title: 'Asignar / Cambiar Profesor',
+                text: 'Seleccione el docente encargado para este grupo de estudio:',
+                input: 'select',
+                inputOptions: opcionesProfesores,
+                inputValue: idProfesorActual || '',
+                showCancelButton: true,
+                confirmButtonColor: '#5fb230',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Guardar Profesor',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var form = $('<form method="POST" action="{{ route('grupos.asignar_profesor') }}"></form>');
+                    form.append('@csrf');
+                    form.append('<input type="hidden" name="id_curso_activo" value="' + idCursoActivo + '">');
+                    form.append('<input type="hidden" name="id_profesor" value="' + (result.value || '') + '">');
+                    $('body').append(form);
+                    form.submit();
+                }
+            });
+        }
 
         function confirmarEliminarGrupo(id) {
             Swal.fire({

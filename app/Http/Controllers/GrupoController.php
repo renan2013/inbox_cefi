@@ -57,13 +57,13 @@ class GrupoController extends Controller
     }
 
     /**
-     * Crea un nuevo grupo académico y matricula al profesor.
+     * Crea un nuevo grupo académico y matricula al profesor (si fue asignado).
      */
     public function store(Request $request)
     {
         $request->validate([
             'id_plan' => 'required|exists:plan_estudios,id_plan',
-            'id_profesor' => 'required|exists:usuarios,id',
+            'id_profesor' => 'nullable|exists:usuarios,id',
             'periodo' => 'required|string|max:100',
             'fecha_inicio' => 'required|date',
             'fecha_final' => 'required|date',
@@ -79,13 +79,23 @@ class GrupoController extends Controller
         ]);
 
         $horario = trim("{$request->horario_dia} {$request->horario_inicio} - {$request->horario_fin}");
+        $idProfesor = $request->filled('id_profesor') ? (int)$request->id_profesor : null;
+
+        // Asegurar que la columna id_profesor permita NULL cuando aún no se ha asignado docente
+        if ($idProfesor === null) {
+            try {
+                DB::statement("ALTER TABLE `cursos_activos` MODIFY COLUMN `id_profesor` INT(11) NULL DEFAULT NULL");
+            } catch (\Throwable $eCol) {
+                // Ignorar si ya es nullable o el motor no requiere alteración
+            }
+        }
 
         DB::beginTransaction();
         try {
             // 1. Crear el curso activo / grupo
             $grupo = CursoActivo::create([
                 'id_plan' => $request->id_plan,
-                'id_profesor' => $request->id_profesor,
+                'id_profesor' => $idProfesor,
                 'periodo' => $request->periodo,
                 'fecha_inicio' => $request->fecha_inicio,
                 'fecha_final' => $request->fecha_final,
@@ -100,16 +110,17 @@ class GrupoController extends Controller
                 'en_supervision' => 1
             ]);
 
-            // 2. Matricular al profesor
-            Matricula::create([
-                'id_estudiante' => $request->id_profesor,
-                'id_curso_activo' => $grupo->id_curso_activo
-            ]);
+            // 2. Si se seleccionó un profesor, matricularlo y asegurar rol docente
+            if ($idProfesor) {
+                Matricula::firstOrCreate([
+                    'id_estudiante' => $idProfesor,
+                    'id_curso_activo' => $grupo->id_curso_activo
+                ]);
 
-            // 3. Actualizar el rol del profesor a 4 (si no es administrador)
-            $profesor = Usuario::find($request->id_profesor);
-            if ($profesor && $profesor->id_rol != 1 && $profesor->id_rol != 4) {
-                $profesor->update(['id_rol' => 4]);
+                $profesor = Usuario::find($idProfesor);
+                if ($profesor && $profesor->id_rol != 1 && $profesor->id_rol != 4) {
+                    $profesor->update(['id_rol' => 4]);
+                }
             }
 
             DB::commit();
@@ -118,6 +129,50 @@ class GrupoController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('grupos.index')->with('error', 'Error al crear el grupo: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Permite asignar o actualizar el profesor de un grupo existente en cualquier momento.
+     */
+    public function asignarProfesor(Request $request)
+    {
+        $request->validate([
+            'id_curso_activo' => 'required|exists:cursos_activos,id_curso_activo',
+            'id_profesor' => 'nullable|exists:usuarios,id',
+        ]);
+
+        $idProfesor = $request->filled('id_profesor') ? (int)$request->id_profesor : null;
+
+        if ($idProfesor === null) {
+            try {
+                DB::statement("ALTER TABLE `cursos_activos` MODIFY COLUMN `id_profesor` INT(11) NULL DEFAULT NULL");
+            } catch (\Throwable $eCol) {
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            $grupo = CursoActivo::findOrFail($request->id_curso_activo);
+            $grupo->update(['id_profesor' => $idProfesor]);
+
+            if ($idProfesor) {
+                Matricula::firstOrCreate([
+                    'id_estudiante' => $idProfesor,
+                    'id_curso_activo' => $grupo->id_curso_activo
+                ]);
+
+                $profesor = Usuario::find($idProfesor);
+                if ($profesor && $profesor->id_rol != 1 && $profesor->id_rol != 4) {
+                    $profesor->update(['id_rol' => 4]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('grupos.index')->with('success', 'Profesor del grupo actualizado correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('grupos.index')->with('error', 'Error al actualizar el profesor: ' . $e->getMessage());
         }
     }
 
