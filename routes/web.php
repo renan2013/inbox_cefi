@@ -507,6 +507,7 @@ Route::middleware('auth')->group(function () {
         
         Route::get('/docente/cursos/{id}/recursos-drive', [MisCursosController::class, 'verRecursosDrive'])->name('mis_cursos.recursos_drive');
         Route::post('/docente/cursos/{id}/recursos-drive/guardar', [MisCursosController::class, 'guardarRecursoDrive'])->name('mis_cursos.recursos_drive.guardar');
+        Route::post('/docente/cursos/recursos-drive/configurar-limite', [MisCursosController::class, 'configurarLimiteRecursoDrive'])->name('mis_cursos.recursos_drive.limite');
         Route::get('/docente/cursos/{id}/recursos-drive/{recurso_id}/eliminar', [MisCursosController::class, 'eliminarRecursoDrive'])->name('mis_cursos.recursos_drive.eliminar');
 
         Route::get('/docente/recursos', [RecursoProfesorController::class, 'index'])->name('recursos.index');

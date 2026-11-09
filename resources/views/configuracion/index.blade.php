@@ -543,6 +543,14 @@
                                     <input type="text" name="moodle_key" class="form-control form-control-custom font-monospace" value="{{ old('moodle_key', $cliente['moodle_key'] ?? '') }}">
                                     <div class="form-text text-white-50 small">Token de autenticación directa con el conector de notas Moodle.</div>
                                 </div>
+                                <div class="mb-2">
+                                    <label class="form-label-custom">Tamaño Máximo de Recursos de Curso (MB)</label>
+                                    <div class="input-group">
+                                        <input type="number" name="max_upload_recursos_mb" min="1" max="1024" class="form-control form-control-custom fw-bold" value="{{ old('max_upload_recursos_mb', $configDb['max_upload_recursos_mb'] ?? 20) }}">
+                                        <span class="input-group-text bg-primary text-white border-0 fw-bold">MB</span>
+                                    </div>
+                                    <div class="form-text text-white-50 small">Peso máximo permitido por archivo en el repositorio interno de recursos de cursos.</div>
+                                </div>
                             </div>
                         </div>
 

@@ -119,6 +119,13 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        <div class="alert alert-danger border-0 rounded-4 d-flex align-items-center mb-4" style="background-color: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2) !important;">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div>{{ $errors->first() }}</div>
+        </div>
+    @endif
+
     <div class="row g-4">
         <!-- Formulario de Subida -->
         <div class="col-lg-4">
@@ -131,7 +138,16 @@
                     <div class="mb-4">
                         <label class="form-label text-white-50 small fw-bold">Seleccionar Archivo</label>
                         <input type="file" name="archivo_drive" class="form-control form-control-custom w-100" id="archivo_drive" required>
-                        <div class="form-text text-white-50 x-small mt-2">Tamaño máximo de archivo recomendado: 20MB.</div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div class="form-text text-white-50 x-small mb-0">
+                                Tamaño máximo permitido: <strong id="label_max_mb">{{ $maxMb ?? 20 }}MB</strong>.
+                            </div>
+                            @if (!empty($es_admin))
+                                <button type="button" class="btn btn-sm btn-link text-primary p-0 text-decoration-none fw-bold small" onclick="cambiarLimiteMb()">
+                                    <i class="bi bi-sliders me-1"></i> Ajustar límite
+                                </button>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="form-check form-switch mb-4">
@@ -233,6 +249,59 @@
                 showConfirmButton: false,
                 timer: 3000
             });
+        });
+    }
+
+    let currentMaxMb = {{ $maxMb ?? 20 }};
+    function cambiarLimiteMb() {
+        Swal.fire({
+            title: 'Límite de Subida (MB)',
+            text: 'Defina el tamaño máximo permitido por archivo en el repositorio de cursos:',
+            input: 'number',
+            inputValue: currentMaxMb,
+            inputAttributes: {
+                min: 1,
+                max: 1024,
+                step: 1
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Guardar Límite',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#0d6efd'
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                fetch("{{ route('mis_cursos.recursos_drive.limite') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ max_mb: parseInt(result.value, 10) })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        currentMaxMb = data.max_mb;
+                        const lbl = document.getElementById('label_max_mb');
+                        if (lbl) lbl.innerText = data.max_mb + 'MB';
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Parámetro actualizado',
+                            text: data.message,
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                    } else {
+                        Swal.fire('Error', data.message || 'No se pudo actualizar el límite.', 'error');
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'Error de conexión al guardar el parámetro.', 'error');
+                });
+            }
         });
     }
 </script>

@@ -165,6 +165,9 @@ class ConfiguracionController extends Controller
         if ($request->has('moodle_key')) {
             $fields['cliente_moodle_key'] = $request->input('moodle_key');
         }
+        if ($request->filled('max_upload_recursos_mb')) {
+            $fields['max_upload_recursos_mb'] = max(1, min(1024, (int)$request->input('max_upload_recursos_mb')));
+        }
 
         // 2. Parámetros n8n & Automatizaciones
         if ($request->has('n8n_webhook_base_url')) {

@@ -1386,7 +1386,12 @@ class MisCursosController extends Controller
             ->orderBy('fecha_subida', 'desc')
             ->get();
 
-        return view('mis_cursos.recursos_drive', compact('curso', 'recursos', 'es_admin'));
+        $maxMb = (int) (\App\Models\ConfiguracionSistema::where('clave', 'max_upload_recursos_mb')->value('valor') ?: 20);
+        if ($maxMb < 1) {
+            $maxMb = 20;
+        }
+
+        return view('mis_cursos.recursos_drive', compact('curso', 'recursos', 'es_admin', 'maxMb'));
     }
 
     /**
@@ -1394,8 +1399,17 @@ class MisCursosController extends Controller
      */
     public function guardarRecursoDrive(Request $request, $id)
     {
+        $maxMb = (int) (\App\Models\ConfiguracionSistema::where('clave', 'max_upload_recursos_mb')->value('valor') ?: 20);
+        if ($maxMb < 1) {
+            $maxMb = 20;
+        }
+        @ini_set('upload_max_filesize', $maxMb . 'M');
+        @ini_set('post_max_size', ($maxMb + 8) . 'M');
+
         $request->validate([
-            'archivo_drive' => 'required|file|max:20480', // max 20MB
+            'archivo_drive' => 'required|file|max:' . ($maxMb * 1024),
+        ], [
+            'archivo_drive.max' => "El archivo supera el tamaño máximo configurado de {$maxMb} MB.",
         ]);
 
         $curso = CursoActivo::findOrFail($id);
@@ -1430,6 +1444,28 @@ class MisCursosController extends Controller
         }
 
         return redirect()->route('mis_cursos.recursos_drive', $id)->with('error', 'No se ha seleccionado ningún archivo.');
+    }
+
+    /**
+     * Permite al Administrador ajustar el límite máximo (en MB) de subida de recursos.
+     */
+    public function configurarLimiteRecursoDrive(Request $request)
+    {
+        if (Auth::user()->id_rol != 1) {
+            return response()->json(['success' => false, 'message' => 'Solo el Administrador puede modificar este parámetro.'], 403);
+        }
+
+        $maxMb = max(1, min(1024, (int) $request->input('max_mb', 20)));
+        \App\Models\ConfiguracionSistema::updateOrCreate(
+            ['clave' => 'max_upload_recursos_mb'],
+            ['valor' => (string) $maxMb]
+        );
+
+        return response()->json([
+            'success' => true,
+            'max_mb' => $maxMb,
+            'message' => "Límite actualizado a {$maxMb} MB correctamente."
+        ]);
     }
 
     /**
