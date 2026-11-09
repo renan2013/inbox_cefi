@@ -615,7 +615,22 @@ class CursoController extends Controller
             // Silenciosamente continuar
         }
 
-        return redirect()->route('cursos.index')->with('success', '¡Curso/materia actualizado exitosamente!');
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => '¡Cambios guardados exitosamente! Puede continuar editando.',
+                'curso' => [
+                    'id_plan' => $curso->id_plan,
+                    'codigo' => $curso->codigo,
+                    'materia' => $curso->materia,
+                ]
+            ]);
+        }
+
+        return redirect()
+            ->route('cursos.edit', $curso->id_plan)
+            ->with('success', '¡Cambios guardados exitosamente! Puede continuar editando.')
+            ->with('active_tab', $request->input('active_tab', 'ficha_tecnica'));
     }
 
     /**

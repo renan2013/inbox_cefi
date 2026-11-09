@@ -199,6 +199,16 @@
         </div>
     </div>
 
+    @if (session('success'))
+        <div class="alert alert-success border-0 shadow-sm rounded-4 d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+                <div class="fw-semibold">{{ session('success') }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     @if ($errors->any())
         <div class="alert alert-danger border-0 shadow-sm rounded-4 d-flex align-items-center mb-4">
             <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-danger"></i>
@@ -214,10 +224,10 @@
 
     <form action="{{ route('cursos.update', $curso->id_plan) }}" method="POST" enctype="multipart/form-data" id="formPlanEstudios">
         @csrf
-        <input type="hidden" name="active_tab" id="active_tab_input" value="ficha_tecnica">
+        <input type="hidden" name="active_tab" id="active_tab_input" value="{{ session('active_tab', 'ficha_tecnica') }}">
 
         <!-- Botón Flotante de Guardado Persistente -->
-        <button type="button" onclick="validarYGuardarPlan()" class="btn btn-save-float">
+        <button type="button" id="btnGuardarFlotante" onclick="validarYGuardarPlan()" class="btn btn-save-float">
             <i class="bi bi-check-circle-fill me-2"></i> GUARDAR CAMBIOS DEL PLAN
         </button>
 
@@ -1809,6 +1819,82 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
         if (input) input.classList.toggle('d-none', select.value !== 'CUSTOM');
     }
 
+    function ejecutarGuardadoPlan() {
+        const form = document.getElementById('formPlanEstudios');
+        const btn = document.getElementById('btnGuardarFlotante');
+        if (!form) return;
+
+        if (typeof tinymce !== 'undefined') {
+            tinymce.triggerSave();
+        }
+
+        const originalBtnHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> GUARDANDO CAMBIOS...';
+        }
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(async (response) => {
+            const data = await response.json().catch(() => null);
+            if (!response.ok) {
+                let errMsg = 'Error al guardar los cambios. Verifique los campos obligatorios.';
+                if (data && data.errors) {
+                    errMsg = Object.values(data.errors).flat().join('\n');
+                } else if (data && data.message) {
+                    errMsg = data.message;
+                }
+                throw new Error(errMsg);
+            }
+            return data;
+        })
+        .then((data) => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check2-all me-2"></i> ¡CAMBIOS GUARDADOS!';
+                setTimeout(() => {
+                    btn.innerHTML = originalBtnHtml;
+                }, 2200);
+            }
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: (data && data.message) ? data.message : '¡Cambios guardados exitosamente!',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }
+        })
+        .catch((error) => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+            }
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo guardar',
+                    text: error.message || 'Ocurrió un problema al guardar los cambios.'
+                });
+            } else {
+                alert(error.message || 'Ocurrió un problema al guardar los cambios.');
+            }
+        });
+    }
+
     function validarYGuardarPlan() {
         if (typeof tinymce !== 'undefined') {
             tinymce.triggerSave();
@@ -1818,8 +1904,6 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
         document.querySelectorAll('input[name="porcentajes[]"]').forEach(inp => {
             totalP += parseFloat(inp.value) || 0;
         });
-
-        const form = document.getElementById('formPlanEstudios');
 
         if (document.querySelectorAll('#tablaEvaluacion tbody tr').length > 0 && Math.round(totalP) !== 100) {
             Swal.fire({
@@ -1833,7 +1917,7 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
                 cancelButtonColor: '#6c757d'
             }).then((res) => {
                 if (res.isConfirmed) {
-                    form.submit();
+                    ejecutarGuardadoPlan();
                 } else {
                     const tabEval = document.querySelector('button[data-bs-target="#evaluacion_tab"]');
                     if (tabEval) tabEval.click();
@@ -1842,7 +1926,7 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
             return;
         }
 
-        form.submit();
+        ejecutarGuardadoPlan();
     }
 
     function cambiarCreditos(delta) {
@@ -1868,6 +1952,30 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
     document.addEventListener('DOMContentLoaded', function() {
         inicializarTinyMCE();
         calcularDistribucionHoras();
+
+        // Sincronizar pestaña activa y evitar recarga al presionar Enter
+        const activeTabInput = document.getElementById('active_tab_input');
+        document.querySelectorAll('#cursoTab button[data-bs-toggle="tab"]').forEach(btn => {
+            btn.addEventListener('shown.bs.tab', function(e) {
+                const target = e.target.getAttribute('data-bs-target');
+                if (target && activeTabInput) {
+                    activeTabInput.value = target.replace('#', '');
+                }
+            });
+        });
+
+        if (activeTabInput && activeTabInput.value && activeTabInput.value !== 'ficha_tecnica') {
+            const tabBtn = document.querySelector(`#cursoTab button[data-bs-target="#${activeTabInput.value}"]`);
+            if (tabBtn) tabBtn.click();
+        }
+
+        const formPlan = document.getElementById('formPlanEstudios');
+        if (formPlan) {
+            formPlan.addEventListener('submit', function(e) {
+                e.preventDefault();
+                validarYGuardarPlan();
+            });
+        }
         
         // Renderizar rúbricas existentes
         document.querySelectorAll('.rubrica-item').forEach(item => {
