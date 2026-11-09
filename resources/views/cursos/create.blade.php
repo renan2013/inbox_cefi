@@ -294,11 +294,13 @@
                                                 'V Cuatrimestre', 'VI Cuatrimestre', 'VII Cuatrimestre', 'VIII Cuatrimestre',
                                                 'I Bimestre', 'II Bimestre', 'III Bimestre', 'IV Bimestre',
                                                 'V Bimestre', 'VI Bimestre',
+                                                'Módulo 1', 'Módulo 2', 'Módulo 3', 'Módulo 4', 'Módulo 5', 'Módulo 6',
                                                 'Mes', 'Semana', 'Seminario', 'Taller', 'Fecha Específica',
                                             ];
+                                            $valPeriodo = old('cuatrimestre');
                                         @endphp
                                         @foreach ($opcionesPeriodo as $c)
-                                            <option value="{{ $c }}" {{ old('cuatrimestre') === $c ? 'selected' : '' }}>{{ $c }}</option>
+                                            <option value="{{ $c }}" {{ $valPeriodo === $c ? 'selected' : '' }}>{{ $c }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -328,23 +330,70 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label for="creditos" class="form-label">Créditos</label>
-                                    <input type="number" name="creditos" id="creditos" class="form-control" placeholder="Ej: 4" min="0" value="{{ old('creditos', '4') }}">
+                                    <div class="input-group">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="cambiarCreditos(-1)" title="Disminuir créditos">
+                                            <i class="bi bi-dash-lg"></i>
+                                        </button>
+                                        <input type="number" name="creditos" id="creditos" class="form-control text-center fw-bold" placeholder="4" min="0" max="50" value="{{ old('creditos', '4') }}">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="cambiarCreditos(1)" title="Aumentar créditos">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label for="duracion" class="form-label">Duración <span class="text-muted">(semanas)</span></label>
+                                    <label for="duracion" class="form-label">Duración <span class="text-muted">(semanas)</span> <span class="text-danger">*</span></label>
                                     <div class="input-group">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="cambiarDuracion(-1)" title="Disminuir semanas">
+                                            <i class="bi bi-dash-lg"></i>
+                                        </button>
                                         <input type="number" name="duracion" id="duracion" class="form-control text-center fw-bold" placeholder="15" value="{{ old('duracion', '15') }}" min="1" required>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="cambiarDuracion(1)" title="Aumentar semanas">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
                                         <span class="input-group-text bg-light text-muted">semanas</span>
                                     </div>
                                 </div>
                                 <div class="col-md-5">
-                                    <label for="modalidad" class="form-label">Modalidad</label>
-                                    <input type="text" name="modalidad" id="modalidad" class="form-control" placeholder="Ej: Virtual (aprendizaje electrónico)" value="{{ old('modalidad', 'Virtual (aprendizaje electrónico)') }}">
+                                    <label for="modalidad" class="form-label">Modalidad <span class="text-danger">*</span></label>
+                                    @php
+                                        $valMod = old('modalidad', 'Virtual (aprendizaje electrónico)');
+                                        $opcionesModalidad = [
+                                            'Virtual (aprendizaje electrónico)',
+                                            'Virtual',
+                                            'Presencial',
+                                            'Semi Presencial',
+                                            'Híbrida / Bimodal',
+                                            'Asincrónica (100% autodidacta)',
+                                            'Por definir / Horario Flexible',
+                                        ];
+                                    @endphp
+                                    <select name="modalidad" id="modalidad" class="form-select" required>
+                                        @foreach ($opcionesModalidad as $mod)
+                                            <option value="{{ $mod }}" {{ $valMod === $mod ? 'selected' : '' }}>{{ $mod }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="naturaleza" class="form-label">Naturaleza</label>
-                                    <input type="text" name="naturaleza" id="naturaleza" class="form-control" placeholder="Ej: Teórico-práctica" value="{{ old('naturaleza', 'Teórico-práctica') }}">
+                                    <label for="naturaleza" class="form-label">Naturaleza <span class="text-danger">*</span></label>
+                                    @php
+                                        $valNat = old('naturaleza', 'Teórico-práctica');
+                                        $opcionesNaturaleza = [
+                                            'Teórico-práctica',
+                                            'Teórica',
+                                            'Práctica',
+                                            'Taller / Aplicada',
+                                            'Laboratorio',
+                                            'Seminario',
+                                            'Tutoría',
+                                            'Proyecto / Práctica Profesional',
+                                        ];
+                                    @endphp
+                                    <select name="naturaleza" id="naturaleza" class="form-select" required>
+                                        @foreach ($opcionesNaturaleza as $nat)
+                                            <option value="{{ $nat }}" {{ $valNat === $nat ? 'selected' : '' }}>{{ $nat }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="col-md-6">
@@ -1728,6 +1777,26 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
         }
 
         form.submit();
+    }
+
+    function cambiarCreditos(delta) {
+        const inp = document.getElementById('creditos');
+        if (inp) {
+            let val = parseInt(inp.value, 10);
+            if (isNaN(val)) val = 0;
+            val = Math.max(0, val + delta);
+            inp.value = val;
+        }
+    }
+
+    function cambiarDuracion(delta) {
+        const inp = document.getElementById('duracion');
+        if (inp) {
+            let val = parseInt(inp.value, 10);
+            if (isNaN(val)) val = 1;
+            val = Math.max(1, val + delta);
+            inp.value = val;
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
