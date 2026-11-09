@@ -39,11 +39,11 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 2rem;
+            padding: 1.5rem 2rem 5.5rem;
         }
         .pulse-logo {
-            max-width: 250px;
-            margin-bottom: 2rem;
+            max-width: 230px;
+            margin-bottom: 1.25rem;
             animation: floatLogo 4s ease-in-out infinite;
         }
         @keyframes floatLogo {
@@ -51,37 +51,37 @@
             50% { transform: translateY(-10px); }
         }
         .welcome-title {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 600;
             letter-spacing: 4px;
             color: var(--primary);
             text-transform: uppercase;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.75rem;
         }
         .materia-name {
-            font-size: 4rem;
+            font-size: clamp(2.4rem, 4vw, 3.8rem);
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: -1px;
-            background: linear-gradient(to right, #ffffff, #94a3b8);
+            background: linear-gradient(to right, #ffffff, #cbd5e1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
         .profesor-name {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 300;
             color: #cbd5e1;
-            margin-bottom: 3.5rem;
+            margin-bottom: 1.75rem;
         }
         .timer-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
-            padding: 2rem 4rem;
+            padding: 1.75rem 3.5rem 1.5rem;
             border-radius: 2rem;
             box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            margin-bottom: 3rem;
+            margin-bottom: 1.5rem;
             animation: glowBorder 5s infinite alternate;
         }
         @keyframes glowBorder {
@@ -94,6 +94,7 @@
             font-variant-numeric: tabular-nums;
             letter-spacing: 2px;
             color: #fff;
+            line-height: 1.1;
         }
         .countdown-label {
             font-size: 0.9rem;
@@ -101,11 +102,53 @@
             letter-spacing: 3px;
             color: var(--primary);
             font-weight: 600;
-            margin-top: 0.5rem;
+            margin-top: 0.4rem;
+        }
+        .timer-controls {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .btn-timer-ctrl {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            user-select: none;
+        }
+        .btn-timer-ctrl:hover {
+            background: rgba(95, 178, 48, 0.25);
+            border-color: var(--primary);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+        .btn-timer-ctrl:active {
+            transform: translateY(0);
+        }
+        .important-notice {
+            color: #ffffff !important;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            margin-top: 0.25rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
         .social-bar {
             position: absolute;
-            bottom: 30px;
+            bottom: 24px;
             width: 100%;
             display: flex;
             justify-content: center;
@@ -145,10 +188,21 @@
         <div class="timer-card">
             <div class="countdown-digits" id="timer">--:--</div>
             <div class="countdown-label" id="timerLabel">Iniciando en breve</div>
+            <div class="timer-controls">
+                <button type="button" class="btn-timer-ctrl" onclick="adjustTimer(-60)" title="Disminuir 1 minuto">
+                    <i class="bi bi-dash-lg"></i> 1 min
+                </button>
+                <button type="button" class="btn-timer-ctrl" onclick="resetTimer()" title="Reiniciar el tiempo">
+                    <i class="bi bi-arrow-counterclockwise"></i> Resetear
+                </button>
+                <button type="button" class="btn-timer-ctrl" onclick="adjustTimer(60)" title="Aumentar 1 minuto">
+                    <i class="bi bi-plus-lg"></i> 1 min
+                </button>
+            </div>
         </div>
 
         <!-- Instrucciones en pantalla -->
-        <p class="text-white-50 small"><i class="bi bi-info-circle me-1"></i> Asegúrese de habilitar su audio y cámara al conectarse.</p>
+        <p class="important-notice"><i class="bi bi-info-circle-fill me-1"></i> Asegúrese de habilitar su audio y cámara al conectarse.</p>
 
     </div>
 
@@ -160,19 +214,29 @@
     </div>
 
     <script>
-        let totalSeconds = {{ $countdown_minutes }} * 60;
+        const initialSeconds = Math.max(60, ({{ (int) $countdown_minutes }} || 5) * 60);
+        let totalSeconds = initialSeconds;
+        let interval = null;
         const timerElement = document.getElementById('timer');
         const timerLabel = document.getElementById('timerLabel');
 
-        function updateTimer() {
+        function renderTimer() {
             if (totalSeconds <= 0) {
+                totalSeconds = 0;
                 timerElement.innerText = "¡CLASE INICIADA!";
                 timerElement.style.fontSize = "3.5rem";
                 timerElement.style.color = "#5fb230";
                 timerLabel.innerText = "La sesión está en curso";
-                clearInterval(interval);
+                if (interval) {
+                    clearInterval(interval);
+                    interval = null;
+                }
                 return;
             }
+
+            timerElement.style.fontSize = "";
+            timerElement.style.color = "";
+            timerLabel.innerText = "Iniciando en breve";
 
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
@@ -181,11 +245,36 @@
             const displaySec = seconds < 10 ? '0' + seconds : seconds;
 
             timerElement.innerText = `${displayMin}:${displaySec}`;
-            totalSeconds--;
         }
 
-        updateTimer();
-        const interval = setInterval(updateTimer, 1000);
+        function tickTimer() {
+            renderTimer();
+            if (totalSeconds > 0) {
+                totalSeconds--;
+            }
+        }
+
+        function startTimerLoop() {
+            if (interval) clearInterval(interval);
+            interval = setInterval(tickTimer, 1000);
+        }
+
+        function adjustTimer(deltaSeconds) {
+            totalSeconds = Math.max(0, totalSeconds + deltaSeconds);
+            renderTimer();
+            if (totalSeconds > 0 && !interval) {
+                startTimerLoop();
+            }
+        }
+
+        function resetTimer() {
+            totalSeconds = initialSeconds;
+            renderTimer();
+            startTimerLoop();
+        }
+
+        tickTimer();
+        startTimerLoop();
     </script>
 </body>
 </html>
