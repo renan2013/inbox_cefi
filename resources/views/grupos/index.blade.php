@@ -359,12 +359,19 @@
                     </div>
 
                     <div class="row g-4 mb-5">
-                        <div class="col-md-6">
+                        <div class="col-md-3">
+                            <label class="form-label-custom">N° de Lecciones / Semanas</label>
+                            <div class="input-group">
+                                <input type="number" id="num_lecciones" class="form-control form-control-custom" min="1" max="100" placeholder="Ej: 8" value="8">
+                                <span class="input-group-text bg-transparent border-start-0 text-white-50" style="border-color: var(--border-dark);">lecc.</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label-custom">Fecha Inicio</label>
                             <input type="date" name="fecha_inicio" class="form-control form-control-custom w-100" required>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label-custom">Fecha Final</label>
+                        <div class="col-md-5">
+                            <label class="form-label-custom">Fecha Final <span class="text-success fw-normal">(Calculada)</span></label>
                             <input type="date" name="fecha_final" class="form-control form-control-custom w-100" required>
                         </div>
                     </div>
@@ -547,11 +554,15 @@
                                         <input type="time" name="horario_fin" id="edit_horario_fin" class="form-control form-control-custom">
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
+                                    <label class="form-label-custom">Lecciones</label>
+                                    <input type="number" id="edit_num_lecciones" class="form-control form-control-custom w-100" min="1" max="100" placeholder="Ej: 8" value="8">
+                                </div>
+                                <div class="col-md-2">
                                     <label class="form-label-custom">Fecha Inicio</label>
                                     <input type="date" name="fecha_inicio" id="edit_fecha_inicio" class="form-control form-control-custom w-100" required>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <label class="form-label-custom">Fecha Final</label>
                                     <input type="date" name="fecha_final" id="edit_fecha_final" class="form-control form-control-custom w-100" required>
                                 </div>
@@ -617,18 +628,20 @@
 
             function parseSemanas(txt) {
                 if (!txt) return null;
-                var m = txt.match(/(\d+)\s*semana/i);
+                var m = txt.match(/(\d+)\s*(?:semana|lecci|clase)/i);
                 if (m) return parseInt(m[1], 10);
                 if (/cuatrimestre/i.test(txt)) return 15;
                 if (/bimestre/i.test(txt)) return 8;
                 if (/mes/i.test(txt)) return 4;
+                if (/semana/i.test(txt)) return 1;
                 return null;
             }
 
             function calcularFechaFinal(fechaIni, semanas) {
-                if (!fechaIni || !semanas) return null;
+                if (!fechaIni || !semanas || semanas <= 0) return null;
                 var d = new Date(fechaIni + 'T00:00:00');
                 if (isNaN(d.getTime())) return null;
+                // Si es 1 lección/semana, finaliza 6 días después (semana completa) o el mismo día si es fecha única
                 d.setDate(d.getDate() + (semanas * 7) - 1);
                 var mes = ('0' + (d.getMonth() + 1)).slice(-2);
                 var dia = ('0' + d.getDate()).slice(-2);
@@ -636,26 +649,31 @@
             }
 
             function autoAjustarFechaFinal() {
-                var planId = $('#id_plan_select').val();
                 var fIni = $('input[name="fecha_inicio"]').val();
-                if (planId && fIni && materiasCargadas[planId]) {
-                    var mat = materiasCargadas[planId];
-                    var semanas = parseSemanas(mat.duracion) || parseSemanas(mat.cuatrimestre);
-                    if (!semanas) {
+                var numLecc = parseInt($('#num_lecciones').val(), 10);
+                if (!fIni) return;
+
+                if (!numLecc || isNaN(numLecc) || numLecc <= 0) {
+                    var planId = $('#id_plan_select').val();
+                    if (planId && materiasCargadas[planId]) {
+                        var mat = materiasCargadas[planId];
+                        numLecc = parseSemanas(mat.duracion) || parseSemanas(mat.cuatrimestre);
+                    }
+                    if (!numLecc) {
                         var tipoPer = $('#cuatrimestre_select').val();
-                        semanas = parseSemanas(tipoPer);
+                        numLecc = parseSemanas(tipoPer) || 8;
                     }
-                    if (semanas) {
-                        var fFinCalculada = calcularFechaFinal(fIni, semanas);
-                        if (fFinCalculada) {
-                            $('input[name="fecha_final"]').val(fFinCalculada);
-                            actPeriodo();
-                        }
-                    }
+                    $('#num_lecciones').val(numLecc);
+                }
+
+                var fFinCalculada = calcularFechaFinal(fIni, numLecc);
+                if (fFinCalculada) {
+                    $('input[name="fecha_final"]').val(fFinCalculada);
+                    actPeriodo();
                 }
             }
 
-            $('input[name="fecha_inicio"]').on('change', autoAjustarFechaFinal);
+            $('input[name="fecha_inicio"], #num_lecciones').on('change input', autoAjustarFechaFinal);
 
             $('#id_programa_select').change(function() {
                 var id = $(this).val();
@@ -706,9 +724,35 @@
                     if (mat.modalidad) {
                         $('select[name="modalidad"]').val(mat.modalidad);
                     }
+                    var lecc = parseSemanas(mat.duracion) || parseSemanas(mat.cuatrimestre);
+                    if (lecc) {
+                        $('#num_lecciones').val(lecc);
+                    }
                     autoAjustarFechaFinal();
                 }
             });
+
+            $('#cuatrimestre_select').change(function() {
+                var tipoPer = $(this).val();
+                var lecc = parseSemanas(tipoPer);
+                if (lecc) {
+                    $('#num_lecciones').val(lecc);
+                }
+                autoAjustarFechaFinal();
+            });
+
+            // Ajuste automático en modal de edición
+            function autoAjustarFechaFinalModal() {
+                var fIni = $('#edit_fecha_inicio').val();
+                var numLecc = parseInt($('#edit_num_lecciones').val(), 10) || 8;
+                if (fIni) {
+                    var fFinCalculada = calcularFechaFinal(fIni, numLecc);
+                    if (fFinCalculada) {
+                        $('#edit_fecha_final').val(fFinCalculada);
+                    }
+                }
+            }
+            $('#edit_fecha_inicio, #edit_num_lecciones').on('change input', autoAjustarFechaFinalModal);
         });
 
         var opcionesProfesores = {
@@ -764,6 +808,18 @@
 
             $('#edit_fecha_inicio').val(g.fecha_inicio ? g.fecha_inicio.substring(0, 10) : '');
             $('#edit_fecha_final').val(g.fecha_final ? g.fecha_final.substring(0, 10) : '');
+
+            // Calcular número de lecciones basado en fechas existentes
+            if (g.fecha_inicio && g.fecha_final) {
+                var d1 = new Date(g.fecha_inicio.substring(0, 10) + 'T00:00:00');
+                var d2 = new Date(g.fecha_final.substring(0, 10) + 'T00:00:00');
+                var diffDias = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+                var leccEst = Math.max(1, Math.round(diffDias / 7));
+                $('#edit_num_lecciones').val(leccEst);
+            } else {
+                $('#edit_num_lecciones').val(8);
+            }
+
             $('#edit_id_moodle').val(g.id_moodle || '');
             $('#edit_enlace_zoom').val(g.enlace_zoom || '');
 
