@@ -190,6 +190,7 @@ class GrupoController extends Controller
         self::ensureCursosActivosColumns();
 
         $request->validate([
+            'id_plan' => 'nullable|exists:plan_estudios,id_plan',
             'id_profesor' => 'nullable|exists:usuarios,id',
             'nombre_grupo' => 'nullable|string|max:100',
             'periodo' => 'required|string|max:100',
@@ -226,6 +227,9 @@ class GrupoController extends Controller
                 'enlace_zoom' => $request->enlace_zoom,
                 'id_moodle' => $request->id_moodle,
             ];
+            if ($request->filled('id_plan')) {
+                $dataUpdate['id_plan'] = (int)$request->id_plan;
+            }
             if (Schema::hasColumn('cursos_activos', 'nombre_grupo')) {
                 $dataUpdate['nombre_grupo'] = $request->filled('nombre_grupo') ? trim($request->nombre_grupo) : null;
             }
