@@ -42,6 +42,9 @@ class PlanEstudio extends Model
         'cronograma',
         'guias_evaluacion',
         'bibliografia',
+        'evaluaciones_json',
+        'cronograma_json',
+        'rubricas_json',
         'fecha_descriptor_pdf'
     ];
 

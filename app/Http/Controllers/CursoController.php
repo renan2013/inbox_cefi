@@ -5,53 +5,309 @@ namespace App\Http\Controllers;
 use App\Models\PlanEstudio;
 use App\Models\Programa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CursoController extends Controller
 {
     /**
-     * Asegura de forma preventiva que todas las columnas de la ficha curricular existan en la tabla.
+     * Asegura de forma preventiva que todas las columnas de la ficha curricular y las tablas de sílabos existan.
      */
     protected function ensurePlanEstudiosColumns()
     {
         try {
-            $existing = array_map('strtolower', Schema::getColumnListing('plan_estudios'));
-            if (empty($existing)) {
-                return;
-            }
+            if (Schema::hasTable('plan_estudios')) {
+                $existing = array_map('strtolower', Schema::getColumnListing('plan_estudios'));
+                $cols = [
+                    'duracion' => "VARCHAR(100) NULL DEFAULT '15 semanas'",
+                    'distribucion_horas' => "TEXT NULL",
+                    'horas_teoricas' => "INT NULL DEFAULT 3",
+                    'horas_practicas' => "INT NULL DEFAULT 1",
+                    'horas_independientes' => "INT NULL DEFAULT 8",
+                    'horas_totales' => "INT NULL DEFAULT 12",
+                    'modalidad' => "VARCHAR(100) NULL DEFAULT 'Virtual (aprendizaje electrónico)'",
+                    'naturaleza' => "VARCHAR(100) NULL DEFAULT 'Teórico-práctica'",
+                    'requisitos' => "TEXT NULL",
+                    'correquisitos' => "TEXT NULL",
+                    'nivel' => "VARCHAR(100) NULL DEFAULT NULL",
+                    'profesor' => "VARCHAR(255) NULL DEFAULT NULL",
+                    'descripcion_curso' => "LONGTEXT NULL",
+                    'objetivo_general' => "LONGTEXT NULL",
+                    'objetivos_especificos' => "LONGTEXT NULL",
+                    'contenidos_tematicos' => "LONGTEXT NULL",
+                    'metodologia_ensenanza' => "LONGTEXT NULL",
+                    'estrategias_aprendizaje' => "LONGTEXT NULL",
+                    'evaluacion_aprendizajes' => "LONGTEXT NULL",
+                    'recursos_didacticos' => "LONGTEXT NULL",
+                    'cronograma' => "LONGTEXT NULL",
+                    'guias_evaluacion' => "LONGTEXT NULL",
+                    'bibliografia' => "LONGTEXT NULL",
+                    'evaluaciones_json' => "LONGTEXT NULL",
+                    'cronograma_json' => "LONGTEXT NULL",
+                    'rubricas_json' => "LONGTEXT NULL",
+                    'fecha_descriptor_pdf' => "DATETIME NULL DEFAULT NULL"
+                ];
 
-            $cols = [
-                'duracion' => "VARCHAR(100) NULL DEFAULT '15 semanas'",
-                'distribucion_horas' => "TEXT NULL",
-                'horas_teoricas' => "INT NULL DEFAULT 3",
-                'horas_practicas' => "INT NULL DEFAULT 1",
-                'horas_independientes' => "INT NULL DEFAULT 8",
-                'horas_totales' => "INT NULL DEFAULT 12",
-                'modalidad' => "VARCHAR(100) NULL DEFAULT 'Virtual (aprendizaje electrónico)'",
-                'naturaleza' => "VARCHAR(100) NULL DEFAULT 'Teórico-práctica'",
-                'correquisitos' => "TEXT NULL",
-                'nivel' => "VARCHAR(100) NULL DEFAULT NULL",
-                'profesor' => "VARCHAR(255) NULL DEFAULT NULL",
-                'descripcion_curso' => "LONGTEXT NULL",
-                'contenidos_tematicos' => "LONGTEXT NULL",
-                'metodologia_ensenanza' => "LONGTEXT NULL",
-                'estrategias_aprendizaje' => "LONGTEXT NULL",
-                'evaluacion_aprendizajes' => "LONGTEXT NULL",
-                'recursos_didacticos' => "LONGTEXT NULL",
-                'cronograma' => "LONGTEXT NULL",
-                'guias_evaluacion' => "LONGTEXT NULL",
-                'bibliografia' => "LONGTEXT NULL",
-                'fecha_descriptor_pdf' => "DATETIME NULL DEFAULT NULL"
-            ];
-
-            foreach ($cols as $col => $type) {
-                if (!in_array(strtolower($col), $existing, true)) {
-                    DB::statement("ALTER TABLE plan_estudios ADD COLUMN `{$col}` {$type}");
+                foreach ($cols as $col => $type) {
+                    if (!in_array(strtolower($col), $existing, true)) {
+                        try {
+                            DB::statement("ALTER TABLE plan_estudios ADD COLUMN `{$col}` {$type}");
+                        } catch (\Throwable $e) {
+                            // Continuar con la siguiente columna
+                        }
+                    }
                 }
             }
         } catch (\Throwable $e) {
-            // Silenciosamente continuar si no hay permisos ALTER o si ya existen
+            // Silenciosamente continuar
+        }
+
+        // Asegurar tablas y columnas de sílabo / evaluación / cronograma / rúbricas
+        try {
+            if (!Schema::hasTable('silabos')) {
+                DB::statement("CREATE TABLE IF NOT EXISTS `silabos` (
+                    `id_silabo` INT AUTO_INCREMENT PRIMARY KEY,
+                    `id_plan` INT NOT NULL,
+                    `id_profesor` INT NULL DEFAULT NULL,
+                    `descripcion` LONGTEXT NULL,
+                    `metodologia` LONGTEXT NULL,
+                    `estrategias_aprendizaje` LONGTEXT NULL,
+                    `recursos_aprendizaje` LONGTEXT NULL,
+                    `contenidos` LONGTEXT NULL,
+                    `cronograma` LONGTEXT NULL,
+                    `bibliografia` LONGTEXT NULL,
+                    `modalidad` VARCHAR(150) NULL,
+                    `horario` VARCHAR(150) NULL,
+                    `tipo_curso` VARCHAR(150) NULL,
+                    `objetivo_general` LONGTEXT NULL,
+                    `objetivos_especificos` LONGTEXT NULL,
+                    `anexos` LONGTEXT NULL,
+                    `fecha_creacion` DATETIME NULL
+                )");
+            } else {
+                $existingSil = array_map('strtolower', Schema::getColumnListing('silabos'));
+                $silCols = [
+                    'estrategias_aprendizaje' => "LONGTEXT NULL",
+                    'recursos_aprendizaje' => "LONGTEXT NULL",
+                    'objetivo_general' => "LONGTEXT NULL",
+                    'objetivos_especificos' => "LONGTEXT NULL",
+                    'anexos' => "LONGTEXT NULL",
+                    'horario' => "VARCHAR(150) NULL",
+                    'tipo_curso' => "VARCHAR(150) NULL",
+                    'modalidad' => "VARCHAR(150) NULL",
+                    'fecha_creacion' => "DATETIME NULL"
+                ];
+                foreach ($silCols as $col => $type) {
+                    if (!in_array(strtolower($col), $existingSil, true)) {
+                        try {
+                            DB::statement("ALTER TABLE `silabos` ADD COLUMN `{$col}` {$type}");
+                        } catch (\Throwable $e) {}
+                    }
+                }
+            }
+
+            if (!Schema::hasTable('silabo_evaluacion')) {
+                DB::statement("CREATE TABLE IF NOT EXISTS `silabo_evaluacion` (
+                    `id_evaluacion` INT AUTO_INCREMENT PRIMARY KEY,
+                    `id_silabo` INT NOT NULL,
+                    `rubro` VARCHAR(255) NOT NULL,
+                    `porcentaje` DECIMAL(5,2) NOT NULL DEFAULT 0,
+                    `cantidad` INT NOT NULL DEFAULT 1,
+                    `anexo` VARCHAR(255) NULL,
+                    `tipo_moodle` VARCHAR(100) NULL
+                )");
+            } else {
+                $existingEval = array_map('strtolower', Schema::getColumnListing('silabo_evaluacion'));
+                foreach (['cantidad' => "INT NOT NULL DEFAULT 1", 'anexo' => "VARCHAR(255) NULL", 'tipo_moodle' => "VARCHAR(100) NULL"] as $col => $type) {
+                    if (!in_array(strtolower($col), $existingEval, true)) {
+                        try {
+                            DB::statement("ALTER TABLE `silabo_evaluacion` ADD COLUMN `{$col}` {$type}");
+                        } catch (\Throwable $e) {}
+                    }
+                }
+            }
+
+            if (!Schema::hasTable('silabo_cronograma')) {
+                DB::statement("CREATE TABLE IF NOT EXISTS `silabo_cronograma` (
+                    `id_cronograma` INT AUTO_INCREMENT PRIMARY KEY,
+                    `id_silabo` INT NOT NULL,
+                    `semana` VARCHAR(50) NOT NULL,
+                    `fecha` VARCHAR(50) NULL,
+                    `actividad` LONGTEXT NULL,
+                    `tareas` LONGTEXT NULL,
+                    `modalidad_trabajo` VARCHAR(100) NULL DEFAULT 'Asincrónico',
+                    `actividades_moodle` LONGTEXT NULL
+                )");
+            } else {
+                $existingCro = array_map('strtolower', Schema::getColumnListing('silabo_cronograma'));
+                foreach (['fecha' => "VARCHAR(50) NULL", 'tareas' => "LONGTEXT NULL", 'modalidad_trabajo' => "VARCHAR(100) NULL DEFAULT 'Asincrónico'", 'actividades_moodle' => "LONGTEXT NULL"] as $col => $type) {
+                    if (!in_array(strtolower($col), $existingCro, true)) {
+                        try {
+                            DB::statement("ALTER TABLE `silabo_cronograma` ADD COLUMN `{$col}` {$type}");
+                        } catch (\Throwable $e) {}
+                    }
+                }
+            }
+
+            if (!Schema::hasTable('silabo_rubricas')) {
+                DB::statement("CREATE TABLE IF NOT EXISTS `silabo_rubricas` (
+                    `id_rubrica` INT AUTO_INCREMENT PRIMARY KEY,
+                    `id_silabo` INT NOT NULL,
+                    `codigo` VARCHAR(50) NULL,
+                    `nombre` VARCHAR(255) NOT NULL,
+                    `porcentaje_total` DECIMAL(5,2) NULL DEFAULT 0,
+                    `cantidad` INT NULL DEFAULT 1,
+                    `valor` DECIMAL(8,2) NULL DEFAULT 0,
+                    `contenido_json` LONGTEXT NULL
+                )");
+            }
+        } catch (\Throwable $e) {
+            // Continuar
+        }
+    }
+
+    /**
+     * Filtra un arreglo asociativo dejando únicamente las columnas que existen en la tabla indicada.
+     */
+    protected function filterTableColumns(string $table, array $row): array
+    {
+        try {
+            $cols = array_map('strtolower', Schema::getColumnListing($table));
+            if (empty($cols)) {
+                return $row;
+            }
+            $filtered = [];
+            foreach ($row as $k => $v) {
+                if (in_array(strtolower($k), $cols, true)) {
+                    $filtered[$k] = $v;
+                }
+            }
+            return $filtered;
+        } catch (\Throwable $e) {
+            return $row;
+        }
+    }
+
+    /**
+     * Sincroniza la plantilla de sílabo, evaluación, cronograma y rúbricas en las tablas relacionales.
+     */
+    protected function sincronizarPlantillaSilabo(PlanEstudio $plan, array $evaluaciones_arr, array $cronograma_arr, array $rubricas_arr): void
+    {
+        try {
+            if (!Schema::hasTable('silabos')) {
+                return;
+            }
+
+            $silabo = DB::table('silabos')
+                ->where('id_plan', $plan->id_plan)
+                ->orderBy('id_silabo', 'desc')
+                ->first();
+
+            $profesorId = Auth::id() ?: (DB::table('usuarios')->value('id') ?? 1);
+
+            $baseSilaboData = [
+                'id_plan' => $plan->id_plan,
+                'descripcion' => $plan->descripcion_curso ?? '',
+                'metodologia' => $plan->metodologia_ensenanza ?? '',
+                'estrategias_aprendizaje' => $plan->estrategias_aprendizaje ?? '',
+                'recursos_aprendizaje' => $plan->recursos_didacticos ?? '',
+                'contenidos' => $plan->contenidos_tematicos ?? '',
+                'cronograma' => $plan->cronograma ?? '',
+                'bibliografia' => $plan->bibliografia ?? '',
+                'modalidad' => $plan->modalidad ?? 'Virtual (aprendizaje electrónico)',
+                'horario' => '',
+                'tipo_curso' => $plan->naturaleza ?? 'Teórico-práctica',
+                'objetivo_general' => $plan->objetivo_general ?? '',
+                'objetivos_especificos' => $plan->objetivos_especificos ?? '',
+                'anexos' => ''
+            ];
+
+            $id_silabo = null;
+            if ($silabo) {
+                $id_silabo = $silabo->id_silabo;
+                $updatePayload = $this->filterTableColumns('silabos', $baseSilaboData);
+                DB::table('silabos')->where('id_silabo', $id_silabo)->update($updatePayload);
+            } else {
+                $insertPayload = $baseSilaboData;
+                $insertPayload['id_profesor'] = $profesorId;
+                $insertPayload['fecha_creacion'] = now();
+                $insertPayload = $this->filterTableColumns('silabos', $insertPayload);
+                try {
+                    $id_silabo = DB::table('silabos')->insertGetId($insertPayload);
+                } catch (\Throwable $eInsert) {
+                    // Fallback si id_profesor admite NULL o 0
+                    $insertPayload['id_profesor'] = null;
+                    try {
+                        $id_silabo = DB::table('silabos')->insertGetId($insertPayload);
+                    } catch (\Throwable $eInsert2) {
+                        $insertPayload['id_profesor'] = 0;
+                        $id_silabo = DB::table('silabos')->insertGetId($insertPayload);
+                    }
+                }
+            }
+
+            if (!$id_silabo) {
+                return;
+            }
+
+            // 1. Sincronizar Evaluación
+            try {
+                if (Schema::hasTable('silabo_evaluacion')) {
+                    DB::table('silabo_evaluacion')->where('id_silabo', $id_silabo)->delete();
+                    foreach ($evaluaciones_arr as $ev) {
+                        $rowEval = $this->filterTableColumns('silabo_evaluacion', [
+                            'id_silabo' => $id_silabo,
+                            'rubro' => $ev['rubro'],
+                            'porcentaje' => $ev['porcentaje'],
+                            'cantidad' => $ev['cantidad'],
+                            'anexo' => $ev['anexo'],
+                            'tipo_moodle' => $ev['tipo_moodle'],
+                        ]);
+                        DB::table('silabo_evaluacion')->insert($rowEval);
+                    }
+                }
+            } catch (\Throwable $eEval) {}
+
+            // 2. Sincronizar Cronograma
+            try {
+                if (Schema::hasTable('silabo_cronograma')) {
+                    DB::table('silabo_cronograma')->where('id_silabo', $id_silabo)->delete();
+                    foreach ($cronograma_arr as $cro) {
+                        $rowCro = $this->filterTableColumns('silabo_cronograma', [
+                            'id_silabo' => $id_silabo,
+                            'semana' => (string)$cro['semana'],
+                            'fecha' => (string)($cro['fecha'] ?? ''),
+                            'actividad' => (string)($cro['actividad'] ?? ''),
+                            'tareas' => (string)($cro['tareas'] ?? ''),
+                            'modalidad_trabajo' => (string)($cro['modalidad_trabajo'] ?? 'Asincrónico'),
+                            'actividades_moodle' => (string)($cro['actividades_moodle'] ?? ''),
+                        ]);
+                        DB::table('silabo_cronograma')->insert($rowCro);
+                    }
+                }
+            } catch (\Throwable $eCro) {}
+
+            // 3. Sincronizar Rúbricas
+            try {
+                if (Schema::hasTable('silabo_rubricas')) {
+                    DB::table('silabo_rubricas')->where('id_silabo', $id_silabo)->delete();
+                    foreach ($rubricas_arr as $rub) {
+                        $rowRub = $this->filterTableColumns('silabo_rubricas', [
+                            'id_silabo' => $id_silabo,
+                            'codigo' => $rub['codigo'],
+                            'nombre' => $rub['nombre'],
+                            'porcentaje_total' => $rub['porcentaje_total'],
+                            'cantidad' => $rub['cantidad'],
+                            'valor' => $rub['valor'],
+                            'contenido_json' => $rub['contenido_json'],
+                        ]);
+                        DB::table('silabo_rubricas')->insert($rowRub);
+                    }
+                }
+            } catch (\Throwable $eRub) {}
+        } catch (\Throwable $e) {
+            // Silenciosamente continuar
         }
     }
 
@@ -187,25 +443,39 @@ class CursoController extends Controller
             $data['adjunto_pdf'] = '';
         }
 
-        // Construir representación HTML para secciones de evaluación y cronograma si están vacías
+        // Construir arreglos estructurados y representación HTML para evaluación, cronograma y rúbricas
         $rubros = $request->input('rubros', []);
         $porcentajes = $request->input('porcentajes', []);
         $cantidades_eval = $request->input('cantidades_eval', []);
         $tipos_moodle = $request->input('tipos_moodle_eval', []);
         $anexos_eval = $request->input('anexos_eval', []);
 
-        if (empty($data['evaluacion_aprendizajes']) && !empty($rubros)) {
+        $evaluaciones_arr = [];
+        if (is_array($rubros)) {
+            foreach ($rubros as $k => $nom) {
+                $nom = trim((string)$nom);
+                if ($nom !== '') {
+                    $evaluaciones_arr[] = [
+                        'rubro' => $nom,
+                        'porcentaje' => floatval($porcentajes[$k] ?? 0),
+                        'cantidad' => intval($cantidades_eval[$k] ?? 1),
+                        'anexo' => (string)($anexos_eval[$k] ?? ''),
+                        'tipo_moodle' => (string)($tipos_moodle[$k] ?? ''),
+                    ];
+                }
+            }
+        }
+
+        if (!empty($evaluaciones_arr)) {
             $evalHtml = '<table width="100%" border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-size: 10pt;">';
             $evalHtml .= '<tr style="background-color: #f1f5f9; font-weight: bold;"><th>Rubro</th><th style="text-align:center;">%</th><th style="text-align:center;">Cant.</th><th style="text-align:center;">Valor Unit.</th></tr>';
             $totP = 0;
-            foreach ($rubros as $k => $nom) {
-                if (!empty($nom)) {
-                    $p = floatval($porcentajes[$k] ?? 0);
-                    $totP += $p;
-                    $cant = intval($cantidades_eval[$k] ?? 1);
-                    $unit = $cant > 0 ? round($p / $cant, 2) : $p;
-                    $evalHtml .= "<tr><td>{$nom}</td><td style='text-align:center;'>{$p}%</td><td style='text-align:center;'>{$cant}</td><td style='text-align:center;'>{$unit}%</td></tr>";
-                }
+            foreach ($evaluaciones_arr as $ev) {
+                $p = $ev['porcentaje'];
+                $totP += $p;
+                $cant = $ev['cantidad'];
+                $unit = $cant > 0 ? round($p / $cant, 2) : $p;
+                $evalHtml .= "<tr><td>{$ev['rubro']}</td><td style='text-align:center;'>{$p}%</td><td style='text-align:center;'>{$cant}</td><td style='text-align:center;'>{$unit}%</td></tr>";
             }
             $evalHtml .= "<tr style='font-weight: bold; background-color: #f8fafc;'><td style='text-align: right;'>TOTAL:</td><td style='text-align:center;'>{$totP}%</td><td colspan='2'></td></tr>";
             $evalHtml .= '</table>';
@@ -220,14 +490,31 @@ class CursoController extends Controller
         $modalidades = $request->input('c_modalidad', []);
         $moodle_post = $request->input('c_moodle', []);
 
-        if (empty($data['cronograma']) && !empty($semanas)) {
-            $cronoHtml = '<table width="100%" border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-size: 9.5pt;">';
-            $cronoHtml .= '<tr style="background-color: #f1f5f9; font-weight: bold;"><th style="width: 8%;">Semana</th><th style="width: 42%;">Actividades / Contenidos</th><th style="width: 35%;">Tareas / Evaluación</th><th style="width: 15%;">Modalidad</th></tr>';
+        $cronograma_arr = [];
+        if (is_array($semanas)) {
             foreach ($semanas as $k => $sem) {
-                $act = $actividades[$k] ?? '';
-                $tar = $tareas_post[$k] ?? '';
-                $mod = $modalidades[$k] ?? 'Asincrónico';
-                $cronoHtml .= "<tr><td style='text-align:center; font-weight: bold;'>{$sem}</td><td>{$act}</td><td>{$tar}</td><td style='text-align:center;'>{$mod}</td></tr>";
+                $cronograma_arr[] = [
+                    'semana' => intval($sem),
+                    'fecha' => !empty($fechas[$k]) ? (string)$fechas[$k] : '',
+                    'actividad' => (string)($actividades[$k] ?? ''),
+                    'tareas' => (string)($tareas_post[$k] ?? ''),
+                    'modalidad_trabajo' => (string)($modalidades[$k] ?? 'Asincrónico'),
+                    'actividades_moodle' => (string)($moodle_post[$k] ?? ''),
+                ];
+            }
+        }
+
+        if (!empty($cronograma_arr)) {
+            $cronoHtml = '<table width="100%" border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-size: 9.5pt;">';
+            $cronoHtml .= '<tr style="background-color: #f1f5f9; font-weight: bold;"><th style="width: 12%;">Semana</th><th style="width: 40%;">Actividades / Contenidos</th><th style="width: 33%;">Tareas / Evaluación</th><th style="width: 15%;">Modalidad</th></tr>';
+            foreach ($cronograma_arr as $cro) {
+                $semLabel = $cro['semana'];
+                if (!empty($cro['fecha'])) {
+                    $ts = strtotime($cro['fecha']);
+                    $fechaFmt = $ts ? date('d/m/Y', $ts) : $cro['fecha'];
+                    $semLabel .= " ({$fechaFmt})";
+                }
+                $cronoHtml .= "<tr><td style='text-align:center; font-weight: bold;'>{$semLabel}</td><td>{$cro['actividad']}</td><td>{$cro['tareas']}</td><td style='text-align:center;'>{$cro['modalidad_trabajo']}</td></tr>";
             }
             $cronoHtml .= '</table>';
             $data['cronograma'] = $cronoHtml;
@@ -241,83 +528,32 @@ class CursoController extends Controller
         $r_valores = $request->input('rubrica_valor', []);
         $r_json = $request->input('rubrica_json', []);
 
-        $plan = PlanEstudio::create($data);
-
-        // Guardar plantilla de sílabo asociada si existe la tabla
-        try {
-            if (Schema::hasTable('silabos')) {
-                $id_silabo = DB::table('silabos')->insertGetId([
-                    'id_plan' => $plan->id_plan,
-                    'id_profesor' => 0,
-                    'descripcion' => $plan->descripcion_curso ?? '',
-                    'metodologia' => $plan->metodologia_ensenanza ?? '',
-                    'estrategias_aprendizaje' => $plan->estrategias_aprendizaje ?? '',
-                    'recursos_aprendizaje' => $plan->recursos_didacticos ?? '',
-                    'contenidos' => $plan->contenidos_tematicos ?? '',
-                    'cronograma' => $plan->cronograma ?? '',
-                    'bibliografia' => $plan->bibliografia ?? '',
-                    'modalidad' => $plan->modalidad ?? 'Virtual (aprendizaje electrónico)',
-                    'horario' => '',
-                    'tipo_curso' => '',
-                    'objetivo_general' => $plan->objetivo_general ?? '',
-                    'objetivos_especificos' => $plan->objetivos_especificos ?? '',
-                    'anexos' => '',
-                    'fecha_creacion' => now()
-                ]);
-
-                if ($id_silabo) {
-                    if (Schema::hasTable('silabo_evaluacion')) {
-                        foreach ($rubros as $k => $nom) {
-                            $nom = trim($nom);
-                            if (!empty($nom)) {
-                                DB::table('silabo_evaluacion')->insert([
-                                    'id_silabo' => $id_silabo,
-                                    'rubro' => $nom,
-                                    'porcentaje' => floatval($porcentajes[$k] ?? 0),
-                                    'cantidad' => intval($cantidades_eval[$k] ?? 1),
-                                    'anexo' => $anexos_eval[$k] ?? '',
-                                    'tipo_moodle' => $tipos_moodle[$k] ?? ''
-                                ]);
-                            }
-                        }
-                    }
-
-                    if (Schema::hasTable('silabo_cronograma')) {
-                        foreach ($semanas as $k => $sem) {
-                            DB::table('silabo_cronograma')->insert([
-                                'id_silabo' => $id_silabo,
-                                'semana' => intval($sem),
-                                'fecha' => !empty($fechas[$k]) ? $fechas[$k] : null,
-                                'actividad' => $actividades[$k] ?? '',
-                                'tareas' => $tareas_post[$k] ?? '',
-                                'modalidad_trabajo' => $modalidades[$k] ?? 'Asincrónico',
-                                'actividades_moodle' => $moodle_post[$k] ?? ''
-                            ]);
-                        }
-                    }
-
-                    if (Schema::hasTable('silabo_rubricas') && is_array($r_nombres_sel)) {
-                        foreach ($r_nombres_sel as $k => $sel_val) {
-                            $nom = ($sel_val === 'CUSTOM') ? ($r_nombres_custom[$k] ?? '') : $sel_val;
-                            $js = $r_json[$k] ?? '';
-                            if (!empty($nom) && !empty($js)) {
-                                DB::table('silabo_rubricas')->insert([
-                                    'id_silabo' => $id_silabo,
-                                    'codigo' => 'R' . ($k + 1),
-                                    'nombre' => $nom,
-                                    'porcentaje_total' => floatval($r_porcentajes[$k] ?? 0),
-                                    'cantidad' => intval($r_cantidades[$k] ?? 1),
-                                    'valor' => floatval($r_valores[$k] ?? 0),
-                                    'contenido_json' => $js
-                                ]);
-                            }
-                        }
-                    }
+        $rubricas_arr = [];
+        if (is_array($r_nombres_sel)) {
+            foreach ($r_nombres_sel as $k => $sel_val) {
+                $nom = ($sel_val === 'CUSTOM') ? trim((string)($r_nombres_custom[$k] ?? '')) : trim((string)$sel_val);
+                $js = (string)($r_json[$k] ?? '');
+                if ($nom !== '' && $js !== '') {
+                    $rubricas_arr[] = [
+                        'codigo' => 'R' . ($k + 1),
+                        'nombre' => $nom,
+                        'porcentaje_total' => floatval($r_porcentajes[$k] ?? 0),
+                        'cantidad' => intval($r_cantidades[$k] ?? 1),
+                        'valor' => floatval($r_valores[$k] ?? 0),
+                        'contenido_json' => $js,
+                    ];
                 }
             }
-        } catch (\Throwable $e) {
-            // Silenciosamente continuar
         }
+
+        $data['evaluaciones_json'] = json_encode($evaluaciones_arr, JSON_UNESCAPED_UNICODE);
+        $data['cronograma_json'] = json_encode($cronograma_arr, JSON_UNESCAPED_UNICODE);
+        $data['rubricas_json'] = json_encode($rubricas_arr, JSON_UNESCAPED_UNICODE);
+
+        $data = $this->filterTableColumns('plan_estudios', $data);
+        $plan = PlanEstudio::create($data);
+
+        $this->sincronizarPlantillaSilabo($plan, $evaluaciones_arr, $cronograma_arr, $rubricas_arr);
 
         return redirect()->route('cursos.index')->with('success', '¡Curso añadido exitosamente al plan de estudios con su ficha técnica oficial!');
     }
@@ -327,6 +563,8 @@ class CursoController extends Controller
      */
     public function edit($id)
     {
+        $this->ensurePlanEstudiosColumns();
+
         $curso = PlanEstudio::findOrFail($id);
         $programas = Programa::orderBy('categoria', 'asc')->orderBy('nombre_programa', 'asc')->get();
 
@@ -343,7 +581,13 @@ class CursoController extends Controller
         }
 
         $evaluaciones = [];
-        if ($id_silabo) {
+        if (!empty($curso->evaluaciones_json)) {
+            $decodedEval = json_decode($curso->evaluaciones_json, true);
+            if (is_array($decodedEval) && !empty($decodedEval)) {
+                $evaluaciones = $decodedEval;
+            }
+        }
+        if (empty($evaluaciones) && $id_silabo) {
             try {
                 $evaluaciones = DB::table('silabo_evaluacion')
                     ->where('id_silabo', $id_silabo)
@@ -357,20 +601,27 @@ class CursoController extends Controller
         }
 
         $cronograma_data = [];
-        if ($id_silabo) {
+        if (!empty($curso->cronograma_json)) {
+            $decodedCro = json_decode($curso->cronograma_json, true);
+            if (is_array($decodedCro) && !empty($decodedCro)) {
+                $cronograma_data = $decodedCro;
+            }
+        }
+        if (empty($cronograma_data) && $id_silabo) {
             try {
                 $cronograma_data = DB::table('silabo_cronograma')
                     ->where('id_silabo', $id_silabo)
-                    ->orderBy('semana', 'asc')
+                    ->orderByRaw('CAST(semana AS UNSIGNED) ASC')
                     ->get()
                     ->map(fn($item) => (array)$item)
                     ->toArray();
-                $this->depurarCronogramaSegunEvaluacion($cronograma_data, $evaluaciones);
             } catch (\Throwable $e) {
                 $cronograma_data = [];
             }
         }
-        if (empty($cronograma_data)) {
+        if (!empty($cronograma_data)) {
+            $this->depurarCronogramaSegunEvaluacion($cronograma_data, $evaluaciones);
+        } else {
             for ($i = 1; $i <= 15; $i++) {
                 $cronograma_data[] = [
                     'semana' => $i,
@@ -384,7 +635,13 @@ class CursoController extends Controller
         }
 
         $rubricas_data = [];
-        if ($id_silabo) {
+        if (!empty($curso->rubricas_json)) {
+            $decodedRub = json_decode($curso->rubricas_json, true);
+            if (is_array($decodedRub) && !empty($decodedRub)) {
+                $rubricas_data = $decodedRub;
+            }
+        }
+        if (empty($rubricas_data) && $id_silabo) {
             try {
                 $rubricas_data = DB::table('silabo_rubricas')
                     ->where('id_silabo', $id_silabo)
@@ -465,29 +722,45 @@ class CursoController extends Controller
             $data['adjunto_pdf'] = $filename;
         }
 
-        // Re-generar resúmenes HTML si se editaron rubros o cronograma
+        // Re-generar arreglos estructurados y resúmenes HTML para evaluación, cronograma y rúbricas
         $rubros = $request->input('rubros', []);
         $porcentajes = $request->input('porcentajes', []);
         $cantidades_eval = $request->input('cantidades_eval', []);
         $tipos_moodle = $request->input('tipos_moodle_eval', []);
         $anexos_eval = $request->input('anexos_eval', []);
 
-        if (empty($data['evaluacion_aprendizajes']) && !empty($rubros)) {
+        $evaluaciones_arr = [];
+        if (is_array($rubros)) {
+            foreach ($rubros as $k => $nom) {
+                $nom = trim((string)$nom);
+                if ($nom !== '') {
+                    $evaluaciones_arr[] = [
+                        'rubro' => $nom,
+                        'porcentaje' => floatval($porcentajes[$k] ?? 0),
+                        'cantidad' => intval($cantidades_eval[$k] ?? 1),
+                        'anexo' => (string)($anexos_eval[$k] ?? ''),
+                        'tipo_moodle' => (string)($tipos_moodle[$k] ?? ''),
+                    ];
+                }
+            }
+        }
+
+        if (!empty($evaluaciones_arr)) {
             $evalHtml = '<table width="100%" border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-size: 10pt;">';
             $evalHtml .= '<tr style="background-color: #f1f5f9; font-weight: bold;"><th>Rubro</th><th style="text-align:center;">%</th><th style="text-align:center;">Cant.</th><th style="text-align:center;">Valor Unit.</th></tr>';
             $totP = 0;
-            foreach ($rubros as $k => $nom) {
-                if (!empty($nom)) {
-                    $p = floatval($porcentajes[$k] ?? 0);
-                    $totP += $p;
-                    $cant = intval($cantidades_eval[$k] ?? 1);
-                    $unit = $cant > 0 ? round($p / $cant, 2) : $p;
-                    $evalHtml .= "<tr><td>{$nom}</td><td style='text-align:center;'>{$p}%</td><td style='text-align:center;'>{$cant}</td><td style='text-align:center;'>{$unit}%</td></tr>";
-                }
+            foreach ($evaluaciones_arr as $ev) {
+                $p = $ev['porcentaje'];
+                $totP += $p;
+                $cant = $ev['cantidad'];
+                $unit = $cant > 0 ? round($p / $cant, 2) : $p;
+                $evalHtml .= "<tr><td>{$ev['rubro']}</td><td style='text-align:center;'>{$p}%</td><td style='text-align:center;'>{$cant}</td><td style='text-align:center;'>{$unit}%</td></tr>";
             }
             $evalHtml .= "<tr style='font-weight: bold; background-color: #f8fafc;'><td style='text-align: right;'>TOTAL:</td><td style='text-align:center;'>{$totP}%</td><td colspan='2'></td></tr>";
             $evalHtml .= '</table>';
             $data['evaluacion_aprendizajes'] = $evalHtml;
+        } else {
+            $data['evaluacion_aprendizajes'] = '';
         }
 
         $semanas = $request->input('c_semana', []);
@@ -497,123 +770,69 @@ class CursoController extends Controller
         $modalidades = $request->input('c_modalidad', []);
         $moodle_post = $request->input('c_moodle', []);
 
-        if (empty($data['cronograma']) && !empty($semanas)) {
-            $cronoHtml = '<table width="100%" border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-size: 9.5pt;">';
-            $cronoHtml .= '<tr style="background-color: #f1f5f9; font-weight: bold;"><th style="width: 8%;">Semana</th><th style="width: 42%;">Actividades / Contenidos</th><th style="width: 35%;">Tareas / Evaluación</th><th style="width: 15%;">Modalidad</th></tr>';
+        $cronograma_arr = [];
+        if (is_array($semanas)) {
             foreach ($semanas as $k => $sem) {
-                $act = $actividades[$k] ?? '';
-                $tar = $tareas_post[$k] ?? '';
-                $mod = $modalidades[$k] ?? 'Asincrónico';
-                $cronoHtml .= "<tr><td style='text-align:center; font-weight: bold;'>{$sem}</td><td>{$act}</td><td>{$tar}</td><td style='text-align:center;'>{$mod}</td></tr>";
+                $cronograma_arr[] = [
+                    'semana' => intval($sem),
+                    'fecha' => !empty($fechas[$k]) ? (string)$fechas[$k] : '',
+                    'actividad' => (string)($actividades[$k] ?? ''),
+                    'tareas' => (string)($tareas_post[$k] ?? ''),
+                    'modalidad_trabajo' => (string)($modalidades[$k] ?? 'Asincrónico'),
+                    'actividades_moodle' => (string)($moodle_post[$k] ?? ''),
+                ];
+            }
+        }
+
+        if (!empty($cronograma_arr)) {
+            $cronoHtml = '<table width="100%" border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #cbd5e1; font-size: 9.5pt;">';
+            $cronoHtml .= '<tr style="background-color: #f1f5f9; font-weight: bold;"><th style="width: 12%;">Semana</th><th style="width: 40%;">Actividades / Contenidos</th><th style="width: 33%;">Tareas / Evaluación</th><th style="width: 15%;">Modalidad</th></tr>';
+            foreach ($cronograma_arr as $cro) {
+                $semLabel = $cro['semana'];
+                if (!empty($cro['fecha'])) {
+                    $ts = strtotime($cro['fecha']);
+                    $fechaFmt = $ts ? date('d/m/Y', $ts) : $cro['fecha'];
+                    $semLabel .= " ({$fechaFmt})";
+                }
+                $cronoHtml .= "<tr><td style='text-align:center; font-weight: bold;'>{$semLabel}</td><td>{$cro['actividad']}</td><td>{$cro['tareas']}</td><td style='text-align:center;'>{$cro['modalidad_trabajo']}</td></tr>";
             }
             $cronoHtml .= '</table>';
             $data['cronograma'] = $cronoHtml;
         }
 
-        $curso->update($data);
+        $r_nombres_sel = $request->input('rubrica_nombre_sel', []);
+        $r_nombres_custom = $request->input('rubrica_nombre_custom', []);
+        $r_porcentajes = $request->input('rubrica_porcentaje', []);
+        $r_cantidades = $request->input('rubrica_cantidad', []);
+        $r_valores = $request->input('rubrica_valor', []);
+        $r_json = $request->input('rubrica_json', []);
 
-        // Sincronizar con plantilla de sílabo
-        try {
-            if (Schema::hasTable('silabos')) {
-                $silabo = DB::table('silabos')->where('id_plan', $id)->first();
-                if ($silabo) {
-                    $id_silabo = $silabo->id_silabo;
-                    DB::table('silabos')->where('id_silabo', $id_silabo)->update([
-                        'descripcion' => $curso->descripcion_curso ?? '',
-                        'metodologia' => $curso->metodologia_ensenanza ?? '',
-                        'estrategias_aprendizaje' => $curso->estrategias_aprendizaje ?? '',
-                        'recursos_aprendizaje' => $curso->recursos_didacticos ?? '',
-                        'contenidos' => $curso->contenidos_tematicos ?? '',
-                        'cronograma' => $curso->cronograma ?? '',
-                        'bibliografia' => $curso->bibliografia ?? '',
-                        'modalidad' => $curso->modalidad ?? 'Virtual (aprendizaje electrónico)',
-                        'objetivo_general' => $curso->objetivo_general ?? '',
-                        'objetivos_especificos' => $curso->objetivos_especificos ?? ''
-                    ]);
-                } else {
-                    $id_silabo = DB::table('silabos')->insertGetId([
-                        'id_plan' => $id,
-                        'id_profesor' => 0,
-                        'descripcion' => $curso->descripcion_curso ?? '',
-                        'metodologia' => $curso->metodologia_ensenanza ?? '',
-                        'estrategias_aprendizaje' => $curso->estrategias_aprendizaje ?? '',
-                        'recursos_aprendizaje' => $curso->recursos_didacticos ?? '',
-                        'contenidos' => $curso->contenidos_tematicos ?? '',
-                        'cronograma' => $curso->cronograma ?? '',
-                        'bibliografia' => $curso->bibliografia ?? '',
-                        'modalidad' => $curso->modalidad ?? 'Virtual (aprendizaje electrónico)',
-                        'horario' => '',
-                        'tipo_curso' => '',
-                        'objetivo_general' => $curso->objetivo_general ?? '',
-                        'objetivos_especificos' => $curso->objetivos_especificos ?? '',
-                        'anexos' => '',
-                        'fecha_creacion' => now()
-                    ]);
-                }
-
-                if ($id_silabo) {
-                    if (Schema::hasTable('silabo_evaluacion')) {
-                        DB::table('silabo_evaluacion')->where('id_silabo', $id_silabo)->delete();
-                        foreach ($rubros as $k => $nom) {
-                            $nom = trim($nom);
-                            if (!empty($nom)) {
-                                DB::table('silabo_evaluacion')->insert([
-                                    'id_silabo' => $id_silabo,
-                                    'rubro' => $nom,
-                                    'porcentaje' => floatval($porcentajes[$k] ?? 0),
-                                    'cantidad' => intval($cantidades_eval[$k] ?? 1),
-                                    'anexo' => $anexos_eval[$k] ?? '',
-                                    'tipo_moodle' => $tipos_moodle[$k] ?? ''
-                                ]);
-                            }
-                        }
-                    }
-
-                    if (Schema::hasTable('silabo_cronograma')) {
-                        DB::table('silabo_cronograma')->where('id_silabo', $id_silabo)->delete();
-                        foreach ($semanas as $k => $sem) {
-                            DB::table('silabo_cronograma')->insert([
-                                'id_silabo' => $id_silabo,
-                                'semana' => intval($sem),
-                                'fecha' => !empty($fechas[$k]) ? $fechas[$k] : null,
-                                'actividad' => $actividades[$k] ?? '',
-                                'tareas' => $tareas_post[$k] ?? '',
-                                'modalidad_trabajo' => $modalidades[$k] ?? 'Asincrónico',
-                                'actividades_moodle' => $moodle_post[$k] ?? ''
-                            ]);
-                        }
-                    }
-
-                    $r_nombres_sel = $request->input('rubrica_nombre_sel', []);
-                    $r_nombres_custom = $request->input('rubrica_nombre_custom', []);
-                    $r_porcentajes = $request->input('rubrica_porcentaje', []);
-                    $r_cantidades = $request->input('rubrica_cantidad', []);
-                    $r_valores = $request->input('rubrica_valor', []);
-                    $r_json = $request->input('rubrica_json', []);
-
-                    if (Schema::hasTable('silabo_rubricas') && is_array($r_nombres_sel)) {
-                        DB::table('silabo_rubricas')->where('id_silabo', $id_silabo)->delete();
-                        foreach ($r_nombres_sel as $k => $sel_val) {
-                            $nom = ($sel_val === 'CUSTOM') ? ($r_nombres_custom[$k] ?? '') : $sel_val;
-                            $js = $r_json[$k] ?? '';
-                            if (!empty($nom) && !empty($js)) {
-                                DB::table('silabo_rubricas')->insert([
-                                    'id_silabo' => $id_silabo,
-                                    'codigo' => 'R' . ($k + 1),
-                                    'nombre' => $nom,
-                                    'porcentaje_total' => floatval($r_porcentajes[$k] ?? 0),
-                                    'cantidad' => intval($r_cantidades[$k] ?? 1),
-                                    'valor' => floatval($r_valores[$k] ?? 0),
-                                    'contenido_json' => $js
-                                ]);
-                            }
-                        }
-                    }
+        $rubricas_arr = [];
+        if (is_array($r_nombres_sel)) {
+            foreach ($r_nombres_sel as $k => $sel_val) {
+                $nom = ($sel_val === 'CUSTOM') ? trim((string)($r_nombres_custom[$k] ?? '')) : trim((string)$sel_val);
+                $js = (string)($r_json[$k] ?? '');
+                if ($nom !== '' && $js !== '') {
+                    $rubricas_arr[] = [
+                        'codigo' => 'R' . ($k + 1),
+                        'nombre' => $nom,
+                        'porcentaje_total' => floatval($r_porcentajes[$k] ?? 0),
+                        'cantidad' => intval($r_cantidades[$k] ?? 1),
+                        'valor' => floatval($r_valores[$k] ?? 0),
+                        'contenido_json' => $js,
+                    ];
                 }
             }
-        } catch (\Throwable $e) {
-            // Silenciosamente continuar
         }
+
+        $data['evaluaciones_json'] = json_encode($evaluaciones_arr, JSON_UNESCAPED_UNICODE);
+        $data['cronograma_json'] = json_encode($cronograma_arr, JSON_UNESCAPED_UNICODE);
+        $data['rubricas_json'] = json_encode($rubricas_arr, JSON_UNESCAPED_UNICODE);
+
+        $data = $this->filterTableColumns('plan_estudios', $data);
+        $curso->update($data);
+
+        $this->sincronizarPlantillaSilabo($curso, $evaluaciones_arr, $cronograma_arr, $rubricas_arr);
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([

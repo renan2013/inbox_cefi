@@ -750,7 +750,7 @@
                     <a href="{{ route('cursos.index') }}" class="btn btn-outline-secondary px-4 rounded-pill">
                         <i class="bi bi-x-circle me-1"></i> Cancelar
                     </a>
-                    <button type="button" onclick="validarYGuardarPlan()" class="btn btn-primary px-5 py-3 shadow rounded-pill fw-bold" style="background-color: var(--primary-color); border: none;">
+                    <button type="button" id="btnGuardarInferior" onclick="validarYGuardarPlan()" class="btn btn-primary px-5 py-3 shadow rounded-pill fw-bold" style="background-color: var(--primary-color); border: none;">
                         <i class="bi bi-check-circle-fill me-2"></i> Guardar Cambios del Plan
                     </button>
                 </div>
@@ -1914,6 +1914,7 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
     function ejecutarGuardadoPlan() {
         const form = document.getElementById('formPlanEstudios');
         const btn = document.getElementById('btnGuardarFlotante');
+        const btnInf = document.getElementById('btnGuardarInferior');
         if (!form) return;
 
         if (typeof tinymce !== 'undefined') {
@@ -1921,9 +1922,14 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
         }
 
         const originalBtnHtml = btn ? btn.innerHTML : '';
+        const originalBtnInfHtml = btnInf ? btnInf.innerHTML : '';
         if (btn) {
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> GUARDANDO CAMBIOS...';
+        }
+        if (btnInf) {
+            btnInf.disabled = true;
+            btnInf.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Guardando cambios...';
         }
 
         const formData = new FormData(form);
@@ -1957,6 +1963,13 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
                     btn.innerHTML = originalBtnHtml;
                 }, 2200);
             }
+            if (btnInf) {
+                btnInf.disabled = false;
+                btnInf.innerHTML = '<i class="bi bi-check2-all me-2"></i> ¡Cambios Guardados!';
+                setTimeout(() => {
+                    btnInf.innerHTML = originalBtnInfHtml;
+                }, 2200);
+            }
 
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
@@ -1974,6 +1987,10 @@ Devuélveme el resultado estrictamente formateado como código HTML (etiqueta <t
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = originalBtnHtml;
+            }
+            if (btnInf) {
+                btnInf.disabled = false;
+                btnInf.innerHTML = originalBtnInfHtml;
             }
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
