@@ -64,11 +64,11 @@
         </div>
 
         <div class="row g-4">
-            <!-- GOOGLE DRIVE CLOUD FILES -->
+            <!-- REPOSITORIO INTERNO DE ARCHIVOS -->
             <div class="col-lg-6">
                 <div class="card glass-card h-100">
                     <div class="card-header bg-transparent border-bottom border-secondary p-4 d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold text-white mb-0"><i class="bi bi-google text-primary me-2"></i> Documentos en Drive (Nube)</h5>
+                        <h5 class="fw-bold text-white mb-0"><i class="bi bi-hdd-network-fill text-primary me-2"></i> Archivos del Repositorio ({{ config('cliente.nombre', 'CEFI') }})</h5>
                         <span class="badge bg-primary bg-opacity-20 text-primary border border-primary border-opacity-25 px-3 py-1.5 rounded-pill small">{{ count($drive_compartidos) }} Archivos</span>
                     </div>
                     
@@ -106,7 +106,7 @@
                                     @endforeach
                                 @else
                                     <tr>
-                                        <td colspan="3" class="text-center py-5 text-white-50">No hay documentos de Google Drive compartidos.</td>
+                                        <td colspan="3" class="text-center py-5 text-white-50">No hay archivos compartidos en el repositorio.</td>
                                     </tr>
                                 @endif
                             </tbody>

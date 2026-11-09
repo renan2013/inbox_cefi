@@ -272,8 +272,8 @@
                                     </button>
                                 @endif
 
-                                <a href="{{ route('mis_cursos.recursos_drive', $curso->id_curso_activo) }}" class="btn btn-action-vertical" title="Gestionar Recursos">
-                                    <i class="bi bi-google text-primary fs-4 d-block mb-1"></i>
+                                <a href="{{ route('mis_cursos.recursos_drive', $curso->id_curso_activo) }}" class="btn btn-action-vertical" title="Gestionar Recursos del Curso">
+                                    <i class="bi bi-hdd-network-fill text-primary fs-4 d-block mb-1"></i>
                                     <span class="small fw-bold">Recursos</span>
                                 </a>
 
@@ -485,10 +485,10 @@
                                     @if (count($recursos_drive) > 0)
                                         @foreach ($recursos_drive as $rd)
                                             <tr>
-                                                <td class="ps-4"><i class="bi bi-google text-primary fs-4"></i></td>
+                                                <td class="ps-4"><i class="bi bi-file-earmark-check-fill text-primary fs-4"></i></td>
                                                 <td>
                                                     <div class="fw-bold">{{ $rd->nombre_archivo }}</div>
-                                                    <small class="text-white-50">Recurso externo (Google Drive)</small>
+                                                    <small class="text-white-50">Repositorio Interno ({{ config('cliente.nombre', 'CEFI') }})</small>
                                                 </td>
                                                 <td class="text-white-50 small">{{ \Carbon\Carbon::parse($rd->fecha_subida)->format('d/m/Y g:i a') }}</td>
                                                 <td class="text-end pe-4">
@@ -509,7 +509,7 @@
                         @if ($es_admin || Auth::id() == $curso->id_profesor)
                             <div class="p-3 text-center bg-dark bg-opacity-25" style="border-top: 1px solid var(--border-dark);">
                                 <a href="{{ route('mis_cursos.recursos_drive', $curso->id_curso_activo) }}" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
-                                    <i class="bi bi-plus-circle me-2"></i> GESTIONAR RECURSOS DRIVE
+                                    <i class="bi bi-plus-circle me-2"></i> GESTIONAR RECURSOS DEL CURSO
                                 </a>
                             </div>
                         @endif

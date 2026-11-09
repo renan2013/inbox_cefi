@@ -1403,24 +1403,30 @@ class MisCursosController extends Controller
         if ($request->hasFile('archivo_drive')) {
             $file = $request->file('archivo_drive');
             $originalName = $file->getClientOriginalName();
-            
-            // Store the file locally in public storage under recursos_drive
-            $filename = time() . '_' . str_replace(' ', '_', $originalName);
-            $path = $file->storeAs('recursos_drive', $filename, 'public');
+            $safeName = preg_replace('/[^A-Za-z0-9._-]/', '_', $originalName);
+            $filename = time() . '_' . $safeName;
 
-            $linkPublico = asset('storage/' . $path);
+            $targetDir = public_path('uploads/recursos_curso');
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0777, true);
+            }
+            $file->move($targetDir, $filename);
+
+            $linkPublico = asset('uploads/recursos_curso/' . $filename);
             $es_compartido = $request->has('es_compartido') ? 1 : 0;
 
             DB::table('recursos_drive')->insert([
                 'id_curso_activo' => $curso->id_curso_activo,
                 'nombre_archivo' => $originalName,
-                'id_drive' => md5($filename), // Dummy drive id
+                'id_drive' => md5($filename),
                 'link_publico' => $linkPublico,
                 'es_compartido' => $es_compartido,
                 'fecha_subida' => Carbon::now()
             ]);
 
-            return redirect()->route('mis_cursos.recursos_drive', $id)->with('success', 'Archivo subido y vinculado correctamente.');
+            $curso->update(['check_recursos' => 1]);
+
+            return redirect()->route('mis_cursos.recursos_drive', $id)->with('success', 'Archivo subido y vinculado correctamente en el repositorio de la plataforma.');
         }
 
         return redirect()->route('mis_cursos.recursos_drive', $id)->with('error', 'No se ha seleccionado ningún archivo.');
@@ -1440,7 +1446,14 @@ class MisCursosController extends Controller
             // Delete record from DB
             DB::table('recursos_drive')->where('id', $recurso_id)->delete();
             
-            // Try to delete local file if it exists
+            // Try to delete local file if it exists in uploads/recursos_curso or storage
+            $parsedPath = parse_url($recurso->link_publico, PHP_URL_PATH);
+            if ($parsedPath) {
+                $localPublicFile = public_path(ltrim($parsedPath, '/'));
+                if (is_file($localPublicFile)) {
+                    @unlink($localPublicFile);
+                }
+            }
             $relativePath = str_replace(asset('storage/'), '', $recurso->link_publico);
             if (\Illuminate\Support\Facades\Storage::disk('public')->exists($relativePath)) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($relativePath);
