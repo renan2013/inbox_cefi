@@ -150,6 +150,87 @@
             border-color: var(--primary);
             color: #fff;
         }
+
+        /* Acordeón de Programas */
+        .accordion-custom .accordion-item {
+            background-color: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 1.25rem !important;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .accordion-custom .accordion-item:hover {
+            border-color: rgba(95, 178, 48, 0.4);
+        }
+
+        .accordion-custom .accordion-button {
+            background-color: var(--card-dark);
+            color: #f8fafc;
+            padding: 1.25rem 1.75rem;
+            box-shadow: none !important;
+            border-bottom: 1px solid transparent;
+            font-weight: 700;
+        }
+
+        .accordion-custom .accordion-button:not(.collapsed) {
+            background-color: rgba(95, 178, 48, 0.08);
+            color: var(--primary);
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .accordion-custom .accordion-button::after {
+            filter: invert(1);
+            transition: transform 0.25s ease;
+        }
+
+        [data-theme="light"] .accordion-custom .accordion-item {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05) !important;
+        }
+
+        [data-theme="light"] .accordion-custom .accordion-button {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .accordion-custom .accordion-button:not(.collapsed) {
+            background-color: rgba(95, 178, 48, 0.08) !important;
+            color: var(--primary) !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+
+        [data-theme="light"] .accordion-custom .accordion-button::after {
+            filter: none !important;
+        }
+
+        [data-theme="light"] .table-custom td {
+            color: #1e293b !important;
+        }
+
+        [data-theme="light"] .table-custom td strong,
+        [data-theme="light"] .table-custom td .fw-bold {
+            color: #0f172a !important;
+        }
+
+        [data-theme="light"] .table-custom td small,
+        [data-theme="light"] .table-custom td .text-white-50 {
+            color: #64748b !important;
+        }
+
+        [data-theme="light"] .filter-section {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        [data-theme="light"] .form-control-custom {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
     </style>
 @endsection
 
@@ -159,8 +240,8 @@
         <!-- Header -->
         <div class="page-header d-flex justify-content-between align-items-center flex-wrap g-3">
             <div>
-                <h1 class="display-6 fw-bold mb-1">Lista de Cursos</h1>
-                <p class="text-white-50 mb-0">Gestiona y consulta las materias, códigos y créditos correspondientes a los planes de estudio.</p>
+                <h1 class="display-6 fw-bold mb-1">Lista de Cursos y Mallas</h1>
+                <p class="text-white-50 mb-0">Gestiona y consulta las materias, códigos y créditos organizados por cada programa académico.</p>
             </div>
             <div>
                 <a href="{{ route('cursos.create') }}" class="btn btn-search">
@@ -203,84 +284,219 @@
             </form>
         </div>
 
-        <!-- Table -->
-        <div class="table-container">
-            <div class="table-responsive">
-                <table class="table table-custom">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Nombre de la Materia</th>
-                            <th>Programa</th>
-                            <th>Cuatrimestre</th>
-                            <th>Créditos</th>
-                            <th>Precio</th>
-                            <th class="text-end">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($cursos as $curso)
-                            <tr>
-                                <td>
-                                    <strong class="text-white">{{ $curso->codigo }}</strong>
-                                </td>
-                                <td>
-                                    <div class="fw-bold" style="color: #f8fafc;">{{ $curso->materia }}</div>
-                                    <small class="text-white-50">ID Plan: {{ $curso->id_plan }}</small>
-                                </td>
-                                <td>
-                                    <div>{{ $curso->programa->nombre_programa ?? 'Sin Programa' }}</div>
-                                    <small class="text-white-50">{{ $curso->programa->categoria ?? '' }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge-cuatri">{{ $curso->cuatrimestre }}</span>
-                                </td>
-                                <td>
-                                    <strong class="text-white">{{ $curso->creditos ?? 'N/D' }}</strong>
-                                </td>
-                                <td>
-                                    <span class="text-success fw-bold">₡{{ number_format($curso->precio, 2) }}</span>
-                                </td>
-                                <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-1">
-                                        <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver Descriptor PDF">
-                                            <i class="bi bi-file-earmark-pdf"></i>
-                                        </a>
-                                        <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Descargar Descriptor Word (.doc)">
-                                            <i class="bi bi-file-earmark-word"></i>
-                                        </a>
-                                        <a href="{{ route('cursos.edit', $curso->id_plan) }}" class="btn btn-sm btn-outline-success" title="Editar">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-curso" data-id="{{ $curso->id_plan }}" data-materia="{{ $curso->materia }}" title="Eliminar">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center py-5 text-white-50">
-                                    <i class="bi bi-journal-x display-4 d-block mb-3 text-muted"></i>
-                                    <p class="mb-3">No se encontraron cursos con los criterios de búsqueda especificados.</p>
-                                    <a href="{{ route('cursos.create') }}" class="btn btn-sm btn-outline-success">
-                                        <i class="bi bi-plus-circle me-1"></i> Registrar Nuevo Curso
-                                    </a>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        <!-- Resumen y controles de acordeón -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+            <div class="text-white-50 small">
+                <span>Total: <strong class="text-white">{{ $totalCursos }}</strong> materias registradas.</span>
+                <span class="ms-2 d-none d-md-inline text-white-50 opacity-75">• Haga clic en la pestaña de cada programa para desplegar sus cursos</span>
             </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btn-expandir-todo">
+                    <i class="bi bi-arrows-expand me-1"></i> Expandir Todo
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btn-colapsar-todo">
+                    <i class="bi bi-arrows-collapse me-1"></i> Colapsar Todo
+                </button>
+            </div>
+        </div>
 
-            <!-- Pagination Footer -->
-            @if ($cursos->hasPages())
-                <div class="d-flex justify-content-between align-items-center p-4 border-top" style="border-color: var(--border-dark) !important;">
-                    <div class="text-white-50" style="font-size: 0.9rem;">
-                        Mostrando registros del <strong>{{ $cursos->firstItem() }}</strong> al <strong>{{ $cursos->lastItem() }}</strong> de un total de <strong>{{ $cursos->total() }}</strong>
+        <!-- Acordeón de Programas Académicos -->
+        <div class="accordion accordion-custom" id="accordionProgramasCursos">
+            @php $programasMostrados = 0; @endphp
+            @foreach ($programas as $prog)
+                @php
+                    $cursosDelProg = $cursosPorPrograma->get($prog->id_programa, collect());
+                    $numCursos = $cursosDelProg->count();
+                    // Si se aplicó filtro y este programa no tiene cursos coincidentes, se omite
+                    if ($isFiltered && $numCursos === 0) {
+                        continue;
+                    }
+                    $programasMostrados++;
+                    // Si está filtrado o se seleccionó específicamente este programa, abrirlo por defecto
+                    $estaAbierto = $isFiltered || (request('programa_id') == $prog->id_programa);
+                @endphp
+
+                <div class="accordion-item" id="item-prog-{{ $prog->id_programa }}">
+                    <h2 class="accordion-header" id="heading-{{ $prog->id_programa }}">
+                        <button class="accordion-button {{ $estaAbierto ? '' : 'collapsed' }}" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#collapse-{{ $prog->id_programa }}" 
+                                aria-expanded="{{ $estaAbierto ? 'true' : 'false' }}" 
+                                aria-controls="collapse-{{ $prog->id_programa }}">
+                            <div class="d-flex align-items-center justify-content-between w-100 pe-3 flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-layers-half text-success fs-5"></i>
+                                    <span class="fw-bold">{{ $prog->nombre_programa }}</span>
+                                    @if ($prog->categoria)
+                                        <span class="badge bg-secondary bg-opacity-25 text-white-50 rounded-pill px-2.5 py-1 small fw-normal">{{ $prog->categoria }}</span>
+                                    @endif
+                                </div>
+                                <div class="d-flex align-items-center gap-2" onclick="event.stopPropagation();">
+                                    <span class="badge {{ $numCursos > 0 ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-25' : 'bg-secondary bg-opacity-25 text-white-50' }} rounded-pill px-3 py-1.5 fw-bold">
+                                        <i class="bi bi-journal-text me-1"></i> {{ $numCursos }} {{ $numCursos == 1 ? 'Materia' : 'Materias' }}
+                                    </span>
+                                    <a href="{{ route('cursos.create', ['programa_id' => $prog->id_programa]) }}" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-semibold" title="Añadir nueva materia a este programa">
+                                        <i class="bi bi-plus-lg me-1"></i> Añadir Materia
+                                    </a>
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse-{{ $prog->id_programa }}" 
+                         class="accordion-collapse collapse {{ $estaAbierto ? 'show' : '' }}" 
+                         aria-labelledby="heading-{{ $prog->id_programa }}">
+                        <div class="accordion-body p-0">
+                            @if ($numCursos > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-custom mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="ps-4">Código</th>
+                                                <th>Nombre de la Materia</th>
+                                                <th>Periodo / Cuatrimestre</th>
+                                                <th>Modalidad / Duración</th>
+                                                <th class="text-center">Créditos</th>
+                                                <th class="text-center">Precio</th>
+                                                <th class="text-end pe-4">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($cursosDelProg as $curso)
+                                                <tr>
+                                                    <td class="ps-4">
+                                                        <strong class="text-white">{{ $curso->codigo ?: 'S/C' }}</strong>
+                                                    </td>
+                                                    <td>
+                                                        <div class="fw-bold" style="color: #f8fafc;">{{ $curso->materia }}</div>
+                                                        <small class="text-white-50">ID Plan: {{ $curso->id_plan }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge-cuatri">{{ $curso->cuatrimestre ?: 'Regular' }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="small text-white-50">{{ $curso->modalidad ?? 'Virtual' }}</span>
+                                                        @if ($curso->duracion)
+                                                            <small class="d-block text-white-50 opacity-75">{{ $curso->duracion }}</small>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <strong class="text-white">{{ $curso->creditos ?? 'N/D' }}</strong>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="text-success fw-bold">₡{{ number_format($curso->precio, 2) }}</span>
+                                                    </td>
+                                                    <td class="text-end pe-4">
+                                                        <div class="d-flex justify-content-end gap-1">
+                                                            <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver Descriptor PDF">
+                                                                <i class="bi bi-file-earmark-pdf"></i>
+                                                            </a>
+                                                            <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Descargar Descriptor Word (.doc)">
+                                                                <i class="bi bi-file-earmark-word"></i>
+                                                            </a>
+                                                            <a href="{{ route('cursos.edit', $curso->id_plan) }}" class="btn btn-sm btn-outline-success" title="Editar">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </a>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-curso" data-id="{{ $curso->id_plan }}" data-materia="{{ $curso->materia }}" title="Eliminar">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-4 text-white-50">
+                                    <i class="bi bi-journal-x fs-3 d-block mb-2 text-muted"></i>
+                                    <p class="mb-2">No hay materias registradas para este programa académico aún.</p>
+                                    <a href="{{ route('cursos.create', ['programa_id' => $prog->id_programa]) }}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                        <i class="bi bi-plus-circle me-1"></i> Registrar Primera Materia
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                    <div>
-                        {{ $cursos->links('pagination::bootstrap-5') }}
+                </div>
+            @endforeach
+
+            {{-- Cursos sin programa asignado (si hubiera alguno) --}}
+            @php
+                $cursosHuerfanos = $cursosPorPrograma->filter(function($items, $key) use ($programas) {
+                    return empty($key) || !$programas->contains('id_programa', $key);
+                })->flatten();
+            @endphp
+            @if ($cursosHuerfanos->isNotEmpty())
+                @php $programasMostrados++; @endphp
+                <div class="accordion-item" id="item-prog-huerfanos">
+                    <h2 class="accordion-header" id="heading-huerfanos">
+                        <button class="accordion-button {{ $isFiltered ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-huerfanos">
+                            <div class="d-flex align-items-center justify-content-between w-100 pe-3 flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+                                    <span class="fw-bold text-warning">Materias Sin Programa Asignado</span>
+                                </div>
+                                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1.5 fw-bold">
+                                    {{ $cursosHuerfanos->count() }} Materias
+                                </span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse-huerfanos" class="accordion-collapse collapse {{ $isFiltered ? 'show' : '' }}">
+                        <div class="accordion-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-custom mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-4">Código</th>
+                                            <th>Nombre de la Materia</th>
+                                            <th>Periodo</th>
+                                            <th>Modalidad</th>
+                                            <th class="text-center">Créditos</th>
+                                            <th class="text-center">Precio</th>
+                                            <th class="text-end pe-4">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($cursosHuerfanos as $curso)
+                                            <tr>
+                                                <td class="ps-4"><strong class="text-white">{{ $curso->codigo ?: 'S/C' }}</strong></td>
+                                                <td>
+                                                    <div class="fw-bold" style="color: #f8fafc;">{{ $curso->materia }}</div>
+                                                    <small class="text-white-50">ID Plan: {{ $curso->id_plan }}</small>
+                                                </td>
+                                                <td><span class="badge-cuatri">{{ $curso->cuatrimestre ?: 'Regular' }}</span></td>
+                                                <td><span class="small text-white-50">{{ $curso->modalidad ?? 'Virtual' }}</span></td>
+                                                <td class="text-center"><strong class="text-white">{{ $curso->creditos ?? 'N/D' }}</strong></td>
+                                                <td class="text-center"><span class="text-success fw-bold">₡{{ number_format($curso->precio, 2) }}</span></td>
+                                                <td class="text-end pe-4">
+                                                    <div class="d-flex justify-content-end gap-1">
+                                                        <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="bi bi-file-earmark-pdf"></i></a>
+                                                        <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-earmark-word"></i></a>
+                                                        <a href="{{ route('cursos.edit', $curso->id_plan) }}" class="btn btn-sm btn-outline-success"><i class="bi bi-pencil"></i></a>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-curso" data-id="{{ $curso->id_plan }}" data-materia="{{ $curso->materia }}"><i class="bi bi-trash"></i></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if ($programasMostrados === 0)
+                <div class="card glass-card text-center py-5">
+                    <div class="card-body">
+                        <i class="bi bi-journal-x display-4 d-block mb-3 text-muted"></i>
+                        <h5 class="fw-bold text-white mb-2">No se encontraron cursos</h5>
+                        <p class="text-white-50 mb-3">No hay materias que coincidan con los criterios de búsqueda especificados.</p>
+                        <a href="{{ route('cursos.index') }}" class="btn btn-search">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Ver Todos los Cursos
+                        </a>
                     </div>
                 </div>
             @endif
@@ -316,6 +532,34 @@
                     text: "{{ session('error') }}"
                 });
             @endif
+
+            // Controles de expandir/colapsar todo
+            const btnExpandir = document.getElementById('btn-expandir-todo');
+            const btnColapsar = document.getElementById('btn-colapsar-todo');
+
+            if (btnExpandir) {
+                btnExpandir.addEventListener('click', function() {
+                    document.querySelectorAll('#accordionProgramasCursos .accordion-collapse').forEach(el => {
+                        el.classList.add('show');
+                    });
+                    document.querySelectorAll('#accordionProgramasCursos .accordion-button').forEach(btn => {
+                        btn.classList.remove('collapsed');
+                        btn.setAttribute('aria-expanded', 'true');
+                    });
+                });
+            }
+
+            if (btnColapsar) {
+                btnColapsar.addEventListener('click', function() {
+                    document.querySelectorAll('#accordionProgramasCursos .accordion-collapse').forEach(el => {
+                        el.classList.remove('show');
+                    });
+                    document.querySelectorAll('#accordionProgramasCursos .accordion-button').forEach(btn => {
+                        btn.classList.add('collapsed');
+                        btn.setAttribute('aria-expanded', 'false');
+                    });
+                });
+            }
 
             document.querySelectorAll('.btn-eliminar-curso').forEach(btn => {
                 btn.addEventListener('click', function(e) {

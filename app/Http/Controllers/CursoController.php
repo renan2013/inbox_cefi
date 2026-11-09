@@ -60,10 +60,15 @@ class CursoController extends Controller
      */
     public function index(Request $request)
     {
+        $this->ensurePlanEstudiosColumns();
+
         $query = PlanEstudio::with('programa');
+
+        $isFiltered = false;
 
         // Búsqueda por término (materia o código)
         if ($request->filled('search')) {
+            $isFiltered = true;
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('materia', 'like', "%{$search}%")
@@ -73,13 +78,20 @@ class CursoController extends Controller
 
         // Filtro por Programa
         if ($request->filled('programa_id')) {
+            $isFiltered = true;
             $query->where('id_programa', $request->programa_id);
         }
 
-        $cursos = $query->orderBy('cuatrimestre', 'asc')->paginate(15)->withQueryString();
+        $cursos = $query->orderBy('cuatrimestre', 'asc')
+                        ->orderBy('id_plan', 'asc')
+                        ->get();
+
+        $cursosPorPrograma = $cursos->groupBy('id_programa');
+        $totalCursos = $cursos->count();
+
         $programas = Programa::orderBy('categoria', 'asc')->orderBy('nombre_programa', 'asc')->get();
 
-        return view('cursos.index', compact('cursos', 'programas'));
+        return view('cursos.index', compact('cursos', 'cursosPorPrograma', 'programas', 'totalCursos', 'isFiltered'));
     }
 
     /**

@@ -277,7 +277,7 @@
                                                 @php $curr_cat = $prog->categoria; @endphp
                                                 <optgroup label="{{ $curr_cat ?: 'Programas' }}">
                                             @endif
-                                            <option value="{{ $prog->id_programa }}" data-costo="{{ $prog->costo_materia ?? 0 }}" {{ old('id_programa') == $prog->id_programa ? 'selected' : '' }}>
+                                            <option value="{{ $prog->id_programa }}" data-costo="{{ $prog->costo_materia ?? 0 }}" {{ (old('id_programa', request('programa_id')) == $prog->id_programa) ? 'selected' : '' }}>
                                                 {{ $prog->nombre_programa }}
                                             </option>
                                         @endforeach
