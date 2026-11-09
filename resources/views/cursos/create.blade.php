@@ -606,7 +606,7 @@
                                             {{ $idx + 1 }}
                                             <input type="hidden" name="c_semana[]" value="{{ $idx + 1 }}">
                                         </td>
-                                        <td><input type="date" name="c_fecha[]" class="form-control form-control-sm" value="{{ $cro['fecha'] ?? '' }}"></td>
+                                        <td><input type="date" name="c_fecha[]" class="form-control form-control-sm" value="{{ $cro['fecha'] ?? '' }}" onchange="sugerirAutocompletarFechas(this)"></td>
                                         <td><textarea id="{{ $idActExistente }}" name="c_actividad[]" class="form-control form-control-sm editor-rico-compacto">{{ $cro['actividad'] ?? '' }}</textarea></td>
                                         <td>
                                             <div class="form-control form-control-sm tarea-display-only bg-light border border-light-subtle rounded-3" style="min-height: 120px; overflow-y: auto; padding: 0.5rem 0.75rem;">
@@ -870,11 +870,100 @@
         if (container) container.classList.toggle('d-none', !isSincronico);
     }
 
+    let timerSugerenciaFecha = null;
+
+    function sugerirAutocompletarFechas(input) {
+        if (!input || !input.value) return;
+
+        const match = input.value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) return;
+
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10);
+        const day = parseInt(match[3], 10);
+
+        if (year < 2020 || year > 2100) return;
+
+        const tr = input.closest('tr');
+        const rows = Array.from(document.querySelectorAll('#tablaCronograma tbody tr'));
+        const rowIdx = rows.indexOf(tr);
+
+        if (rowIdx === -1 || rowIdx >= rows.length - 1) return;
+
+        if (timerSugerenciaFecha) clearTimeout(timerSugerenciaFecha);
+
+        timerSugerenciaFecha = setTimeout(() => {
+            const baseDate = new Date(year, month - 1, day);
+            if (isNaN(baseDate.getTime())) return;
+
+            const diasSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+            const nombreDia = diasSemana[baseDate.getDay()];
+            const fechaBonita = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+            const semInicio = rowIdx + 2;
+            const semFin = rows.length;
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: `¿Completar lecciones cada ${nombreDia}?`,
+                    html: `Has seleccionado el <strong>${nombreDia} ${fechaBonita}</strong> en la <strong>Semana ${rowIdx + 1}</strong>.<br><span class="text-muted small">¿Deseas completar automáticamente las fechas de las semanas ${semInicio} a ${semFin} cada <strong>${nombreDia}</strong>?</span>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: `Sí, cada ${nombreDia}`,
+                    cancelButtonText: 'No, solo esta semana',
+                    confirmButtonColor: '#5fb230',
+                    cancelButtonColor: '#64748b'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        for (let i = rowIdx + 1; i < rows.length; i++) {
+                            const nextDate = new Date(year, month - 1, day + (i - rowIdx) * 7);
+                            const yyyy = nextDate.getFullYear();
+                            const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+                            const dd = String(nextDate.getDate()).padStart(2, '0');
+                            const nextInput = rows[i].querySelector('input[name="c_fecha[]"]');
+                            if (nextInput) {
+                                nextInput.value = `${yyyy}-${mm}-${dd}`;
+                                nextInput.style.transition = 'background-color 0.4s ease, border-color 0.4s ease';
+                                nextInput.style.backgroundColor = 'rgba(95, 178, 48, 0.15)';
+                                nextInput.style.borderColor = '#5fb230';
+                                setTimeout(() => {
+                                    nextInput.style.backgroundColor = '';
+                                    nextInput.style.borderColor = '';
+                                }, 1400);
+                            }
+                        }
+
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: `Fechas programadas cada ${nombreDia} hasta la Semana ${semFin}`,
+                            showConfirmButton: false,
+                            timer: 2500
+                        });
+                    }
+                });
+            }
+        }, 350);
+    }
+
     function agregarFilaCronograma() {
         const tbody = document.querySelector('#tablaCronograma tbody');
-        const count = tbody.querySelectorAll('tr').length + 1;
+        const existingRows = tbody.querySelectorAll('tr');
+        const count = existingRows.length + 1;
         const uniqueIdAct = 'act_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
         const uniqueIdTar = 'tar_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+
+        let nextFechaVal = '';
+        if (existingRows.length > 0) {
+            const lastFechaInput = existingRows[existingRows.length - 1].querySelector('input[name="c_fecha[]"]');
+            if (lastFechaInput && lastFechaInput.value) {
+                const m = lastFechaInput.value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (m) {
+                    const nextD = new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10) + 7);
+                    nextFechaVal = `${nextD.getFullYear()}-${String(nextD.getMonth() + 1).padStart(2, '0')}-${String(nextD.getDate()).padStart(2, '0')}`;
+                }
+            }
+        }
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -882,7 +971,7 @@
                 ${count}
                 <input type="hidden" name="c_semana[]" value="${count}">
             </td>
-            <td><input type="date" name="c_fecha[]" class="form-control form-control-sm"></td>
+            <td><input type="date" name="c_fecha[]" class="form-control form-control-sm" value="${nextFechaVal}" onchange="sugerirAutocompletarFechas(this)"></td>
             <td><textarea id="${uniqueIdAct}" name="c_actividad[]" class="form-control form-control-sm editor-rico-compacto"></textarea></td>
             <td>
                 <div class="form-control form-control-sm tarea-display-only bg-light border border-light-subtle rounded-3" style="min-height: 120px; overflow-y: auto; padding: 0.5rem 0.75rem;">
