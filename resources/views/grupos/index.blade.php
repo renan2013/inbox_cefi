@@ -220,8 +220,9 @@
                         <div class="col-md-3">
                             <label class="form-label-custom">Año Lectivo</label>
                             <select id="ano_select" class="form-select form-select-custom w-100">
-                                <option value="2026">2026</option>
-                                <option value="2027">2027</option>
+                                @for ($anio = 2026; $anio <= 2030; $anio++)
+                                    <option value="{{ $anio }}">{{ $anio }}</option>
+                                @endfor
                             </select>
                             <input type="hidden" name="periodo" id="periodo">
                         </div>
