@@ -60,20 +60,52 @@ class DescriptorPDF extends FPDF
 
     function Footer()
     {
-        $this->SetY(-15);
+        $this->SetY(-16);
+        $y_line = $this->GetY();
         $this->SetLineWidth(0.3);
         $this->SetDrawColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
-        $this->Line(12, $this->GetY(), 135, $this->GetY());
+        $this->Line(12, $y_line, 135, $y_line);
         $this->SetDrawColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
-        $this->Line(135, $this->GetY(), 198, $this->GetY());
+        $this->Line(135, $y_line, 198, $y_line);
         $this->SetLineWidth(0.2);
 
-        $this->SetFont('Arial', 'I', 8);
+        $y_text = $y_line + 1.5;
+
+        // Izquierda: Documento Oficial
+        $this->SetXY(12, $y_text);
+        $this->SetFont('Arial', 'I', 7.5);
         $this->SetTextColor(100, 116, 139);
-        $this->Cell(120, 10, $this->toPdf('Documento Oficial de Plan de Estudios - ' . config('cliente.nombre', 'CEFI')), 0, 0, 'L');
+        $this->Cell(65, 8, $this->toPdf('Documento Oficial - ' . config('cliente.nombre', 'CEFI')), 0, 0, 'L');
+
+        // Centro: "Generado por [logo inbox]" pequeño y centrado
+        $logo_inbox = public_path('imgs/logo_inbox_color.png');
+        if (!file_exists($logo_inbox)) {
+            $logo_inbox = dirname(base_path()) . '/imgs/logo_inbox_color.png';
+        }
+
+        $txt_gen = $this->toPdf('Generado por');
+        $this->SetFont('Arial', 'I', 7.5);
+        $w_txt = $this->GetStringWidth($txt_gen);
+
+        if (file_exists($logo_inbox)) {
+            $w_logo = 13;
+            $gap = 1.5;
+            $total_w = $w_txt + $gap + $w_logo;
+            $start_x = ($this->w - $total_w) / 2;
+
+            $this->SetXY($start_x, $y_text);
+            $this->Cell($w_txt, 8, $txt_gen, 0, 0, 'L');
+            @$this->Image($logo_inbox, $start_x + $w_txt + $gap, $y_text + 2.0, $w_logo);
+        } else {
+            $this->SetXY(($this->w - 40) / 2, $y_text);
+            $this->Cell(40, 8, $this->toPdf('Generado por INBOX'), 0, 0, 'C');
+        }
+
+        // Derecha: Paginación
+        $this->SetXY(150, $y_text);
         $this->SetFont('Arial', 'B', 8);
         $this->SetTextColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
-        $this->Cell(0, 10, $this->toPdf('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'R');
+        $this->Cell(48, 8, $this->toPdf('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'R');
     }
 
     function NbLines($w, $txt): int
