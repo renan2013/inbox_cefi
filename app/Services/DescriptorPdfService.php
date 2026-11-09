@@ -438,7 +438,7 @@ class DescriptorPdfService
 
         $pdf->SetFont('Arial', 'BI', 9.5);
         $pdf->SetTextColor(100, 116, 139);
-        $pdf->Cell(186, 5, $pdf->toPdf('Descriptor Oficial del Curso'), 0, 1, 'C');
+        $pdf->Cell(186, 5, $pdf->toPdf('Programa del Curso'), 0, 1, 'C');
 
         // Barra divisoria institucional bicolor (Azul Marino CEFI + Verde CEFI)
         $y_div = $pdf->GetY() + 2;
