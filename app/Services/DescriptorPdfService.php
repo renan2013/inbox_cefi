@@ -429,12 +429,12 @@ class DescriptorPdfService
         $pdf->SetTextColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
         $pdf->Cell(186, 5.5, $pdf->toPdf($pdf->programa), 0, 1, 'C');
 
-        // Nombre del Curso en letras grandes con espacio superior e inferior
-        $pdf->Ln(4.5);
+        // Nombre del Curso en letras grandes con espacio superior e inferior ampliado al 100%
+        $pdf->Ln(9);
         $pdf->SetFont('Arial', 'B', 16);
         $pdf->SetTextColor($pdf->oscuro_cefi[0], $pdf->oscuro_cefi[1], $pdf->oscuro_cefi[2]);
         $pdf->MultiCell(186, 7.5, $pdf->toPdf(mb_strtoupper($pdf->materia, 'UTF-8')), 0, 'C');
-        $pdf->Ln(3.5);
+        $pdf->Ln(7);
 
         $pdf->SetFont('Arial', 'BI', 9.5);
         $pdf->SetTextColor(100, 116, 139);
