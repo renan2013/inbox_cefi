@@ -59,4 +59,59 @@ class PlanEstudio extends Model
     {
         return $this->belongsTo(Programa::class, 'id_programa', 'id_programa');
     }
+
+    /**
+     * Calcula el porcentaje de completitud (0 a 100%) del sílabo / descriptor curricular.
+     */
+    public function getPorcentajeSilaboAttribute(): int
+    {
+        $puntos = 0;
+
+        // 1. Ficha técnica básica (Código y Materia) -> 15%
+        if (!empty($this->codigo) && !empty($this->materia)) {
+            $puntos += 15;
+        }
+
+        $tieneContenido = function ($texto, $minLen = 10) {
+            if (empty($texto)) return false;
+            $limpio = trim(html_entity_decode(strip_tags((string)$texto), ENT_QUOTES, 'UTF-8'));
+            return mb_strlen($limpio, 'UTF-8') >= $minLen;
+        };
+
+        // 2. I. Descripción del curso -> 15%
+        if ($tieneContenido($this->descripcion_curso, 15)) {
+            $puntos += 15;
+        }
+
+        // 3. II-III. Objetivos -> 15%
+        if ($tieneContenido($this->objetivo_general, 10) || $tieneContenido($this->objetivos_especificos, 15)) {
+            $puntos += 15;
+        }
+
+        // 4. IV-VI. Contenidos temáticos y Metodología -> 15%
+        if ($tieneContenido($this->contenidos_tematicos, 15) && $tieneContenido($this->metodologia_ensenanza, 10)) {
+            $puntos += 15;
+        } elseif ($tieneContenido($this->contenidos_tematicos, 15) || $tieneContenido($this->metodologia_ensenanza, 10)) {
+            $puntos += 8;
+        }
+
+        // 5. VII. Evaluación de los aprendizajes -> 15%
+        if ($tieneContenido($this->evaluacion_aprendizajes, 10)) {
+            $puntos += 15;
+        }
+
+        // 6. VIII. Cronograma -> 15%
+        if ($tieneContenido($this->cronograma, 25)) {
+            $puntos += 15;
+        }
+
+        // 7. IX-XI. Guías de evaluación y Bibliografía -> 10%
+        if ($tieneContenido($this->guias_evaluacion, 15) && $tieneContenido($this->bibliografia, 10)) {
+            $puntos += 10;
+        } elseif ($tieneContenido($this->guias_evaluacion, 15) || $tieneContenido($this->bibliografia, 10)) {
+            $puntos += 5;
+        }
+
+        return min(100, $puntos);
+    }
 }

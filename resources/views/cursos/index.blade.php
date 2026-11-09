@@ -231,6 +231,63 @@
             border-color: #cbd5e1 !important;
             color: #0f172a !important;
         }
+
+        /* Etiquetas de porcentaje del sílabo */
+        .badge-silabo {
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            white-space: nowrap;
+        }
+
+        .badge-silabo-100 {
+            background-color: rgba(16, 185, 129, 0.15) !important;
+            color: #10b981 !important;
+            border: 1px solid rgba(16, 185, 129, 0.35) !important;
+        }
+        [data-theme="light"] .badge-silabo-100 {
+            background-color: #d1fae5 !important;
+            color: #065f46 !important;
+            border-color: #6ee7b7 !important;
+        }
+
+        .badge-silabo-medio {
+            background-color: rgba(14, 165, 233, 0.15) !important;
+            color: #38bdf8 !important;
+            border: 1px solid rgba(14, 165, 233, 0.35) !important;
+        }
+        [data-theme="light"] .badge-silabo-medio {
+            background-color: #e0f2fe !important;
+            color: #0369a1 !important;
+            border-color: #7dd3fc !important;
+        }
+
+        .badge-silabo-bajo {
+            background-color: rgba(245, 158, 11, 0.15) !important;
+            color: #fbbf24 !important;
+            border: 1px solid rgba(245, 158, 11, 0.35) !important;
+        }
+        [data-theme="light"] .badge-silabo-bajo {
+            background-color: #fef3c7 !important;
+            color: #92400e !important;
+            border-color: #fcd34d !important;
+        }
+
+        .silabo-progress-track {
+            width: 115px;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        [data-theme="light"] .silabo-progress-track {
+            background-color: #e2e8f0;
+        }
     </style>
 @endsection
 
@@ -377,24 +434,37 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        @if ($curso->fecha_descriptor_pdf)
-                                                            <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
-                                                                <i class="bi bi-patch-check-fill me-1 text-success"></i> Oficial Generado
-                                                            </span>
-                                                            <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">
-                                                                <i class="bi bi-calendar3 me-1"></i>{{ \Carbon\Carbon::parse($curso->fecha_descriptor_pdf)->format('d/m/Y') }}
-                                                            </small>
-                                                        @elseif (!empty($curso->contenidos_tematicos) || !empty($curso->descripcion_curso) || !empty($curso->cronograma))
-                                                            <span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
-                                                                <i class="bi bi-journal-check me-1 text-info"></i> Sílabo Completo
-                                                            </span>
-                                                            <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">Listo para emitir</small>
-                                                        @else
-                                                            <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
-                                                                <i class="bi bi-clock-history me-1 text-warning"></i> Ficha Básica
-                                                            </span>
-                                                            <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">Sin contenidos cargados</small>
-                                                        @endif
+                                                        @php
+                                                            $pct = $curso->porcentaje_silabo;
+                                                            if ($pct >= 100) {
+                                                                $claseBadge = 'badge-silabo-100';
+                                                                $colorBarra = '#10b981';
+                                                                $icono = 'bi-check-circle-fill';
+                                                                $textoEstado = '100% Completo';
+                                                                $subtexto = $curso->fecha_descriptor_pdf 
+                                                                    ? ('Emitido: ' . \Carbon\Carbon::parse($curso->fecha_descriptor_pdf)->format('d/m/Y')) 
+                                                                    : 'Listo para emitir';
+                                                            } elseif ($pct >= 50) {
+                                                                $claseBadge = 'badge-silabo-medio';
+                                                                $colorBarra = '#0ea5e9';
+                                                                $icono = 'bi-pie-chart-fill';
+                                                                $textoEstado = $pct . '% En Progreso';
+                                                                $subtexto = 'Sílabo parcial';
+                                                            } else {
+                                                                $claseBadge = 'badge-silabo-bajo';
+                                                                $colorBarra = '#f59e0b';
+                                                                $icono = 'bi-hourglass-split';
+                                                                $textoEstado = $pct . '% Ficha Básica';
+                                                                $subtexto = 'Falta completar sílabo';
+                                                            }
+                                                        @endphp
+                                                        <span class="badge-silabo {{ $claseBadge }}">
+                                                            <i class="bi {{ $icono }}"></i> {{ $textoEstado }}
+                                                        </span>
+                                                        <div class="silabo-progress-track">
+                                                            <div style="width: {{ $pct }}%; height: 100%; background-color: {{ $colorBarra }}; border-radius: 99px;"></div>
+                                                        </div>
+                                                        <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">{{ $subtexto }}</small>
                                                     </td>
                                                     <td>
                                                         <span class="small text-white-50">{{ $curso->modalidad ?? 'Virtual' }}</span>
@@ -494,24 +564,37 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    @if ($curso->fecha_descriptor_pdf)
-                                                        <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
-                                                            <i class="bi bi-patch-check-fill me-1 text-success"></i> Oficial Generado
-                                                        </span>
-                                                        <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">
-                                                            <i class="bi bi-calendar3 me-1"></i>{{ \Carbon\Carbon::parse($curso->fecha_descriptor_pdf)->format('d/m/Y') }}
-                                                        </small>
-                                                    @elseif (!empty($curso->contenidos_tematicos) || !empty($curso->descripcion_curso) || !empty($curso->cronograma))
-                                                        <span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
-                                                            <i class="bi bi-journal-check me-1 text-info"></i> Sílabo Completo
-                                                        </span>
-                                                        <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">Listo para emitir</small>
-                                                    @else
-                                                        <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center" style="font-size: 0.75rem;">
-                                                            <i class="bi bi-clock-history me-1 text-warning"></i> Ficha Básica
-                                                        </span>
-                                                        <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">Sin contenidos cargados</small>
-                                                    @endif
+                                                    @php
+                                                        $pct = $curso->porcentaje_silabo;
+                                                        if ($pct >= 100) {
+                                                            $claseBadge = 'badge-silabo-100';
+                                                            $colorBarra = '#10b981';
+                                                            $icono = 'bi-check-circle-fill';
+                                                            $textoEstado = '100% Completo';
+                                                            $subtexto = $curso->fecha_descriptor_pdf 
+                                                                ? ('Emitido: ' . \Carbon\Carbon::parse($curso->fecha_descriptor_pdf)->format('d/m/Y')) 
+                                                                : 'Listo para emitir';
+                                                        } elseif ($pct >= 50) {
+                                                            $claseBadge = 'badge-silabo-medio';
+                                                            $colorBarra = '#0ea5e9';
+                                                            $icono = 'bi-pie-chart-fill';
+                                                            $textoEstado = $pct . '% En Progreso';
+                                                            $subtexto = 'Sílabo parcial';
+                                                        } else {
+                                                            $claseBadge = 'badge-silabo-bajo';
+                                                            $colorBarra = '#f59e0b';
+                                                            $icono = 'bi-hourglass-split';
+                                                            $textoEstado = $pct . '% Ficha Básica';
+                                                            $subtexto = 'Falta completar sílabo';
+                                                        }
+                                                    @endphp
+                                                    <span class="badge-silabo {{ $claseBadge }}">
+                                                        <i class="bi {{ $icono }}"></i> {{ $textoEstado }}
+                                                    </span>
+                                                    <div class="silabo-progress-track">
+                                                        <div style="width: {{ $pct }}%; height: 100%; background-color: {{ $colorBarra }}; border-radius: 99px;"></div>
+                                                    </div>
+                                                    <small class="d-block text-white-50 mt-1" style="font-size: 0.7rem;">{{ $subtexto }}</small>
                                                 </td>
                                                 <td>
                                                     <span class="small text-white-50">{{ $curso->modalidad ?? 'Virtual' }}</span>
