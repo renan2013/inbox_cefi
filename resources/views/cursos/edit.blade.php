@@ -301,7 +301,7 @@
                                                 'V Cuatrimestre', 'VI Cuatrimestre', 'VII Cuatrimestre', 'VIII Cuatrimestre',
                                                 'I Bimestre', 'II Bimestre', 'III Bimestre', 'IV Bimestre',
                                                 'V Bimestre', 'VI Bimestre',
-                                                'Mes',
+                                                'Mes', 'Semana', 'Seminario', 'Taller', 'Fecha Específica',
                                             ];
                                             $valPeriodo = old('cuatrimestre', $curso->cuatrimestre);
                                             if ($valPeriodo && !in_array($valPeriodo, $opcionesPeriodo, true)) {

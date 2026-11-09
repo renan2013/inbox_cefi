@@ -211,6 +211,10 @@
                                 <option value="V Bimestre">V Bimestre</option>
                                 <option value="VI Bimestre">VI Bimestre</option>
                                 <option value="Mes">Mes</option>
+                                <option value="Semana">Semana (1 Semana)</option>
+                                <option value="Seminario">Seminario</option>
+                                <option value="Taller">Taller / Intensivo</option>
+                                <option value="Fecha Específica">Fecha Determinada / Específica</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -253,6 +257,9 @@
                             <select name="tipo_curso" class="form-select form-select-custom w-100">
                                 <option value="Regular">Regular</option>
                                 <option value="Tutoría">Tutoría</option>
+                                <option value="Seminario">Seminario</option>
+                                <option value="Taller">Taller</option>
+                                <option value="Curso Libre">Curso Libre / Intensivo</option>
                             </select>
                         </div>
                     </div>
@@ -378,10 +385,28 @@
     <script>
         $(document).ready(function() {
             // Generar período
-            function actPeriodo() { 
-                $('#periodo').val($('#cuatrimestre_select').val() + ' ' + $('#ano_select').val()); 
+            function formatearFechaCorta(iso) {
+                if (!iso) return '';
+                var p = iso.split('-');
+                return p.length === 3 ? (p[2] + '/' + p[1] + '/' + p[0]) : iso;
             }
-            $('#cuatrimestre_select, #ano_select').change(actPeriodo); 
+            function actPeriodo() { 
+                var tipoPer = $('#cuatrimestre_select').val();
+                var anio = $('#ano_select').val();
+                var fIni = $('input[name="fecha_inicio"]').val();
+                var fFin = $('input[name="fecha_final"]').val();
+
+                if (tipoPer === 'Fecha Específica' && fIni) {
+                    if (fFin && fFin !== fIni) {
+                        $('#periodo').val('Del ' + formatearFechaCorta(fIni) + ' al ' + formatearFechaCorta(fFin));
+                    } else {
+                        $('#periodo').val('Fecha: ' + formatearFechaCorta(fIni));
+                    }
+                } else {
+                    $('#periodo').val(tipoPer + ' ' + anio); 
+                }
+            }
+            $('#cuatrimestre_select, #ano_select, input[name="fecha_inicio"], input[name="fecha_final"]').on('change input', actPeriodo); 
             actPeriodo();
 
             // Cargar materias del programa vía AJAX

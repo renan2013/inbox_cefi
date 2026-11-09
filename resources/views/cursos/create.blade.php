@@ -294,7 +294,7 @@
                                                 'V Cuatrimestre', 'VI Cuatrimestre', 'VII Cuatrimestre', 'VIII Cuatrimestre',
                                                 'I Bimestre', 'II Bimestre', 'III Bimestre', 'IV Bimestre',
                                                 'V Bimestre', 'VI Bimestre',
-                                                'Mes',
+                                                'Mes', 'Semana', 'Seminario', 'Taller', 'Fecha Específica',
                                             ];
                                         @endphp
                                         @foreach ($opcionesPeriodo as $c)
