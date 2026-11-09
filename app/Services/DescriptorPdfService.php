@@ -342,9 +342,11 @@ class DescriptorPdfService
      *
      * @param int $id_plan ID del plan de estudios
      * @param string $dest 'I' inline, 'D' download, 'F' save
+     * @param string|null $profesorOverride Nombre del profesor asignado al curso activo (opcional)
+     * @param int $profesorId ID del profesor asignado para priorizar su sílabo (opcional)
      * @return mixed Response o string ruta
      */
-    public static function generar(int $id_plan, string $dest = 'I')
+    public static function generar(int $id_plan, string $dest = 'I', ?string $profesorOverride = null, int $profesorId = 0)
     {
         $plan = DB::table('plan_estudios as p')
             ->leftJoin('programas as pr', 'p.id_programa', '=', 'pr.id_programa')
@@ -363,7 +365,11 @@ class DescriptorPdfService
         // Cargar sílabo de respaldo si algún campo del plan está vacío
         $silabo = null;
         try {
-            $silabo = DB::table('silabos')->where('id_plan', $id_plan)->orderBy('id_silabo', 'desc')->first();
+            $qSilabo = DB::table('silabos')->where('id_plan', $id_plan);
+            if ($profesorId > 0) {
+                $qSilabo->orderByRaw('(id_profesor = ?) DESC', [$profesorId]);
+            }
+            $silabo = $qSilabo->orderBy('id_silabo', 'desc')->first();
         } catch (\Throwable $e) {
             $silabo = null;
         }
@@ -484,7 +490,7 @@ class DescriptorPdfService
             ['Requisitos', (string)$prop('requisitos', 'No tiene')],
             ['Correquisitos', (string)$prop('correquisitos', 'No tiene')],
             ['Nivel', (string)$prop('nivel', $prop('facultad_programa', 'Carrera Técnica'))],
-            ['Profesor', (string)$prop('profesor', '--')],
+            ['Profesor', !empty($profesorOverride) ? $profesorOverride : (string)$prop('profesor', '--')],
         ]);
 
         $w_label = 60;
