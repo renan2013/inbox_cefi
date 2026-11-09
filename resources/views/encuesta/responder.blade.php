@@ -193,11 +193,13 @@
                 <div class="success-anim text-success"><i class="bi bi-check-lg"></i></div>
                 <h3 class="fw-bold text-dark mb-2">¡Ya has completado esta evaluación!</h3>
                 <p class="text-muted mb-4">Agradecemos profundamente tu tiempo y tus aportes para seguir mejorando.</p>
+                @if (\App\Services\ModuleService::isEnabled('moodle_sync'))
                 <div>
                     <a href="{{ $moodle_return_url }}" class="btn btn-success rounded-pill px-4 py-2 fw-bold">
                         <i class="bi bi-arrow-left me-1"></i> Volver a Moodle
                     </a>
                 </div>
+                @endif
             </div>
         @elseif (!$tiene_preguntas)
             <!-- Sin preguntas -->
@@ -205,7 +207,9 @@
                 <i class="bi bi-cone-striped fs-1 text-warning mb-3"></i>
                 <h4 class="fw-bold text-dark mb-2">Encuesta no configurada</h4>
                 <p class="text-muted mb-4">El banco de preguntas no contiene elementos activos en este momento.</p>
-                <a href="{{ $moodle_return_url }}" class="btn btn-outline-secondary rounded-pill px-4">Regresar a Moodle</a>
+                @if (\App\Services\ModuleService::isEnabled('moodle_sync'))
+                    <a href="{{ $moodle_return_url }}" class="btn btn-outline-secondary rounded-pill px-4">Regresar a Moodle</a>
+                @endif
             </div>
         @else
             <!-- Formulario Wizard -->
@@ -327,11 +331,13 @@
                 <div class="success-anim text-success"><i class="bi bi-check-lg"></i></div>
                 <h3 class="fw-bold text-dark mb-2">¡Evaluación Enviada con Éxito!</h3>
                 <p class="text-muted mb-4">Tus respuestas han sido procesadas de forma 100% confidencial y anónima.</p>
+                @if (\App\Services\ModuleService::isEnabled('moodle_sync'))
                 <div>
                     <a href="{{ $moodle_return_url }}" id="btnVolverMoodle" class="btn btn-success rounded-pill px-5 py-3 fw-bold shadow">
                         <i class="bi bi-mortarboard-fill me-2"></i> Continuar en Moodle
                     </a>
                 </div>
+                @endif
             </div>
 
         @endif
@@ -422,8 +428,9 @@
                 if (data.success) {
                     document.getElementById('encuestaForm').style.display = 'none';
                     document.getElementById('success-screen').style.display = 'block';
-                    if (data.return_url) {
-                        document.getElementById('btnVolverMoodle').href = data.return_url;
+                    const btnVolver = document.getElementById('btnVolverMoodle');
+                    if (btnVolver && data.return_url) {
+                        btnVolver.href = data.return_url;
                     }
                     window.scrollTo({ top: 100, behavior: 'smooth' });
                 } else {

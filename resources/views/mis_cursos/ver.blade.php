@@ -711,9 +711,9 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="p-3 rounded-3 bg-dark border border-secondary border-opacity-25 text-center">
-                                    <i class="bi bi-mortarboard text-primary fs-3 d-block mb-1"></i>
-                                    <h6 class="fw-bold mb-0">Integrada a Moodle</h6>
-                                    <small class="text-white-50">Se enlaza directamente en la sección general del curso.</small>
+                                    <i class="bi bi-share text-primary fs-3 d-block mb-1"></i>
+                                    <h6 class="fw-bold mb-0">Enlace Directo</h6>
+                                    <small class="text-white-50">Compartible por WhatsApp, correo o en la sesión en vivo.</small>
                                 </div>
                             </div>
                             <div class="col-md-4">
