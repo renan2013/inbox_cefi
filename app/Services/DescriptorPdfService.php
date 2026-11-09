@@ -250,11 +250,22 @@ class DescriptorPDF extends FPDF
         }
         if ($max_cols == 0) return;
 
-        // Proporciones óptimas según número de columnas
+        // Proporciones óptimas según número de columnas y tipo de tabla
+        $firstRowHtml = $rows[2][0] ?? '';
+        $isEvaluacionTable = ($max_cols === 4) && (
+            stripos($firstRowHtml, 'Rubro') !== false ||
+            stripos($firstRowHtml, 'Valor Unit') !== false ||
+            stripos($firstRowHtml, 'Cant') !== false
+        );
+
         if ($max_cols === 4) {
-            $col_widths = [24, 66, 62, 34]; // Ideal para Cronograma (Semana, Actividades, Tareas, Modalidad)
+            if ($isEvaluacionTable) {
+                $col_widths = [114, 24, 24, 24]; // Primera columna amplia para que el Rubro quepa en una sola línea
+            } else {
+                $col_widths = [24, 66, 62, 34]; // Cronograma (Semana, Actividades, Tareas, Modalidad)
+            }
         } elseif ($max_cols === 3) {
-            $col_widths = [50, 96, 40];
+            $col_widths = [116, 35, 35];
         } elseif ($max_cols === 2) {
             $col_widths = [136, 50];
         } else {
@@ -273,7 +284,15 @@ class DescriptorPDF extends FPDF
             $cell_texts = [];
             for ($c = 0; $c < $max_cols; $c++) {
                 $raw = $cols[2][$c] ?? '';
-                $clean = trim(strip_tags(str_replace(['&nbsp;', '<br>', '<br/>', '<br />'], [' ', "\n", "\n", "\n"], $raw)));
+                $raw = str_ireplace(['&nbsp;', '<br>', '<br/>', '<br />', '</p>', '</div>', '</li>'], [' ', "\n", "\n", "\n", "\n", "\n", "\n"], $raw);
+                $raw = str_ireplace('<li>', '- ', $raw);
+                $stripped = strip_tags($raw);
+                $linesArr = array_values(array_filter(array_map(function ($ln) {
+                    return trim(preg_replace('/[ \t]+/', ' ', $ln));
+                }, explode("\n", str_replace("\r", '', $stripped))), function ($ln) {
+                    return $ln !== '';
+                }));
+                $clean = implode("\n", $linesArr);
                 $pdf_txt = $this->toPdf($clean);
                 $cell_texts[$c] = $pdf_txt;
                 $w_c = $col_widths[$c] ?? (186 / $max_cols);
@@ -320,11 +339,10 @@ class DescriptorPDF extends FPDF
                     $this->SetLineWidth(0.2);
                 }
 
-                // Imprimir texto con soporte multilínea
+                // Imprimir texto con soporte multilínea alineado a la izquierda
                 $pad_y = ($max_lines === 1) ? (($h_row - $line_h) / 2) : 1.0;
                 $this->SetXY($x_start + 1.5, $y_start + $pad_y);
-                $align = ($max_cols === 4 && $c === 0 && !$is_th) ? 'C' : 'L';
-                $this->MultiCell($w_c - 3, $line_h, $txt, 0, $align);
+                $this->MultiCell($w_c - 3, $line_h, $txt, 0, 'L');
 
                 $x_start += $w_c;
             }
