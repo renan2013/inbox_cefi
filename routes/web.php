@@ -258,6 +258,7 @@ Route::middleware('auth')->group(function () {
 
         // Grupos
         Route::get('/grupos', [GrupoController::class, 'index'])->name('grupos.index');
+        Route::get('/grupos/programa/{id}/cursos-ajax', [GrupoController::class, 'cursosPorProgramaAjax'])->name('grupos.cursos_programa_ajax');
         Route::post('/grupos/crear', [GrupoController::class, 'store'])->name('grupos.store');
         Route::post('/grupos/eliminar', [GrupoController::class, 'destroy'])->name('grupos.destroy');
 

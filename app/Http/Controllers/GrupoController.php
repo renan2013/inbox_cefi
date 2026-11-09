@@ -44,6 +44,19 @@ class GrupoController extends Controller
     }
 
     /**
+     * Devuelve en JSON la lista de materias (plan_estudios) de un programa académico para el selector de Grupos.
+     */
+    public function cursosPorProgramaAjax($id)
+    {
+        $materias = PlanEstudio::where('id_programa', $id)
+            ->select('id_plan', 'codigo', 'materia', 'cuatrimestre', 'modalidad')
+            ->orderBy('id_plan', 'asc')
+            ->get();
+
+        return response()->json($materias);
+    }
+
+    /**
      * Crea un nuevo grupo académico y matricula al profesor.
      */
     public function store(Request $request)

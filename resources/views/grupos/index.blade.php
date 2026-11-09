@@ -199,11 +199,18 @@
 
                     <div class="row g-4 mb-4">
                         <div class="col-md-3">
-                            <label class="form-label-custom">Cuatrimestre</label>
+                            <label class="form-label-custom">Cuatrimestre / Periodo</label>
                             <select id="cuatrimestre_select" class="form-select form-select-custom w-100">
                                 <option value="I Cuatrimestre">I Cuatrimestre (Ene-Abr)</option>
                                 <option value="II Cuatrimestre">II Cuatrimestre (May-Ago)</option>
                                 <option value="III Cuatrimestre">III Cuatrimestre (Sep-Dic)</option>
+                                <option value="I Bimestre">I Bimestre</option>
+                                <option value="II Bimestre">II Bimestre</option>
+                                <option value="III Bimestre">III Bimestre</option>
+                                <option value="IV Bimestre">IV Bimestre</option>
+                                <option value="V Bimestre">V Bimestre</option>
+                                <option value="VI Bimestre">VI Bimestre</option>
+                                <option value="Mes">Mes</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -380,21 +387,41 @@
             // Cargar materias del programa vía AJAX
             $('#id_programa_select').change(function() {
                 var id = $(this).val();
+                var select = $('#id_plan_select');
                 if (id) {
-                    var url = "{{ route('boletas.cursos_programa_ajax', ':id') }}".replace(':id', id);
+                    select.empty().append('<option value="">Cargando materias...</option>').prop('disabled', true);
+                    var url = "{{ route('grupos.cursos_programa_ajax', ':id') }}".replace(':id', id);
                     $.getJSON(url, function(data) {
-                        var select = $('#id_plan_select').empty().append('<option value="">Seleccione Materia...</option>');
-                        if (data.length === 0) {
+                        select.empty().append('<option value="">Seleccione Materia...</option>');
+
+                        // Soportar tanto arreglo plano como respuesta agrupada { success: true, cursos: { ... } }
+                        var lista = [];
+                        if (Array.isArray(data)) {
+                            lista = data;
+                        } else if (data && data.cursos && typeof data.cursos === 'object') {
+                            $.each(data.cursos, function(periodo, items) {
+                                if (Array.isArray(items)) {
+                                    lista = lista.concat(items);
+                                }
+                            });
+                        }
+
+                        if (lista.length === 0) {
                             select.append('<option value="">No hay materias registradas para este programa</option>');
                         } else {
-                            $.each(data, function(i, m) { 
-                                select.append('<option value="'+m.id_plan+'">'+m.codigo+' - '+m.materia+'</option>'); 
+                            $.each(lista, function(i, m) {
+                                var cod = m.codigo ? (m.codigo + ' - ') : '';
+                                var nom = m.materia || 'Materia sin nombre';
+                                var per = m.cuatrimestre ? (' (' + m.cuatrimestre + ')') : '';
+                                select.append('<option value="' + m.id_plan + '">' + cod + nom + per + '</option>');
                             });
                         }
                         select.prop('disabled', false);
+                    }).fail(function() {
+                        select.empty().append('<option value="">Error al cargar materias del programa</option>').prop('disabled', true);
                     });
                 } else {
-                    $('#id_plan_select').empty().append('<option value="">Seleccione un programa primero...</option>').prop('disabled', true);
+                    select.empty().append('<option value="">Seleccione un programa primero...</option>').prop('disabled', true);
                 }
             });
         });
