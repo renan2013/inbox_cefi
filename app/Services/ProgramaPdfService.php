@@ -31,31 +31,60 @@ class ProgramaPDF extends FPDF
 
     function Header()
     {
-        $headerH = 35.0;
-        $this->header_h = $headerH;
+        $headerH = $this->header_h;
+        $headerDrawn = false;
 
-        // 1. Dibujar el encabezado institucional (degradado verde, curva S azul #11619b y sello CEFI) 100% en vectores nativos PDF
-        $this->drawVectorHeaderCurve($headerH);
+        // 1. Si existe imagen_encabezado personalizada o plantilla global, dibujarla respetando su proporción real
+        if (!empty($this->header_path) && file_exists($this->header_path)) {
+            try {
+                $info = @getimagesize($this->header_path);
+                if ($info && !empty($info[0]) && !empty($info[1])) {
+                    $headerH = max(26.0, min(46.0, round(210 * ($info[1] / $info[0]), 2)));
+                    $this->header_h = $headerH;
+                }
+                @$this->Image($this->header_path, 0, 0, 210, $headerH);
+                $headerDrawn = true;
+            } catch (\Throwable $e) {
+                $headerDrawn = false;
+            }
+        }
 
-        // Texto institucional "CENTRO DE ENSEÑANZA Y FORMACION INTEGRAL" en vectores nítidos
-        $this->SetTextColor(255, 255, 255);
-        $this->SetFont('Arial', '', 8.0);
-        $this->SetXY(136.0, 8.2);
-        $this->Cell(34.0, 4.2, $this->toPdf('CENTRO DE'), 0, 1, 'R');
-        $this->SetX(136.0);
-        $this->Cell(34.0, 4.2, $this->toPdf('ENSEÑANZA'), 0, 1, 'R');
-        $this->SetX(136.0);
-        $this->Cell(34.0, 4.2, $this->toPdf('Y FORMACION'), 0, 1, 'R');
-        $this->SetX(136.0);
-        $this->Cell(34.0, 4.2, $this->toPdf('INTEGRAL'), 0, 1, 'R');
+        if (!$headerDrawn) {
+            // Fondo izquierdo verde oscuro (#184a2c)
+            $this->SetFillColor($this->verde_oscuro_hdr[0], $this->verde_oscuro_hdr[1], $this->verde_oscuro_hdr[2]);
+            $this->Rect(0, 0, 134, $headerH, 'F');
 
-        // Línea vertical blanca divisoria vectorial
-        $this->SetDrawColor(255, 255, 255);
-        $this->SetLineWidth(0.42);
-        $this->Line(173.5, 5.0, 173.5, $headerH - 5.8);
+            // Franja de transición verde claro y turquesa (simulando la curva del diseño)
+            $this->SetFillColor($this->verde_curva_hdr[0], $this->verde_curva_hdr[1], $this->verde_curva_hdr[2]);
+            $this->Rect(130, 0, 8, $headerH, 'F');
 
-        // Sello circular CEFI PARAUNIVERSITARIO 100% vectorial a la derecha
-        $this->drawCefiBadgeRight(191.2, 17.2, 26.2);
+            $this->SetFillColor(28, 140, 160);
+            $this->Rect(136, 0, 6, $headerH, 'F');
+
+            // Fondo derecho azul institucional (#0a5c96)
+            $this->SetFillColor($this->azul_hdr[0], $this->azul_hdr[1], $this->azul_hdr[2]);
+            $this->Rect(140, 0, 70, $headerH, 'F');
+
+            // Texto "CENTRO DE ENSEÑANZA Y FORMACION INTEGRAL" a la izquierda de la línea divisoria
+            $this->SetTextColor(255, 255, 255);
+            $this->SetFont('Arial', '', 7.5);
+            $this->SetXY(140, 9.5);
+            $this->Cell(31, 3.8, $this->toPdf('CENTRO DE'), 0, 1, 'R');
+            $this->SetX(140);
+            $this->Cell(31, 3.8, $this->toPdf('ENSEÑANZA'), 0, 1, 'R');
+            $this->SetX(140);
+            $this->Cell(31, 3.8, $this->toPdf('Y FORMACION'), 0, 1, 'R');
+            $this->SetX(140);
+            $this->Cell(31, 3.8, $this->toPdf('INTEGRAL'), 0, 1, 'R');
+
+            // Línea vertical blanca divisoria
+            $this->SetDrawColor(255, 255, 255);
+            $this->SetLineWidth(0.35);
+            $this->Line(174, 5.5, 174, $headerH - 5.5);
+
+            // Sello circular CEFI PARAUNIVERSITARIO a la derecha
+            $this->drawCefiBadgeRight(191, $headerH / 2);
+        }
 
         // 2. Textos dinámicos del Programa a la izquierda (sobre el bloque verde oscuro, más abajo y con título más grande)
         [$prefijoCat, $tituloLimpio] = $this->splitTituloModerno($this->nombre_programa, $this->categoria);
@@ -94,370 +123,37 @@ class ProgramaPDF extends FPDF
         $this->SetY($headerH);
     }
 
-    /**
-     * Dibuja el fondo del encabezado (degradado verde izquierdo + curva S azul #11619b derecha)
-     * utilizando trazos vectoriales nativos de PDF (Bézier cúbica) sin pixelado.
-     */
-    function drawVectorHeaderCurve(float $headerH): void
+    function drawCefiBadgeRight(float $cx, float $cy): void
     {
-        $k = $this->k;
-        $hp = $this->h;
-
-        // 1. Degradado horizontal verde en la sección inferior/izquierda (X = 0 a 210, Y = 2.8 a $headerH)
-        $steps = 85;
-        $startX = 0.0;
-        $endX = 210.0;
-        $stepW = ($endX - $startX) / $steps;
-        $r0 = 10; $g0 = 32;  $b0 = 19;  // Verde muy oscuro izquierdo
-        $r1 = 15; $g1 = 136; $b1 = 68;  // Verde esmeralda CEFI hacia el centro/derecha
-
-        for ($i = 0; $i < $steps; $i++) {
-            $t = min(1.0, ($i / ($steps - 1)) * 1.35);
-            $r = (int)round($r0 + ($r1 - $r0) * $t);
-            $g = (int)round($g0 + ($g1 - $g0) * $t);
-            $b = (int)round($b0 + ($b1 - $b0) * $t);
-            $this->SetFillColor($r, $g, $b);
-            $this->Rect($startX + $i * $stepW, 2.8, $stepW + 0.35, $headerH - 2.8, 'F');
-        }
-
-        // 2. Sombra suave vectorial bajo el borde de la curva S para dar profundidad
-        $yTop = 3.1;
-        $yBot = $headerH - 2.8;
-        $shadows = [
-            ['dx' => -2.2, 'dy' => 1.0, 'rgb' => [11, 88, 45]],
-            ['dx' => -1.4, 'dy' => 0.7, 'rgb' => [9, 68, 35]],
-            ['dx' => -0.7, 'dy' => 0.35, 'rgb' => [7, 48, 25]],
-        ];
-        foreach ($shadows as $sh) {
-            $this->SetFillColor($sh['rgb'][0], $sh['rgb'][1], $sh['rgb'][2]);
-            $sx0  = 103.0 + $sh['dx']; $sy0  = $yTop;
-            $scx1 = 123.0 + $sh['dx']; $scy1 = $yTop;
-            $scx2 = 131.0 + $sh['dx']; $scy2 = min($headerH, $yBot + $sh['dy']);
-            $sx1  = 152.0 + $sh['dx']; $sy1  = min($headerH, $yBot + $sh['dy']);
-
-            $this->_out(sprintf('%.2F %.2F m', $sx0 * $k, ($hp - $sy0) * $k));
-            $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
-                $scx1 * $k, ($hp - $scy1) * $k,
-                $scx2 * $k, ($hp - $scy2) * $k,
-                $sx1 * $k,  ($hp - $sy1) * $k
-            ));
-            $this->_out(sprintf('%.2F %.2F l', 210.0 * $k, ($hp - $sy1) * $k));
-            $this->_out(sprintf('%.2F %.2F l', 210.0 * $k, ($hp - 0.0) * $k));
-            $this->_out(sprintf('%.2F %.2F l h f', $sx0 * $k, ($hp - 0.0) * $k));
-        }
-
-        // 3. Franja superior y bloque derecho con curva S en azul oscuro institucional (#11619b)
-        $this->SetFillColor($this->azul_hdr[0], $this->azul_hdr[1], $this->azul_hdr[2]);
-        $x0  = 103.0; $y0  = $yTop;
-        $cx1 = 123.0; $cy1 = $yTop;
-        $cx2 = 131.0; $cy2 = $yBot;
-        $x1  = 152.0; $y1  = $yBot;
-
-        $this->_out(sprintf('%.2F %.2F m', 0.0 * $k, ($hp - 0.0) * $k));
-        $this->_out(sprintf('%.2F %.2F l', 210.0 * $k, ($hp - 0.0) * $k));
-        $this->_out(sprintf('%.2F %.2F l', 210.0 * $k, ($hp - $y1) * $k));
-        $this->_out(sprintf('%.2F %.2F l', $x1 * $k, ($hp - $y1) * $k));
-        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
-            $cx2 * $k, ($hp - $cy2) * $k,
-            $cx1 * $k, ($hp - $cy1) * $k,
-            $x0 * $k,  ($hp - $y0) * $k
-        ));
-        $this->_out(sprintf('%.2F %.2F l h f', 0.0 * $k, ($hp - $y0) * $k));
-    }
-
-    /**
-     * Dibuja el emblema circular oficial "CEFI PARAUNIVERSITARIO" 100% en vectores PDF
-     * leyendo las curvas originales de public/imgs/logo_cefi_blanco.svg.
-     */
-    function drawCefiBadgeRight(float $cx, float $cy, float $diameter = 26.2): void
-    {
-        $svgPath = public_path('imgs/logo_cefi_blanco.svg');
-        if (file_exists($svgPath)) {
-            $svgContent = @file_get_contents($svgPath);
-            if (!empty($svgContent) && $this->renderSvgBadgePaths($svgContent, $cx, $cy, $diameter)) {
-                $this->SetLineWidth(0.2);
-                return;
-            }
-        }
-
-        // Respaldo vectorial en caso de que no exista el archivo SVG
-        $r = $diameter / 2;
+        // Sello blanco con borde verde CEFI
         $this->SetFillColor(255, 255, 255);
-        $this->drawVectorCircle($cx, $cy, $r, 'F');
         $this->SetDrawColor(0, 160, 77);
-        $this->SetLineWidth(0.8);
-        $this->drawVectorCircle($cx, $cy, $r - 0.8, 'D');
+        $this->SetLineWidth(0.9);
+        $this->Rect($cx - 12, $cy - 12, 24, 24, 'DF');
 
-        $this->SetXY($cx - 11, $cy - 5.5);
-        $this->SetFont('Arial', 'B', 12.5);
+        // Siglas CEFI
+        $this->SetXY($cx - 11, $cy - 8.5);
+        $this->SetFont('Arial', 'B', 13);
         $this->SetTextColor(0, 160, 77);
-        $this->Cell(22, 5.5, $this->toPdf('CEFI'), 0, 1, 'C');
+        $this->Cell(22, 6, $this->toPdf('CEFI'), 0, 1, 'C');
 
-        $this->SetXY($cx - 11, $cy);
-        $this->SetFont('Arial', 'B', 3.6);
+        // Subtítulo interno
+        $this->SetXY($cx - 11, $cy - 2);
+        $this->SetFont('Arial', 'B', 3.8);
         $this->SetTextColor(17, 97, 155);
-        $this->Cell(22, 1.8, $this->toPdf('Centro de Enseñanza'), 0, 1, 'C');
+        $this->Cell(22, 2, $this->toPdf('Centro de Enseñanza'), 0, 1, 'C');
         $this->SetX($cx - 11);
-        $this->Cell(22, 1.8, $this->toPdf('y Formación Integral'), 0, 1, 'C');
+        $this->Cell(22, 2, $this->toPdf('y Formación Integral'), 0, 1, 'C');
+
+        // Cinta PARAUNIVERSITARIO
+        $this->SetFillColor(17, 97, 155);
+        $this->Rect($cx - 12, $cy + 4.5, 24, 4.8, 'F');
+        $this->SetXY($cx - 12, $cy + 5);
+        $this->SetFont('Arial', 'B', 4.6);
+        $this->SetTextColor(255, 255, 255);
+        $this->Cell(24, 3.8, $this->toPdf('PARAUNIVERSITARIO'), 0, 1, 'C');
+
         $this->SetLineWidth(0.2);
-    }
-
-    /**
-     * Interpreta los elementos vectoriales (<circle>, <ellipse>, <polygon>, <path>) de logo_cefi_blanco.svg
-     * y los emite como primitivas vectoriales nativas en el flujo del PDF.
-     */
-    function renderSvgBadgePaths(string $svg, float $cx, float $cy, float $diameter): bool
-    {
-        $scale = $diameter / 1095.0;
-        $svgCx = 609.2;
-        $svgCy = 545.0;
-
-        $styles = [
-            'st0'  => ['fill' => [255, 255, 255], 'op' => 'f'],
-            'st1'  => ['fill' => [0, 160, 77],    'op' => 'f*'],
-            'st2'  => ['fill' => [17, 97, 155],   'op' => 'f*'],
-            'st7'  => ['fill' => [152, 196, 81],  'op' => 'f'],
-            'st8'  => ['fill' => [153, 197, 83],  'op' => 'f'],
-            'st9'  => ['fill' => [17, 97, 155],   'op' => 'f'],
-            'st10' => ['fill' => [8, 42, 58],     'op' => 'f*'],
-            'st11' => ['fill' => [11, 68, 103],   'stroke' => [255, 255, 255], 'lw' => 0.08, 'op' => 'B'],
-            'st12' => ['fill' => [11, 68, 103],   'op' => 'f'],
-            'st13' => ['fill' => [17, 97, 155],   'stroke' => [255, 255, 255], 'lw' => 0.08, 'op' => 'B'],
-            'st14' => ['fill' => [255, 255, 255], 'stroke' => [255, 255, 255], 'lw' => 0.05, 'op' => 'B*'],
-        ];
-
-        $pattern = '/<(circle|ellipse|polygon|path)\b([^>]*)\/?>/is';
-        if (!preg_match_all($pattern, $svg, $matches, PREG_SET_ORDER)) {
-            return false;
-        }
-
-        $k = $this->k;
-        $hp = $this->h;
-
-        foreach ($matches as $m) {
-            $tag = strtolower($m[1]);
-            $attrStr = $m[2];
-
-            if (!preg_match('/\bclass="([^"]+)"/', $attrStr, $cm)) {
-                continue;
-            }
-            $cls = trim($cm[1]);
-            if (!isset($styles[$cls])) {
-                continue;
-            }
-            $st = $styles[$cls];
-            $this->SetFillColor($st['fill'][0], $st['fill'][1], $st['fill'][2]);
-            if (isset($st['stroke'])) {
-                $this->SetDrawColor($st['stroke'][0], $st['stroke'][1], $st['stroke'][2]);
-                $this->SetLineWidth($st['lw'] ?? 0.08);
-            }
-
-            if ($tag === 'circle') {
-                if (preg_match('/\bcx="([^"]+)"/', $attrStr, $cxm) &&
-                    preg_match('/\bcy="([^"]+)"/', $attrStr, $cym) &&
-                    preg_match('/\br="([^"]+)"/', $attrStr, $rm)) {
-                    $px = $cx + ((float)$cxm[1] - $svgCx) * $scale;
-                    $py = $cy + ((float)$cym[1] - $svgCy) * $scale;
-                    $pr = (float)$rm[1] * $scale;
-                    $this->drawVectorCircle($px, $py, $pr, 'F');
-                }
-            } elseif ($tag === 'ellipse') {
-                if (preg_match('/\bcx="([^"]+)"/', $attrStr, $cxm) &&
-                    preg_match('/\bcy="([^"]+)"/', $attrStr, $cym) &&
-                    preg_match('/\brx="([^"]+)"/', $attrStr, $rxm)) {
-                    $px = $cx + ((float)$cxm[1] - $svgCx) * $scale;
-                    $py = $cy + ((float)$cym[1] - $svgCy) * $scale;
-                    $pr = (float)$rxm[1] * $scale;
-                    $this->drawVectorCircle($px, $py, $pr, isset($st['stroke']) ? 'FD' : 'F');
-                }
-            } elseif ($tag === 'polygon') {
-                if (preg_match('/\bpoints="([^"]+)"/', $attrStr, $pm)) {
-                    if (preg_match_all('/[-+]?(?:\d+\.\d*|\.\d+|\d+)/', $pm[1], $nums) && count($nums[0]) >= 4) {
-                        $coords = $nums[0];
-                        $cnt = count($coords);
-                        for ($i = 0; $i + 1 < $cnt; $i += 2) {
-                            $px = $cx + ((float)$coords[$i] - $svgCx) * $scale;
-                            $py = $cy + ((float)$coords[$i + 1] - $svgCy) * $scale;
-                            $cmd = ($i === 0) ? 'm' : 'l';
-                            $this->_out(sprintf('%.2F %.2F %s', $px * $k, ($hp - $py) * $k, $cmd));
-                        }
-                        $this->_out('h ' . $st['op']);
-                    }
-                }
-            } elseif ($tag === 'path') {
-                if (preg_match('/\bd="([^"]+)"/s', $attrStr, $dm)) {
-                    $this->emitSvgPathData($dm[1], $cx, $cy, $svgCx, $svgCy, $scale, $st['op']);
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Convierte un atributo d="..." de SVG (M, m, L, l, H, h, V, v, C, c, S, s, Z, z)
-     * en operadores vectoriales PDF (m, l, c, h) y ejecuta el operador de pintado final.
-     */
-    function emitSvgPathData(string $d, float $cx, float $cy, float $svgCx, float $svgCy, float $scale, string $paintOp): void
-    {
-        if (!preg_match_all('/([MmLlHhVvCcSsZz])|([-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][-+]?\d+)?)/', $d, $tokens)) {
-            return;
-        }
-
-        $items = $tokens[0];
-        $n = count($items);
-        $idx = 0;
-        $cmd = '';
-        $prevCmd = '';
-
-        $curX = 0.0;
-        $curY = 0.0;
-        $startX = 0.0;
-        $startY = 0.0;
-        $lastCtrlX = 0.0;
-        $lastCtrlY = 0.0;
-        $hasSubpath = false;
-
-        $k = $this->k;
-        $hp = $this->h;
-
-        $toPdfX = fn(float $sx): float => ($cx + ($sx - $svgCx) * $scale) * $k;
-        $toPdfY = fn(float $sy): float => ($hp - ($cy + ($sy - $svgCy) * $scale)) * $k;
-
-        while ($idx < $n) {
-            $tok = $items[$idx];
-            if (ctype_alpha($tok)) {
-                $cmd = $tok;
-                $idx++;
-                if ($cmd === 'Z' || $cmd === 'z') {
-                    $this->_out('h');
-                    $curX = $startX;
-                    $curY = $startY;
-                    $prevCmd = $cmd;
-                    continue;
-                }
-            }
-
-            switch ($cmd) {
-                case 'M':
-                case 'm':
-                    if ($idx + 1 >= $n) break 2;
-                    $x = (float)$items[$idx++];
-                    $y = (float)$items[$idx++];
-                    if ($cmd === 'm') {
-                        $curX += $x;
-                        $curY += $y;
-                    } else {
-                        $curX = $x;
-                        $curY = $y;
-                    }
-                    $startX = $curX;
-                    $startY = $curY;
-                    $this->_out(sprintf('%.2F %.2F m', $toPdfX($curX), $toPdfY($curY)));
-                    $hasSubpath = true;
-                    $prevCmd = $cmd;
-                    $cmd = ($cmd === 'm') ? 'l' : 'L';
-                    break;
-
-                case 'L':
-                case 'l':
-                    if ($idx + 1 >= $n) break 2;
-                    $x = (float)$items[$idx++];
-                    $y = (float)$items[$idx++];
-                    if ($cmd === 'l') {
-                        $curX += $x;
-                        $curY += $y;
-                    } else {
-                        $curX = $x;
-                        $curY = $y;
-                    }
-                    $this->_out(sprintf('%.2F %.2F l', $toPdfX($curX), $toPdfY($curY)));
-                    $prevCmd = $cmd;
-                    break;
-
-                case 'H':
-                case 'h':
-                    if ($idx >= $n) break 2;
-                    $x = (float)$items[$idx++];
-                    $curX = ($cmd === 'h') ? ($curX + $x) : $x;
-                    $this->_out(sprintf('%.2F %.2F l', $toPdfX($curX), $toPdfY($curY)));
-                    $prevCmd = $cmd;
-                    break;
-
-                case 'V':
-                case 'v':
-                    if ($idx >= $n) break 2;
-                    $y = (float)$items[$idx++];
-                    $curY = ($cmd === 'v') ? ($curY + $y) : $y;
-                    $this->_out(sprintf('%.2F %.2F l', $toPdfX($curX), $toPdfY($curY)));
-                    $prevCmd = $cmd;
-                    break;
-
-                case 'C':
-                case 'c':
-                    if ($idx + 5 >= $n) break 2;
-                    $x1 = (float)$items[$idx++];
-                    $y1 = (float)$items[$idx++];
-                    $x2 = (float)$items[$idx++];
-                    $y2 = (float)$items[$idx++];
-                    $x  = (float)$items[$idx++];
-                    $y  = (float)$items[$idx++];
-                    if ($cmd === 'c') {
-                        $x1 += $curX; $y1 += $curY;
-                        $x2 += $curX; $y2 += $curY;
-                        $x  += $curX; $y  += $curY;
-                    }
-                    $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
-                        $toPdfX($x1), $toPdfY($y1),
-                        $toPdfX($x2), $toPdfY($y2),
-                        $toPdfX($x),  $toPdfY($y)
-                    ));
-                    $lastCtrlX = $x2;
-                    $lastCtrlY = $y2;
-                    $curX = $x;
-                    $curY = $y;
-                    $prevCmd = $cmd;
-                    break;
-
-                case 'S':
-                case 's':
-                    if ($idx + 3 >= $n) break 2;
-                    $x2 = (float)$items[$idx++];
-                    $y2 = (float)$items[$idx++];
-                    $x  = (float)$items[$idx++];
-                    $y  = (float)$items[$idx++];
-                    if (in_array($prevCmd, ['C', 'c', 'S', 's'], true)) {
-                        $x1 = 2.0 * $curX - $lastCtrlX;
-                        $y1 = 2.0 * $curY - $lastCtrlY;
-                    } else {
-                        $x1 = $curX;
-                        $y1 = $curY;
-                    }
-                    if ($cmd === 's') {
-                        $x2 += $curX; $y2 += $curY;
-                        $x  += $curX; $y  += $curY;
-                    }
-                    $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
-                        $toPdfX($x1), $toPdfY($y1),
-                        $toPdfX($x2), $toPdfY($y2),
-                        $toPdfX($x),  $toPdfY($y)
-                    ));
-                    $lastCtrlX = $x2;
-                    $lastCtrlY = $y2;
-                    $curX = $x;
-                    $curY = $y;
-                    $prevCmd = $cmd;
-                    break;
-
-                default:
-                    $idx++;
-                    break;
-            }
-        }
-
-        if ($hasSubpath) {
-            $this->_out($paintOp);
-        }
     }
 
     function splitTituloModerno(string $nombre, string $categoria): array
@@ -727,54 +423,27 @@ class ProgramaPDF extends FPDF
         $this->SetLineWidth(0.2);
     }
 
-    function drawVectorFooterCurve(): void
-    {
-        $k = $this->k;
-        $hp = $this->h;
-
-        // 1. Fondo blanco limpio sobre el área del pie de página para evitar bordes pixelados de PNGs
-        $this->SetFillColor(255, 255, 255);
-        $this->Rect(0, 280.8, 210, 16.2, 'F');
-
-        // 2. Degradado inferior izquierdo (X = 0 a 152, Y = 294.2 a 297.0) de verde oscuro a verde esmeralda CEFI
-        $steps = 60;
-        $startX = 0.0;
-        $endX = 152.0;
-        $stepW = ($endX - $startX) / $steps;
-        $r0 = 14; $g0 = 46;  $b0 = 28;
-        $r1 = 0;  $g1 = 152; $b1 = 69;
-
-        for ($i = 0; $i < $steps; $i++) {
-            $t = $i / ($steps - 1);
-            $r = (int)round($r0 + ($r1 - $r0) * $t);
-            $g = (int)round($g0 + ($g1 - $g0) * $t);
-            $b = (int)round($b0 + ($b1 - $b0) * $t);
-            $this->SetFillColor($r, $g, $b);
-            $this->Rect($startX + $i * $stepW, 294.2, $stepW + 0.35, 2.8, 'F');
-        }
-
-        // 3. Curva S vectorial nativa (Bézier cúbica) en el lado derecho (X = 149 a 210, Y = 281.4 a 297.0)
-        $this->SetFillColor($r1, $g1, $b1);
-        $x0 = 149.0; $y0 = 294.2;
-        $cx1 = 157.5; $cy1 = 294.2;
-        $cx2 = 159.5; $cy2 = 281.4;
-        $x1 = 168.0; $y1 = 281.4;
-
-        $this->_out(sprintf('%.2F %.2F m', $x0 * $k, ($hp - $y0) * $k));
-        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
-            $cx1 * $k, ($hp - $cy1) * $k,
-            $cx2 * $k, ($hp - $cy2) * $k,
-            $x1 * $k,  ($hp - $y1) * $k
-        ));
-        $this->_out(sprintf('%.2F %.2F l', 210.0 * $k, ($hp - $y1) * $k));
-        $this->_out(sprintf('%.2F %.2F l', 210.0 * $k, ($hp - 297.0) * $k));
-        $this->_out(sprintf('%.2F %.2F l h f', $x0 * $k, ($hp - 297.0) * $k));
-    }
-
     function Footer()
     {
-        // Dibujar la curva verde y barra inferior de forma 100% vectorial para evitar cualquier pixelado
-        $this->drawVectorFooterCurve();
+        $hasFooterBg = false;
+        if (!empty($this->footer_path) && file_exists($this->footer_path)) {
+            try {
+                @$this->Image($this->footer_path, 0, 281, 210, 16);
+                $hasFooterBg = true;
+            } catch (\Throwable $e) {
+                $hasFooterBg = false;
+            }
+        }
+
+        if (!$hasFooterBg) {
+            // Línea superior sutil del footer y pestaña verde derecha por defecto
+            $this->SetDrawColor(210, 215, 220);
+            $this->SetLineWidth(0.3);
+            $this->Line(0, 281, 210, 281);
+
+            $this->SetFillColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
+            $this->Rect(164, 281.2, 46, 15.8, 'F');
+        }
 
         // Íconos vectoriales generados y enlaces activos sobre la franja blanca izquierda
         $y = 283.6;
