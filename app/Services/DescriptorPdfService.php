@@ -13,8 +13,11 @@ class DescriptorPDF extends FPDF
     public $materia;
     public $programa;
     public $facultad;
-    public $verde_cefi = [0, 160, 77];
-    public $oscuro_cefi = [30, 41, 59];
+    public $azul_cefi = [11, 61, 112];
+    public $verde_cefi = [95, 178, 48];
+    public $oscuro_cefi = [15, 23, 42];
+    public $azul_claro = [239, 246, 255];
+    public $verde_claro = [240, 253, 244];
     public $gris_claro = [241, 245, 249];
 
     var $B = 0;
@@ -38,23 +41,96 @@ class DescriptorPDF extends FPDF
         if ($this->PageNo() == 1) return;
 
         $this->SetY(10);
+        $this->SetFont('Arial', 'B', 8);
+        $this->SetTextColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
+        $this->Cell(120, 5, $this->toPdf($this->codigo . ' - ' . $this->materia), 0, 0, 'L');
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(100, 116, 139);
-        $this->Cell(120, 5, $this->toPdf($this->codigo . ' - ' . $this->materia), 0, 0, 'L');
         $this->Cell(0, 5, $this->toPdf(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI'))), 0, 1, 'R');
-        $this->SetDrawColor(226, 232, 240);
-        $this->SetLineWidth(0.3);
-        $this->Line(12, 16, 198, 16);
-        $this->Ln(4);
+
+        // Línea divisoria bicolor institucional (Azul y Verde CEFI)
+        $this->SetLineWidth(0.5);
+        $this->SetDrawColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
+        $this->Line(12, 16, 135, 16);
+        $this->SetDrawColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
+        $this->Line(135, 16, 198, 16);
+        $this->SetLineWidth(0.2);
+        $this->Ln(5);
     }
 
     function Footer()
     {
         $this->SetY(-15);
+        $this->SetLineWidth(0.3);
+        $this->SetDrawColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
+        $this->Line(12, $this->GetY(), 135, $this->GetY());
+        $this->SetDrawColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
+        $this->Line(135, $this->GetY(), 198, $this->GetY());
+        $this->SetLineWidth(0.2);
+
         $this->SetFont('Arial', 'I', 8);
-        $this->SetTextColor(148, 163, 184);
-        $this->Cell(100, 10, $this->toPdf('Documento Oficial de Plan de Estudios - ' . config('cliente.nombre', 'CEFI')), 0, 0, 'L');
+        $this->SetTextColor(100, 116, 139);
+        $this->Cell(120, 10, $this->toPdf('Documento Oficial de Plan de Estudios - ' . config('cliente.nombre', 'CEFI')), 0, 0, 'L');
+        $this->SetFont('Arial', 'B', 8);
+        $this->SetTextColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
         $this->Cell(0, 10, $this->toPdf('Página ') . $this->PageNo() . '/{nb}', 0, 0, 'R');
+    }
+
+    function NbLines($w, $txt): int
+    {
+        $cw = &$this->CurrentFont['cw'];
+        if ($w == 0) {
+            $w = $this->w - $this->rMargin - $this->x;
+        }
+        $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
+        $s = str_replace("\r", '', (string)$txt);
+        $nb = strlen($s);
+        if ($nb > 0 && $s[$nb - 1] == "\n") {
+            $nb--;
+        }
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $nl = 1;
+        while ($i < $nb) {
+            $c = $s[$i];
+            if ($c == "\n") {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+                continue;
+            }
+            if ($c == ' ') {
+                $sep = $i;
+            }
+            $l += $cw[$c] ?? 500;
+            if ($l > $wmax) {
+                if ($sep == -1) {
+                    if ($i == $j) {
+                        $i++;
+                    }
+                } else {
+                    $i = $sep + 1;
+                }
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+            } else {
+                $i++;
+            }
+        }
+        return $nl;
+    }
+
+    function CheckPageBreak($h)
+    {
+        if ($this->GetY() + $h > $this->PageBreakTrigger) {
+            $this->AddPage($this->CurOrientation);
+        }
     }
 
     function toPdf($txt): string
@@ -75,21 +151,29 @@ class DescriptorPDF extends FPDF
     {
         if (empty(trim(strip_tags($contenido ?? '')))) return;
 
+        $this->CheckPageBreak(18);
         $this->Ln(4);
-        $this->SetFont('Arial', 'B', 10);
-        $this->SetFillColor($this->gris_claro[0], $this->gris_claro[1], $this->gris_claro[2]);
-        $this->SetTextColor($this->oscuro_cefi[0], $this->oscuro_cefi[1], $this->oscuro_cefi[2]);
 
-        $this->Cell(186, 7, $this->toPdf("  $num. " . mb_strtoupper($titulo, 'UTF-8')), 0, 1, 'L', true);
-
-        // Borde lateral verde
-        $y = $this->GetY() - 7;
-        $this->SetDrawColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
-        $this->SetLineWidth(1.2);
-        $this->Line(12, $y, 12, $y + 7);
+        $y = $this->GetY();
+        // Fondo suave azul institucional con borde sutil
+        $this->SetFillColor($this->azul_claro[0], $this->azul_claro[1], $this->azul_claro[2]);
+        $this->SetDrawColor(219, 234, 254);
         $this->SetLineWidth(0.2);
+        $this->Rect(12, $y, 186, 7.5, 'DF');
 
-        $this->Ln(3);
+        // Acento lateral bicolor (Verde CEFI + Azul Marino CEFI)
+        $this->SetFillColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
+        $this->Rect(12, $y, 2.5, 7.5, 'F');
+        $this->SetFillColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
+        $this->Rect(14.5, $y, 1.0, 7.5, 'F');
+
+        // Texto del encabezado de sección en Azul Marino CEFI
+        $this->SetXY(17, $y);
+        $this->SetFont('Arial', 'B', 9.5);
+        $this->SetTextColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
+        $this->Cell(181, 7.5, $this->toPdf("$num. " . mb_strtoupper($titulo, 'UTF-8')), 0, 1, 'L', false);
+
+        $this->Ln(2.5);
         $this->SetFont('Arial', '', 9.5);
         $this->SetTextColor(30, 41, 59);
 
@@ -134,24 +218,86 @@ class DescriptorPDF extends FPDF
         }
         if ($max_cols == 0) return;
 
-        $w_col = 186 / $max_cols;
-        $this->SetDrawColor(203, 213, 225);
+        // Proporciones óptimas según número de columnas
+        if ($max_cols === 4) {
+            $col_widths = [24, 66, 62, 34]; // Ideal para Cronograma (Semana, Actividades, Tareas, Modalidad)
+        } elseif ($max_cols === 3) {
+            $col_widths = [50, 96, 40];
+        } elseif ($max_cols === 2) {
+            $col_widths = [136, 50];
+        } else {
+            $w_col = 186 / $max_cols;
+            $col_widths = array_fill(0, $max_cols, $w_col);
+        }
 
         foreach ($rows[2] as $idx => $row_html) {
             preg_match_all('/<(td|th).*?>(.*?)<\/\1>/is', $row_html, $cols);
             $is_th = (strpos($row_html, '<th') !== false || $idx === 0);
 
             $this->SetFont('Arial', $is_th ? 'B' : '', 8.5);
-            if ($is_th) {
-                $this->SetFillColor(241, 245, 249);
+
+            // Calcular el alto dinámico de la fila según la celda con más líneas
+            $max_lines = 1;
+            $cell_texts = [];
+            for ($c = 0; $c < $max_cols; $c++) {
+                $raw = $cols[2][$c] ?? '';
+                $clean = trim(strip_tags(str_replace(['&nbsp;', '<br>', '<br/>', '<br />'], [' ', "\n", "\n", "\n"], $raw)));
+                $pdf_txt = $this->toPdf($clean);
+                $cell_texts[$c] = $pdf_txt;
+                $w_c = $col_widths[$c] ?? (186 / $max_cols);
+                $lines = $this->NbLines($w_c - 3, $pdf_txt);
+                if ($lines > $max_lines) {
+                    $max_lines = $lines;
+                }
             }
 
-            $h_row = 6;
-            foreach ($cols[2] as $cell_text) {
-                $clean = trim(strip_tags(str_replace('&nbsp;', ' ', $cell_text)));
-                $this->Cell($w_col, $h_row, $this->toPdf(mb_substr($clean, 0, 40, 'UTF-8')), 1, 0, 'L', $is_th);
+            $line_h = $is_th ? 6.5 : 4.8;
+            $h_row = ($max_lines === 1) ? ($is_th ? 7.0 : 6.0) : ($max_lines * $line_h + 2.0);
+
+            $this->CheckPageBreak($h_row);
+
+            $x_start = 12;
+            $y_start = $this->GetY();
+
+            for ($c = 0; $c < $max_cols; $c++) {
+                $w_c = $col_widths[$c] ?? (186 / $max_cols);
+                $txt = $cell_texts[$c];
+
+                // Fondo y bordes de la celda
+                if ($is_th) {
+                    $this->SetFillColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
+                    $this->SetDrawColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
+                    $this->SetTextColor(255, 255, 255);
+                } else {
+                    if ($idx % 2 === 0) {
+                        $this->SetFillColor(245, 249, 255);
+                    } else {
+                        $this->SetFillColor(255, 255, 255);
+                    }
+                    $this->SetDrawColor(203, 213, 225);
+                    $this->SetTextColor(30, 41, 59);
+                }
+
+                $this->Rect($x_start, $y_start, $w_c, $h_row, 'DF');
+
+                // Línea inferior verde institucional bajo el encabezado de la tabla
+                if ($is_th) {
+                    $this->SetDrawColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
+                    $this->SetLineWidth(0.6);
+                    $this->Line($x_start, $y_start + $h_row, $x_start + $w_c, $y_start + $h_row);
+                    $this->SetLineWidth(0.2);
+                }
+
+                // Imprimir texto con soporte multilínea
+                $pad_y = ($max_lines === 1) ? (($h_row - $line_h) / 2) : 1.0;
+                $this->SetXY($x_start + 1.5, $y_start + $pad_y);
+                $align = ($max_cols === 4 && $c === 0 && !$is_th) ? 'C' : 'L';
+                $this->MultiCell($w_c - 3, $line_h, $txt, 0, $align);
+
+                $x_start += $w_c;
             }
-            $this->Ln($h_row);
+
+            $this->SetY($y_start + $h_row);
         }
         $this->Ln(2);
     }
@@ -238,33 +384,55 @@ class DescriptorPdfService
 
         $pdf->SetY(38);
         $pdf->SetFont('Arial', 'B', 13);
-        $pdf->SetTextColor(15, 23, 42);
+        $pdf->SetTextColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
         $pdf->Cell(186, 6, $pdf->toPdf(mb_strtoupper(config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')), 'UTF-8')), 0, 1, 'C');
 
         if (!empty($pdf->facultad)) {
             $pdf->SetFont('Arial', 'B', 10);
-            $pdf->SetTextColor(71, 85, 105);
+            $pdf->SetTextColor(51, 65, 85);
             $pdf->Cell(186, 5, $pdf->toPdf($pdf->facultad), 0, 1, 'C');
         }
 
-        $pdf->SetFont('Arial', 'B', 10.5);
-        $pdf->SetTextColor(95, 178, 48);
-        $pdf->Cell(186, 5, $pdf->toPdf($pdf->programa), 0, 1, 'C');
+        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->SetTextColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
+        $pdf->Cell(186, 5.5, $pdf->toPdf($pdf->programa), 0, 1, 'C');
 
-        $pdf->SetFont('Arial', 'I', 9);
+        $pdf->SetFont('Arial', 'BI', 9);
         $pdf->SetTextColor(100, 116, 139);
         $pdf->Cell(186, 5, $pdf->toPdf('Descriptor Oficial del Curso'), 0, 1, 'C');
 
-        $pdf->Ln(4);
-
-        // Tabla Ficha Técnica
-        $pdf->SetDrawColor(203, 213, 225);
+        // Barra divisoria institucional bicolor (Azul Marino CEFI + Verde CEFI)
+        $y_div = $pdf->GetY() + 1.5;
+        $pdf->SetLineWidth(0.7);
+        $pdf->SetDrawColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
+        $pdf->Line(45, $y_div, 105, $y_div);
+        $pdf->SetDrawColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
+        $pdf->Line(105, $y_div, 165, $y_div);
         $pdf->SetLineWidth(0.2);
+
+        $pdf->Ln(4.5);
+
+        // Encabezado Institucional de la Tabla Ficha Técnica
+        $y_head = $pdf->GetY();
+        $pdf->SetFillColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
+        $pdf->SetDrawColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
+        $pdf->Rect(12, $y_head, 186, 6.5, 'DF');
+
+        // Acento lateral verde en el encabezado de la Ficha Técnica
+        $pdf->SetFillColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
+        $pdf->Rect(12, $y_head, 3.0, 6.5, 'F');
+
+        $pdf->SetXY(16, $y_head);
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->Cell(182, 6.5, $pdf->toPdf('FICHA TÉCNICA E INFORMACIÓN GENERAL DEL CURSO'), 0, 1, 'L', false);
+
+        $creditos_val = (int)$prop('creditos', 0) > 0 ? (string)$prop('creditos') : '4';
 
         $ficha = [
             ['Código', (string)$prop('codigo', '')],
             ['Nombre del Curso', (string)$prop('materia', '')],
-            ['Créditos', (string)$prop('creditos', '4')],
+            ['Créditos', $creditos_val],
             ['Duración', (string)$prop('duracion', '15 semanas')],
             ['Distribución horas por semana', (string)$prop('distribucion_horas', '12 horas (3 teóricas, 1 práctica, 8 independientes)')],
             ['Modalidad', (string)$prop('modalidad', 'Virtual')],
@@ -276,15 +444,61 @@ class DescriptorPdfService
             ['Profesor', (string)$prop('profesor', '--')],
         ];
 
-        foreach ($ficha as $row) {
-            $pdf->SetFont('Arial', 'B', 8.5);
-            $pdf->SetFillColor(248, 250, 252);
-            $pdf->SetTextColor(51, 65, 85);
-            $pdf->Cell(60, 5.5, $pdf->toPdf("  " . $row[0]), 1, 0, 'L', true);
+        $w_label = 60;
+        $w_value = 126;
 
-            $pdf->SetFont('Arial', '', 8.5);
+        foreach ($ficha as $idx => $row) {
+            $label_txt = $pdf->toPdf($row[0]);
+            $val_txt = $pdf->toPdf($row[1]);
+
+            $pdf->SetFont('Arial', 'B', 8.5);
+            $lines_label = $pdf->NbLines($w_label - 6, $label_txt);
+
+            $pdf->SetFont('Arial', ($idx <= 1) ? 'B' : '', 8.5);
+            $lines_val = $pdf->NbLines($w_value - 6, $val_txt);
+
+            $max_lines = max($lines_label, $lines_val);
+            $line_h = 4.6;
+            $row_h = ($max_lines === 1) ? 5.8 : ($max_lines * $line_h + 2.2);
+
+            $pdf->CheckPageBreak($row_h);
+
+            $x = 12;
+            $y = $pdf->GetY();
+
+            // Celda de etiqueta (columna izquierda con fondo azul claro institucional y borde suave)
+            $pdf->SetDrawColor(191, 211, 238);
+            $pdf->SetFillColor($pdf->azul_claro[0], $pdf->azul_claro[1], $pdf->azul_claro[2]);
+            $pdf->Rect($x, $y, $w_label, $row_h, 'DF');
+
+            // Línea de acento lateral verde/azul en cada fila de la ficha
+            $acento = ($idx % 2 === 0) ? $pdf->verde_cefi : $pdf->azul_cefi;
+            $pdf->SetFillColor($acento[0], $acento[1], $acento[2]);
+            $pdf->Rect($x, $y, 1.2, $row_h, 'F');
+
+            // Celda de valor (columna derecha con cebreado sutil)
+            if ($idx % 2 === 1) {
+                $pdf->SetFillColor(250, 252, 255);
+            } else {
+                $pdf->SetFillColor(255, 255, 255);
+            }
+            $pdf->Rect($x + $w_label, $y, $w_value, $row_h, 'DF');
+
+            // Imprimir texto de la etiqueta (centrado verticalmente si la fila tiene más de 1 línea)
+            $pad_label = ($row_h - ($lines_label * $line_h)) / 2;
+            $pdf->SetXY($x + 3.5, $y + $pad_label);
+            $pdf->SetFont('Arial', 'B', 8.5);
+            $pdf->SetTextColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
+            $pdf->MultiCell($w_label - 6, $line_h, $label_txt, 0, 'L');
+
+            // Imprimir texto del valor (con salto automático a segunda línea cuando es largo)
+            $pad_val = ($row_h - ($lines_val * $line_h)) / 2;
+            $pdf->SetXY($x + $w_label + 3, $y + $pad_val);
+            $pdf->SetFont('Arial', ($idx <= 1) ? 'B' : '', 8.5);
             $pdf->SetTextColor(15, 23, 42);
-            $pdf->Cell(126, 5.5, $pdf->toPdf("  " . $row[1]), 1, 1, 'L');
+            $pdf->MultiCell($w_value - 6, $line_h, $val_txt, 0, 'L');
+
+            $pdf->SetY($y + $row_h);
         }
 
         // Secciones Curriculares I a XI
