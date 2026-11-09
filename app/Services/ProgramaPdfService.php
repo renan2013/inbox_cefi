@@ -423,27 +423,54 @@ class ProgramaPDF extends FPDF
         $this->SetLineWidth(0.2);
     }
 
+    function drawVectorFooterCurve(): void
+    {
+        $k = $this->k;
+        $hp = $this->h;
+
+        // 1. Fondo blanco limpio sobre el área del pie de página para evitar bordes pixelados de PNGs
+        $this->SetFillColor(255, 255, 255);
+        $this->Rect(0, 280.8, 210, 16.2, 'F');
+
+        // 2. Degradado inferior izquierdo (X = 0 a 152, Y = 294.2 a 297.0) de verde oscuro a verde esmeralda CEFI
+        $steps = 60;
+        $startX = 0.0;
+        $endX = 152.0;
+        $stepW = ($endX - $startX) / $steps;
+        $r0 = 14; $g0 = 46;  $b0 = 28;
+        $r1 = 0;  $g1 = 152; $b1 = 69;
+
+        for ($i = 0; $i < $steps; $i++) {
+            $t = $i / ($steps - 1);
+            $r = (int)round($r0 + ($r1 - $r0) * $t);
+            $g = (int)round($g0 + ($g1 - $g0) * $t);
+            $b = (int)round($b0 + ($b1 - $b0) * $t);
+            $this->SetFillColor($r, $g, $b);
+            $this->Rect($startX + $i * $stepW, 294.2, $stepW + 0.35, 2.8, 'F');
+        }
+
+        // 3. Curva S vectorial nativa (Bézier cúbica) en el lado derecho (X = 149 a 210, Y = 281.4 a 297.0)
+        $this->SetFillColor($r1, $g1, $b1);
+        $x0 = 149.0; $y0 = 294.2;
+        $cx1 = 157.5; $cy1 = 294.2;
+        $cx2 = 159.5; $cy2 = 281.4;
+        $x1 = 168.0; $y1 = 281.4;
+
+        $this->_out(sprintf('%.2F %.2F m', $x0 * $k, ($hp - $y0) * $k));
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c',
+            $cx1 * $k, ($hp - $cy1) * $k,
+            $cx2 * $k, ($hp - $cy2) * $k,
+            $x1 * $k,  ($hp - $y1) * $k
+        ));
+        $this->_out(sprintf('%.2F %.2F l', 210.0 * $k, ($hp - $y1) * $k));
+        $this->_out(sprintf('%.2F %.2F l', 210.0 * $k, ($hp - 297.0) * $k));
+        $this->_out(sprintf('%.2F %.2F l h f', $x0 * $k, ($hp - 297.0) * $k));
+    }
+
     function Footer()
     {
-        $hasFooterBg = false;
-        if (!empty($this->footer_path) && file_exists($this->footer_path)) {
-            try {
-                @$this->Image($this->footer_path, 0, 281, 210, 16);
-                $hasFooterBg = true;
-            } catch (\Throwable $e) {
-                $hasFooterBg = false;
-            }
-        }
-
-        if (!$hasFooterBg) {
-            // Línea superior sutil del footer y pestaña verde derecha por defecto
-            $this->SetDrawColor(210, 215, 220);
-            $this->SetLineWidth(0.3);
-            $this->Line(0, 281, 210, 281);
-
-            $this->SetFillColor($this->verde_cefi[0], $this->verde_cefi[1], $this->verde_cefi[2]);
-            $this->Rect(164, 281.2, 46, 15.8, 'F');
-        }
+        // Dibujar la curva verde y barra inferior de forma 100% vectorial para evitar cualquier pixelado
+        $this->drawVectorFooterCurve();
 
         // Íconos vectoriales generados y enlaces activos sobre la franja blanca izquierda
         $y = 283.6;
