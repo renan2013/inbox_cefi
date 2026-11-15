@@ -239,6 +239,10 @@
             text-decoration: none;
         }
 
+        .brand-logo img {
+            height: 22px;
+            width: auto;
+        }
         .brand-logo span {
             color: var(--primary);
             margin-right: 0.5rem;
@@ -414,7 +418,7 @@
             <a class="brand-logo d-flex align-items-center text-decoration-none" href="{{ (Auth::check() && (Auth::user()->id_rol == 3 || (method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))) ? route('estudiante.portal') : route('dashboard') }}">
                 <img src="{{ asset('imgs/SVG/logo_blanco.svg') }}" alt="Inbox Logo" class="logo-dark-theme">
                 <img src="{{ asset('imgs/SVG/logo_color.svg') }}" alt="Inbox Logo" class="logo-light-theme">
-                <span class="badge rounded-pill ms-2 fs-6 fw-bold px-2 py-1 text-white" style="background-color: var(--primary, #5fb230) !important;">2.0</span>
+                <span class="badge rounded-pill ms-1 fw-bold px-2 py-0 text-white" style="background-color: var(--primary, #5fb230) !important; font-size: 0.68rem; line-height: 1.45;">2.0</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -422,7 +426,7 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                     <!-- Acceso Exclusivo para Estudiantes / Alumnos -->
                     @if(Auth::check() && (Auth::user()->id_rol == 3 || (method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno())))
                     <li class="nav-item">
