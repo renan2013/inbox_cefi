@@ -4,6 +4,12 @@ namespace App\Services;
 
 use ZipArchive;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use App\Models\Boleta;
+use App\Models\ExpedienteArchivo;
+use App\Models\ExpedienteDigital;
+use App\Models\Usuario;
 
 class ExpedienteStorageService
 {
@@ -259,5 +265,71 @@ class ExpedienteStorageService
         }
 
         return @rmdir($dir);
+    }
+
+    /**
+     * Adjunta o actualiza automáticamente el PDF de una boleta en la bóveda del expediente digital del estudiante.
+     */
+    public static function adjuntarBoletaPdf(
+        Boleta $boleta,
+        string $rutaPdfOrigen,
+        string $tipoDocumento = 'Boleta de Matrícula',
+        string $categoria = '03_Admision_y_Matricula',
+        string $prefijoArchivo = 'boleta',
+        string $nombreOriginal = '',
+        string $descripcion = ''
+    ): ?ExpedienteArchivo {
+        if (empty($boleta->id_estudiante) || empty($rutaPdfOrigen) || !file_exists($rutaPdfOrigen)) {
+            return null;
+        }
+
+        if (!Schema::hasTable('expedientes_digitales') || !Schema::hasTable('expediente_archivos')) {
+            return null;
+        }
+
+        $expediente = ExpedienteDigital::firstOrCreate(
+            ['id_usuario' => $boleta->id_estudiante]
+        );
+
+        $usuario = Usuario::find($boleta->id_estudiante);
+        $nombreCompleto = $usuario
+            ? trim(($usuario->nombre ?? '') . ' ' . ($usuario->apellidos ?? ''))
+            : "Estudiante_{$expediente->id_expediente}";
+
+        $dirInfo = self::getTargetDir($expediente->id_expediente, $nombreCompleto, $tipoDocumento, $categoria);
+
+        $prefijoLimpio = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $prefijoArchivo);
+        $fileBaseName = "exp_{$expediente->id_expediente}_{$prefijoLimpio}_{$boleta->id}.pdf";
+        $destPath = $dirInfo['full_dir'] . DIRECTORY_SEPARATOR . $fileBaseName;
+        $serverRelativeName = $dirInfo['relative_dir'] . $fileBaseName;
+
+        if (!@copy($rutaPdfOrigen, $destPath)) {
+            return null;
+        }
+
+        $numeroBoleta = $boleta->numero_boleta ?: ('B-' . str_pad($boleta->id, 6, '0', STR_PAD_LEFT));
+        if (empty($nombreOriginal)) {
+            $nombreOriginal = "Boleta_{$numeroBoleta}.pdf";
+        }
+
+        $subidoPor = Auth::check()
+            ? trim((Auth::user()->nombre ?? 'Sistema') . ' ' . (Auth::user()->apellidos ?? ''))
+            : 'Sistema';
+
+        return ExpedienteArchivo::updateOrCreate(
+            [
+                'id_expediente'   => $expediente->id_expediente,
+                'nombre_servidor' => $serverRelativeName,
+            ],
+            [
+                'tipo_documento'  => $tipoDocumento,
+                'categoria'       => $categoria,
+                'nombre_original' => $nombreOriginal,
+                'descripcion'     => $descripcion,
+                'ruta_archivo'    => $destPath,
+                'subido_por'      => $subidoPor,
+                'fecha_subida'    => now(),
+            ]
+        );
     }
 }

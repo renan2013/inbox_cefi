@@ -818,6 +818,7 @@
                                     <th class="py-3 text-muted text-end">Pagado</th>
                                     <th class="py-3 text-muted text-end">Saldo</th>
                                     <th class="py-3 text-muted text-center">Estado</th>
+                                    <th class="py-3 text-muted text-center">Documento</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -831,12 +832,17 @@
                                     <td class="text-end text-success">₡{{ number_format((float)$b->monto_pagado, 2) }}</td>
                                     <td class="text-end text-danger fw-bold">₡{{ number_format((float)$b->saldo_pendiente, 2) }}</td>
                                     <td class="text-center">
-                                        <span class="badge bg-secondary rounded-pill px-3 py-1">{{ ucfirst($b->estado) }}</span>
+                                        <span class="badge bg-secondary rounded-pill px-3 py-1">{{ ucfirst(str_replace('_', ' ', $b->estado)) }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{{ route('boletas.pdf', $b->id) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="bi bi-file-earmark-pdf-fill me-1"></i>Ver PDF
+                                        </a>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted">
+                                    <td colspan="8" class="text-center py-5 text-muted">
                                         <i class="bi bi-wallet2 fs-1 d-block mb-2"></i>
                                         No hay boletas de pago registradas para este estudiante.
                                     </td>

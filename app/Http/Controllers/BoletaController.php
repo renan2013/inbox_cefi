@@ -11,6 +11,7 @@ use App\Models\Programa;
 use App\Models\PlanEstudio;
 use App\Services\InteresesService;
 use App\Services\BoletaPdfService;
+use App\Services\ExpedienteStorageService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -947,10 +948,19 @@ class BoletaController extends Controller
 
             DB::commit();
 
-            // Generar archivo físico oficial de PDF
+            // Generar archivo físico oficial de PDF y adjuntar al expediente
             try {
                 $ruta_pdf_disco = BoletaPdfService::generar($boleta->id, 'F');
                 $boleta->update(['ruta_pdf' => 'uploads/boletas/boleta_' . $boleta->id . '.pdf']);
+                ExpedienteStorageService::adjuntarBoletaPdf(
+                    $boleta,
+                    $ruta_pdf_disco,
+                    'Boleta de Matrícula',
+                    '03_Admision_y_Matricula',
+                    'boleta',
+                    '',
+                    'Boleta oficializada (' . ucfirst(str_replace('_', ' ', (string)$boleta->estado)) . ')'
+                );
             } catch (\Throwable $ePdf) {
                 // PDF fallback
             }
@@ -1076,10 +1086,19 @@ class BoletaController extends Controller
 
             DB::commit();
 
-            // Generar PDF físico oficial
+            // Generar PDF físico oficial y adjuntar al expediente
             try {
                 $ruta_pdf_disco = BoletaPdfService::generar($boleta->id, 'F');
                 $boleta->update(['ruta_pdf' => 'uploads/boletas/boleta_' . $boleta->id . '.pdf']);
+                ExpedienteStorageService::adjuntarBoletaPdf(
+                    $boleta,
+                    $ruta_pdf_disco,
+                    'Boleta de Matrícula',
+                    '03_Admision_y_Matricula',
+                    'boleta',
+                    '',
+                    'Boleta firmada y oficializada (' . ucfirst(str_replace('_', ' ', (string)$boleta->estado)) . ')'
+                );
             } catch (\Throwable $ePdf) {
                 // PDF fallback
             }
@@ -1289,6 +1308,37 @@ class BoletaController extends Controller
             $boleta->refresh();
 
             DB::commit();
+
+            // Regenerar PDF actualizado y adjuntar/actualizar en el expediente digital del estudiante
+            try {
+                $ruta_pdf_disco = BoletaPdfService::generar($boleta->id, 'F');
+                $boleta->update(['ruta_pdf' => 'uploads/boletas/boleta_' . $boleta->id . '.pdf']);
+
+                $numeroBoleta = $boleta->numero_boleta ?: ('B-' . str_pad($boleta->id, 6, '0', STR_PAD_LEFT));
+                $estadoTexto = ucfirst(str_replace('_', ' ', (string)$boleta->estado));
+
+                ExpedienteStorageService::adjuntarBoletaPdf(
+                    $boleta,
+                    $ruta_pdf_disco,
+                    'Boleta de Matrícula',
+                    '03_Admision_y_Matricula',
+                    'boleta',
+                    "Boleta_{$numeroBoleta}.pdf",
+                    "Boleta actualizada tras pago ({$estadoTexto})"
+                );
+
+                ExpedienteStorageService::adjuntarBoletaPdf(
+                    $boleta,
+                    $ruta_pdf_disco,
+                    'Comprobante de Pago Boleta',
+                    '07_Comprobantes_Financieros',
+                    'comprobante_boleta',
+                    "Comprobante_Boleta_{$numeroBoleta}.pdf",
+                    "Pago ₡" . number_format($monto_pago, 2) . " ({$metodo}" . ($referencia ? " · Ref: {$referencia}" : '') . ") - {$estadoTexto}"
+                );
+            } catch (\Throwable $eExp) {
+                \Illuminate\Support\Facades\Log::warning("No se pudo actualizar PDF/expediente tras pago de boleta #{$boleta->id}: " . $eExp->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
