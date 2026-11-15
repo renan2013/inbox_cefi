@@ -44,7 +44,7 @@ return [
     | Recursos Gráficos e Identidad Visual del Cliente
     |--------------------------------------------------------------------------
     */
-    'logo_url' => env('CLIENT_LOGO_URL', '/imgs/logo.png'),
+    'logo_url' => env('CLIENT_LOGO_URL', '/imgs/logo_cefi.svg'),
     'logo_banner_whatsapp' => env('CLIENT_WA_BANNER_URL', '/imgs/fondo_defecto_notificacion.png'),
     'favicon' => env('CLIENT_FAVICON', '/favicon.ico'),
 

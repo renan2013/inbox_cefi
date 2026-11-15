@@ -313,10 +313,13 @@
         <!-- CABECERA INSTITUCIONAL -->
         <div class="header-institucional">
             @php
-                $logoUrl = asset(config('cliente.logo', 'imgs/logo.png'));
+                $logoUrl = \App\Services\ClienteService::logoUrl();
+                if (stripos($logoUrl, 'logo.png') !== false && file_exists(public_path('imgs/logo_cefi.svg'))) {
+                    $logoUrl = asset('imgs/logo_cefi.svg');
+                }
             @endphp
-            <img src="{{ $logoUrl }}" alt="{{ config('cliente.nombre', 'CEFI') }}" class="logo-inst-silabo" onerror="this.style.display='none'">
-            <h3>{{ config('cliente.nombre_legal', config('cliente.nombre', 'CEFI')) }}</h3>
+            <img src="{{ $logoUrl }}" alt="{{ \App\Services\ClienteService::nombre() }}" class="logo-inst-silabo" onerror="this.style.display='none'">
+            <h3>{{ \App\Services\ClienteService::nombreLegal() }}</h3>
             @if(!empty($facultadCurso))
                 <h4>{{ $facultadCurso }}</h4>
             @endif

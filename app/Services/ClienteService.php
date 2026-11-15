@@ -143,8 +143,8 @@ class ClienteService
     public static function logoUrl(): string
     {
         $val = self::all()['logo_url'] ?? '';
-        if (empty($val)) {
-            $val = config('cliente.logo_url', 'imgs/logo.png');
+        if (empty($val) || $val === '/imgs/logo.png' || $val === 'imgs/logo.png') {
+            $val = file_exists(public_path('imgs/logo_cefi.svg')) ? 'imgs/logo_cefi.svg' : config('cliente.logo_url', 'imgs/logo.png');
         }
         if (str_starts_with($val, 'http://') || str_starts_with($val, 'https://')) {
             return $val;
