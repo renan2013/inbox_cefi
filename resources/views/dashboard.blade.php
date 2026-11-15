@@ -586,22 +586,30 @@
         </div>
         
         @if ($es_admin)
-            <div class="dropdown mt-2 mt-md-0">
-                <button class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-plus-lg me-2"></i> Nueva Tarea
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark-custom shadow border-0">
-                    <li>
-                        <a class="dropdown-item dropdown-item-custom py-2" href="{{ route('tareas.seleccionar_plantilla') }}">
-                            <i class="bi bi-file-earmark-text text-primary me-2"></i> Desde Plantilla
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item dropdown-item-custom py-2" href="{{ route('tareas.create') }}">
-                            <i class="bi bi-plus-circle text-success me-2"></i> Tarea en Blanco
-                        </a>
-                    </li>
-                </ul>
+            <div class="d-flex flex-wrap gap-2 mt-2 mt-md-0">
+                <a href="{{ route('tareas.plantillas.gestionar') }}" class="btn btn-outline-info rounded-pill px-3 py-2 fw-bold shadow-sm">
+                    <i class="bi bi-card-checklist me-1"></i> Plantillas
+                </a>
+                <a href="{{ route('tareas.etiquetas.index') }}" class="btn btn-outline-warning rounded-pill px-3 py-2 fw-bold shadow-sm">
+                    <i class="bi bi-tags me-1"></i> Etiquetas
+                </a>
+                <div class="dropdown">
+                    <button class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-plus-lg me-2"></i> Nueva Tarea
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark-custom shadow border-0">
+                        <li>
+                            <a class="dropdown-item dropdown-item-custom py-2" href="{{ route('tareas.seleccionar_plantilla') }}">
+                                <i class="bi bi-file-earmark-text text-primary me-2"></i> Desde Plantilla
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item dropdown-item-custom py-2" href="{{ route('tareas.create') }}">
+                                <i class="bi bi-plus-circle text-success me-2"></i> Tarea en Blanco
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         @endif
     </div>
@@ -710,6 +718,11 @@
                             <button type="button" class="btn btn-view-toggle rounded-pill px-3" id="btn-view-kanban" onclick="switchView('kanban')">
                                 <i class="bi bi-kanban me-1"></i> Tablero
                             </button>
+                            @if(\App\Services\ModuleService::isEnabled('dashboard') && \App\Services\ModuleService::isEnabled('item.gantt_tareas'))
+                            <button type="button" class="btn btn-view-toggle rounded-pill px-3" id="btn-view-gantt" onclick="switchView('gantt')">
+                                <i class="bi bi-bar-chart-steps me-1"></i> Gantt
+                            </button>
+                            @endif
                         </div>
                         <span class="badge bg-primary rounded-pill px-3 py-2" style="font-size: 0.8rem;">{{ $tareas->total() }} registros</span>
                     </div>
@@ -969,6 +982,84 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- 3. Vista de Cronograma Gantt Integrada -->
+                    <div id="view-gantt-container" style="display: none;">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                            <div class="small task-subtitle-text">
+                                <i class="bi bi-bar-chart-steps text-info me-1"></i>
+                                Línea de tiempo y porcentaje de avance de las tareas filtradas.
+                            </div>
+                            <a href="{{ route('tareas.gantt', ['anio' => $anio_seleccionado, 'etiqueta' => $etiqueta_seleccionada]) }}" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                                <i class="bi bi-arrows-fullscreen me-1"></i>Filtros Avanzados de Cronograma
+                            </a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-custom table-hover align-middle mb-0">
+                                <thead>
+                                    <tr class="table-header-row">
+                                        <th class="ps-3" style="width: 45px;">#</th>
+                                        <th style="min-width: 220px;">Tarea / Curso</th>
+                                        <th style="width: 140px;">Fechas (Inicio &rarr; Fin)</th>
+                                        <th style="min-width: 240px;">Cronograma &amp; Avance (Gantt)</th>
+                                        <th class="text-end pe-3" style="width: 80px;">Detalle</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($tareas as $idx => $tg)
+                                        @php
+                                            $fCreacion = !empty($tg->fecha_creacion) ? \Carbon\Carbon::parse($tg->fecha_creacion) : \Carbon\Carbon::today();
+                                            $fVenc     = (!empty($tg->fecha_vencimiento) && $tg->fecha_vencimiento !== '0000-00-00')
+                                                ? \Carbon\Carbon::parse($tg->fecha_vencimiento)
+                                                : $fCreacion->copy()->addDays(7);
+                                            $diasDuracion = max(1, $fCreacion->diffInDays($fVenc));
+                                            $pctGantt = $tg->estado === 'completada' ? 100 : ($tg->estado === 'en_proceso' ? 55 : ($tg->estado === 'cancelada' ? 0 : 15));
+                                            $colorGantt = $tg->estado === 'completada' ? '#00c875' : ($tg->estado === 'en_proceso' ? '#fdab3d' : ($tg->estado === 'cancelada' ? '#df2f4a' : '#579bfc'));
+                                        @endphp
+                                        <tr>
+                                            <td class="ps-3 task-subtitle-text small">{{ $tareas->firstItem() + $idx }}</td>
+                                            <td>
+                                                <div class="task-title-text small cursor-pointer" onclick="abrirModalEditarTarea({{ $tg->id }})" style="cursor:pointer;">
+                                                    {{ $tg->titulo }}
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2 mt-1">
+                                                    <span class="monday-pill priority-{{ $tg->prioridad ?? 'media' }}" style="min-width:65px;padding:0.15rem 0.5rem;font-size:0.68rem;">
+                                                        {{ ucfirst($tg->prioridad ?? 'media') }}
+                                                    </span>
+                                                    <span class="monday-pill status-{{ $tg->estado }}" style="min-width:85px;padding:0.15rem 0.5rem;font-size:0.68rem;">
+                                                        {{ ucfirst(str_replace('_', ' ', $tg->estado)) }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="small task-subtitle-text">
+                                                <div><i class="bi bi-play-circle text-info me-1"></i>{{ $fCreacion->format('d/m/Y') }}</div>
+                                                <div><i class="bi bi-flag text-warning me-1"></i>{{ $fVenc->format('d/m/Y') }} <span class="opacity-75">({{ $diasDuracion }}d)</span></div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="flex-grow-1" style="height: 16px; background: rgba(148,163,184,0.15); border-radius: 999px; overflow: hidden; padding: 2px;">
+                                                        <div style="width: {{ $pctGantt }}%; height: 100%; background: {{ $colorGantt }}; border-radius: 999px; transition: width .4s ease;"></div>
+                                                    </div>
+                                                    <span class="small fw-bold" style="min-width: 40px; color: {{ $colorGantt }};">{{ $pctGantt }}%</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2 py-1" onclick="abrirModalEditarTarea({{ $tg->id }})" title="Editar Tarea">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 task-subtitle-text">
+                                                No hay tareas registradas para mostrar en el cronograma Gantt.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1159,18 +1250,30 @@
     };
 
     function switchView(view) {
-        if (view === 'table') {
-            $('#view-table-container').show();
-            $('#view-kanban-container').removeClass('active').hide();
-            $('#btn-view-table').addClass('active');
-            $('#btn-view-kanban').removeClass('active');
-        } else {
-            $('#view-table-container').hide();
+        $('#view-table-container').hide();
+        $('#view-kanban-container').removeClass('active').hide();
+        $('#view-gantt-container').hide();
+        $('#btn-view-table, #btn-view-kanban, #btn-view-gantt').removeClass('active');
+
+        if (view === 'kanban') {
             $('#view-kanban-container').addClass('active').css('display', 'flex');
             $('#btn-view-kanban').addClass('active');
-            $('#btn-view-table').removeClass('active');
+        } else if (view === 'gantt') {
+            $('#view-gantt-container').fadeIn(150);
+            $('#btn-view-gantt').addClass('active');
+        } else {
+            $('#view-table-container').show();
+            $('#btn-view-table').addClass('active');
         }
     }
+
+    $(document).ready(function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialView = urlParams.get('view');
+        if (initialView === 'kanban' || initialView === 'gantt') {
+            switchView(initialView);
+        }
+    });
 
     // --- MONDAY RECEPTIVE AJAX: CAMBIO DE ESTADO SIN RECARGAR PÁGINA ---
     function cambiarEstadoAjax(idTarea, nuevoEstado) {

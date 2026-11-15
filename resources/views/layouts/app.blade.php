@@ -470,15 +470,8 @@
                     @endif
                     @if(\App\Services\ModuleService::isEnabled('dashboard') && \App\Services\ModuleService::isEnabled('item.dashboard_link'))
                     <li class="nav-item">
-                        <a class="nav-link nav-link-custom {{ Route::is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                        <a class="nav-link nav-link-custom {{ (Route::is('dashboard') || Route::is('tareas.*')) ? 'active' : '' }}" href="{{ route('dashboard') }}">
                             Dashboard
-                        </a>
-                    </li>
-                    @endif
-                    @if(\App\Services\ModuleService::isEnabled('tareas_gantt') && \App\Services\ModuleService::isEnabled('item.gantt_tareas'))
-                    <li class="nav-item">
-                        <a class="nav-link nav-link-custom {{ Route::is('tareas.gantt') ? 'active' : '' }}" href="{{ route('tareas.gantt') }}">
-                            Gantt Tareas
                         </a>
                     </li>
                     @endif

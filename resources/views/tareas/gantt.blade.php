@@ -57,18 +57,26 @@
             <h2 class="fw-bold mb-0"><i class="bi bi-bar-chart-steps text-info me-2"></i>Diagrama de Gantt & Cronograma de Tareas</h2>
         </div>
 
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{{ route('tareas.create') }}" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">
-                <i class="bi bi-plus-lg me-1"></i>Nueva Tarea
-            </a>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="btn-group rounded-pill p-1 border border-secondary bg-dark bg-opacity-25 me-2" role="group" aria-label="Vista de Tareas">
+                <a href="{{ route('dashboard', ['view' => 'table']) }}" class="btn btn-sm text-muted rounded-pill px-3">
+                    <i class="bi bi-table me-1"></i> Tabla
+                </a>
+                <a href="{{ route('dashboard', ['view' => 'kanban']) }}" class="btn btn-sm text-muted rounded-pill px-3">
+                    <i class="bi bi-kanban me-1"></i> Tablero
+                </a>
+                <a href="{{ route('tareas.gantt') }}" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold">
+                    <i class="bi bi-bar-chart-steps me-1"></i> Gantt
+                </a>
+            </div>
             <a href="{{ route('tareas.plantillas.gestionar') }}" class="btn btn-outline-info rounded-pill px-3">
                 <i class="bi bi-card-checklist me-1"></i>Plantillas
             </a>
             <a href="{{ route('tareas.etiquetas.index') }}" class="btn btn-outline-warning rounded-pill px-3">
                 <i class="bi bi-bookmarks me-1"></i>Etiquetas
             </a>
-            <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary rounded-pill px-3">
-                <i class="bi bi-speedometer2 me-1"></i>Volver al Dashboard
+            <a href="{{ route('tareas.create') }}" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i>Nueva Tarea
             </a>
         </div>
     </div>
