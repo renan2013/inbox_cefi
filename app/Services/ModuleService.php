@@ -5,11 +5,145 @@ namespace App\Services;
 class ModuleService
 {
     protected static array $runtimeCache = [];
+    protected static ?array $hubTreeCache = null;
 
     /**
-     * Comprueba si un módulo está habilitado en la configuración o base de datos.
+     * Ruta al archivo local de estado sincronizado desde Inbox Cloud Hub (renangalvan.net).
+     */
+    public static function getStateFilePath(): string
+    {
+        return storage_path('app/menu_tree_state.json');
+    }
+
+    /**
+     * Carga el mapa completo del Árbol de Menús y Licencias sincronizado desde el Hub.
+     */
+    public static function getHubTreeState(bool $forceReload = false): array
+    {
+        if (self::$hubTreeCache !== null && !$forceReload) {
+            return self::$hubTreeCache;
+        }
+
+        $state = null;
+        $filePath = self::getStateFilePath();
+
+        // 1. Intentar leer desde archivo JSON rápido en storage/app
+        if (file_exists($filePath)) {
+            $raw = @file_get_contents($filePath);
+            if ($raw) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $state = $decoded;
+                }
+            }
+        }
+
+        // 2. Fallback desde Base de Datos (configuracion_sistema -> hub_menu_tree_json)
+        if ($state === null) {
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
+                    $dbJson = \App\Models\ConfiguracionSistema::where('clave', 'hub_menu_tree_json')->value('valor');
+                    if ($dbJson) {
+                        $decoded = json_decode($dbJson, true);
+                        if (is_array($decoded)) {
+                            $state = $decoded;
+                            @file_put_contents($filePath, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Continuar si la BD no está disponible
+            }
+        }
+
+        return self::$hubTreeCache = (is_array($state) ? $state : []);
+    }
+
+    /**
+     * Guarda el estado recibido desde Inbox Cloud Hub (renangalvan.net) en JSON y Base de Datos.
+     */
+    public static function saveHubTreeState(array $flags, string $status = 'activo', string $notice = ''): bool
+    {
+        $cleanFlags = [];
+        foreach ($flags as $k => $v) {
+            if (str_starts_with((string)$k, '_')) {
+                continue;
+            }
+            $cleanFlags[$k] = (bool)$v;
+        }
+
+        // Sincronizar banderas macro de compatibilidad según sub-ítems
+        if (array_key_exists('item.generar_boleta', $cleanFlags) || array_key_exists('item.gestion_boletas', $cleanFlags)) {
+            $cleanFlags['boletas_matricula'] = !empty($cleanFlags['item.generar_boleta']) || !empty($cleanFlags['item.gestion_boletas']);
+        }
+        if (array_key_exists('item.estado_cuenta', $cleanFlags) || array_key_exists('item.morosidad', $cleanFlags)) {
+            $cleanFlags['finanzas'] = !empty($cleanFlags['item.estado_cuenta']) || !empty($cleanFlags['item.morosidad']);
+        }
+        if (array_key_exists('item.campanas_whatsapp', $cleanFlags) || array_key_exists('item.suite_whatsapp', $cleanFlags)) {
+            $cleanFlags['whatsapp_n8n'] = !empty($cleanFlags['item.campanas_whatsapp']) || !empty($cleanFlags['item.suite_whatsapp']);
+        }
+
+        $cleanFlags['_license_status'] = in_array($status, ['activo', 'aviso_cobro', 'suspendido'], true) ? $status : 'activo';
+        $cleanFlags['_license_notice'] = $notice;
+        $cleanFlags['_last_hub_sync']  = date('Y-m-d H:i:s');
+
+        $json = json_encode($cleanFlags, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $filePath = self::getStateFilePath();
+        @is_dir(dirname($filePath)) || @mkdir(dirname($filePath), 0775, true);
+        $savedFile = @file_put_contents($filePath, $json) !== false;
+
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
+                \App\Models\ConfiguracionSistema::updateOrCreate(
+                    ['clave' => 'hub_menu_tree_json'],
+                    [
+                        'valor'       => $json,
+                        'grupo'       => 'licencia_hub',
+                        'tipo'        => 'json',
+                        'descripcion' => 'Árbol jerárquico de menús sincronizado desde Inbox Cloud Hub (renangalvan.net)',
+                    ]
+                );
+
+                // También actualizar claves module_* individuales para compatibilidad total
+                foreach ($cleanFlags as $mKey => $mVal) {
+                    if (!str_starts_with((string)$mKey, '_') && !str_starts_with((string)$mKey, 'item.')) {
+                        \App\Models\ConfiguracionSistema::updateOrCreate(
+                            ['clave' => 'module_' . $mKey],
+                            [
+                                'valor' => $mVal ? '1' : '0',
+                                'grupo' => 'modulos',
+                                'tipo'  => 'boolean',
+                            ]
+                        );
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignorar error de BD si archivo ya guardó
+        }
+
+        self::$runtimeCache = [];
+        self::getHubTreeState(true);
+
+        return $savedFile;
+    }
+
+    public static function getLicenseStatus(): string
+    {
+        $hub = self::getHubTreeState();
+        return (string)($hub['_license_status'] ?? 'activo');
+    }
+
+    public static function getLicenseNotice(): string
+    {
+        $hub = self::getHubTreeState();
+        return trim((string)($hub['_license_notice'] ?? ''));
+    }
+
+    /**
+     * Comprueba si un módulo o sub-ítem (`item.xxx`) está habilitado.
      *
-     * @param string $moduleKey Clave del módulo (ej: 'inventario', 'finanzas')
+     * @param string $moduleKey Clave del módulo o sub-ítem (ej: 'inventario', 'item.mis_cursos')
      * @return bool
      */
     public static function isEnabled(string $moduleKey): bool
@@ -18,9 +152,15 @@ class ModuleService
             return self::$runtimeCache[$moduleKey];
         }
 
+        // 1. Prioridad máxima: Estado sincronizado desde Inbox Cloud Hub (renangalvan.net)
+        $hubState = self::getHubTreeState();
+        if (array_key_exists($moduleKey, $hubState)) {
+            return self::$runtimeCache[$moduleKey] = (bool)$hubState[$moduleKey];
+        }
+
         $modules = config('modules.modules', []);
 
-        // 1. Revisar si hay override específico en base de datos
+        // 2. Revisar si hay override específico en base de datos
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('configuracion_sistema')) {
                 $dbVal = \App\Models\ConfiguracionSistema::where('clave', 'module_' . $moduleKey)->value('valor');
@@ -32,22 +172,16 @@ class ModuleService
             // Continuar con config si BD no está accesible aún
         }
 
-        // 2. Si no hay override en BD, consultar configuración del archivo
+        // 3. Si no hay override en BD, consultar configuración del archivo
         if (array_key_exists($moduleKey, $modules)) {
             $val = $modules[$moduleKey];
             if (is_string($val)) {
                 $val = filter_var($val, FILTER_VALIDATE_BOOLEAN);
             }
-            if (!$val) {
-                return self::$runtimeCache[$moduleKey] = false;
-            }
+            return self::$runtimeCache[$moduleKey] = (bool)$val;
         }
 
-        if (!array_key_exists($moduleKey, $modules)) {
-            return self::$runtimeCache[$moduleKey] = true; // Por defecto disponible si no se ha restringido
-        }
-
-        return self::$runtimeCache[$moduleKey] = (bool)$modules[$moduleKey];
+        return self::$runtimeCache[$moduleKey] = true; // Por defecto disponible para sub-ítems si no han sido apagados
     }
 
     /**

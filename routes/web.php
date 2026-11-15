@@ -828,3 +828,48 @@ Route::match(['get', 'post'], '/sistema/limpiar-sistema', function () {
         ", 500, ['Content-Type' => 'text/html']);
     }
 })->name('sistema.limpiar');
+
+// =========================================================================
+// RECEPTOR REMOTO DE LICENCIAS Y ÁRBOL DE MENÚS (INBOX CLOUD HUB - renangalvan.net)
+// =========================================================================
+Route::post('/api/license-sync', function (\Illuminate\Http\Request $request) {
+    $masterSecret = 'RenanHub2026_MasterHmacSecretKey_998877!';
+    $rawBody = $request->getContent();
+
+    if (!$rawBody) {
+        return response()->json(['success' => false, 'message' => 'Cuerpo de solicitud vacío.'], 400);
+    }
+
+    $receivedSig = (string)$request->header('X-Inbox-Hub-Signature', '');
+    $expectedSig = hash_hmac('sha256', $rawBody, $masterSecret);
+
+    if ($receivedSig === '' || !hash_equals($expectedSig, $receivedSig)) {
+        return response()->json(['success' => false, 'message' => 'Firma HMAC-SHA256 inválida o no autorizada.'], 401);
+    }
+
+    $payload = json_decode($rawBody, true);
+    if (!is_array($payload) || !isset($payload['flags']) || !is_array($payload['flags'])) {
+        return response()->json(['success' => false, 'message' => 'Estructura JSON de licencia inválida.'], 422);
+    }
+
+    $flags  = $payload['flags'];
+    $status = (string)($payload['estado_licencia'] ?? 'activo');
+    $notice = (string)($payload['mensaje_aviso'] ?? '');
+
+    $saved = \App\Services\ModuleService::saveHubTreeState($flags, $status, $notice);
+
+    $parentMenus = ['dashboard', 'tareas_gantt', 'inventario', 'gestion_cursos', 'estudiante_tcu', 'soporte', 'planilla', 'registro_academico', 'base_datos', 'menu_configuracion'];
+    $activeMenus = 0;
+    foreach ($parentMenus as $mk) {
+        if (!empty($flags[$mk])) {
+            $activeMenus++;
+        }
+    }
+
+    return response()->json([
+        'success'      => (bool)$saved,
+        'message'      => "CEFI sincronizado con éxito ({$activeMenus} menús principales activos, estado: {$status}).",
+        'synced_at'    => date('Y-m-d H:i:s'),
+        'active_menus' => $activeMenus,
+    ]);
+})->name('api.license_sync');

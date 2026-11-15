@@ -380,6 +380,33 @@
     @yield('styles')
 </head>
 <body>
+    @php
+        $_hubLicenseStatus = \App\Services\ModuleService::getLicenseStatus();
+        $_hubLicenseNotice = \App\Services\ModuleService::getLicenseNotice();
+    @endphp
+    @if($_hubLicenseStatus === 'suspendido' && !Request::is('api/*') && !Request::is('logout'))
+    <div style="position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;display:flex;align-items:center;justify-content:center;padding:2rem;font-family:system-ui,-apple-system,sans-serif;">
+        <div style="max-width:540px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:2.5rem;text-align:center;box-shadow:0 25px 50px rgba(0,0,0,0.4);">
+            <div style="width:72px;height:72px;border-radius:50%;background:rgba(239,68,68,0.15);color:#f87171;display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:1.25rem;">
+                <i class="bi bi-shield-exclamation"></i>
+            </div>
+            <h3 style="font-weight:800;margin-bottom:0.75rem;">Servicio Temporalmente en Mantenimiento Administrativo</h3>
+            <p style="color:#cbd5e1;font-size:0.95rem;line-height:1.6;margin-bottom:1.5rem;">
+                {{ $_hubLicenseNotice !== '' ? $_hubLicenseNotice : 'La licencia de uso de esta plataforma requiere atención administrativa. Por favor comuníquese con el proveedor oficial del sistema (renangalvan.net).' }}
+            </p>
+            <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-outline-light rounded-pill px-4">Cerrar Sesión</button>
+            </form>
+        </div>
+    </div>
+    @endif
+    @if($_hubLicenseStatus === 'aviso_cobro')
+    <div style="background:linear-gradient(90deg,#f59e0b,#d97706);color:#0f172a;font-weight:700;font-size:0.85rem;padding:0.45rem 1rem;text-align:center;">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+        {{ $_hubLicenseNotice !== '' ? $_hubLicenseNotice : 'Aviso Administrativo: Renovación o facturación de licencia pendiente. Contacte a soporte técnico (renangalvan.net).' }}
+    </div>
+    @endif
 
     <!-- Header / Navbar CEFI v2.1 -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
@@ -423,13 +450,13 @@
                     @endif
 
                     @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
-                    @module('dashboard')
+                    @if(\App\Services\ModuleService::isEnabled('dashboard') && \App\Services\ModuleService::isEnabled('item.dashboard_link'))
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom {{ Route::is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                             Dashboard
                         </a>
                     </li>
-                    @endmodule
+                    @endif
                     @endif
 
                     <!-- Logística Dropdown -->
@@ -440,8 +467,12 @@
                             <i class="bi bi-box-seam me-1"></i> Logística
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom">
+                            @module('item.inventario_control')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('inventario.index') }}"><i class="bi bi-clipboard-data"></i> Control de Inventario</a></li>
+                            @endmodule
+                            @module('item.inventario_operaciones')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('inventario.operaciones') }}"><i class="bi bi-box-arrow-right"></i> Operaciones de Bodega</a></li>
+                            @endmodule
                         </ul>
                     </li>
                     @endif
@@ -455,18 +486,34 @@
                             Gestionar Curso
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom">
+                             @module('item.supervision_cursos')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('supervision.index') }}"><i class="bi bi-eye"></i> Supervisión de Cursos</a></li>
                              <li><hr class="dropdown-divider-custom"></li>
+                             @endmodule
+                             @module('item.mis_cursos')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('mis_cursos.index') }}"><i class="bi bi-book"></i> Mis Cursos</a></li>
+                             @endmodule
+                             @module('item.mis_recursos')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('recursos.index') }}"><i class="bi bi-collection"></i> Mis Recursos</a></li>
+                             @endmodule
+                             @module('item.recursos_compartidos')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('recursos.compartidos') }}"><i class="bi bi-share"></i> Recursos Compartidos</a></li>
+                             @endmodule
+                             @module('item.videotutoriales')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('videotutoriales.index') }}"><i class="bi bi-play-btn"></i> Videotutoriales</a></li>
+                             @endmodule
                              <li><hr class="dropdown-divider-custom"></li>
+                             @module('item.biblioteca_medios')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('biblioteca.index') }}"><i class="bi bi-images"></i> Biblioteca de Medios</a></li>
                              <li><hr class="dropdown-divider-custom"></li>
+                             @endmodule
+                             @module('item.resultados_encuesta')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('encuestas.resultados') }}"><i class="bi bi-bar-chart-fill"></i> Resultados Encuestas</a></li>
+                             @endmodule
                              @if(Auth::check() && Auth::user()->id_rol == 1)
+                             @module('item.banco_preguntas')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('encuestas.preguntas') }}"><i class="bi bi-clipboard2-check"></i> Banco de Preguntas</a></li>
+                             @endmodule
                              @endif
                         </ul>
                     </li>
@@ -481,8 +528,12 @@
                             Estudiante
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom">
+                            @module('item.portal_estudiante')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('estudiante.portal') }}"><i class="bi bi-mortarboard text-success me-2"></i> Portal de Estudiantes</a></li>
+                            @endmodule
+                            @module('item.bitacora_tcu')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('tcu.index') }}"><i class="bi bi-journal-text"></i> Bitácora de TCU</a></li>
+                            @endmodule
                         </ul>
                     </li>
                     @endmodule
@@ -496,20 +547,34 @@
                             Soporte
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom">
+                             @module('item.gestionar_soporte')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('soporte.gestionar') }}">Gestionar Soporte</a></li>
+                             @endmodule
+                             @module('item.categorias_soporte')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('soporte.categorias') }}">Gestionar Categorías</a></li>
+                             @endmodule
+                             @module('item.lista_soporte')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('soporte.lista') }}">Lista de Soporte</a></li>
+                             @endmodule
                              <li><hr class="dropdown-divider-custom"></li>
+                             @module('item.gestionar_claves')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('claves.index') }}">Gestionar Claves</a></li>
+                             @endmodule
                              @module('inbox_ai')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.conocimiento_ai') }}"><i class="bi bi-cpu-fill text-success me-2"></i> Cerebro Inbox AI 2.0</a></li>
                              @endmodule
                              <li><hr class="dropdown-divider-custom"></li>
+                             @module('item.centro_soporte')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('centro_soporte.index') }}">Centro de Soporte</a></li>
                              <li><hr class="dropdown-divider-custom"></li>
+                             @endmodule
+                             @module('item.automatizaciones')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('plantillas.index') }}"><i class="bi bi-gear-wide-connected"></i> Automatizaciones</a></li>
-                             @module('whatsapp_n8n')
+                             @endmodule
+                             @module('item.campanas_whatsapp')
                              <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('whatsapp.campanas.index') }}"><i class="bi bi-megaphone-fill text-warning me-2"></i> Difusión y Campañas WhatsApp</a></li>
+                             @endmodule
+                             @module('item.prospectos_marketing')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('marketing.prospectos.index') }}"><i class="bi bi-person-lines-fill text-primary me-2"></i> Base de Prospectos (Marketing)</a></li>
                              @endmodule
                         </ul>
@@ -525,16 +590,32 @@
                             Planilla
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom">
+                            @module('item.planilla_marcar')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('asistencia.marcar') }}"><i class="bi bi-clock"></i> Registrar Asistencia</a></li>
+                            @endmodule
+                            @module('item.planilla_credencial')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('planilla.credencial') }}"><i class="bi bi-qr-code-scan"></i> Mi Credencial QR</a></li>
+                            @endmodule
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><h6 class="dropdown-header-custom">Administración</h6></li>
+                            @module('item.planilla_panel')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('planilla.index') }}"><i class="bi bi-speedometer"></i> Panel de Planilla</a></li>
+                            @endmodule
+                            @module('item.planilla_escanear')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('planilla.escanear') }}"><i class="bi bi-camera"></i> Estación de Escaneo</a></li>
+                            @endmodule
+                            @module('item.planilla_empleados')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('planilla.empleados') }}"><i class="bi bi-person-gear"></i> Configurar Empleados</a></li>
+                            @endmodule
+                            @module('item.planilla_historial')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('asistencia.historial') }}"><i class="bi bi-calendar3"></i> Historial Asistencias</a></li>
+                            @endmodule
+                            @module('item.planilla_calculo')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('planilla.calcular') }}"><i class="bi bi-calculator"></i> Cálculo de Planilla</a></li>
+                            @endmodule
+                            @module('item.planilla_pagos')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('planilla.historial_pagos') }}"><i class="bi bi-receipt-cutoff"></i> Historial de Pagos</a></li>
+                            @endmodule
                         </ul>
                     </li>
                     @endmodule
@@ -549,43 +630,79 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom">
                             @module('boletas_matricula')
+                            @module('item.generar_boleta')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('boletas.generar') }}"><i class="bi bi-receipt"></i> Generar Boleta de Pago</a></li>
+                            @endmodule
+                            @module('item.gestion_boletas')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('boletas.index') }}"><i class="bi bi-clock-history"></i> Historial de Boletas</a></li>
+                            @endmodule
                             @endmodule
 
                             @module('finanzas')
+                            @module('item.estado_cuenta')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('boletas.estado_cuenta') }}"><i class="bi bi-wallet2"></i> Estado de Cuenta</a></li>
+                            @endmodule
+                            @module('item.morosidad')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('boletas.morosidad') }}"><i class="bi bi-exclamation-triangle"></i> Control de Morosidad</a></li>
+                            @endmodule
                             @endmodule
 
                             @module('registro_academico')
                             <li><hr class="dropdown-divider-custom"></li>
+                            @module('item.registrar_usuario')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('usuarios.create') }}"><i class="bi bi-person-plus"></i> Registrar Usuario</a></li>
+                            @endmodule
+                            @module('item.lista_usuarios')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('usuarios.index') }}"><i class="bi bi-people"></i> Lista de Usuarios</a></li>
+                            @endmodule
                             @endmodule
 
                             @module('expedientes_360')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('expedientes.index') }}"><i class="bi bi-folder2-open"></i> Expedientes Digitales 360°</a></li>
+                            @module('item.crear_expediente')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('expedientes.create') }}"><i class="bi bi-folder-plus"></i> Crear Expediente</a></li>
+                            @endmodule
                             @endmodule
 
                             @module('registro_academico')
                             <li><hr class="dropdown-divider-custom"></li>
+                            @module('item.registrar_programa')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.create') }}"><i class="bi bi-mortarboard"></i> Registrar Programa</a></li>
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('cursos.create') }}"><i class="bi bi-book-half"></i> Registrar Curso</a></li>                        
+                            @endmodule
+                            @module('item.registrar_curso')
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('cursos.create') }}"><i class="bi bi-book-half"></i> Registrar Curso</a></li>
+                            @endmodule
+                            @module('item.gestionar_grupos')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('grupos.index') }}"><i class="bi bi-grid-3x3-gap"></i> Gestionar Grupos</a></li>
+                            @endmodule
                             <li><hr class="dropdown-divider-custom"></li>
+                            @module('item.lista_programas')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.index') }}"><i class="bi bi-list-task"></i> Lista de Programas</a></li>
+                            @endmodule
+                            @module('item.lista_cursos')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('cursos.index') }}"><i class="bi bi-journals"></i> Lista de Cursos</a></li>
+                            @endmodule
+                            @module('item.programas_completos')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.completos') }}"><i class="bi bi-file-earmark-ruled"></i> Programas Completos</a></li>
+                            @endmodule
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><h6 class="dropdown-header-custom"><i class="bi bi-mortarboard-fill me-1"></i> Control Académico (Fase 4)</h6></li>
+                            @module('item.convalidaciones')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('convalidaciones.index') }}"><i class="bi bi-patch-check"></i> Convalidaciones & Homologaciones</a></li>
+                            @endmodule
+                            @module('item.retiros')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('retiros.index') }}"><i class="bi bi-arrow-left-right"></i> Retiros y Cambios de Curso</a></li>
+                            @endmodule
+                            @module('item.graduaciones')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('graduaciones.index') }}"><i class="bi bi-award"></i> Auditoría y Graduaciones</a></li>
+                            @endmodule
                             <li><hr class="dropdown-divider-custom"></li>
+                            @module('item.reportes_sistema')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('reportes.index') }}"><i class="bi bi-file-earmark-pdf"></i> Reportes del Sistema</a></li>
+                            @endmodule
+                            @module('item.registro_utilitarios')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('utilitarios.index') }}"><i class="bi bi-tools"></i> Utilitarios</a></li>
+                            @endmodule
                             @endmodule
                         </ul>
                     </li>
@@ -593,40 +710,62 @@
                     @endif
 
                     <!-- Configuración Dropdown (Solo Administrador General con Clave) -->
-                    @if(Auth::check() && Auth::user()->id_rol == 1)
+                    @if(Auth::check() && Auth::user()->id_rol == 1 && \App\Services\ModuleService::isEnabled('menu_configuracion'))
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom nav-link-config dropdown-toggle {{ Request::is('configuracion*') || Request::is('*conocimiento-ai*') || Request::is('automatizaciones*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Configuración
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom dropdown-menu-end">
                             <li><h6 class="dropdown-header-custom"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Administración General</h6></li>
+                            @module('item.cfg_panel')
                             <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('configuracion.index') }}"><i class="bi bi-speedometer2 text-info me-2"></i> Panel de Configuración</a></li>
+                            @endmodule
+                            @module('item.cfg_pagos')
                             <li><a class="dropdown-item dropdown-item-custom fw-bold text-success" href="{{ route('configuracion.pagos') }}"><i class="bi bi-cash-coin text-success me-2"></i> Pagos, Morosidad e Intereses</a></li>
+                            @endmodule
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><h6 class="dropdown-header-custom"><i class="bi bi-robot text-success me-1"></i> Tutor AI</h6></li>
+                            @module('item.cfg_rag')
                             <li>
                                 <a class="dropdown-item dropdown-item-custom fw-semibold {{ Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="{{ route('configuracion.conocimiento_ai') }}">
                                     <i class="bi bi-mortarboard-fill text-info me-2"></i> Base de Conocimiento (RAG)
                                 </a>
                             </li>
+                            @endmodule
+                            @module('item.cfg_chat_ai')
                             <li>
                                 <a class="dropdown-item dropdown-item-custom" href="javascript:void(0)" onclick="const f = document.getElementById('inboxAiFab'); if(f) f.click();">
                                     <i class="bi bi-chat-dots-fill text-success me-2"></i> Abrir Chat Tutor AI
                                 </a>
                             </li>
+                            @endmodule
+                            @module('item.cfg_automatizaciones')
                             <li><hr class="dropdown-divider-custom"></li>
                             <li>
                                 <a class="dropdown-item dropdown-item-custom fw-semibold {{ Request::is('automatizaciones*') ? 'active' : '' }}" href="{{ route('plantillas.index') }}">
                                     <i class="bi bi-gear-wide-connected text-success me-2"></i> Automatizaciones
                                 </a>
                             </li>
+                            @endmodule
                             <li><hr class="dropdown-divider-custom"></li>
+                            @module('item.cfg_parametros')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'parametros']) }}"><i class="bi bi-buildings text-primary me-2"></i> Parámetros del Sistema</a></li>
+                            @endmodule
+                            @module('item.cfg_identidad')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'identidad']) }}"><i class="bi bi-palette text-warning me-2"></i> Logotipo e Identidad</a></li>
+                            @endmodule
+                            @module('item.cfg_n8n')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'n8n']) }}"><i class="bi bi-diagram-3-fill text-success me-2"></i> Parámetros n8n & WhatsApp</a></li>
+                            @endmodule
+                            @module('item.cfg_smtp')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'smtp']) }}"><i class="bi bi-envelope-at-fill text-warning me-2"></i> Correo Saliente (SMTP)</a></li>
+                            @endmodule
+                            @module('item.cfg_modulos')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'modulos']) }}"><i class="bi bi-toggles2 text-danger me-2"></i> Módulos y Personalización</a></li>
+                            @endmodule
+                            @module('item.cfg_seguridad')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'seguridad']) }}"><i class="bi bi-key-fill text-info me-2"></i> Clave Maestra Superior</a></li>
+                            @endmodule
                             <li><hr class="dropdown-divider-custom"></li>
                             <li>
                                 <form action="{{ route('configuracion.salir') }}" method="POST" class="d-inline">
@@ -714,6 +853,30 @@
         document.addEventListener('DOMContentLoaded', () => {
             const theme = document.documentElement.getAttribute('data-theme') || 'light';
             updateThemeIcon(theme);
+
+            // Limpiar divisores duplicados o extremos cuando se desactivan sub-ítems desde Inbox Cloud Hub
+            document.querySelectorAll('.navbar .dropdown-menu').forEach(menu => {
+                const items = Array.from(menu.children);
+                let prevWasDivider = true;
+                items.forEach(li => {
+                    const isDivider = li.querySelector('hr.dropdown-divider-custom') !== null;
+                    if (isDivider) {
+                        if (prevWasDivider) {
+                            li.style.display = 'none';
+                        }
+                        prevWasDivider = true;
+                    } else if (li.querySelector('.dropdown-header-custom') === null) {
+                        prevWasDivider = false;
+                    }
+                });
+                const visibleItems = Array.from(menu.children).filter(li => li.style.display !== 'none');
+                if (visibleItems.length > 0) {
+                    const lastLi = visibleItems[visibleItems.length - 1];
+                    if (lastLi.querySelector('hr.dropdown-divider-custom')) {
+                        lastLi.style.display = 'none';
+                    }
+                }
+            });
         });
     </script>
     @yield('scripts')
