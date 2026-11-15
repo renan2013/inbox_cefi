@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\File;
 class SoporteController extends Controller
 {
     /**
+     * Correo interno fijo del Creador / Proveedor de las plataformas Inbox.
+     */
+    public const CREATOR_PROVIDER_EMAIL = 'renangalvan@gmail.com';
+    /**
      * Vista interna de administración de Tickets / Averías.
      */
     public function index(Request $request)
@@ -331,10 +335,11 @@ class SoporteController extends Controller
 
     /**
      * Envía la avería hacia Inbox Cloud Hub (que dispara WhatsApp n8n + Email)
-     * y también dispara el webhook local de n8n si está configurado.
+     * y envía simultáneamente el correo directo al Proveedor/Creador (renangalvan@gmail.com).
      */
     protected function dispatchOmnicanalAveria(array $payload): void
     {
+        $payload['creator_email'] = self::CREATOR_PROVIDER_EMAIL;
         $secret = env('INBOX_HUB_SECRET', 'INBOX_HUB_MASTER_2026_RG_SECRET_KEY');
         $hubUrl = env('INBOX_HUB_TICKETS_URL', 'https://hub.renangalvan.net/api/tickets.php');
 
@@ -360,7 +365,39 @@ class SoporteController extends Controller
             curl_exec($ch);
             curl_close($ch);
         } catch (\Throwable $e) {
-            // No bloquear la experiencia del usuario si el servidor externo tarda
+            // Continuar con envío de correo directo
+        }
+
+        // Envío directo e interno al correo fijo del Creador / Proveedor (renangalvan@gmail.com)
+        try {
+            $subject = "🚨 [AVERÍA " . strtoupper($payload['prioridad'] ?? 'ALTA') . "] " . ($payload['client_siglas'] ?? 'CEFI') . ": " . ($payload['titulo'] ?? 'Reporte de Sistema');
+            $evHtml = '';
+            if (!empty($payload['evidencia_url'])) {
+                $evUrl = htmlspecialchars($payload['evidencia_url']);
+                $evHtml = "<p><strong>📸 Evidencia Gráfica:</strong><br><a href='{$evUrl}' target='_blank'>Ver captura completa</a><br><img src='{$evUrl}' style='max-width:520px;border-radius:8px;margin-top:8px;'></p>";
+            }
+            $htmlBody = "
+                <div style='font-family:Arial,sans-serif;max-width:620px;padding:20px;background:#1e293b;color:#f8fafc;border-radius:12px;'>
+                    <h2 style='color:#f87171;margin-top:0;'>🚨 Nueva Avería Reportada — " . htmlspecialchars($payload['client_nombre'] ?? 'Inbox CEFI') . "</h2>
+                    <p><strong>Ticket:</strong> #" . htmlspecialchars((string)($payload['local_id'] ?? '')) . "</p>
+                    <p><strong>Etiqueta / Causa:</strong> " . htmlspecialchars($payload['etiqueta'] ?? '') . "</p>
+                    <p><strong>Prioridad:</strong> " . strtoupper(htmlspecialchars($payload['prioridad'] ?? 'Alta')) . "</p>
+                    <p><strong>Reportado por:</strong> " . htmlspecialchars(($payload['usuario_nombre'] ?? '') . ' (' . ($payload['usuario_email'] ?? '') . ')') . "</p>
+                    <p><strong>URL del Fallo:</strong> <a href='" . htmlspecialchars($payload['url_origen'] ?? '#') . "' style='color:#38bdf8;'>" . htmlspecialchars($payload['url_origen'] ?? '') . "</a></p>
+                    <div style='padding:14px;background:#0f172a;border-left:4px solid #f59e0b;border-radius:8px;margin:14px 0;'>
+                        <strong>" . htmlspecialchars($payload['titulo'] ?? '') . "</strong><br>
+                        <span style='white-space:pre-line;'>" . htmlspecialchars($payload['problema'] ?? '') . "</span>
+                    </div>
+                    {$evHtml}
+                    <p style='margin-top:18px;'><a href='https://hub.renangalvan.net/?tab=averias' style='background:#10b981;color:#0f172a;padding:10px 20px;border-radius:999px;text-decoration:none;font-weight:bold;'>Gestionar en Inbox Cloud Hub</a></p>
+                </div>
+            ";
+            \Illuminate\Support\Facades\Mail::html($htmlBody, function ($message) use ($subject) {
+                $message->to(self::CREATOR_PROVIDER_EMAIL)
+                        ->subject($subject);
+            });
+        } catch (\Throwable $e) {
+            // Fallback silencioso si el servidor local no tiene SMTP configurado aún
         }
     }
 }
