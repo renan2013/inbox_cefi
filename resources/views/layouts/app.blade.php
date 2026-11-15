@@ -854,6 +854,29 @@
             const theme = document.documentElement.getAttribute('data-theme') || 'light';
             updateThemeIcon(theme);
 
+            // Ocultar automáticamente cualquier ítem auto-detectado que haya sido desmarcado en Inbox Cloud Hub
+            @php
+                $_disabledAutoLabels = [];
+                foreach (\App\Services\ModuleService::discoverNavbarTree() as $_mKey => $_mMeta) {
+                    $_pOn = \App\Services\ModuleService::isEnabled($_mKey);
+                    foreach ($_mMeta['children'] ?? [] as $_cKey => $_cMeta) {
+                        if ((!$_pOn || !\App\Services\ModuleService::isEnabled($_cKey)) && !empty($_cMeta['nombre'])) {
+                            $_disabledAutoLabels[] = mb_strtolower(trim($_cMeta['nombre']), 'UTF-8');
+                        }
+                    }
+                }
+            @endphp
+            const disabledLabels = @json(array_values(array_unique($_disabledAutoLabels)));
+            if (disabledLabels.length > 0) {
+                document.querySelectorAll('.navbar .dropdown-menu a.dropdown-item').forEach(a => {
+                    const txt = (a.innerText || '').trim().replace(/\s+/g, ' ').toLowerCase();
+                    if (disabledLabels.includes(txt)) {
+                        const li = a.closest('li');
+                        if (li) li.remove();
+                    }
+                });
+            }
+
             // Limpiar divisores duplicados o extremos cuando se desactivan sub-ítems desde Inbox Cloud Hub
             document.querySelectorAll('.navbar .dropdown-menu').forEach(menu => {
                 const items = Array.from(menu.children);

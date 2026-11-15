@@ -848,7 +848,20 @@ Route::post('/api/license-sync', function (\Illuminate\Http\Request $request) {
     }
 
     $payload = json_decode($rawBody, true);
-    if (!is_array($payload) || !isset($payload['flags']) || !is_array($payload['flags'])) {
+    if (!is_array($payload)) {
+        return response()->json(['success' => false, 'message' => 'Estructura JSON inválida.'], 422);
+    }
+
+    if (($payload['action'] ?? '') === 'discover_tree') {
+        return response()->json([
+            'success'         => true,
+            'message'         => 'Árbol de menús de CEFI escaneado en vivo.',
+            'discovered_tree' => \App\Services\ModuleService::discoverNavbarTree(),
+            'current_flags'   => \App\Services\ModuleService::getHubTreeState(),
+        ]);
+    }
+
+    if (!isset($payload['flags']) || !is_array($payload['flags'])) {
         return response()->json(['success' => false, 'message' => 'Estructura JSON de licencia inválida.'], 422);
     }
 
@@ -867,9 +880,10 @@ Route::post('/api/license-sync', function (\Illuminate\Http\Request $request) {
     }
 
     return response()->json([
-        'success'      => (bool)$saved,
-        'message'      => "CEFI sincronizado con éxito ({$activeMenus} menús principales activos, estado: {$status}).",
-        'synced_at'    => date('Y-m-d H:i:s'),
-        'active_menus' => $activeMenus,
+        'success'         => (bool)$saved,
+        'message'         => "CEFI sincronizado con éxito ({$activeMenus} menús principales activos, estado: {$status}).",
+        'synced_at'       => date('Y-m-d H:i:s'),
+        'active_menus'    => $activeMenus,
+        'discovered_tree' => \App\Services\ModuleService::discoverNavbarTree(),
     ]);
 })->name('api.license_sync');
