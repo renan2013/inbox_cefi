@@ -43,6 +43,7 @@ class CursoController extends Controller
                     'cronograma' => "LONGTEXT NULL",
                     'guias_evaluacion' => "LONGTEXT NULL",
                     'bibliografia' => "LONGTEXT NULL",
+                    'bibliografia_complementaria' => "LONGTEXT NULL",
                     'evaluaciones_json' => "LONGTEXT NULL",
                     'cronograma_json' => "LONGTEXT NULL",
                     'rubricas_json' => "LONGTEXT NULL",
@@ -159,8 +160,16 @@ class CursoController extends Controller
                     `porcentaje_total` DECIMAL(5,2) NULL DEFAULT 0,
                     `cantidad` INT NULL DEFAULT 1,
                     `valor` DECIMAL(8,2) NULL DEFAULT 0,
-                    `contenido_json` LONGTEXT NULL
+                    `contenido_json` LONGTEXT NULL,
+                    `descripcion_entregable` LONGTEXT NULL
                 )");
+            } else {
+                $existingRub = array_map('strtolower', Schema::getColumnListing('silabo_rubricas'));
+                if (!in_array('descripcion_entregable', $existingRub, true)) {
+                    try {
+                        DB::statement("ALTER TABLE `silabo_rubricas` ADD COLUMN `descripcion_entregable` LONGTEXT NULL");
+                    } catch (\Throwable $e) {}
+                }
             }
         } catch (\Throwable $e) {
             // Continuar
@@ -301,6 +310,7 @@ class CursoController extends Controller
                             'cantidad' => $rub['cantidad'],
                             'valor' => $rub['valor'],
                             'contenido_json' => $rub['contenido_json'],
+                            'descripcion_entregable' => $rub['descripcion_entregable'] ?? ($rub['descripcion'] ?? null),
                         ]);
                         DB::table('silabo_rubricas')->insert($rowRub);
                     }
@@ -395,7 +405,7 @@ class CursoController extends Controller
             'adjunto_pdf', '_token', 'active_tab',
             'rubros', 'porcentajes', 'cantidades_eval', 'tipos_moodle_eval', 'anexos_eval',
             'c_semana', 'c_fecha', 'c_actividad', 'c_tareas', 'c_moodle', 'c_modalidad',
-            'rubrica_nombre_sel', 'rubrica_nombre_custom', 'rubrica_porcentaje', 'rubrica_cantidad', 'rubrica_valor', 'rubrica_json'
+            'rubrica_nombre_sel', 'rubrica_nombre_custom', 'rubrica_descripcion', 'rubrica_porcentaje', 'rubrica_cantidad', 'rubrica_valor', 'rubrica_json'
         ]);
 
         // Formatear duración
@@ -523,6 +533,7 @@ class CursoController extends Controller
         // Rúbricas
         $r_nombres_sel = $request->input('rubrica_nombre_sel', []);
         $r_nombres_custom = $request->input('rubrica_nombre_custom', []);
+        $r_descripciones = $request->input('rubrica_descripcion', []);
         $r_porcentajes = $request->input('rubrica_porcentaje', []);
         $r_cantidades = $request->input('rubrica_cantidad', []);
         $r_valores = $request->input('rubrica_valor', []);
@@ -533,7 +544,13 @@ class CursoController extends Controller
             foreach ($r_nombres_sel as $k => $sel_val) {
                 $nom = ($sel_val === 'CUSTOM') ? trim((string)($r_nombres_custom[$k] ?? '')) : trim((string)$sel_val);
                 $js = (string)($r_json[$k] ?? '');
+                $desc_entregable = trim((string)($r_descripciones[$k] ?? ''));
                 if ($nom !== '' && $js !== '') {
+                    $js_decoded = json_decode($js, true);
+                    if (is_array($js_decoded)) {
+                        $js_decoded['descripcion_entregable'] = $desc_entregable;
+                        $js = json_encode($js_decoded, JSON_UNESCAPED_UNICODE);
+                    }
                     $rubricas_arr[] = [
                         'codigo' => 'R' . ($k + 1),
                         'nombre' => $nom,
@@ -541,6 +558,7 @@ class CursoController extends Controller
                         'cantidad' => intval($r_cantidades[$k] ?? 1),
                         'valor' => floatval($r_valores[$k] ?? 0),
                         'contenido_json' => $js,
+                        'descripcion_entregable' => $desc_entregable,
                     ];
                 }
             }
@@ -677,7 +695,7 @@ class CursoController extends Controller
             'adjunto_pdf', '_token', 'active_tab',
             'rubros', 'porcentajes', 'cantidades_eval', 'tipos_moodle_eval', 'anexos_eval',
             'c_semana', 'c_fecha', 'c_actividad', 'c_tareas', 'c_moodle', 'c_modalidad',
-            'rubrica_nombre_sel', 'rubrica_nombre_custom', 'rubrica_porcentaje', 'rubrica_cantidad', 'rubrica_valor', 'rubrica_json'
+            'rubrica_nombre_sel', 'rubrica_nombre_custom', 'rubrica_descripcion', 'rubrica_porcentaje', 'rubrica_cantidad', 'rubrica_valor', 'rubrica_json'
         ]);
 
         // Formatear duración
@@ -802,6 +820,7 @@ class CursoController extends Controller
 
         $r_nombres_sel = $request->input('rubrica_nombre_sel', []);
         $r_nombres_custom = $request->input('rubrica_nombre_custom', []);
+        $r_descripciones = $request->input('rubrica_descripcion', []);
         $r_porcentajes = $request->input('rubrica_porcentaje', []);
         $r_cantidades = $request->input('rubrica_cantidad', []);
         $r_valores = $request->input('rubrica_valor', []);
@@ -812,7 +831,13 @@ class CursoController extends Controller
             foreach ($r_nombres_sel as $k => $sel_val) {
                 $nom = ($sel_val === 'CUSTOM') ? trim((string)($r_nombres_custom[$k] ?? '')) : trim((string)$sel_val);
                 $js = (string)($r_json[$k] ?? '');
+                $desc_entregable = trim((string)($r_descripciones[$k] ?? ''));
                 if ($nom !== '' && $js !== '') {
+                    $js_decoded = json_decode($js, true);
+                    if (is_array($js_decoded)) {
+                        $js_decoded['descripcion_entregable'] = $desc_entregable;
+                        $js = json_encode($js_decoded, JSON_UNESCAPED_UNICODE);
+                    }
                     $rubricas_arr[] = [
                         'codigo' => 'R' . ($k + 1),
                         'nombre' => $nom,
@@ -820,6 +845,7 @@ class CursoController extends Controller
                         'cantidad' => intval($r_cantidades[$k] ?? 1),
                         'valor' => floatval($r_valores[$k] ?? 0),
                         'contenido_json' => $js,
+                        'descripcion_entregable' => $desc_entregable,
                     ];
                 }
             }

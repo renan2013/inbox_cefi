@@ -351,6 +351,104 @@ class DescriptorPDF extends FPDF
         }
         $this->Ln(2);
     }
+
+    function renderRubricaConesup(array $rubrica, int $num)
+    {
+        $nom = html_entity_decode((string)($rubrica['nombre'] ?? 'Rúbrica'), ENT_QUOTES, 'UTF-8');
+        $porc = (float)($rubrica['porcentaje_total'] ?? 0);
+        $desc = (string)($rubrica['descripcion_entregable'] ?? '');
+        $json_str = (string)($rubrica['contenido_json'] ?? '');
+
+        if ($desc === '' && $json_str !== '') {
+            $dec = json_decode($json_str, true);
+            if (is_array($dec) && !empty($dec['descripcion_entregable'])) {
+                $desc = (string)$dec['descripcion_entregable'];
+            }
+        }
+
+        $this->CheckPageBreak(22);
+        $this->SetFont('Arial', 'B', 9.5);
+        $this->SetTextColor(15, 23, 42);
+        $this->Cell(186, 5.5, $this->toPdf("{$num}. {$nom} (" . (int)$porc . "%)"), 0, 1, 'L');
+
+        if ($desc !== '') {
+            $this->SetFont('Arial', '', 8.5);
+            $this->SetTextColor(51, 65, 85);
+            $this->MultiCell(186, 4.4, $this->toPdf($desc), 0, 'L');
+            $this->Ln(1.5);
+        }
+
+        $data = json_decode($json_str, true);
+        if (is_array($data) && !empty($data['columnas'])) {
+            $cols = $data['columnas'];
+            $filas = $data['filas'] ?? [];
+            $num_cols = count($cols);
+            $w_crit = 38;
+            $w_col = ($num_cols > 0) ? ((186 - $w_crit) / $num_cols) : 37;
+
+            $this->CheckPageBreak(12);
+            $this->SetDrawColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
+            $this->SetLineWidth(0.15);
+            $this->SetFillColor($this->azul_cefi[0], $this->azul_cefi[1], $this->azul_cefi[2]);
+            $this->SetFont('Arial', 'B', 7.5);
+            $this->SetTextColor(255, 255, 255);
+
+            $this->Cell($w_crit, 6.5, $this->toPdf("Criterio"), 1, 0, 'L', true);
+            foreach ($cols as $col_nom) {
+                $this->Cell($w_col, 6.5, $this->toPdf($col_nom), 1, 0, 'C', true);
+            }
+            $this->Ln();
+            $this->SetDrawColor(203, 213, 225);
+            $this->SetTextColor(15, 23, 42);
+
+            foreach ($filas as $idx_f => $f) {
+                $crit_nom = $this->toPdf($f['criterio'] ?? ($f['nombre'] ?? 'Criterio'));
+                $vals = $f['valores'] ?? [];
+
+                $this->SetFont('Arial', 'B', 7.2);
+                $nb_c = $this->NbLines($w_crit - 3, $crit_nom);
+                $max_l = $nb_c;
+
+                $this->SetFont('Arial', '', 7.2);
+                foreach ($cols as $idx_c => $cn) {
+                    $val_txt = $this->toPdf($vals[$idx_c] ?? '');
+                    $nb_v = $this->NbLines($w_col - 3, $val_txt);
+                    $max_l = max($max_l, $nb_v);
+                }
+
+                $h = max(7.0, ($max_l * 3.6) + 3.0);
+                $this->CheckPageBreak($h);
+
+                $x = 12;
+                $y = $this->GetY();
+
+                $is_even = ($idx_f % 2 === 1);
+                $bg_col = $is_even ? [248, 250, 252] : [255, 255, 255];
+                $bg_crit = $is_even ? [241, 245, 249] : [248, 250, 252];
+
+                $this->SetFillColor($bg_crit[0], $bg_crit[1], $bg_crit[2]);
+                $this->Rect($x, $y, $w_crit, $h, 'DF');
+                $this->SetXY($x + 1.5, $y + 1.2);
+                $this->SetFont('Arial', 'B', 7.2);
+                $this->SetTextColor(15, 23, 42);
+                $this->MultiCell($w_crit - 3, 3.6, $crit_nom, 0, 'L');
+
+                $this->SetFont('Arial', '', 7.2);
+                $this->SetTextColor(30, 41, 59);
+                $this->SetFillColor($bg_col[0], $bg_col[1], $bg_col[2]);
+                foreach ($cols as $idx_c => $cn) {
+                    $cx = $x + $w_crit + ($idx_c * $w_col);
+                    $this->Rect($cx, $y, $w_col, $h, 'DF');
+                    $this->SetXY($cx + 1.5, $y + 1.2);
+                    $val_txt = $this->toPdf($vals[$idx_c] ?? '');
+                    $this->MultiCell($w_col - 3, 3.6, $val_txt, 0, 'L');
+                }
+
+                $this->SetXY($x, $y + $h);
+            }
+        }
+        $this->Ln(3);
+    }
 }
 
 class DescriptorPdfService
@@ -568,32 +666,86 @@ class DescriptorPdfService
             $pdf->SetY($y + $row_h);
         }
 
+        // Cargar rúbricas para la sección CONESUP de estrategias evaluativas y rúbricas
+        $rubricas_pdf = [];
+        if (!empty($plan->rubricas_json)) {
+            $decRub = json_decode($plan->rubricas_json, true);
+            if (is_array($decRub)) $rubricas_pdf = $decRub;
+        }
+        if (empty($rubricas_pdf) && $silabo) {
+            try {
+                $rubricas_pdf = DB::table('silabo_rubricas')
+                    ->where('id_silabo', $silabo->id_silabo)
+                    ->orderBy('codigo', 'asc')
+                    ->get()
+                    ->map(fn($r) => (array)$r)
+                    ->toArray();
+            } catch (\Throwable $e) {
+                $rubricas_pdf = [];
+            }
+        }
+
         // Pasar las secciones curriculares a la segunda página para que la Ficha Técnica quede independiente en la primera página
         $secciones = [
-            ['I', 'Descripción del curso', (string)$prop('descripcion_curso', $silabo->descripcion ?? '')],
-            ['II', 'Objetivos generales', (string)$prop('objetivo_general', $silabo->objetivo_general ?? '')],
+            ['I', 'Descripción general del curso', (string)$prop('descripcion_curso', $silabo->descripcion ?? '')],
+            ['II', 'Objetivo general', (string)$prop('objetivo_general', $silabo->objetivo_general ?? '')],
             ['III', 'Objetivos específicos', (string)$prop('objetivos_especificos', $silabo->objetivos_especificos ?? '')],
-            ['IV', 'Contenidos temáticos', (string)$prop('contenidos_tematicos', $silabo->contenidos ?? '')],
+            ['IV', 'Contenido conceptual', (string)$prop('contenidos_tematicos', $silabo->contenidos ?? '')],
             ['V', 'Metodología de enseñanza', (string)$prop('metodologia_ensenanza', $silabo->metodologia ?? '')],
             ['VI', 'Estrategias de aprendizaje', (string)$prop('estrategias_aprendizaje', $silabo->estrategias_aprendizaje ?? '')],
             ['VII', 'Evaluación de los aprendizajes', (string)$prop('evaluacion_aprendizajes', '')],
             ['VIII', 'Recursos didácticos', (string)$prop('recursos_didacticos', $silabo->recursos_aprendizaje ?? '')],
             ['IX', 'Cronograma', (string)$prop('cronograma', $silabo->cronograma ?? '')],
-            ['X', 'Las guías de evaluación', (string)$prop('guias_evaluacion', '')],
-            ['XI', 'Bibliografía', (string)$prop('bibliografia', $silabo->bibliografia ?? '')],
         ];
 
-        $tieneSecciones = false;
-        foreach ($secciones as $sec) {
-            if (!empty(trim(strip_tags($sec[2] ?? '')))) {
-                $tieneSecciones = true;
-                break;
+        $biblio_cod_nom = trim(($plan->codigo ?? '') . ' ' . ($plan->materia ?? ''));
+        $secciones_finales = [
+            ['X', 'Bibliografía obligatoria' . ($biblio_cod_nom ? ': ' . $biblio_cod_nom : ''), (string)$prop('bibliografia', $silabo->bibliografia ?? '')],
+            ['XI', 'Bibliografía complementaria' . ($biblio_cod_nom ? ': ' . $biblio_cod_nom : ''), (string)$prop('bibliografia_complementaria', '')],
+        ];
+
+        $tieneSecciones = !empty($rubricas_pdf) || !empty(trim(strip_tags((string)$prop('guias_evaluacion', ''))));
+        if (!$tieneSecciones) {
+            foreach (array_merge($secciones, $secciones_finales) as $sec) {
+                if (!empty(trim(strip_tags($sec[2] ?? '')))) {
+                    $tieneSecciones = true;
+                    break;
+                }
             }
         }
 
         if ($tieneSecciones) {
             $pdf->AddPage();
             foreach ($secciones as $sec) {
+                $pdf->renderSeccion($sec[0], $sec[1], $sec[2]);
+            }
+
+            if (!empty($rubricas_pdf)) {
+                $pdf->CheckPageBreak(22);
+                $pdf->Ln(4);
+                $y = $pdf->GetY();
+                $pdf->SetFillColor($pdf->azul_claro[0], $pdf->azul_claro[1], $pdf->azul_claro[2]);
+                $pdf->SetDrawColor(219, 234, 254);
+                $pdf->SetLineWidth(0.2);
+                $pdf->Rect(12, $y, 186, 7.5, 'DF');
+                $pdf->SetFillColor($pdf->verde_cefi[0], $pdf->verde_cefi[1], $pdf->verde_cefi[2]);
+                $pdf->Rect(12, $y, 2.5, 7.5, 'F');
+                $pdf->SetFillColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
+                $pdf->Rect(14.5, $y, 1.0, 7.5, 'F');
+                $pdf->SetXY(17, $y);
+                $pdf->SetFont('Arial', 'B', 9.5);
+                $pdf->SetTextColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
+                $pdf->Cell(181, 7.5, $pdf->toPdf('DESCRIPCIÓN DE LAS ESTRATEGIAS EVALUATIVAS Y RÚBRICAS'), 0, 1, 'L', false);
+                $pdf->Ln(2.5);
+
+                foreach ($rubricas_pdf as $idx_r => $rub) {
+                    $pdf->renderRubricaConesup($rub, $idx_r + 1);
+                }
+            } elseif (!empty(trim(strip_tags((string)$prop('guias_evaluacion', ''))))) {
+                $pdf->renderSeccion('X', 'Descripción de las estrategias evaluativas y rúbricas', (string)$prop('guias_evaluacion', ''));
+            }
+
+            foreach ($secciones_finales as $sec) {
                 $pdf->renderSeccion($sec[0], $sec[1], $sec[2]);
             }
         }
