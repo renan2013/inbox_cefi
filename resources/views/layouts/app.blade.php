@@ -595,7 +595,7 @@
                     <!-- Configuración Dropdown (Solo Administrador General con Clave) -->
                     @if(Auth::check() && Auth::user()->id_rol == 1)
                     <li class="nav-item dropdown">
-                        <a class="nav-link nav-link-custom nav-link-config dropdown-toggle {{ Request::is('configuracion*') || Request::is('*conocimiento-ai*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link nav-link-custom nav-link-config dropdown-toggle {{ Request::is('configuracion*') || Request::is('*conocimiento-ai*') || Request::is('automatizaciones*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Configuración
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark-custom dropdown-menu-end">
@@ -612,6 +612,12 @@
                             <li>
                                 <a class="dropdown-item dropdown-item-custom" href="javascript:void(0)" onclick="const f = document.getElementById('inboxAiFab'); if(f) f.click();">
                                     <i class="bi bi-chat-dots-fill text-success me-2"></i> Abrir Chat Tutor AI
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li>
+                                <a class="dropdown-item dropdown-item-custom fw-semibold {{ Request::is('automatizaciones*') ? 'active' : '' }}" href="{{ route('plantillas.index') }}">
+                                    <i class="bi bi-gear-wide-connected text-success me-2"></i> Automatizaciones
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider-custom"></li>

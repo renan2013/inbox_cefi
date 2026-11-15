@@ -156,7 +156,10 @@
                 <h1 class="display-6 fw-bold mb-1">{{ $plantilla->nombre }}</h1>
                 <p class="text-white-50 mb-0">Genere certificados individuales al instante o emita de forma masiva en lote comprimido (ZIP).</p>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ route('plantillas.historial') }}" class="btn btn-outline-success rounded-pill px-4">
+                    <i class="bi bi-clock-history me-1"></i> Ver Historial
+                </a>
                 <a href="{{ route('plantillas.edit', $plantilla->id) }}" class="btn btn-outline-info rounded-pill px-4">
                     <i class="bi bi-pencil-square me-1"></i> Diseñador Gráfico
                 </a>
@@ -322,6 +325,11 @@
                                             <option value="preview">Abrir en Pestaña</option>
                                         </select>
                                     </div>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" role="switch" name="registrar_emision" id="registrarEmision" value="1" checked>
+                                    <label class="form-check-label small fw-bold text-white-50" for="registrarEmision">Guardar copia en el historial de emisiones</label>
                                 </div>
 
                                 <div class="d-grid gap-2">

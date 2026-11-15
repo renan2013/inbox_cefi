@@ -52,8 +52,11 @@
                 <h1 class="display-6 fw-bold mb-1">Gestión de Plantillas de Documentos</h1>
                 <p class="text-white-50 mb-0">Cree y configure las plantillas de impresión, títulos y certificaciones mediante arrastre gráfico.</p>
             </div>
-            <div>
-                <a href="{{ route('plantillas.create') }}" class="btn btn-success rounded-pill px-4" style="background-color: var(--primary); border: none;">
+            <div class="d-flex gap-2">
+                <a href="{{ route('plantillas.historial') }}" class="btn btn-outline-light rounded-pill px-4 fw-semibold">
+                    <i class="bi bi-clock-history me-1 text-success"></i> Ver Historial
+                </a>
+                <a href="{{ route('plantillas.create') }}" class="btn btn-success rounded-pill px-4 fw-bold" style="background-color: var(--primary); border: none;">
                     <i class="bi bi-plus-lg me-1"></i> Nueva Plantilla
                 </a>
             </div>

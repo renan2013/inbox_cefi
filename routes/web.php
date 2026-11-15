@@ -432,9 +432,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/centro-soporte/credencial', [CentroSoporteController::class, 'storeCredencial'])->name('centro_soporte.credencial.store');
         Route::match(['put', 'post'], '/centro-soporte/credencial/{id}/editar', [CentroSoporteController::class, 'updateCredencial'])->name('centro_soporte.credencial.update');
         Route::post('/centro-soporte/credencial/{id}/eliminar', [CentroSoporteController::class, 'destroyCredencial'])->name('centro_soporte.credencial.delete');
+    });
 
-        // Automatizaciones (Plantillas)
+    // --- AUTOMATIZACIONES (PLANTILLAS DE DOCUMENTOS E HISTORIAL DE EMISIONES) ---
+    Route::middleware('no.alumno')->group(function () {
         Route::get('/automatizaciones', [PlantillaDocumentoController::class, 'index'])->name('plantillas.index');
+        Route::get('/automatizaciones/historial', [PlantillaDocumentoController::class, 'historial'])->name('plantillas.historial');
+        Route::post('/automatizaciones/historial/{id}/eliminar', [PlantillaDocumentoController::class, 'eliminarEmision'])->name('plantillas.historial.delete');
         Route::get('/automatizaciones/crear', [PlantillaDocumentoController::class, 'create'])->name('plantillas.create');
         Route::post('/automatizaciones/crear', [PlantillaDocumentoController::class, 'store'])->name('plantillas.store');
         Route::get('/automatizaciones/{id}/editar', [PlantillaDocumentoController::class, 'edit'])->name('plantillas.edit');

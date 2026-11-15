@@ -7,12 +7,39 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use ZipArchive;
 
 require_once app_path('Services/FPDF/fpdf.php');
 
 class PlantillaDocumentoController extends Controller
 {
+    /**
+     * Garantiza que la tabla documentos_emitidos exista en la base de datos.
+     */
+    private function ensureHistorialTable(): void
+    {
+        try {
+            if (!Schema::hasTable('documentos_emitidos')) {
+                DB::statement("
+                    CREATE TABLE IF NOT EXISTS `documentos_emitidos` (
+                        `id` int(11) NOT NULL AUTO_INCREMENT,
+                        `id_plantilla` int(11) NOT NULL,
+                        `nombre_estudiante` varchar(255) NOT NULL,
+                        `datos_extra` text DEFAULT NULL,
+                        `id_usuario_emisor` int(11) DEFAULT NULL,
+                        `ruta_archivo` varchar(255) DEFAULT NULL,
+                        `ruta_png` varchar(255) DEFAULT NULL,
+                        `fecha_emision` timestamp NOT NULL DEFAULT current_timestamp(),
+                        PRIMARY KEY (`id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                ");
+            }
+        } catch (\Throwable $e) {
+            // Ignorar si ya existe o no tiene permisos DDL
+        }
+    }
+
     /**
      * Convierte un código hexadecimal a RGB.
      */
@@ -74,6 +101,55 @@ class PlantillaDocumentoController extends Controller
     {
         $plantillas = PlantillaDocumento::orderBy('id', 'desc')->get();
         return view('plantillas.index', compact('plantillas'));
+    }
+
+    /**
+     * Historial de documentos emitidos (PDF / PNG).
+     */
+    public function historial()
+    {
+        $this->ensureHistorialTable();
+
+        $emisiones = collect();
+        try {
+            $emisiones = DB::table('documentos_emitidos as e')
+                ->leftJoin('plantillas_documentos as p', 'e.id_plantilla', '=', 'p.id')
+                ->leftJoin('usuarios as u', 'e.id_usuario_emisor', '=', 'u.id')
+                ->select(
+                    'e.*',
+                    DB::raw(" COALESCE(p.nombre, 'Plantilla Eliminada') as plantilla_nombre "),
+                    DB::raw(" COALESCE(u.nombre, 'Administrador') as emisor_nombre ")
+                )
+                ->orderBy('e.fecha_emision', 'desc')
+                ->orderBy('e.id', 'desc')
+                ->get();
+        } catch (\Throwable $e) {
+            $emisiones = collect();
+        }
+
+        return view('plantillas.historial', compact('emisiones'));
+    }
+
+    /**
+     * Elimina un registro del historial de emisiones y sus archivos físicos.
+     */
+    public function eliminarEmision($id)
+    {
+        $this->ensureHistorialTable();
+
+        $registro = DB::table('documentos_emitidos')->where('id', $id)->first();
+        if ($registro) {
+            if (!empty($registro->ruta_archivo) && File::exists(public_path($registro->ruta_archivo))) {
+                @File::delete(public_path($registro->ruta_archivo));
+            }
+            if (!empty($registro->ruta_png) && File::exists(public_path($registro->ruta_png))) {
+                @File::delete(public_path($registro->ruta_png));
+            }
+            DB::table('documentos_emitidos')->where('id', $id)->delete();
+            return redirect()->route('plantillas.historial')->with('success', 'Registro y archivos eliminados correctamente.');
+        }
+
+        return redirect()->route('plantillas.historial')->with('error', 'No se encontró el registro solicitado.');
     }
 
     /**
@@ -343,7 +419,9 @@ class PlantillaDocumentoController extends Controller
             $texto_iso = $this->cleanUtf8($texto);
             $texto_width = $pdf->GetStringWidth($texto_iso);
 
-            if ($align === 'C') {
+            if ($align === 'P') {
+                $draw_x = ($ancho_mm - $texto_width) / 2;
+            } elseif ($align === 'C') {
                 $draw_x = $x - ($texto_width / 2);
             } elseif ($align === 'R') {
                 $draw_x = $x - $texto_width;
@@ -358,46 +436,100 @@ class PlantillaDocumentoController extends Controller
         $estudiante = $valores_dinamicos[0] ?? 'Documento';
         $safe_name = preg_replace('/[^a-zA-Z0-9_-]/', '_', $estudiante);
         $filename = $safe_name . '_' . date('Ymd_His') . '.pdf';
+        $pdfContent = $pdf->Output('S');
+
+        // Registrar emisión en historial si está marcado registrar_emision
+        if ($request->boolean('registrar_emision', true)) {
+            $this->guardarEnHistorial($plantilla, $ruta_fondo, $valores_dinamicos, $request, $pdfContent, null);
+        }
 
         $disposition = ($modo === 'preview') ? 'inline' : 'attachment';
 
-        return response($pdf->Output('S'), 200)
+        return response($pdfContent, 200)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', $disposition . '; filename="' . $filename . '"');
     }
 
     /**
-     * Genera un archivo PNG de alta resolución.
+     * Registra una copia del PDF y PNG emitidos en la tabla documentos_emitidos.
      */
-    public function generarPng(Request $request)
+    private function guardarEnHistorial($plantilla, $ruta_fondo, $valores_dinamicos, Request $request, $pdfContent = null, $pngContent = null): void
     {
-        $plantilla_id = $request->input('plantilla_id');
-        $plantilla = PlantillaDocumento::findOrFail($plantilla_id);
+        try {
+            $this->ensureHistorialTable();
 
-        $valores_dinamicos = $request->input('campo_valor', []);
-        $ruta_fondo = $this->resolverRutaFondo($plantilla->imagen_fondo);
-        if (!$ruta_fondo) {
-            abort(404, 'Imagen de fondo no disponible.');
+            $uploadDir = public_path('uploads/emisiones');
+            if (!File::isDirectory($uploadDir)) {
+                File::makeDirectory($uploadDir, 0777, true, true);
+            }
+
+            $nombreEst = $valores_dinamicos[0] ?? 'Desconocido';
+            $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $nombreEst);
+            $baseFilename = uniqid('doc_') . '_' . $safeName;
+
+            $rutaDbPdf = null;
+            $rutaDbPng = null;
+
+            if ($pdfContent) {
+                $rutaDbPdf = 'uploads/emisiones/' . $baseFilename . '.pdf';
+                File::put(public_path($rutaDbPdf), $pdfContent);
+            }
+
+            if ($pngContent) {
+                $rutaDbPng = 'uploads/emisiones/' . $baseFilename . '.png';
+                File::put(public_path($rutaDbPng), $pngContent);
+            } else {
+                // Generar miniatura/PNG para vista previa y WhatsApp
+                $renderedPng = $this->renderPngData($plantilla, $ruta_fondo, $valores_dinamicos, $request);
+                if ($renderedPng) {
+                    $rutaDbPng = 'uploads/emisiones/' . $baseFilename . '.png';
+                    File::put(public_path($rutaDbPng), $renderedPng);
+                }
+            }
+
+            $extra = json_encode([
+                'periodo' => $request->input('qr_periodo', ''),
+                'estado' => $request->input('qr_estado', ''),
+                'universidad' => $request->input('qr_universidad', config('cliente.nombre', 'CEFI')),
+            ], JSON_UNESCAPED_UNICODE);
+
+            DB::table('documentos_emitidos')->insert([
+                'id_plantilla' => $plantilla->id,
+                'nombre_estudiante' => $nombreEst,
+                'datos_extra' => $extra,
+                'id_usuario_emisor' => Auth::id() ?: 1,
+                'ruta_archivo' => $rutaDbPdf,
+                'ruta_png' => $rutaDbPng,
+                'fecha_emision' => now(),
+            ]);
+        } catch (\Throwable $e) {
+            // Continuar sin interrumpir la descarga
         }
+    }
 
-        $info_img = getimagesize($ruta_fondo);
+    /**
+     * Renderiza la imagen PNG en memoria a partir de la plantilla y sus valores.
+     */
+    private function renderPngData($plantilla, $ruta_fondo, $valores_dinamicos, Request $request): ?string
+    {
+        $info_img = @getimagesize($ruta_fondo);
+        if (!$info_img) return null;
+
         $img_w_px = $info_img[0];
         $img_h_px = $info_img[1];
 
         switch ($info_img['mime']) {
             case 'image/jpeg':
-                $img_base = imagecreatefromjpeg($ruta_fondo);
+                $img_base = @imagecreatefromjpeg($ruta_fondo);
                 break;
             case 'image/png':
-                $img_base = imagecreatefrompng($ruta_fondo);
+                $img_base = @imagecreatefrompng($ruta_fondo);
                 break;
             default:
                 $img_base = null;
         }
 
-        if (!$img_base) {
-            abort(500, 'Error al decodificar la imagen de fondo.');
-        }
+        if (!$img_base) return null;
 
         $img_png = imagecreatetruecolor($img_w_px, $img_h_px);
         imagecopy($img_png, $img_base, 0, 0, 0, 0, $img_w_px, $img_h_px);
@@ -431,7 +563,7 @@ class PlantillaDocumentoController extends Controller
             $y_px = ($campo['y'] * $img_h_px) / $doc_h_mm;
 
             if ($tipo === 'foto' && $request->hasFile('foto_estudiante')) {
-                $f_raw = imagecreatefromstring(file_get_contents($request->file('foto_estudiante')->getRealPath()));
+                $f_raw = @imagecreatefromstring(file_get_contents($request->file('foto_estudiante')->getRealPath()));
                 if ($f_raw) {
                     $fw = imagesx($f_raw);
                     $fh = imagesy($f_raw);
@@ -450,7 +582,7 @@ class PlantillaDocumentoController extends Controller
                 $url_qr = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($txt_qr);
                 $qr_data = @file_get_contents($url_qr);
                 if ($qr_data) {
-                    $qr_img = imagecreatefromstring($qr_data);
+                    $qr_img = @imagecreatefromstring($qr_data);
                     if ($qr_img) {
                         $qr_w = imagesx($qr_img);
                         $dest_w = ($size * $img_w_px) / $doc_w_mm;
@@ -475,7 +607,9 @@ class PlantillaDocumentoController extends Controller
             if ($font_path && function_exists('imagettftext')) {
                 $bbox = imagettfbbox($font_size_px, 0, $font_path, $texto);
                 $text_w = abs($bbox[4] - $bbox[0]);
-                if ($align === 'C') {
+                if ($align === 'P') {
+                    $draw_x = ($img_w_px - $text_w) / 2;
+                } elseif ($align === 'C') {
                     $draw_x = $x_px - ($text_w / 2);
                 } elseif ($align === 'R') {
                     $draw_x = $x_px - $text_w;
@@ -488,14 +622,40 @@ class PlantillaDocumentoController extends Controller
             }
         }
 
-        $estudiante = $valores_dinamicos[0] ?? 'Documento';
-        $safe_name = preg_replace('/[^a-zA-Z0-9_-]/', '_', $estudiante);
-        $filename = $safe_name . '_' . date('Ymd_His') . '.png';
-
         ob_start();
         imagepng($img_png);
         $png_data = ob_get_clean();
         imagedestroy($img_png);
+
+        return $png_data ?: null;
+    }
+
+    /**
+     * Genera un archivo PNG de alta resolución.
+     */
+    public function generarPng(Request $request)
+    {
+        $plantilla_id = $request->input('plantilla_id');
+        $plantilla = PlantillaDocumento::findOrFail($plantilla_id);
+
+        $valores_dinamicos = $request->input('campo_valor', []);
+        $ruta_fondo = $this->resolverRutaFondo($plantilla->imagen_fondo);
+        if (!$ruta_fondo) {
+            abort(404, 'Imagen de fondo no disponible.');
+        }
+
+        $png_data = $this->renderPngData($plantilla, $ruta_fondo, $valores_dinamicos, $request);
+        if (!$png_data) {
+            abort(500, 'Error al decodificar la imagen de fondo.');
+        }
+
+        if ($request->boolean('registrar_emision', true)) {
+            $this->guardarEnHistorial($plantilla, $ruta_fondo, $valores_dinamicos, $request, null, $png_data);
+        }
+
+        $estudiante = $valores_dinamicos[0] ?? 'Documento';
+        $safe_name = preg_replace('/[^a-zA-Z0-9_-]/', '_', $estudiante);
+        $filename = $safe_name . '_' . date('Ymd_His') . '.png';
 
         return response($png_data, 200)
             ->header('Content-Type', 'image/png')
