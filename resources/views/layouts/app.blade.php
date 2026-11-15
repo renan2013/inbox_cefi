@@ -240,22 +240,22 @@
         }
 
         .brand-logo img {
-            height: 22px;
-            width: auto;
+            height: 21px !important;
+            width: auto !important;
         }
         .brand-logo span {
             color: var(--primary);
-            margin-right: 0.5rem;
+            margin-right: 0.35rem;
         }
 
         .logo-dark-theme {
             display: block !important;
-            height: 34px !important;
+            height: 21px !important;
             width: auto !important;
         }
         .logo-light-theme {
             display: none !important;
-            height: 34px !important;
+            height: 21px !important;
             width: auto !important;
         }
 
