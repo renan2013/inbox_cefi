@@ -825,9 +825,6 @@
                             @module('item.cfg_smtp')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'smtp']) }}"><i class="bi bi-envelope-at-fill text-warning me-2"></i> Correo Saliente (SMTP)</a></li>
                             @endmodule
-                            @module('item.cfg_modulos')
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'modulos']) }}"><i class="bi bi-toggles2 text-danger me-2"></i> Módulos y Personalización</a></li>
-                            @endmodule
                             @module('item.cfg_seguridad')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.index', ['tab' => 'seguridad']) }}"><i class="bi bi-key-fill text-info me-2"></i> Clave Maestra Superior</a></li>
                             @endmodule
