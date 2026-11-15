@@ -60,7 +60,7 @@ class SoporteController extends Controller
             $file->move(public_path('uploads/soporte'), $adjunto_nombre);
         }
 
-        Soporte::create([
+        $soporte = Soporte::create([
             'titulo' => $request->titulo,
             'problema' => $request->problema,
             'solucion' => $request->solucion,
@@ -71,7 +71,27 @@ class SoporteController extends Controller
             'adjunto' => $adjunto_nombre
         ]);
 
-        return redirect()->route('soporte.gestionar')->with('success', 'Reporte de avería creado con éxito.');
+        $user = Auth::user();
+        $this->dispatchOmnicanalAveria([
+            'local_id'       => $soporte->id,
+            'client_id'      => 'cefi',
+            'client_siglas'  => config('cliente.siglas', 'CEFI'),
+            'client_nombre'  => config('cliente.nombre', 'Inbox CEFI'),
+            'titulo'         => $soporte->titulo,
+            'etiqueta'       => optional($soporte->categoria)->nombre ?? '🟠 Fallo en Módulo',
+            'prioridad'      => 'alta',
+            'problema'       => (string)$request->problema,
+            'estado'         => 'reportado',
+            'url_origen'     => url()->previous(),
+            'navegador'      => $request->header('User-Agent', ''),
+            'evidencia_url'  => $adjunto_nombre ? url('uploads/soporte/' . $adjunto_nombre) : '',
+            'usuario_nombre' => $user ? trim(($user->nombre ?? '') . ' ' . ($user->apellidos ?? '')) : 'Usuario',
+            'usuario_email'  => $user->correo ?? $user->email ?? '',
+            'usuario_rol'    => ($user && $user->id_rol == 1) ? 'Administrador' : 'Usuario / Docente',
+            'fecha_creacion' => date('Y-m-d H:i:s'),
+        ]);
+
+        return redirect()->route('soporte.gestionar')->with('success', 'Reporte de avería creado y sincronizado con éxito.');
     }
 
     /**
@@ -132,9 +152,9 @@ class SoporteController extends Controller
     }
 
     /**
-     * Elimina un ticket.
+     * Elimina un ticket individual (local + sincronización con Inbox Cloud Hub).
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $soporte = Soporte::findOrFail($id);
         if ($soporte->adjunto) {
@@ -143,9 +163,40 @@ class SoporteController extends Controller
                 File::delete($filePath);
             }
         }
+        $localId = $soporte->id;
         $soporte->delete();
 
-        return redirect()->route('soporte.gestionar')->with('success', 'Ticket de soporte eliminado.');
+        $this->notifyHubTicketAction('delete_ticket', ['local_id' => $localId, 'client_id' => 'cefi']);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Reporte de avería eliminado correctamente.']);
+        }
+
+        return redirect()->back()->with('success', 'Reporte de avería #' . $localId . ' eliminado correctamente.');
+    }
+
+    /**
+     * Elimina todos los reportes de avería (útil para limpiar pruebas).
+     */
+    public function destroyAll(Request $request)
+    {
+        foreach (Soporte::all() as $soporte) {
+            if ($soporte->adjunto) {
+                $filePath = public_path('uploads/soporte/' . $soporte->adjunto);
+                if (File::exists($filePath)) {
+                    @File::delete($filePath);
+                }
+            }
+            $soporte->delete();
+        }
+
+        $this->notifyHubTicketAction('delete_ticket', ['local_id' => 'all', 'client_id' => 'cefi']);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Todos los reportes de prueba fueron eliminados.']);
+        }
+
+        return redirect()->back()->with('success', 'Todos los reportes de avería fueron eliminados.');
     }
 
     /**
@@ -340,7 +391,7 @@ class SoporteController extends Controller
     protected function dispatchOmnicanalAveria(array $payload): void
     {
         $payload['creator_email'] = self::CREATOR_PROVIDER_EMAIL;
-        $secret = env('INBOX_HUB_SECRET', 'INBOX_HUB_MASTER_2026_RG_SECRET_KEY');
+        $secret = env('INBOX_HUB_SECRET', 'RenanHub2026_MasterHmacSecretKey_998877!');
         $hubUrl = env('INBOX_HUB_TICKETS_URL', 'https://hub.renangalvan.net/api/tickets.php');
 
         $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -352,15 +403,17 @@ class SoporteController extends Controller
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST           => true,
                 CURLOPT_POSTFIELDS     => $jsonPayload,
+                CURLOPT_USERAGENT      => 'InboxBPM-HubClient/2.5',
                 CURLOPT_HTTPHEADER     => [
                     'Content-Type: application/json',
                     'Accept: application/json',
                     'X-Inbox-Hub-Signature: ' . $signature,
-                    'X-Inbox-Client-Id: ' . ($payload['client_id'] ?? 'inbox_cefi'),
+                    'X-Inbox-Client-Id: ' . ($payload['client_id'] ?? 'cefi'),
                 ],
-                CURLOPT_TIMEOUT        => 6,
-                CURLOPT_CONNECTTIMEOUT => 4,
+                CURLOPT_TIMEOUT        => 8,
+                CURLOPT_CONNECTTIMEOUT => 5,
                 CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => 0,
             ]);
             curl_exec($ch);
             curl_close($ch);
@@ -399,5 +452,40 @@ class SoporteController extends Controller
         } catch (\Throwable $e) {
             // Fallback silencioso si el servidor local no tiene SMTP configurado aún
         }
+    }
+
+    /**
+     * Notifica al Hub cuando se elimina o actualiza una avería desde la plataforma cliente.
+     */
+    protected function notifyHubTicketAction(string $action, array $data): void
+    {
+        $secret = env('INBOX_HUB_SECRET', 'RenanHub2026_MasterHmacSecretKey_998877!');
+        $hubUrl = env('INBOX_HUB_TICKETS_URL', 'https://hub.renangalvan.net/api/tickets.php');
+
+        $payload = array_merge($data, ['action' => $action]);
+        $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $signature   = hash_hmac('sha256', $jsonPayload, $secret);
+
+        try {
+            $ch = curl_init($hubUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $jsonPayload,
+                CURLOPT_USERAGENT      => 'InboxBPM-HubClient/2.5',
+                CURLOPT_HTTPHEADER     => [
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                    'X-Inbox-Hub-Signature: ' . $signature,
+                    'X-Inbox-Client-Id: cefi',
+                ],
+                CURLOPT_TIMEOUT        => 6,
+                CURLOPT_CONNECTTIMEOUT => 4,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => 0,
+            ]);
+            curl_exec($ch);
+            curl_close($ch);
+        } catch (\Throwable $e) {}
     }
 }

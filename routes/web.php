@@ -417,19 +417,23 @@ Route::middleware('auth')->group(function () {
         Route::get('/planilla/historial-pagos', [PlanillaController::class, 'historialPagos'])->name('planilla.historial_pagos');
     });
 
-    // --- SOPORTE, CLAVES Y AUTOMATIZACIONES ---
-    Route::middleware('module:soporte')->group(function () {
+    // --- GESTIÓN DE AVERÍAS Y SOPORTE TÉCNICO (SIEMPRE ACCESIBLE DESDE EL ÍCONO SUPERIOR / DASHBOARD) ---
+    Route::middleware('no.alumno')->group(function () {
         Route::get('/soporte', [SoporteController::class, 'index'])->name('soporte.gestionar');
         Route::post('/soporte/crear', [SoporteController::class, 'store'])->name('soporte.store');
         Route::post('/soporte/{id}/editar', [SoporteController::class, 'update'])->name('soporte.update');
         Route::post('/soporte/{id}/estado', [SoporteController::class, 'changeStatus'])->name('soporte.estado');
-        Route::post('/soporte/{id}/eliminar', [SoporteController::class, 'destroy'])->name('soporte.delete');
+        Route::match(['post', 'delete'], '/soporte/{id}/eliminar', [SoporteController::class, 'destroy'])->name('soporte.delete');
+        Route::post('/soporte/eliminar-todos', [SoporteController::class, 'destroyAll'])->name('soporte.delete_all');
         Route::get('/soporte/lista', [SoporteController::class, 'lista'])->name('soporte.lista');
         Route::get('/soporte/categorias', [SoporteController::class, 'categorias'])->name('soporte.categorias');
         Route::post('/soporte/categorias/crear', [SoporteController::class, 'storeCategoria'])->name('soporte.categorias.store');
         Route::post('/soporte/categorias/{id}/editar', [SoporteController::class, 'updateCategoria'])->name('soporte.categorias.update');
         Route::post('/soporte/categorias/{id}/eliminar', [SoporteController::class, 'destroyCategoria'])->name('soporte.categorias.delete');
+    });
 
+    // --- BÓVEDA DE CLAVES Y CENTRO DE SOPORTE ---
+    Route::middleware('module:soporte')->group(function () {
         // Bóveda Claves
         Route::get('/claves', [BovedaClavesController::class, 'index'])->name('claves.index');
         Route::post('/claves/acceder', [BovedaClavesController::class, 'acceder'])->name('claves.acceder');
@@ -902,6 +906,74 @@ Route::post('/api/license-sync', function (\Illuminate\Http\Request $request) {
             'discovered_tree' => \App\Services\ModuleService::discoverNavbarTree(),
             'current_flags'   => \App\Services\ModuleService::getHubTreeState(),
         ]);
+    }
+
+    if (($payload['action'] ?? '') === 'fetch_tickets') {
+        $tickets = [];
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('soporte')) {
+                $rows = \App\Models\Soporte::with(['creador', 'categoria'])->orderBy('id', 'desc')->limit(50)->get();
+                foreach ($rows as $r) {
+                    $tickets[] = [
+                        'local_id'       => $r->id,
+                        'client_id'      => 'cefi',
+                        'client_siglas'  => 'CEFI',
+                        'client_nombre'  => 'CEFI - Centro de Enseñanza de Formación Integral',
+                        'titulo'         => $r->titulo,
+                        'etiqueta'       => $r->categoria->nombre ?? 'Fallo en Módulo',
+                        'prioridad'      => 'alta',
+                        'problema'       => $r->problema,
+                        'solucion'       => $r->solucion,
+                        'estado'         => $r->estado ?: 'reportado',
+                        'url_origen'     => url('/dashboard'),
+                        'evidencia_url'  => $r->adjunto ? url('uploads/soporte/' . $r->adjunto) : '',
+                        'usuario_nombre' => $r->creador ? trim(($r->creador->nombre ?? '') . ' ' . ($r->creador->apellidos ?? '')) : 'Administrador',
+                        'usuario_email'  => $r->creador->correo ?? $r->creador->email ?? '',
+                        'fecha_creacion' => $r->fecha_creacion ? $r->fecha_creacion->format('Y-m-d H:i:s') : date('Y-m-d H:i:s'),
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {}
+        return response()->json(['success' => true, 'tickets' => $tickets]);
+    }
+
+    if (($payload['action'] ?? '') === 'update_ticket') {
+        $localId = (int)($payload['local_id'] ?? 0);
+        if ($localId > 0 && \Illuminate\Support\Facades\Schema::hasTable('soporte')) {
+            $tk = \App\Models\Soporte::find($localId);
+            if ($tk) {
+                $est = ($payload['estado'] ?? 'solucionado') === 'solucionado' ? 'solucionado' : 'reportado';
+                $tk->estado = $est;
+                if (isset($payload['solucion'])) {
+                    $tk->solucion = $payload['solucion'];
+                }
+                $tk->save();
+            }
+        }
+        return response()->json(['success' => true, 'message' => 'Ticket actualizado en CEFI.']);
+    }
+
+    if (($payload['action'] ?? '') === 'delete_ticket') {
+        $localId = $payload['local_id'] ?? '';
+        if (\Illuminate\Support\Facades\Schema::hasTable('soporte')) {
+            if ($localId === 'all') {
+                foreach (\App\Models\Soporte::all() as $tk) {
+                    if ($tk->adjunto && \Illuminate\Support\Facades\File::exists(public_path('uploads/soporte/' . $tk->adjunto))) {
+                        @\Illuminate\Support\Facades\File::delete(public_path('uploads/soporte/' . $tk->adjunto));
+                    }
+                    $tk->delete();
+                }
+            } elseif ((int)$localId > 0) {
+                $tk = \App\Models\Soporte::find((int)$localId);
+                if ($tk) {
+                    if ($tk->adjunto && \Illuminate\Support\Facades\File::exists(public_path('uploads/soporte/' . $tk->adjunto))) {
+                        @\Illuminate\Support\Facades\File::delete(public_path('uploads/soporte/' . $tk->adjunto));
+                    }
+                    $tk->delete();
+                }
+            }
+        }
+        return response()->json(['success' => true, 'message' => 'Ticket eliminado en CEFI.']);
     }
 
     if (!isset($payload['flags']) || !is_array($payload['flags'])) {

@@ -86,7 +86,15 @@
                 <h1 class="display-6 fw-bold mb-1">Gestión de Soporte / Averías</h1>
                 <p class="text-white-50 mb-0">Registre reportes de incidentes, averías técnicas y asigne soluciones.</p>
             </div>
-            <div>
+            <div class="d-flex flex-wrap gap-2">
+                @if ($soportes->total() > 0)
+                    <form action="{{ route('soporte.delete_all') }}" method="POST" onsubmit="return confirm('¿Está seguro de eliminar TODOS los reportes de avería (incluyendo pruebas)? Se borrarán también del Hub Central.');">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger rounded-pill px-4 fw-bold">
+                            <i class="bi bi-trash3-fill me-1"></i> Borrar Todos los Reportes
+                        </button>
+                    </form>
+                @endif
                 <button class="btn btn-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#crearTicketModal" style="background-color: var(--primary); border: none;">
                     <i class="bi bi-plus-lg me-1"></i> Reportar Avería
                 </button>

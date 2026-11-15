@@ -996,6 +996,54 @@
                                 </div>
                             </div>
                         </div>
+
+                        @php
+                            $_ultimasAveriasModal = collect();
+                            try {
+                                if (\Illuminate\Support\Facades\Schema::hasTable('soporte')) {
+                                    $_ultimasAveriasModal = \Illuminate\Support\Facades\DB::table('soporte')
+                                        ->orderByDesc('id')
+                                        ->limit(8)
+                                        ->get();
+                                }
+                            } catch (\Throwable $e) {}
+                        @endphp
+                        @if($_ultimasAveriasModal->count() > 0)
+                        <div class="mt-4 pt-3 border-top" style="border-color: var(--border-dark) !important;">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+                                <span class="small fw-bold text-uppercase text-warning">
+                                    <i class="bi bi-clock-history me-1"></i>Reportes Activos / Recientes ({{ $_ultimasAveriasModal->count() }})
+                                </span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-0" style="font-size: 0.75rem;" onclick="eliminarTodasAveriasRapido()">
+                                        <i class="bi bi-trash3-fill me-1"></i>Borrar Todos (Pruebas)
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="list-group list-group-flush rounded-3 overflow-hidden border" style="border-color: var(--border-dark) !important; max-height: 185px; overflow-y: auto;" id="listaAveriasModalGlobal">
+                                @foreach($_ultimasAveriasModal as $_avItem)
+                                <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3" id="averia-modal-row-{{ $_avItem->id }}" style="background-color: var(--bg-dark); color: var(--text-light); border-color: var(--border-dark);">
+                                    <div class="text-truncate me-2" style="max-width: 72%;">
+                                        <span class="badge {{ $_avItem->estado === 'solucionado' ? 'bg-success' : 'bg-danger' }} rounded-pill me-1" style="font-size: 0.65rem;">
+                                            #{{ $_avItem->id }} {{ strtoupper($_avItem->estado ?? 'reportado') }}
+                                        </span>
+                                        <span class="fw-semibold small">{{ $_avItem->titulo }}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-1">
+                                        @if(!empty($_avItem->adjunto))
+                                            <a href="{{ asset('uploads/soporte/' . $_avItem->adjunto) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill py-0 px-2" style="font-size: 0.72rem;" title="Ver Evidencia">
+                                                <i class="bi bi-image"></i>
+                                            </a>
+                                        @endif
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill py-0 px-2" style="font-size: 0.72rem;" onclick="eliminarAveriaRapido({{ $_avItem->id }})" title="Borrar este reporte">
+                                            <i class="bi bi-trash3 me-1"></i>Borrar
+                                        </button>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
                     </div>
                     <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between" style="border-color: var(--border-dark) !important;">
                         <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
@@ -1008,6 +1056,83 @@
         </div>
     </div>
     <script>
+        function eliminarAveriaRapido(id) {
+            Swal.fire({
+                title: '¿Borrar reporte #' + id + '?',
+                text: 'Se eliminará este reporte de avería (útil para reportes de prueba o falsos) tanto aquí como en el Hub Central.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, borrar reporte',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+                fetch("{{ url('/soporte') }}/" + id + "/eliminar", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        const row = document.getElementById('averia-modal-row-' + id);
+                        if (row) row.remove();
+                        const badge = document.getElementById('navbar-averias-badge');
+                        if (badge) {
+                            const nextVal = Math.max(0, parseInt(badge.textContent || '1', 10) - 1);
+                            badge.textContent = nextVal;
+                            if (nextVal === 0) badge.classList.add('d-none');
+                        }
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Reporte eliminado',
+                            text: res.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => window.location.reload());
+                    }
+                });
+            });
+        }
+
+        function eliminarTodasAveriasRapido() {
+            Swal.fire({
+                title: '¿Borrar TODOS los reportes?',
+                text: 'Se eliminarán todos los reportes de avería de prueba tanto en la plataforma como en Inbox Cloud Hub.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, borrar todos',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+                fetch("{{ route('soporte.delete_all') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Reportes eliminados',
+                            text: res.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => window.location.reload());
+                    }
+                });
+            });
+        }
         function abrirModalReporteAveria() {
             const urlActual = window.location.href;
             document.getElementById('averia_url_origen').value = urlActual;

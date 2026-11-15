@@ -82,9 +82,24 @@
         </nav>
 
         <!-- Header -->
-        <div class="page-header">
-            <h1 class="display-6 fw-bold mb-1">Bitácora de Soporte Técnico</h1>
-            <p class="text-white-50 mb-0">Consulte reportes de averías, estados de resolución y soluciones aplicadas históricamente.</p>
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="display-6 fw-bold mb-1">Bitácora de Soporte Técnico</h1>
+                <p class="text-white-50 mb-0">Consulte reportes de averías, estados de resolución y soluciones aplicadas históricamente.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('soporte.gestionar') }}" class="btn btn-warning rounded-pill px-4 fw-bold text-dark">
+                    <i class="bi bi-tools me-1"></i> Gestionar / Solucionar Averías
+                </a>
+                @if ($soportes->total() > 0)
+                    <form action="{{ route('soporte.delete_all') }}" method="POST" onsubmit="return confirm('¿Eliminar todos los reportes de prueba?');">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger rounded-pill px-3 fw-bold">
+                            <i class="bi bi-trash3-fill me-1"></i> Borrar Todos
+                        </button>
+                    </form>
+                @endif
+            </div>
         </div>
 
         <!-- SEARCH AND FILTER -->
@@ -156,11 +171,19 @@
                                         </div>
                                     @endif
 
-                                    @if ($ticket->adjunto)
-                                        <div class="mt-3">
-                                            <a href="{{ asset('uploads/soporte/' . $ticket->adjunto) }}" target="_blank" class="btn btn-sm btn-outline-light rounded-pill px-3"><i class="bi bi-file-earmark-arrow-down-fill me-1"></i> Descargar Adjunto</a>
+                                    <div class="mt-3 d-flex flex-wrap justify-content-between align-items-center gap-2 pt-2 border-top border-secondary">
+                                        <div>
+                                            @if ($ticket->adjunto)
+                                                <a href="{{ asset('uploads/soporte/' . $ticket->adjunto) }}" target="_blank" class="btn btn-sm btn-outline-light rounded-pill px-3"><i class="bi bi-file-earmark-arrow-down-fill me-1"></i> Ver / Descargar Evidencia</a>
+                                            @endif
                                         </div>
-                                    @endif
+                                        <form action="{{ route('soporte.delete', $ticket->id) }}" method="POST" onsubmit="return confirm('¿Eliminar permanentemente este reporte de avería?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                <i class="bi bi-trash3 me-1"></i> Borrar Reporte
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>

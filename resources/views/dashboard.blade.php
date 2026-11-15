@@ -707,9 +707,14 @@
                             <p class="mb-0 small">Existen <strong>{{ $averias_abiertas_dash }}</strong> reporte(s) de avería abiertos con evidencia o causa pendiente de atender.</p>
                         </div>
                     </div>
-                    <a href="{{ route('soporte.gestionar') }}" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold text-dark">
-                        <i class="bi bi-tools me-1"></i>Solucionar Averías
-                    </a>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <a href="{{ route('soporte.gestionar') }}" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold text-dark">
+                            <i class="bi bi-tools me-1"></i>Solucionar / Ver Averías
+                        </a>
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold" onclick="eliminarTodasAveriasRapido()">
+                            <i class="bi bi-trash3-fill me-1"></i>Borrar Reportes de Prueba
+                        </button>
+                    </div>
                 </div>
             @endif
 
