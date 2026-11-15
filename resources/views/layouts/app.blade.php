@@ -450,10 +450,35 @@
                     @endif
 
                     @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
+                    @if(\App\Services\ModuleService::isEnabled('dashboard') && \App\Services\ModuleService::isEnabled('item.averias_alerta'))
+                    @php
+                        $_averiasPendientes = 0;
+                        try {
+                            if (\Illuminate\Support\Facades\Schema::hasTable('soportes')) {
+                                $_averiasPendientes = \Illuminate\Support\Facades\DB::table('soportes')->whereIn('estado', ['reportado', 'pendiente'])->count();
+                            }
+                        } catch (\Throwable $e) {}
+                    @endphp
+                    @if($_averiasPendientes > 0)
+                    <li class="nav-item me-1">
+                        <a class="nav-link nav-link-custom text-warning fw-bold" href="{{ route('soporte.gestionar') }}" title="{{ $_averiasPendientes }} averías o soportes pendientes">
+                            <i class="bi bi-lightbulb-fill text-warning"></i>
+                            <span class="badge bg-danger rounded-pill" style="font-size:0.65rem;">{{ $_averiasPendientes }}</span>
+                        </a>
+                    </li>
+                    @endif
+                    @endif
                     @if(\App\Services\ModuleService::isEnabled('dashboard') && \App\Services\ModuleService::isEnabled('item.dashboard_link'))
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom {{ Route::is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                             Dashboard
+                        </a>
+                    </li>
+                    @endif
+                    @if(\App\Services\ModuleService::isEnabled('tareas_gantt') && \App\Services\ModuleService::isEnabled('item.gantt_tareas'))
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom {{ Route::is('tareas.gantt') ? 'active' : '' }}" href="{{ route('tareas.gantt') }}">
+                            Gantt Tareas
                         </a>
                     </li>
                     @endif
@@ -492,6 +517,9 @@
                              @endmodule
                              @module('item.mis_cursos')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('mis_cursos.index') }}"><i class="bi bi-book"></i> Mis Cursos</a></li>
+                             @endmodule
+                             @module('item.cortina_curso')
+                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('cortina.index') }}"><i class="bi bi-display-fill text-primary"></i> Cortina de Eventos</a></li>
                              @endmodule
                              @module('item.mis_recursos')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('recursos.index') }}"><i class="bi bi-collection"></i> Mis Recursos</a></li>
@@ -647,6 +675,13 @@
                             @endmodule
                             @endmodule
 
+                            @module('item.parametros_pagos')
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.pagos') }}"><i class="bi bi-gear-fill"></i> Configuración de Pagos y Firmas</a></li>
+                            @endmodule
+                            @module('item.repositorio_actas')
+                            <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('registro.repositorio_actas') }}"><i class="bi bi-journal-bookmark-fill text-danger"></i> Repositorio de Actas</a></li>
+                            @endmodule
+
                             @module('registro_academico')
                             <li><hr class="dropdown-divider-custom"></li>
                             @module('item.registrar_usuario')
@@ -675,6 +710,9 @@
                             @module('item.gestionar_grupos')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('grupos.index') }}"><i class="bi bi-grid-3x3-gap"></i> Gestionar Grupos</a></li>
                             @endmodule
+                            @module('item.formularios_registro')
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('solicitudes.index') }}"><i class="bi bi-ui-checks"></i> Formularios de Registro</a></li>
+                            @endmodule
                             <li><hr class="dropdown-divider-custom"></li>
                             @module('item.lista_programas')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('programas.index') }}"><i class="bi bi-list-task"></i> Lista de Programas</a></li>
@@ -697,6 +735,23 @@
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('graduaciones.index') }}"><i class="bi bi-award"></i> Auditoría y Graduaciones</a></li>
                             @endmodule
                             <li><hr class="dropdown-divider-custom"></li>
+                            @module('item.etiquetas_tareas')
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('tareas.etiquetas.index') }}"><i class="bi bi-bookmarks text-warning"></i> Etiquetas de Tareas</a></li>
+                            @endmodule
+                            @module('item.plantillas_tareas')
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('tareas.plantillas.gestionar') }}"><i class="bi bi-card-checklist text-primary"></i> Plantillas de Tareas</a></li>
+                            @endmodule
+                            @if(\App\Services\ModuleService::isEnabled('item.saludos_plantillas') || \App\Services\ModuleService::isEnabled('item.saludos_categorias'))
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li><h6 class="dropdown-header-custom"><i class="bi bi-chat-heart-fill text-success me-1"></i> Módulo Saludos</h6></li>
+                            @module('item.saludos_plantillas')
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('saludos.plantillas') }}"><i class="bi bi-chat-heart"></i> Gestionar Plantillas de Saludo</a></li>
+                            @endmodule
+                            @module('item.saludos_categorias')
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('saludos.categorias') }}"><i class="bi bi-folder2"></i> Categorías de Saludos</a></li>
+                            @endmodule
+                            @endif
+                            <li><hr class="dropdown-divider-custom"></li>
                             @module('item.reportes_sistema')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('reportes.index') }}"><i class="bi bi-file-earmark-pdf"></i> Reportes del Sistema</a></li>
                             @endmodule
@@ -707,6 +762,31 @@
                         </ul>
                     </li>
                     @endif
+                    @endif
+
+                    <!-- Base de Datos & Eventos con Sorteos en Vivo -->
+                    @if(Auth::check() && Auth::user()->id_rol == 1 && \App\Services\ModuleService::isEnabled('base_datos'))
+                    <li class="nav-item dropdown">
+                        <a class="nav-link nav-link-custom dropdown-toggle {{ Request::is('base-datos*') || Request::is('cortina*') ? 'active' : '' }}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-gift-fill text-warning me-1"></i> Base de Datos
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark-custom">
+                            @module('item.bd_cortina')
+                            <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('cortina.index') }}"><i class="bi bi-display-fill text-primary me-2"></i> Cortina Digital de Eventos</a></li>
+                            <li><hr class="dropdown-divider-custom"></li>
+                            @endmodule
+                            @module('item.bd_sorteos')
+                            <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('base_datos.index') }}"><i class="bi bi-collection-play-fill text-success me-2"></i> Eventos & Sorteos en Vivo</a></li>
+                            @endmodule
+                            @module('item.bd_directorio')
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('base_datos.index') }}#tabProspectos"><i class="bi bi-telephone-fill text-primary me-2"></i> Directorio de Contactos</a></li>
+                            @endmodule
+                            @module('item.bd_exportar')
+                            <li><hr class="dropdown-divider-custom"></li>
+                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('base_datos.exportar') }}"><i class="bi bi-file-earmark-excel text-success me-2"></i> Descargar Base Completa (CSV)</a></li>
+                            @endmodule
+                        </ul>
+                    </li>
                     @endif
 
                     <!-- Configuración Dropdown (Solo Administrador General con Clave) -->

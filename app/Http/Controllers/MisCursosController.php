@@ -1525,6 +1525,24 @@ class MisCursosController extends Controller
     }
 
     /**
+     * Genera el Informe Ejecutivo Preliminar del Curso (con nómina de estudiantes matriculados y estado docente).
+     */
+    public function informeEjecutivo($id)
+    {
+        $curso = CursoActivo::with(['planEstudio.programa', 'profesor'])->findOrFail($id);
+        $estudiantes = DB::table('matriculas as m')
+            ->join('usuarios as u', 'm.id_estudiante', '=', 'u.id')
+            ->where('m.id_curso_activo', $id)
+            ->where('u.id', '!=', (int)($curso->id_profesor ?? 0))
+            ->select('u.id', 'u.nombre', 'u.apellidos', 'u.cedula', 'u.email', 'u.telefono', 'm.calificacion')
+            ->orderBy('u.nombre')
+            ->orderBy('u.apellidos')
+            ->get();
+
+        return view('mis_cursos.informe_ejecutivo', compact('curso', 'estudiantes'));
+    }
+
+    /**
      * Genera el Acta Oficial de Calificaciones en PDF y la remite automáticamente por correo a Registro Académico y al docente.
      */
     public function remitirActaEmail(Request $request, $id)

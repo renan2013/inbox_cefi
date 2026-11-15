@@ -203,9 +203,15 @@
                                 <span class="badge badge-checklist {{ $c->check_pago ? 'badge-checklist-active' : 'badge-checklist-inactive' }}">Pago</span>
                             </div>
 
-                            <div class="d-grid">
-                                <a href="{{ route('mis_cursos.ver', $c->id_curso_activo) }}" class="btn btn-course-panel text-center">
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ route('mis_cursos.ver', $c->id_curso_activo) }}" class="btn btn-course-panel text-center flex-grow-1">
                                     <i class="bi bi-gear-wide-connected me-1"></i> Abrir Panel de Curso
+                                </a>
+                                <a href="{{ route('mis_cursos.informe_ejecutivo', $c->id_curso_activo) }}" target="_blank" class="btn btn-outline-info rounded-3 px-3 d-inline-flex align-items-center" title="Informe Ejecutivo y Nómina Oficial">
+                                    <i class="bi bi-file-earmark-text me-1"></i> Informe Ejecutivo
+                                </a>
+                                <a href="{{ route('mis_cursos.cortina', $c->id_curso_activo) }}" target="_blank" class="btn btn-outline-warning rounded-3 px-3 d-inline-flex align-items-center" title="Pantalla de Bienvenida / Zoom">
+                                    <i class="bi bi-display"></i>
                                 </a>
                             </div>
                         </div>

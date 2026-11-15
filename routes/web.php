@@ -37,6 +37,9 @@ use App\Http\Controllers\ConvalidacionController;
 use App\Http\Controllers\RetiroAsignaturaController;
 use App\Http\Controllers\GraduacionController;
 use App\Http\Controllers\PortalEstudianteController;
+use App\Http\Controllers\BaseDatosEventosController;
+use App\Http\Controllers\RepositorioActasController;
+use App\Http\Controllers\SaludoController;
 
 Route::post('/inbox-ai/chat', [InboxAiController::class, 'chat'])->name('inbox_ai.chat');
 
@@ -54,6 +57,12 @@ Route::get('/solicitud-curso-libre/exito', function () {
 // Rutas Públicas de Encuestas
 Route::get('/encuesta/{id_curso}', [EncuestaController::class, 'responder'])->name('encuesta.responder');
 Route::post('/encuesta/procesar', [EncuestaController::class, 'procesarRespuesta'])->name('encuesta.procesar');
+
+// Rutas Públicas de Eventos QR, Cortina Digital y Tarjetas de Saludo
+Route::get('/evento/{codigo}', [BaseDatosEventosController::class, 'registroPublico'])->name('evento.registro_publico');
+Route::post('/evento/{codigo}', [BaseDatosEventosController::class, 'guardarRegistroPublico'])->name('evento.registro_publico.store');
+Route::get('/cortina/evento', [BaseDatosEventosController::class, 'cortinaEvento'])->name('cortina.evento');
+Route::get('/saludos/ver/{token}', [SaludoController::class, 'verTarjeta'])->name('saludos.ver_tarjeta');
 
 // API Externa Finanzas (n8n, Green-API, Cron WhatsApp Morosidad)
 Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaController::class, 'apiCuotasVencimiento'])->name('finanzas.api.cuotas_vencimiento');
@@ -218,7 +227,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/tareas/{id}/eliminar', [DashboardController::class, 'eliminarTarea'])->name('tareas.eliminar');
     });
 
-    Route::middleware('module:tareas_gantt')->group(function () {
+    Route::middleware('no.alumno')->group(function () {
+        Route::get('/tareas/gantt', [TareaController::class, 'gantt'])->name('tareas.gantt');
         Route::get('/tareas/crear', [TareaController::class, 'create'])->name('tareas.create');
         Route::post('/tareas/crear', [TareaController::class, 'store'])->name('tareas.store');
         Route::get('/tareas/seleccionar-plantilla', [TareaController::class, 'seleccionarPlantilla'])->name('tareas.seleccionar_plantilla');
@@ -227,6 +237,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/tareas/plantillas/{id}/editar', [TareaController::class, 'editarPlantilla'])->name('tareas.plantillas.edit');
         Route::post('/tareas/plantillas/{id}/editar', [TareaController::class, 'updatePlantilla'])->name('tareas.plantillas.update');
         Route::post('/tareas/plantillas/{id}/eliminar', [TareaController::class, 'destroyPlantilla'])->name('tareas.plantillas.destroy');
+        Route::get('/tareas/etiquetas', [TareaController::class, 'etiquetas'])->name('tareas.etiquetas.index');
+        Route::post('/tareas/etiquetas/crear', [TareaController::class, 'storeEtiqueta'])->name('tareas.etiquetas.store');
+        Route::post('/tareas/etiquetas/{id}/editar', [TareaController::class, 'updateEtiqueta'])->name('tareas.etiquetas.update');
+        Route::post('/tareas/etiquetas/{id}/eliminar', [TareaController::class, 'destroyEtiqueta'])->name('tareas.etiquetas.destroy');
     });
 
     // --- REGISTRO ACADÉMICO ---
@@ -508,6 +522,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/docente/cursos/{id}/gestionar-silabo/guardar', [MisCursosController::class, 'guardarSilabo'])->name('mis_cursos.gestionar_silabo.guardar');
         Route::get('/docente/cursos/{id}/silabo-pdf', [MisCursosController::class, 'verSilaboPdf'])->name('mis_cursos.silabo_pdf');
         Route::get('/docente/cursos/{id}/acta-pdf', [MisCursosController::class, 'generarActaPdf'])->name('mis_cursos.acta_pdf');
+        Route::get('/docente/cursos/{id}/informe-ejecutivo', [MisCursosController::class, 'informeEjecutivo'])->name('mis_cursos.informe_ejecutivo');
         Route::post('/docente/cursos/{id}/remitir-acta-email', [MisCursosController::class, 'remitirActaEmail'])->name('mis_cursos.remitir_acta_email');
         
         Route::get('/docente/cursos/{id}/recursos-drive', [MisCursosController::class, 'verRecursosDrive'])->name('mis_cursos.recursos_drive');
@@ -545,6 +560,31 @@ Route::middleware('auth')->group(function () {
         Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
         Route::get('/inventario/operaciones', [InventarioController::class, 'operaciones'])->name('inventario.operaciones');
         Route::post('/inventario/operaciones/guardar', [InventarioController::class, 'registrarMovimiento'])->name('inventario.movimiento.store');
+    });
+
+    // --- REPOSITORIO OFICIAL DE ACTAS, SALUDOS, CORTINA Y BASE DE DATOS / SORTEOS ---
+    Route::middleware('no.alumno')->group(function () {
+        // Repositorio Oficial de Actas
+        Route::get('/registro/repositorio-actas', [RepositorioActasController::class, 'index'])->name('registro.repositorio_actas');
+        Route::post('/registro/repositorio-actas/{id}/toggle', [RepositorioActasController::class, 'toggleSelloActa'])->name('registro.repositorio_actas.toggle');
+
+        // Módulo Saludos y Tarjetas Institucionales
+        Route::get('/saludos/plantillas', [SaludoController::class, 'plantillas'])->name('saludos.plantillas');
+        Route::post('/saludos/plantillas', [SaludoController::class, 'storePlantilla'])->name('saludos.plantillas.store');
+        Route::post('/saludos/plantillas/{id}/eliminar', [SaludoController::class, 'destroyPlantilla'])->name('saludos.plantillas.destroy');
+        Route::get('/saludos/categorias', [SaludoController::class, 'categorias'])->name('saludos.categorias');
+        Route::post('/saludos/categorias', [SaludoController::class, 'storeCategoria'])->name('saludos.categorias.store');
+        Route::post('/saludos/categorias/{id}/eliminar', [SaludoController::class, 'destroyCategoria'])->name('saludos.categorias.destroy');
+        Route::post('/saludos/tarjetas', [SaludoController::class, 'storeTarjeta'])->name('saludos.tarjetas.store');
+
+        // Cortina Digital de Eventos & Base de Datos con Sorteos en Vivo
+        Route::get('/cortina', [BaseDatosEventosController::class, 'cortinaIndex'])->name('cortina.index');
+        Route::get('/base-datos', [BaseDatosEventosController::class, 'index'])->name('base_datos.index');
+        Route::post('/base-datos/evento', [BaseDatosEventosController::class, 'storeEvento'])->name('base_datos.evento.store');
+        Route::post('/base-datos/evento/{id}/eliminar', [BaseDatosEventosController::class, 'destroyEvento'])->name('base_datos.evento.destroy');
+        Route::get('/base-datos/evento/{id}/sorteo', [BaseDatosEventosController::class, 'sorteoEnVivo'])->name('base_datos.sorteo');
+        Route::post('/base-datos/evento/{id}/sorteo/ganador', [BaseDatosEventosController::class, 'registrarGanadorSorteo'])->name('base_datos.sorteo.ganador');
+        Route::get('/base-datos/exportar', [BaseDatosEventosController::class, 'exportarCsv'])->name('base_datos.exportar');
     });
 });
 

@@ -243,4 +243,152 @@ class TareaController extends Controller
         DB::table('tarea_plantillas')->where('id', $id)->delete();
         return redirect()->route('tareas.plantillas.gestionar')->with('success', 'Plantilla eliminada correctamente.');
     }
+
+    /**
+     * Vista General Interactiva de Diagrama de Gantt Colaborativo (Gantt Tareas).
+     */
+    public function gantt(Request $request)
+    {
+        $filtroAnio      = $request->input('anio', date('Y'));
+        $filtroEstado    = $request->input('estado', '');
+        $filtroPrioridad = $request->input('prioridad', '');
+        $filtroUsuario   = $request->input('usuario', '');
+        $filtroEtiqueta  = $request->input('etiqueta', '');
+
+        $usuarios  = Schema::hasTable('usuarios') ? DB::table('usuarios')->orderBy('nombre')->get() : collect();
+        $etiquetas = Schema::hasTable('etiquetas') ? DB::table('etiquetas')->orderBy('nombre')->get() : collect();
+
+        $query = DB::table('tareas as t')
+            ->leftJoin('usuarios as u_creador', 't.id_creador', '=', 'u_creador.id')
+            ->select('t.*', 'u_creador.nombre as creador_nombre', 'u_creador.apellidos as creador_apellidos');
+
+        if ($filtroAnio !== '' && $filtroAnio !== 'todos') {
+            $query->where(function ($q) use ($filtroAnio) {
+                $q->whereYear('t.fecha_creacion', $filtroAnio)
+                  ->orWhereYear('t.fecha_vencimiento', $filtroAnio);
+            });
+        }
+        if ($filtroEstado !== '') {
+            $query->where('t.estado', $filtroEstado);
+        }
+        if ($filtroPrioridad !== '') {
+            $query->where('t.prioridad', $filtroPrioridad);
+        }
+        if ($filtroUsuario !== '' && Schema::hasTable('tarea_asignaciones')) {
+            $query->whereExists(function ($sub) use ($filtroUsuario) {
+                $sub->select(DB::raw(1))
+                    ->from('tarea_asignaciones as ta')
+                    ->whereColumn('ta.id_tarea', 't.id')
+                    ->where('ta.id_usuario', $filtroUsuario);
+            });
+        }
+        if ($filtroEtiqueta !== '' && Schema::hasTable('tarea_etiquetas')) {
+            $query->whereExists(function ($sub) use ($filtroEtiqueta) {
+                $sub->select(DB::raw(1))
+                    ->from('tarea_etiquetas as te')
+                    ->whereColumn('te.id_tarea', 't.id')
+                    ->where('te.id_etiqueta', $filtroEtiqueta);
+            });
+        }
+
+        $tareasRaw = $query->orderBy('t.fecha_creacion', 'asc')->get();
+
+        // Mapear asignados y etiquetas por tarea
+        $asignadosPorTarea = [];
+        if (Schema::hasTable('tarea_asignaciones')) {
+            $rows = DB::table('tarea_asignaciones as ta')
+                ->join('usuarios as u', 'ta.id_usuario', '=', 'u.id')
+                ->select('ta.id_tarea', 'u.id', 'u.nombre', 'u.apellidos', 'u.email')
+                ->get();
+            foreach ($rows as $r) {
+                $asignadosPorTarea[$r->id_tarea][] = $r;
+            }
+        }
+
+        $etiquetasPorTarea = [];
+        if (Schema::hasTable('tarea_etiquetas') && Schema::hasTable('etiquetas')) {
+            $rows = DB::table('tarea_etiquetas as te')
+                ->join('etiquetas as e', 'te.id_etiqueta', '=', 'e.id')
+                ->select('te.id_tarea', 'e.id', 'e.nombre')
+                ->get();
+            foreach ($rows as $r) {
+                $etiquetasPorTarea[$r->id_tarea][] = $r;
+            }
+        }
+
+        $tareas = $tareasRaw->map(function ($t) use ($asignadosPorTarea, $etiquetasPorTarea) {
+            $inicio = !empty($t->fecha_creacion) ? substr((string)$t->fecha_creacion, 0, 10) : date('Y-m-d');
+            $fin    = !empty($t->fecha_vencimiento) ? substr((string)$t->fecha_vencimiento, 0, 10) : date('Y-m-d', strtotime($inicio . ' +7 days'));
+            if ($fin < $inicio) {
+                $fin = $inicio;
+            }
+            $t->fecha_inicio_gantt = $inicio;
+            $t->fecha_fin_gantt    = $fin;
+            $t->asignados          = $asignadosPorTarea[$t->id] ?? [];
+            $t->etiquetas_lista    = $etiquetasPorTarea[$t->id] ?? [];
+            $t->progreso           = $t->estado === 'completada' ? 100 : ($t->estado === 'en_proceso' ? 55 : 15);
+            return $t;
+        });
+
+        return view('tareas.gantt', compact(
+            'tareas',
+            'usuarios',
+            'etiquetas',
+            'filtroAnio',
+            'filtroEstado',
+            'filtroPrioridad',
+            'filtroUsuario',
+            'filtroEtiqueta'
+        ));
+    }
+
+    /**
+     * Gestión de Etiquetas de Tareas.
+     */
+    public function etiquetas()
+    {
+        if (!Schema::hasTable('etiquetas')) {
+            Schema::create('etiquetas', function ($table) {
+                $table->increments('id');
+                $table->string('nombre', 100);
+                $table->string('color', 30)->default('#3b82f6');
+            });
+        }
+
+        $etiquetas = DB::table('etiquetas as e')
+            ->leftJoin('tarea_etiquetas as te', 'e.id', '=', 'te.id_etiqueta')
+            ->select('e.*', DB::raw('COUNT(te.id_tarea) as total_tareas'))
+            ->groupBy('e.id', 'e.nombre')
+            ->orderBy('e.nombre', 'asc')
+            ->get();
+
+        return view('tareas.etiquetas', compact('etiquetas'));
+    }
+
+    public function storeEtiqueta(Request $request)
+    {
+        $request->validate(['nombre' => 'required|string|max:100']);
+        DB::table('etiquetas')->insert([
+            'nombre' => trim($request->input('nombre')),
+        ]);
+        return redirect()->route('tareas.etiquetas.index')->with('success', 'Etiqueta creada correctamente.');
+    }
+
+    public function updateEtiqueta(Request $request, $id)
+    {
+        $request->validate(['nombre' => 'required|string|max:100']);
+        DB::table('etiquetas')->where('id', $id)->update([
+            'nombre' => trim($request->input('nombre')),
+        ]);
+        return redirect()->route('tareas.etiquetas.index')->with('success', 'Etiqueta actualizada correctamente.');
+    }
+
+    public function destroyEtiqueta($id)
+    {
+        if (Schema::hasTable('tarea_etiquetas')) {
+            DB::table('tarea_etiquetas')->where('id_etiqueta', $id)->delete();
+        }
+        DB::table('etiquetas')->where('id', $id)->delete();
+        return redirect()->route('tareas.etiquetas.index')->with('success', 'Etiqueta eliminada correctamente.');
+    }
 }
