@@ -573,7 +573,7 @@ class CursoController extends Controller
 
         $this->sincronizarPlantillaSilabo($plan, $evaluaciones_arr, $cronograma_arr, $rubricas_arr);
 
-        return redirect()->route('cursos.index')->with('success', '¡Curso añadido exitosamente al plan de estudios con su ficha técnica oficial!');
+        return redirect()->route('cursos.show', $plan->id_plan)->with('success', '¡Curso registrado exitosamente en el plan de estudios!');
     }
 
     /**
