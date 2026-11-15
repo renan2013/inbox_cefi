@@ -425,7 +425,7 @@
                                                         <strong class="text-white">{{ $curso->codigo ?: 'S/C' }}</strong>
                                                     </td>
                                                     <td>
-                                                        <div class="fw-bold" style="color: #f8fafc;">{{ $curso->materia }}</div>
+                                                        <a href="{{ route('cursos.show', $curso->id_plan) }}" class="fw-bold text-decoration-none d-inline-block" style="color: #f8fafc;">{{ $curso->materia }}</a>
                                                         <div class="d-flex align-items-center gap-2 mt-1">
                                                             @if ($curso->cuatrimestre)
                                                                 <span class="badge-cuatri py-0 px-2" style="font-size: 0.7rem;">{{ $curso->cuatrimestre }}</span>
@@ -480,6 +480,9 @@
                                                     </td>
                                                     <td class="text-end pe-4">
                                                         <div class="d-flex justify-content-end gap-1">
+                                                            <a href="{{ route('cursos.show', $curso->id_plan) }}" class="btn btn-sm btn-outline-info" title="Ver Curso">
+                                                                <i class="bi bi-eye"></i>
+                                                            </a>
                                                             <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver Descriptor PDF Oficial">
                                                                 <i class="bi bi-file-earmark-pdf"></i>
                                                             </a>

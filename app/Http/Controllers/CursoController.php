@@ -577,6 +577,103 @@ class CursoController extends Controller
     }
 
     /**
+     * Muestra el visor oficial del Descriptor y Ficha Técnica del Curso (Modelo CONESUP).
+     */
+    public function show($id)
+    {
+        $this->ensurePlanEstudiosColumns();
+
+        $curso = PlanEstudio::with('programa')->findOrFail($id);
+
+        $silabo = null;
+        $id_silabo = null;
+        try {
+            $silabo = DB::table('silabos')
+                ->where('id_plan', $id)
+                ->orderBy('id_silabo', 'desc')
+                ->first();
+            if ($silabo) {
+                $id_silabo = (int)$silabo->id_silabo;
+            }
+        } catch (\Throwable $e) {
+            $silabo = null;
+        }
+
+        $evaluaciones_ver = [];
+        if (!empty($curso->evaluaciones_json)) {
+            $decodedEval = json_decode($curso->evaluaciones_json, true);
+            if (is_array($decodedEval) && !empty($decodedEval)) {
+                $evaluaciones_ver = $decodedEval;
+            }
+        }
+        if (empty($evaluaciones_ver) && $id_silabo) {
+            try {
+                $evaluaciones_ver = DB::table('silabo_evaluacion')
+                    ->where('id_silabo', $id_silabo)
+                    ->orderBy('id_evaluacion', 'asc')
+                    ->get()
+                    ->map(fn($item) => (array)$item)
+                    ->toArray();
+            } catch (\Throwable $e) {
+                $evaluaciones_ver = [];
+            }
+        }
+
+        $cronograma_ver = [];
+        if (!empty($curso->cronograma_json)) {
+            $decodedCro = json_decode($curso->cronograma_json, true);
+            if (is_array($decodedCro) && !empty($decodedCro)) {
+                $cronograma_ver = $decodedCro;
+            }
+        }
+        if (empty($cronograma_ver) && $id_silabo) {
+            try {
+                $cronograma_ver = DB::table('silabo_cronograma')
+                    ->where('id_silabo', $id_silabo)
+                    ->orderByRaw('CAST(semana AS UNSIGNED) ASC, id_cronograma ASC')
+                    ->get()
+                    ->map(fn($item) => (array)$item)
+                    ->toArray();
+            } catch (\Throwable $e) {
+                $cronograma_ver = [];
+            }
+        }
+        if (!empty($cronograma_ver)) {
+            usort($cronograma_ver, function ($a, $b) {
+                $semA = intval(preg_replace('/\D/', '', (string)($a['semana'] ?? '0'))) ?: intval($a['semana'] ?? 0);
+                $semB = intval(preg_replace('/\D/', '', (string)($b['semana'] ?? '0'))) ?: intval($b['semana'] ?? 0);
+                if ($semA === $semB) {
+                    return intval($a['id_cronograma'] ?? 0) <=> intval($b['id_cronograma'] ?? 0);
+                }
+                return $semA <=> $semB;
+            });
+            $this->depurarCronogramaSegunEvaluacion($cronograma_ver, $evaluaciones_ver);
+        }
+
+        $rubricas_ver = [];
+        if (!empty($curso->rubricas_json)) {
+            $decodedRub = json_decode($curso->rubricas_json, true);
+            if (is_array($decodedRub) && !empty($decodedRub)) {
+                $rubricas_ver = $decodedRub;
+            }
+        }
+        if (empty($rubricas_ver) && $id_silabo) {
+            try {
+                $rubricas_ver = DB::table('silabo_rubricas')
+                    ->where('id_silabo', $id_silabo)
+                    ->orderBy('codigo', 'asc')
+                    ->get()
+                    ->map(fn($item) => (array)$item)
+                    ->toArray();
+            } catch (\Throwable $e) {
+                $rubricas_ver = [];
+            }
+        }
+
+        return view('cursos.show', compact('curso', 'silabo', 'evaluaciones_ver', 'cronograma_ver', 'rubricas_ver'));
+    }
+
+    /**
      * Muestra el formulario para editar una materia del plan de estudios.
      */
     public function edit($id)

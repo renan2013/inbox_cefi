@@ -287,20 +287,26 @@ if (!function_exists('generarHtmlTareasMoodle')) {
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none text-muted"><i class="bi bi-house-door"></i> Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('cursos.index') }}" class="text-decoration-none text-muted">Oferta Académica</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Editar Curso</li>
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('cursos.index') }}">Oferta Académica</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('cursos.show', $curso->id_plan) }}">Ver Curso</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Editar Curso: <span id="breadcrumbCursoNombre" class="fw-semibold">{{ $curso->materia }}</span></li>
                 </ol>
             </nav>
-            <h2 class="section-title mb-0"><i class="bi bi-pencil-square text-primary me-2"></i> Editar Curso: {{ $curso->materia }}</h2>
-            <p class="text-muted mb-0 small mt-1">Configure la ficha técnica oficial del curso, objetivos, contenidos, evaluación, cronograma y rúbricas</p>
+            <h2 class="section-title mb-0 d-flex flex-wrap align-items-center gap-2">
+                <span><i class="bi bi-pencil-square text-success me-1"></i> Editar Curso en el Plan:</span>
+                <span class="text-primary fw-bold" id="headerNombreCurso">{{ $curso->materia }}</span>
+                @if(!empty($curso->codigo))
+                    <span class="badge bg-light text-dark border ms-1 fs-6" id="headerCodigoCurso">{{ $curso->codigo }}</span>
+                @else
+                    <span class="badge bg-light text-dark border ms-1 fs-6 d-none" id="headerCodigoCurso"></span>
+                @endif
+            </h2>
+            <p class="text-muted mb-0 small mt-1">Programa: <strong class="text-dark text-uppercase" id="subHeaderNombrePrograma">{{ $curso->programa->nombre_programa ?? '' }}</strong></p>
         </div>
-        <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
-            <a href="{{ route('cursos.descriptor_pdf', $curso->id_plan) }}" target="_blank" class="btn btn-outline-danger rounded-pill px-3 shadow-sm">
-                <i class="bi bi-file-earmark-pdf me-1"></i> Descriptor PDF
-            </a>
-            <a href="{{ route('cursos.descriptor_doc', $curso->id_plan) }}" target="_blank" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
-                <i class="bi bi-file-earmark-word me-1"></i> Descriptor Word
+        <div class="d-flex gap-2 mt-3 mt-md-0">
+            <a href="{{ route('cursos.show', $curso->id_plan) }}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-eye me-2"></i> Ver Curso
             </a>
             <a href="{{ route('cursos.index') }}" class="btn btn-secondary rounded-pill px-4">
                 <i class="bi bi-arrow-left me-2"></i> Volver a Cursos
@@ -337,10 +343,26 @@ if (!function_exists('generarHtmlTareasMoodle')) {
 
         <!-- Botón Flotante de Guardado Persistente Azul Oficial -->
         <button type="button" onclick="validarYGuardarPlan()" class="btn btn-primary btn-save-float shadow-lg border-white border-2">
-            <i class="bi bi-check-circle-fill me-2"></i> GUARDAR CAMBIOS DEL CURSO
+            <i class="bi bi-check2-circle me-2"></i> GUARDAR CAMBIOS
         </button>
 
         <div class="card card-silabo border-0 shadow-sm">
+            <!-- Barra Superior de Identificación Permanente del Curso -->
+            <div class="px-4 py-2 bg-light border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success px-2 py-1"><i class="bi bi-book-half me-1"></i> Curso en Edición</span>
+                    <span class="fw-bold text-dark fs-6" id="cardNombreCurso">{{ $curso->materia }}</span>
+                    @if(!empty($curso->codigo))
+                        <span class="badge bg-white text-muted border" id="cardCodigoCurso">{{ $curso->codigo }}</span>
+                    @else
+                        <span class="badge bg-white text-muted border d-none" id="cardCodigoCurso"></span>
+                    @endif
+                </div>
+                <div class="text-muted small">
+                    <i class="bi bi-mortarboard me-1"></i> <strong id="cardCuatrimestreCurso">{{ $curso->cuatrimestre }}</strong>
+                </div>
+            </div>
+
             <div class="card-header bg-white p-0">
                 <ul class="nav nav-tabs border-0 flex-nowrap overflow-auto" id="cursoTab" role="tablist">
                     <li class="nav-item">
@@ -2402,6 +2424,70 @@ No incluyas explicaciones adicionales, introducciones ni bloques de texto fuera 
     if (tablaEvaluacion) {
         tablaEvaluacion.addEventListener('input', sincronizarSilabo);
         tablaEvaluacion.addEventListener('change', sincronizarSilabo);
+    }
+
+    // Sincronización reactiva del Nombre, Código, Programa y Cuatrimestre del Curso en tiempo real
+    const inputMateria = document.querySelector('input[name="materia"]');
+    const inputCodigo = document.querySelector('input[name="codigo"]');
+    const selectPrograma = document.getElementById('id_programa');
+    const selectCuatrimestre = document.getElementById('cuatrimestre');
+
+    function actualizarNombreCursoReactivo() {
+        const valMateria = inputMateria ? (inputMateria.value.trim() || 'Sin Nombre') : '';
+        const valCodigo = inputCodigo ? inputCodigo.value.trim() : '';
+
+        const elH = document.getElementById('headerNombreCurso');
+        const elB = document.getElementById('breadcrumbCursoNombre');
+        const elC = document.getElementById('cardNombreCurso');
+
+        if (elH) elH.textContent = valMateria;
+        if (elB) elB.textContent = valMateria;
+        if (elC) elC.textContent = valMateria;
+
+        const elCodH = document.getElementById('headerCodigoCurso');
+        const elCodC = document.getElementById('cardCodigoCurso');
+        if (elCodH) {
+            elCodH.textContent = valCodigo;
+            elCodH.classList.toggle('d-none', !valCodigo);
+        }
+        if (elCodC) {
+            elCodC.textContent = valCodigo;
+            elCodC.classList.toggle('d-none', !valCodigo);
+        }
+
+        document.title = 'Editar Curso: ' + valMateria + (valCodigo ? ' (' + valCodigo + ')' : '');
+    }
+
+    function actualizarProgramaReactivo() {
+        const elProg = document.getElementById('subHeaderNombrePrograma');
+        if (elProg && selectPrograma && selectPrograma.selectedIndex >= 0) {
+            const opt = selectPrograma.options[selectPrograma.selectedIndex];
+            if (opt && opt.value) {
+                elProg.textContent = opt.textContent.trim().toUpperCase();
+            }
+        }
+    }
+
+    function actualizarCuatrimestreReactivo() {
+        const elCuat = document.getElementById('cardCuatrimestreCurso');
+        if (elCuat && selectCuatrimestre) {
+            elCuat.textContent = selectCuatrimestre.value || '';
+        }
+    }
+
+    if (inputMateria) {
+        inputMateria.addEventListener('input', actualizarNombreCursoReactivo);
+        inputMateria.addEventListener('change', actualizarNombreCursoReactivo);
+    }
+    if (inputCodigo) {
+        inputCodigo.addEventListener('input', actualizarNombreCursoReactivo);
+        inputCodigo.addEventListener('change', actualizarNombreCursoReactivo);
+    }
+    if (selectPrograma) {
+        selectPrograma.addEventListener('change', actualizarProgramaReactivo);
+    }
+    if (selectCuatrimestre) {
+        selectCuatrimestre.addEventListener('change', actualizarCuatrimestreReactivo);
     }
   });
 </script>
