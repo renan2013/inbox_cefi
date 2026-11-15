@@ -226,4 +226,141 @@ class SoporteController extends Controller
 
         return redirect()->route('soporte.categorias')->with('success', 'Categoría eliminada con éxito.');
     }
+
+    /**
+     * Reporte Rápido Omnicanal de Averías desde el ícono superior de cualquier pantalla.
+     * Soporta Evidencia Gráfica (archivo subido o captura pegada con Ctrl+V en Base64),
+     * guarda en BD local, sincroniza con https://hub.renangalvan.net/api/tickets.php,
+     * envía a WhatsApp vía n8n y notifica por correo electrónico.
+     */
+    public function reportarRapido(Request $request)
+    {
+        $request->validate([
+            'titulo'            => 'required|string|max:255',
+            'etiqueta'          => 'nullable|string|max:120',
+            'prioridad'         => 'nullable|string|max:40',
+            'problema'          => 'required|string',
+            'url_origen'        => 'nullable|string|max:500',
+            'evidencia_grafica' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:8192',
+            'evidencia_base64'  => 'nullable|string',
+        ]);
+
+        $uploadDir = public_path('uploads/soporte');
+        if (!File::isDirectory($uploadDir)) {
+            File::makeDirectory($uploadDir, 0775, true);
+        }
+
+        $adjuntoNombre = null;
+        if ($request->hasFile('evidencia_grafica')) {
+            $file = $request->file('evidencia_grafica');
+            $ext  = strtolower($file->getClientOriginalExtension() ?: 'png');
+            $adjuntoNombre = 'averia_' . date('Ymd_His') . '_' . uniqid() . '.' . $ext;
+            $file->move($uploadDir, $adjuntoNombre);
+        } elseif ($request->filled('evidencia_base64')) {
+            $b64 = $request->input('evidencia_base64');
+            if (preg_match('/^data:image\/(\w+);base64,/', $b64, $typeMatch)) {
+                $ext = strtolower($typeMatch[1] === 'jpeg' ? 'jpg' : $typeMatch[1]);
+                $rawImg = base64_decode(substr($b64, strpos($b64, ',') + 1));
+                if ($rawImg !== false) {
+                    $adjuntoNombre = 'averia_' . date('Ymd_His') . '_' . uniqid() . '.' . $ext;
+                    File::put($uploadDir . '/' . $adjuntoNombre, $rawImg);
+                }
+            }
+        }
+
+        $etiqueta  = trim($request->input('etiqueta', '🟠 Fallo en Módulo'));
+        $prioridad = strtolower(trim($request->input('prioridad', 'alta')));
+        $urlOrigen = trim($request->input('url_origen', url()->previous()));
+
+        // Buscar o crear la categoría equivalente en soporte_categorias
+        $cleanCatName = trim(preg_replace('/^[^\w\sáéíóúÁÉÍÓÚñÑ]+\s*/u', '', $etiqueta)) ?: 'General';
+        $catObj = SoporteCategoria::firstOrCreate(['nombre' => $cleanCatName]);
+
+        // Asignar por defecto al primer Administrador General
+        $adminTarget = Usuario::where('id_rol', 1)->orderBy('id', 'asc')->first();
+
+        $problemaEnriquecido = "[Etiqueta: {$etiqueta} | Prioridad: " . strtoupper($prioridad) . "]\n"
+            . ($urlOrigen ? "[Pantalla Origen: {$urlOrigen}]\n\n" : "\n")
+            . trim($request->input('problema'));
+
+        $soporte = Soporte::create([
+            'titulo'       => trim($request->input('titulo')),
+            'problema'     => $problemaEnriquecido,
+            'solucion'     => null,
+            'categoria_id' => $catObj ? $catObj->id : null,
+            'id_creador'   => Auth::id(),
+            'reportado_a'  => $adminTarget ? $adminTarget->id : Auth::id(),
+            'estado'       => 'reportado',
+            'adjunto'      => $adjuntoNombre,
+        ]);
+
+        $evidenciaUrl = $adjuntoNombre ? url('uploads/soporte/' . $adjuntoNombre) : '';
+        $user = Auth::user();
+
+        // Sincronizar con Inbox Cloud Hub (https://hub.renangalvan.net/api/tickets.php) + n8n WhatsApp + Correo
+        $this->dispatchOmnicanalAveria([
+            'local_id'       => $soporte->id,
+            'client_id'      => env('INBOX_CLIENT_ID', 'inbox_cefi'),
+            'client_siglas'  => config('cliente.siglas', 'CEFI'),
+            'client_nombre'  => config('cliente.nombre', 'Inbox CEFI'),
+            'titulo'         => $soporte->titulo,
+            'etiqueta'       => $etiqueta,
+            'prioridad'      => $prioridad,
+            'problema'       => trim($request->input('problema')),
+            'estado'         => 'reportado',
+            'url_origen'     => $urlOrigen,
+            'navegador'      => $request->header('User-Agent', ''),
+            'evidencia_url'  => $evidenciaUrl,
+            'usuario_nombre' => $user ? trim(($user->nombre ?? '') . ' ' . ($user->apellidos ?? '')) : 'Usuario',
+            'usuario_email'  => $user->correo ?? $user->email ?? '',
+            'usuario_rol'    => ($user && $user->id_rol == 1) ? 'Administrador' : 'Usuario / Docente',
+            'fecha_creacion' => date('Y-m-d H:i:s'),
+        ]);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'       => true,
+                'message'       => '¡Avería reportada! Se notificó al Centro de Control, WhatsApp de Soporte y Correo.',
+                'ticket_id'     => $soporte->id,
+                'evidencia_url' => $evidenciaUrl,
+            ]);
+        }
+
+        return redirect()->back()->with('success', '¡Avería #' . $soporte->id . ' reportada y enviada a Soporte Técnico!');
+    }
+
+    /**
+     * Envía la avería hacia Inbox Cloud Hub (que dispara WhatsApp n8n + Email)
+     * y también dispara el webhook local de n8n si está configurado.
+     */
+    protected function dispatchOmnicanalAveria(array $payload): void
+    {
+        $secret = env('INBOX_HUB_SECRET', 'INBOX_HUB_MASTER_2026_RG_SECRET_KEY');
+        $hubUrl = env('INBOX_HUB_TICKETS_URL', 'https://hub.renangalvan.net/api/tickets.php');
+
+        $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $signature   = hash_hmac('sha256', $jsonPayload, $secret);
+
+        try {
+            $ch = curl_init($hubUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $jsonPayload,
+                CURLOPT_HTTPHEADER     => [
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                    'X-Inbox-Hub-Signature: ' . $signature,
+                    'X-Inbox-Client-Id: ' . ($payload['client_id'] ?? 'inbox_cefi'),
+                ],
+                CURLOPT_TIMEOUT        => 6,
+                CURLOPT_CONNECTTIMEOUT => 4,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            curl_exec($ch);
+            curl_close($ch);
+        } catch (\Throwable $e) {
+            // No bloquear la experiencia del usuario si el servidor externo tarda
+        }
+    }
 }

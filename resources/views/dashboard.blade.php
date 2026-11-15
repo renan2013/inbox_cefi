@@ -688,7 +688,31 @@
     <div class="row g-4">
         <!-- Main Content Area: Tasks Table & Kanban -->
         <div class="{{ (count($cumpleaneros) > 0 || count($mis_cursos_asignados) > 0) ? 'col-lg-9' : 'col-12' }}">
-            
+            @php
+                $averias_abiertas_dash = 0;
+                try {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('soporte')) {
+                        $averias_abiertas_dash = \Illuminate\Support\Facades\DB::table('soporte')->whereIn('estado', ['reportado', 'pendiente'])->count();
+                    }
+                } catch (\Throwable $e) {}
+            @endphp
+            @if ($es_admin && $averias_abiertas_dash > 0)
+                <div class="alert alert-warning border-0 rounded-4 d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-3 shadow-sm" style="background-color: rgba(245, 158, 11, 0.14); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35) !important;">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-20 p-3 rounded-circle me-3">
+                            <i class="bi bi-exclamation-triangle-fill text-warning fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="alert-heading fw-bold mb-1">¡Averías del Sistema Pendientes de Solución!</h5>
+                            <p class="mb-0 small">Existen <strong>{{ $averias_abiertas_dash }}</strong> reporte(s) de avería abiertos con evidencia o causa pendiente de atender.</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('soporte.gestionar') }}" class="btn btn-warning btn-sm rounded-pill px-4 fw-bold text-dark">
+                        <i class="bi bi-tools me-1"></i>Solucionar Averías
+                    </a>
+                </div>
+            @endif
+
             <!-- Alerta de Inventario en Dashboard -->
             @if ($productos_bajo_stock > 0)
                 <div class="alert alert-danger border-0 rounded-4 d-flex align-items-center mb-4 p-3 shadow-sm" style="background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3) !important;">

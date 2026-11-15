@@ -469,6 +469,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/configuracion/conocimiento-ai/guardar', [ConfiguracionController::class, 'guardarConocimientoAi'])->name('configuracion.conocimiento_ai.guardar');
     Route::post('/configuracion/conocimiento-ai/{id}/eliminar', [ConfiguracionController::class, 'eliminarConocimientoAi'])->name('configuracion.conocimiento_ai.eliminar');
 
+    // --- REPORTE RÁPIDO OMNICANAL DE AVERÍAS (DESDE CUALQUIER PANTALLA) ---
+    Route::post('/soporte/reportar-rapido', [SoporteController::class, 'reportarRapido'])->name('soporte.reportar_rapido');
+
     // --- PORTAL DE AUTOGESTIÓN ESTUDIANTIL (FASE 6 CEFI - SIEMPRE DISPONIBLE) ---
     Route::get('/estudiante/portal', [PortalEstudianteController::class, 'index'])->name('estudiante.portal');
     Route::get('/estudiante/mi-record-pdf', [PortalEstudianteController::class, 'descargarMiRecordPdf'])->name('estudiante.mi_record_pdf');

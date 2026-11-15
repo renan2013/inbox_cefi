@@ -450,24 +450,16 @@
                     @endif
 
                     @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
-                    @if(\App\Services\ModuleService::isEnabled('dashboard') && \App\Services\ModuleService::isEnabled('item.averias_alerta'))
                     @php
                         $_averiasPendientes = 0;
                         try {
-                            if (\Illuminate\Support\Facades\Schema::hasTable('soportes')) {
+                            if (\Illuminate\Support\Facades\Schema::hasTable('soporte')) {
+                                $_averiasPendientes = \Illuminate\Support\Facades\DB::table('soporte')->whereIn('estado', ['reportado', 'pendiente'])->count();
+                            } elseif (\Illuminate\Support\Facades\Schema::hasTable('soportes')) {
                                 $_averiasPendientes = \Illuminate\Support\Facades\DB::table('soportes')->whereIn('estado', ['reportado', 'pendiente'])->count();
                             }
                         } catch (\Throwable $e) {}
                     @endphp
-                    @if($_averiasPendientes > 0)
-                    <li class="nav-item me-1">
-                        <a class="nav-link nav-link-custom text-warning fw-bold" href="{{ route('soporte.gestionar') }}" title="{{ $_averiasPendientes }} averías o soportes pendientes">
-                            <i class="bi bi-lightbulb-fill text-warning"></i>
-                            <span class="badge bg-danger rounded-pill" style="font-size:0.65rem;">{{ $_averiasPendientes }}</span>
-                        </a>
-                    </li>
-                    @endif
-                    @endif
                     @if(\App\Services\ModuleService::isEnabled('dashboard') && \App\Services\ModuleService::isEnabled('item.dashboard_link'))
                     <li class="nav-item">
                         <a class="nav-link nav-link-custom {{ (Route::is('dashboard') || Route::is('tareas.*')) ? 'active' : '' }}" href="{{ route('dashboard') }}">
@@ -855,6 +847,24 @@
 
                 <!-- User Profile & Logout -->
                 <div class="d-flex align-items-center">
+                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
+                    @if(\App\Services\ModuleService::isEnabled('dashboard') && \App\Services\ModuleService::isEnabled('item.averias_alerta'))
+                    <button type="button"
+                            class="btn btn-outline-warning rounded-circle me-2 position-relative"
+                            style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-color: rgba(245, 158, 11, 0.45); color: #f59e0b;"
+                            onclick="abrirModalReporteAveria()"
+                            title="Reportar Avería o Problema del Sistema (Alerta Directa a Soporte)">
+                        <i class="bi bi-exclamation-triangle-fill {{ ($_averiasPendientes ?? 0) > 0 ? 'text-warning' : '' }}"></i>
+                        @if(($_averiasPendientes ?? 0) > 0)
+                            <span id="navbar-averias-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark" style="font-size: 0.62rem; padding: 0.22em 0.45em;">
+                                {{ $_averiasPendientes }}
+                            </span>
+                        @else
+                            <span id="navbar-averias-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark d-none" style="font-size: 0.62rem; padding: 0.22em 0.45em;">0</span>
+                        @endif
+                    </button>
+                    @endif
+                    @endif
                     @if(Auth::check() && Auth::user()->id_rol == 1)
                     <a href="{{ route('configuracion.index') }}" class="btn btn-outline-secondary btn-gear-config rounded-circle me-2" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-color: var(--border-dark);" title="Configuración de la Plataforma">
                         <i class="bi bi-gear-fill"></i>
@@ -893,6 +903,214 @@
             </p>
         </div>
     </footer>
+
+    <!-- Modal Global Omnicanal: Reportar Avería del Sistema con Evidencia Gráfica -->
+    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
+    <div class="modal fade" id="modalReportarAveriaGlobal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="background-color: var(--card-dark); color: var(--text-light); border: 1px solid var(--border-dark) !important;">
+                <div class="modal-header border-bottom px-4 py-3" style="background: linear-gradient(135deg, rgba(220,38,38,0.18), rgba(245,158,11,0.12)); border-color: var(--border-dark) !important;">
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger rounded-pill px-3 py-1"><i class="bi bi-broadcast me-1"></i>Alerta Omnicanal</span>
+                            <span class="small text-muted">Notifica a Dashboard + Hub Central + WhatsApp (n8n) + Correo</span>
+                        </div>
+                        <h5 class="modal-title fw-bold mb-0 mt-1">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Reportar Avería o Incidencia del Sistema
+                        </h5>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{{ route('soporte.gestionar') }}" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-semibold" title="Ir al Tablero de Averías">
+                            <i class="bi bi-list-check me-1"></i>Ver Averías ({{ $_averiasPendientes ?? 0 }})
+                        </a>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                </div>
+                <form id="formReporteAveriaGlobal" onsubmit="enviarReporteAveriaGlobal(event)" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="url_origen" id="averia_url_origen">
+                    <input type="hidden" name="evidencia_base64" id="averia_evidencia_base64">
+                    <div class="modal-body px-4 py-3">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">
+                                    <i class="bi bi-cursor-text text-warning me-1"></i>Asunto / Resumen del Problema *
+                                </label>
+                                <input type="text" name="titulo" id="averia_titulo" class="form-control" required placeholder="Ej: No permite descargar la boleta en PDF o error al guardar acta..." style="background-color: var(--bg-dark); color: var(--text-light); border-color: var(--border-dark);">
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">
+                                    <i class="bi bi-tags-fill text-info me-1"></i>Etiqueta / Categoría de la Causa *
+                                </label>
+                                <select name="etiqueta" id="averia_etiqueta" class="form-select" style="background-color: var(--bg-dark); color: var(--text-light); border-color: var(--border-dark);">
+                                    <option value="🟠 Fallo en Módulo (Matrícula, Pagos, Cursos, Actas)">🟠 Fallo en Módulo (Matrícula, Pagos, Cursos, Actas)</option>
+                                    <option value="🔴 Error Crítico / Bloqueo del Sistema">🔴 Error Crítico / Bloqueo del Sistema</option>
+                                    <option value="🟡 Error Visual / Diseño / Formato PDF">🟡 Error Visual / Diseño / Formato PDF</option>
+                                    <option value="🟢 Base de Datos / Sincronización">🟢 Base de Datos / Sincronización</option>
+                                    <option value="🔵 Duda Operativa / Capacitación">🔵 Duda Operativa / Capacitación</option>
+                                    <option value="🟣 Solicitud de Mejora">🟣 Solicitud de Mejora</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">
+                                    <i class="bi bi-lightning-charge-fill text-danger me-1"></i>Nivel de Urgencia *
+                                </label>
+                                <select name="prioridad" id="averia_prioridad" class="form-select" style="background-color: var(--bg-dark); color: var(--text-light); border-color: var(--border-dark);">
+                                    <option value="urgente">🚨 Urgente (Bloquea operación)</option>
+                                    <option value="alta" selected>🔴 Alta (Requiere atención pronta)</option>
+                                    <option value="media">🟠 Media (Fallo parcial)</option>
+                                    <option value="baja">🔵 Baja (Consulta / Mejora)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label small fw-bold text-uppercase text-muted mb-1">
+                                    <i class="bi bi-chat-left-text-fill text-primary me-1"></i>Causa / Descripción Detallada del Problema *
+                                </label>
+                                <textarea name="problema" id="averia_problema" rows="3" class="form-control" required placeholder="Describa qué acción estaba realizando, qué mensaje apareció o cuál es la causa..." style="background-color: var(--bg-dark); color: var(--text-light); border-color: var(--border-dark);"></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label small fw-bold text-uppercase text-muted mb-1 d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-camera-fill text-success me-1"></i>Evidencia Gráfica (Captura de Pantalla)</span>
+                                    <span class="badge bg-info bg-opacity-10 text-info fw-normal">Puedes subir archivo o presionar Ctrl + V para pegar captura</span>
+                                </label>
+                                <div id="averia_dropzone" class="p-3 rounded-3 text-center position-relative" style="border: 2px dashed rgba(56, 189, 248, 0.45); background: rgba(15, 23, 42, 0.25); cursor: pointer;" onclick="document.getElementById('averia_file_input').click()">
+                                    <input type="file" name="evidencia_grafica" id="averia_file_input" accept="image/*" class="d-none" onchange="previsualizarEvidenciaArchivo(this)">
+                                    <div id="averia_dropzone_placeholder">
+                                        <i class="bi bi-cloud-arrow-up-fill fs-3 text-info d-block mb-1"></i>
+                                        <div class="small fw-semibold">Haz clic para seleccionar una imagen o pega tu captura aquí con <kbd>Ctrl + V</kbd></div>
+                                        <div class="text-muted" style="font-size: 0.74rem;">Formatos soportados: PNG, JPG, WEBP (Máx. 8 MB)</div>
+                                    </div>
+                                    <div id="averia_preview_wrapper" class="d-none">
+                                        <img id="averia_preview_img" src="" alt="Vista previa de Evidencia Gráfica" style="max-height: 170px; max-width: 100%; border-radius: 8px; border: 1px solid rgba(56,189,248,0.5);">
+                                        <div class="mt-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="limpiarEvidenciaAveria(event)">
+                                                <i class="bi bi-trash me-1"></i>Quitar captura
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="small text-muted mt-2 d-flex align-items-center gap-1">
+                                    <i class="bi bi-link-45deg text-info"></i>
+                                    <span>Pantalla detectada automáticamente:</span>
+                                    <code id="averia_url_label" class="text-info"></code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between" style="border-color: var(--border-dark) !important;">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" id="btnEnviarAveriaGlobal" class="btn btn-warning fw-bold rounded-pill px-4 shadow-sm text-dark">
+                            <i class="bi bi-send-exclamation-fill me-1"></i>Enviar Avería (WhatsApp + Hub + Correo)
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        function abrirModalReporteAveria() {
+            const urlActual = window.location.href;
+            document.getElementById('averia_url_origen').value = urlActual;
+            document.getElementById('averia_url_label').textContent = urlActual;
+            const modalEl = document.getElementById('modalReportarAveriaGlobal');
+            if (modalEl) {
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            }
+        }
+
+        function previsualizarEvidenciaArchivo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('averia_evidencia_base64').value = '';
+                    document.getElementById('averia_preview_img').src = e.target.result;
+                    document.getElementById('averia_dropzone_placeholder').classList.add('d-none');
+                    document.getElementById('averia_preview_wrapper').classList.remove('d-none');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function limpiarEvidenciaAveria(e) {
+            if (e) e.stopPropagation();
+            document.getElementById('averia_file_input').value = '';
+            document.getElementById('averia_evidencia_base64').value = '';
+            document.getElementById('averia_preview_img').src = '';
+            document.getElementById('averia_preview_wrapper').classList.add('d-none');
+            document.getElementById('averia_dropzone_placeholder').classList.remove('d-none');
+        }
+
+        // Permitir pegar captura de pantalla directamente con Ctrl + V cuando el modal está abierto
+        document.addEventListener('paste', function(e) {
+            const modalEl = document.getElementById('modalReportarAveriaGlobal');
+            if (!modalEl || !modalEl.classList.contains('show')) return;
+            const items = (e.clipboardData || e.originalEvent.clipboardData)?.items || [];
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const blob = items[i].getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        document.getElementById('averia_file_input').value = '';
+                        document.getElementById('averia_evidencia_base64').value = ev.target.result;
+                        document.getElementById('averia_preview_img').src = ev.target.result;
+                        document.getElementById('averia_dropzone_placeholder').classList.add('d-none');
+                        document.getElementById('averia_preview_wrapper').classList.remove('d-none');
+                    };
+                    reader.readAsDataURL(blob);
+                    break;
+                }
+            }
+        });
+
+        function enviarReporteAveriaGlobal(e) {
+            e.preventDefault();
+            const form = document.getElementById('formReporteAveriaGlobal');
+            const btn  = document.getElementById('btnEnviarAveriaGlobal');
+            const formData = new FormData(form);
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando alerta...';
+
+            fetch("{{ route('soporte.reportar_rapido') }}", {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(res => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send-exclamation-fill me-1"></i>Enviar Avería (WhatsApp + Hub + Correo)';
+                if (res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalReportarAveriaGlobal')).hide();
+                    form.reset();
+                    limpiarEvidenciaAveria();
+                    const badge = document.getElementById('navbar-averias-badge');
+                    if (badge) {
+                        const current = parseInt(badge.textContent || '0', 10) + 1;
+                        badge.textContent = current;
+                        badge.classList.remove('d-none');
+                    }
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Avería #' + res.ticket_id + ' Reportada!',
+                        text: res.message,
+                        confirmButtonColor: '#5fb230'
+                    });
+                } else {
+                    Swal.fire('Atención', res.message || 'No se pudo registrar el reporte.', 'warning');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send-exclamation-fill me-1"></i>Enviar Avería (WhatsApp + Hub + Correo)';
+                Swal.fire('Error', 'Error de red al enviar el reporte de avería.', 'error');
+            });
+        }
+    </script>
+    @endif
 
     <!-- Widget Flotante Inbox AI 2.0 (Solo Administración y Docentes) -->
     @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
