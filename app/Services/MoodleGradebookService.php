@@ -59,8 +59,8 @@ class MoodleGradebookService
 
         // 3. Consultar Calificaciones en Moodle Bridge
         $defaultBridgeUrl = rtrim(config('cliente.campus_virtual', 'https://virtual.cefi.cr'), '/') . '/webservice/moodle_bridge.php';
-        $bridge_url = env('MOODLE_BRIDGE_URL', $defaultBridgeUrl);
-        $auth_token = env('MOODLE_TOKEN', 'ef5bde9afb1fdd026330058ec405a30e');
+        $bridge_url = config('services.moodle.url', $defaultBridgeUrl);
+        $auth_token = config('services.moodle.token', '');
 
         $response = Http::asForm()->timeout(60)->post($bridge_url, [
             'token' => $auth_token,

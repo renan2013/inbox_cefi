@@ -84,13 +84,13 @@ class ConfiguracionController extends Controller
 
         // Configuración activa de Correo Saliente (SMTP)
         $smtpConfig = [
-            'host'         => $configDb['mail_host'] ?? env('MAIL_HOST', 'smtp.gmail.com'),
-            'port'         => $configDb['mail_port'] ?? env('MAIL_PORT', 465),
-            'encryption'   => $configDb['mail_encryption'] ?? env('MAIL_ENCRYPTION', 'ssl'),
-            'username'     => $configDb['mail_username'] ?? env('MAIL_USERNAME', ''),
-            'password'     => $configDb['mail_password'] ?? env('MAIL_PASSWORD', ''),
-            'from_address' => $configDb['mail_from_address'] ?? env('MAIL_FROM_ADDRESS', ''),
-            'from_name'    => $configDb['mail_from_name'] ?? env('MAIL_FROM_NAME', config('cliente.nombre', 'Inbox CEFI')),
+            'host'         => $configDb['mail_host'] ?? config('mail.mailers.smtp.host', 'smtp.gmail.com'),
+            'port'         => $configDb['mail_port'] ?? config('mail.mailers.smtp.port', 465),
+            'encryption'   => $configDb['mail_encryption'] ?? config('mail.mailers.smtp.scheme', 'ssl'),
+            'username'     => $configDb['mail_username'] ?? config('mail.mailers.smtp.username', ''),
+            'password'     => $configDb['mail_password'] ?? config('mail.mailers.smtp.password', ''),
+            'from_address' => $configDb['mail_from_address'] ?? config('mail.from.address', ''),
+            'from_name'    => $configDb['mail_from_name'] ?? config('mail.from.name', config('cliente.nombre', 'Inbox CEFI')),
         ];
 
         return view('configuracion.index', compact('cliente', 'configDb', 'modulos', 'activeTab', 'waConfig', 'devUnlocked', 'smtpConfig'));

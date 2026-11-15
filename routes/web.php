@@ -67,6 +67,8 @@ Route::get('/saludos/ver/{token}', [SaludoController::class, 'verTarjeta'])->nam
 // API Externa Finanzas (n8n, Green-API, Cron WhatsApp Morosidad)
 Route::match(['get', 'post'], '/api/finanzas/cuotas-vencimiento', [BoletaController::class, 'apiCuotasVencimiento'])->name('finanzas.api.cuotas_vencimiento');
 
+// Rutas administrativas utilitarias (protegidas con sesión + clave superior)
+Route::middleware(['auth', 'admin.config'])->group(function () {
 // Ruta utilitaria para ejecutar migraciones en el servidor web (Hostinger / Producción)
 Route::get('/sistema/migrar', function () {
     try {
@@ -169,8 +171,7 @@ Route::get('/sistema/sembrar-conocimiento', function () {
         ", 500, ['Content-Type' => 'text/html']);
     }
 })->name('sistema.sembrar_conocimiento');
-
-
+});
 
 Route::middleware('auth')->group(function () {
     // =========================================================================
@@ -179,9 +180,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/configuracion/seguridad', [ConfiguracionController::class, 'login'])->name('configuracion.login');
     Route::post('/configuracion/seguridad/acceder', [ConfiguracionController::class, 'acceder'])->name('configuracion.acceder');
     Route::post('/configuracion/seguridad/salir', [ConfiguracionController::class, 'salir'])->name('configuracion.salir');
-    Route::post('/sistema/limpiar-sistema-ajax', [ConfiguracionController::class, 'limpiarSistemaCompleto'])->name('sistema.limpiar_ajax');
 
     // Rutas protegidas exclusivamente para Administrador General con Clave Superior
+    Route::middleware('admin.config')->group(function () {
+        Route::post('/sistema/limpiar-sistema-ajax', [ConfiguracionController::class, 'limpiarSistemaCompleto'])->name('sistema.limpiar_ajax');
+    });
     Route::middleware('admin.config')->prefix('configuracion')->name('configuracion.')->group(function () {
         // Hub Central de Configuración
         Route::get('/', [ConfiguracionController::class, 'index'])->name('index');
@@ -245,12 +248,14 @@ Route::middleware('auth')->group(function () {
 
     // --- REGISTRO ACADÉMICO ---
     Route::middleware(['module:registro_academico', 'no.alumno'])->group(function () {
-        Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
-        Route::get('/usuarios/crear', [UsuarioController::class, 'create'])->name('usuarios.create');
-        Route::post('/usuarios/crear', [UsuarioController::class, 'store'])->name('usuarios.store');
-        Route::get('/usuarios/{id}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
-        Route::post('/usuarios/{id}/actualizar', [UsuarioController::class, 'update'])->name('usuarios.update');
-        Route::post('/usuarios/{id}/eliminar', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+        Route::middleware('admin.role')->group(function () {
+            Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+            Route::get('/usuarios/crear', [UsuarioController::class, 'create'])->name('usuarios.create');
+            Route::post('/usuarios/crear', [UsuarioController::class, 'store'])->name('usuarios.store');
+            Route::get('/usuarios/{id}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
+            Route::post('/usuarios/{id}/actualizar', [UsuarioController::class, 'update'])->name('usuarios.update');
+            Route::post('/usuarios/{id}/eliminar', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+        });
         
         // Cursos y Programas
         Route::get('/cursos', [CursoController::class, 'index'])->name('cursos.index');
@@ -327,7 +332,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['module:boletas_matricula', 'no.alumno'])->group(function () {
         Route::get('/boletas', [BoletaController::class, 'index'])->name('boletas.index');
         Route::get('/boletas/generar', [BoletaController::class, 'generar'])->name('boletas.generar');
-        Route::post('/boletas/generar', [BoletaController::class, 'store'])->name('boletas.store');
         Route::get('/boletas/cursos-programa/{id}/ajax', [BoletaController::class, 'getCursosPorProgramaAjax'])->name('boletas.cursos_programa_ajax');
         Route::get('/boletas/matriculas-pendientes-ajax', [BoletaController::class, 'getMatriculasPendientesAjax'])->name('boletas.matriculas_pendientes_ajax');
         Route::post('/boletas/datos-ajax', [BoletaController::class, 'getBoletaDataAjax'])->name('boletas.datos_ajax');
@@ -337,10 +341,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/boletas/{id}/procesar', [BoletaController::class, 'procesarBoleta'])->name('boletas.procesar');
         Route::post('/boletas/{id}/oficializar-firmada', [BoletaController::class, 'oficializarBoletaFirmada'])->name('boletas.oficializar_firmada');
         Route::get('/boletas/{id}/pdf', [BoletaController::class, 'verPdf'])->name('boletas.pdf');
-        Route::post('/boletas/{id}/pago', [BoletaController::class, 'registrarPago'])->name('boletas.pago.store');
-        Route::post('/boletas/vaciar-pruebas', [BoletaController::class, 'vaciarPruebas'])->name('boletas.vaciar_pruebas');
-        Route::post('/boletas/{id}/anular', [BoletaController::class, 'anular'])->name('boletas.anular');
-        Route::post('/boletas/{id}/eliminar', [BoletaController::class, 'eliminar'])->name('boletas.eliminar');
+        Route::post('/boletas/{id}/pago', [BoletaController::class, 'registrarPago'])->name('boletas.pago.store')->middleware('admin.role');
+        Route::post('/boletas/vaciar-pruebas', [BoletaController::class, 'vaciarPruebas'])->name('boletas.vaciar_pruebas')->middleware('admin.role');
+        Route::post('/boletas/{id}/anular', [BoletaController::class, 'anular'])->name('boletas.anular')->middleware('admin.role');
+        Route::post('/boletas/{id}/eliminar', [BoletaController::class, 'eliminar'])->name('boletas.eliminar')->middleware('admin.role');
         Route::post('/boletas/{id}/enviar-whatsapp', [WhatsAppController::class, 'enviarBoleta'])->name('boletas.enviar_whatsapp');
         Route::post('/boletas/{id}/enviar-email', [BoletaController::class, 'enviarEmail'])->name('boletas.enviar_email');
     });
@@ -376,7 +380,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- DIFUSIÓN WHATSAPP & MARKETING PROSPECTOS ---
-    Route::middleware('module:whatsapp_n8n')->group(function () {
+    Route::middleware(['module:whatsapp_n8n', 'no.alumno', 'admin.role'])->group(function () {
         // Campañas y Difusión Masiva (Oferta Académica)
         Route::get('/whatsapp/campanas', [CampanaWhatsAppController::class, 'index'])->name('whatsapp.campanas.index');
         Route::get('/whatsapp/campanas/destinatarios-ajax', [CampanaWhatsAppController::class, 'destinatariosAjax'])->name('whatsapp.campanas.destinatarios_ajax');
@@ -395,25 +399,25 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- ASISTENCIA Y PLANILLA ---
-    Route::middleware('module:planilla')->group(function () {
+    Route::middleware(['module:planilla', 'no.alumno'])->group(function () {
         Route::get('/asistencia/marcar', [AsistenciaController::class, 'marcar'])->name('asistencia.marcar');
         Route::post('/asistencia/registrar', [AsistenciaController::class, 'registrarMarca'])->name('asistencia.registrar');
         Route::get('/asistencia/historial', [AsistenciaController::class, 'historial'])->name('asistencia.historial');
-        Route::post('/asistencia/manual', [AsistenciaController::class, 'guardarMarcaManual'])->name('asistencia.manual.store');
-        Route::post('/asistencia/manual/{id}/editar', [AsistenciaController::class, 'actualizarMarca'])->name('asistencia.manual.update');
-        Route::post('/asistencia/manual/{id}/eliminar', [AsistenciaController::class, 'eliminarMarca'])->name('asistencia.manual.delete');
+        Route::post('/asistencia/manual', [AsistenciaController::class, 'guardarMarcaManual'])->name('asistencia.manual.store')->middleware('admin.role');
+        Route::post('/asistencia/manual/{id}/editar', [AsistenciaController::class, 'actualizarMarca'])->name('asistencia.manual.update')->middleware('admin.role');
+        Route::post('/asistencia/manual/{id}/eliminar', [AsistenciaController::class, 'eliminarMarca'])->name('asistencia.manual.delete')->middleware('admin.role');
 
         Route::get('/planilla', [PlanillaController::class, 'index'])->name('planilla.index');
-        Route::post('/planilla/tarifa/categoria', [PlanillaController::class, 'guardarTarifaCategoria'])->name('planilla.tarifa.categoria');
+        Route::post('/planilla/tarifa/categoria', [PlanillaController::class, 'guardarTarifaCategoria'])->name('planilla.tarifa.categoria')->middleware('admin.role');
         Route::get('/planilla/empleados', [PlanillaController::class, 'empleados'])->name('planilla.empleados');
-        Route::post('/planilla/tarifa/empleado', [PlanillaController::class, 'guardarTarifaEmpleado'])->name('planilla.tarifa.empleado');
-        Route::post('/planilla/credencial/empleado', [PlanillaController::class, 'guardarCredencialEmpleado'])->name('planilla.credencial.empleado');
+        Route::post('/planilla/tarifa/empleado', [PlanillaController::class, 'guardarTarifaEmpleado'])->name('planilla.tarifa.empleado')->middleware('admin.role');
+        Route::post('/planilla/credencial/empleado', [PlanillaController::class, 'guardarCredencialEmpleado'])->name('planilla.credencial.empleado')->middleware('admin.role');
         Route::get('/planilla/credencial/{id?}', [PlanillaController::class, 'credencial'])->name('planilla.credencial');
         Route::get('/planilla/credencial/ver/{id}', [PlanillaController::class, 'credencial'])->name('planilla.credencial.ver');
         Route::get('/planilla/escanear', [PlanillaController::class, 'escanear'])->name('planilla.escanear');
-        Route::post('/planilla/procesar-marca-qr', [PlanillaController::class, 'procesarMarcaQR'])->name('planilla.escanear.marca');
+        Route::post('/planilla/procesar-marca-qr', [PlanillaController::class, 'procesarMarcaQR'])->name('planilla.escanear.marca')->middleware('admin.role');
         Route::get('/planilla/calcular', [PlanillaController::class, 'calcular'])->name('planilla.calcular');
-        Route::post('/planilla/calcular/pago', [PlanillaController::class, 'guardarPagoPlanilla'])->name('planilla.calcular.pago');
+        Route::post('/planilla/calcular/pago', [PlanillaController::class, 'guardarPagoPlanilla'])->name('planilla.calcular.pago')->middleware('admin.role');
         Route::get('/planilla/historial-pagos', [PlanillaController::class, 'historialPagos'])->name('planilla.historial_pagos');
     });
 
@@ -433,7 +437,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- BÓVEDA DE CLAVES Y CENTRO DE SOPORTE ---
-    Route::middleware('module:soporte')->group(function () {
+    Route::middleware(['module:soporte', 'no.alumno', 'admin.role'])->group(function () {
         // Bóveda Claves
         Route::get('/claves', [BovedaClavesController::class, 'index'])->name('claves.index');
         Route::post('/claves/acceder', [BovedaClavesController::class, 'acceder'])->name('claves.acceder');
@@ -469,9 +473,11 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- CEREBRO & TUTOR AI 2.0 (ASISTENTE VIRTUAL RAG CEFI) ---
-    Route::get('/configuracion/conocimiento-ai', [ConfiguracionController::class, 'conocimientoAi'])->name('configuracion.conocimiento_ai');
-    Route::post('/configuracion/conocimiento-ai/guardar', [ConfiguracionController::class, 'guardarConocimientoAi'])->name('configuracion.conocimiento_ai.guardar');
-    Route::post('/configuracion/conocimiento-ai/{id}/eliminar', [ConfiguracionController::class, 'eliminarConocimientoAi'])->name('configuracion.conocimiento_ai.eliminar');
+    Route::middleware(['no.alumno', 'admin.config'])->group(function () {
+        Route::get('/configuracion/conocimiento-ai', [ConfiguracionController::class, 'conocimientoAi'])->name('configuracion.conocimiento_ai');
+        Route::post('/configuracion/conocimiento-ai/guardar', [ConfiguracionController::class, 'guardarConocimientoAi'])->name('configuracion.conocimiento_ai.guardar');
+        Route::post('/configuracion/conocimiento-ai/{id}/eliminar', [ConfiguracionController::class, 'eliminarConocimientoAi'])->name('configuracion.conocimiento_ai.eliminar');
+    });
 
     // --- REPORTE RÁPIDO OMNICANAL DE AVERÍAS (DESDE CUALQUIER PANTALLA) ---
     Route::post('/soporte/reportar-rapido', [SoporteController::class, 'reportarRapido'])->name('soporte.reportar_rapido');
@@ -599,7 +605,8 @@ Route::middleware('auth')->group(function () {
 Route::get('/boletas/firmar/{token}', [BoletaController::class, 'firmarPublico'])->name('boletas.firmar_publico');
 Route::post('/boletas/firmar/{token}/guardar', [BoletaController::class, 'guardarFirmaPublica'])->name('boletas.guardar_firma_publica');
 
-// --- DEMO AUTOMATIZADO / SEMBRAR ALUMNO COMPLETO 360° ---
+// --- DEMO AUTOMATIZADO Y LIMPIEZA DEL SISTEMA (PROTEGIDOS CON SESIÓN + CLAVE SUPERIOR) ---
+Route::middleware(['auth', 'admin.config'])->group(function () {
 Route::get('/sistema/sembrar-demo', function () {
     try {
         $seeder = new \Database\Seeders\AlumnoDemoCompletoSeeder();
@@ -875,6 +882,7 @@ Route::match(['get', 'post'], '/sistema/limpiar-sistema', function () {
         ", 500, ['Content-Type' => 'text/html']);
     }
 })->name('sistema.limpiar');
+});
 
 // =========================================================================
 // RECEPTOR REMOTO DE LICENCIAS Y ÁRBOL DE MENÚS (INBOX CLOUD HUB - renangalvan.net)

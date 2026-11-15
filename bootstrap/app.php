@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'module'       => \App\Http\Middleware\CheckModuleEnabled::class,
             'admin.config' => \App\Http\Middleware\EnsureConfigAdminAuthorized::class,
+            'admin.role'   => \App\Http\Middleware\EnsureAdminRole::class,
             'no.alumno'    => \App\Http\Middleware\EnsureNotAlumno::class,
         ]);
         $middleware->validateCsrfTokens(except: [

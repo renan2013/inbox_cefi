@@ -391,8 +391,8 @@ class SoporteController extends Controller
     protected function dispatchOmnicanalAveria(array $payload): void
     {
         $payload['creator_email'] = self::CREATOR_PROVIDER_EMAIL;
-        $secret = env('INBOX_HUB_SECRET', 'RenanHub2026_MasterHmacSecretKey_998877!');
-        $hubUrl = env('INBOX_HUB_TICKETS_URL', 'https://hub.renangalvan.net/api/tickets.php');
+        $secret = config('services.inbox_hub.secret', 'RenanHub2026_MasterHmacSecretKey_998877!');
+        $hubUrl = config('services.inbox_hub.tickets_url', 'https://hub.renangalvan.net/api/tickets.php');
 
         $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $signature   = hash_hmac('sha256', $jsonPayload, $secret);
@@ -459,8 +459,8 @@ class SoporteController extends Controller
      */
     protected function notifyHubTicketAction(string $action, array $data): void
     {
-        $secret = env('INBOX_HUB_SECRET', 'RenanHub2026_MasterHmacSecretKey_998877!');
-        $hubUrl = env('INBOX_HUB_TICKETS_URL', 'https://hub.renangalvan.net/api/tickets.php');
+        $secret = config('services.inbox_hub.secret', 'RenanHub2026_MasterHmacSecretKey_998877!');
+        $hubUrl = config('services.inbox_hub.tickets_url', 'https://hub.renangalvan.net/api/tickets.php');
 
         $payload = array_merge($data, ['action' => $action]);
         $jsonPayload = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

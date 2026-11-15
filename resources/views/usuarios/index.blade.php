@@ -1050,6 +1050,10 @@
                                 });
                             }
                         }
+                    });
+                });
+            });
+
             // --- MODAL DE EDICIÓN DE USUARIO ---
             const modalUserEl = document.getElementById('modalEditarUsuario');
             const modalUser = modalUserEl ? new bootstrap.Modal(modalUserEl) : null;

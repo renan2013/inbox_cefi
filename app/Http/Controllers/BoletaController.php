@@ -1353,11 +1353,11 @@ class BoletaController extends Controller
     public function apiCuotasVencimiento(Request $request)
     {
         $clientMasterKey = config('cliente.moodle_key', 'cefi2026');
-        $api_key_server = env('N8N_API_KEY', $clientMasterKey);
+        $api_key_server = config('services.n8n.api_key', $clientMasterKey);
         $provided_key = $request->get('key', $request->header('X-API-KEY', ''));
         $is_admin = auth()->check() && in_array(auth()->user()->id_rol, [1, 2]);
 
-        if (!$is_admin && $provided_key !== $api_key_server && $provided_key !== $clientMasterKey && $provided_key !== 'unela2026') {
+        if (!$is_admin && $provided_key !== $api_key_server && $provided_key !== $clientMasterKey) {
             return response()->json([
                 'success' => false,
                 'message' => 'No autorizado. Se requiere API Key o sesión de administrador.'

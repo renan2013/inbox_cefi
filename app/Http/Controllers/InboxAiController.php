@@ -128,7 +128,7 @@ class InboxAiController extends Controller
         } catch (\Exception $e) {}
 
         // 2. PRIORIDAD 2: Conectar directamente con Google Gemini API (Gemini Pro / Flash)
-        $gemini_key = env('GEMINI_API_KEY', '');
+        $gemini_key = config('services.gemini.api_key', '');
         if (!empty($gemini_key)) {
             try {
                 $appName = config('app.name', 'Inbox BPM');

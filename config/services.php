@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    'moodle' => [
+        'url'   => env('MOODLE_URL', 'https://ceficr.com/moodle/webservice/rest/server.php'),
+        'token' => env('MOODLE_TOKEN', ''),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY', ''),
+    ],
+
+    'n8n' => [
+        'api_key'     => env('N8N_API_KEY', env('INBOX_HUB_SECRET', 'RenanHub2026_MasterHmacSecretKey_998877!')),
+        'ai_chat_url' => env('N8N_AI_CHAT_URL', 'https://n8n.renangalvan.net/webhook/inbox-ai-chat'),
+    ],
+
+    'inbox_hub' => [
+        'secret'      => env('INBOX_HUB_SECRET', 'RenanHub2026_MasterHmacSecretKey_998877!'),
+        'tickets_url' => env('INBOX_HUB_TICKETS_URL', 'https://hub.renangalvan.net/api/tickets.php'),
+    ],
+
 ];

@@ -530,7 +530,7 @@ class MisCursosController extends Controller
         // Guardar ID Moodle en el curso
         $curso->update(['id_moodle' => $id_moodle]);
 
-        $auth_token = env('MOODLE_TOKEN', 'ef5bde9afb1fdd026330058ec405a30e');
+        $auth_token = config('services.moodle.token', '');
         $bridge_url = rtrim(config('cliente.campus_virtual', 'https://virtual.cefi.cr'), '/') . '/webservice/moodle_bridge.php';
 
         try {
@@ -974,7 +974,7 @@ class MisCursosController extends Controller
             $bridge_img_url = rtrim(config('cliente.campus_virtual', 'https://virtual.cefi.cr'), '/') . '/moodle_bridge.php';
             try {
                 Http::withoutVerifying()->timeout(15)->post($bridge_img_url, [
-                    'token' => env('MOODLE_TOKEN', 'ef5bde9afb1fdd026330058ec405a30e'),
+                    'token' => config('services.moodle.token', ''),
                     'action' => 'set_course_image',
                     'courseid' => $curso->id_moodle,
                     'image_base64' => $miniatura_base64,

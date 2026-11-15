@@ -128,14 +128,18 @@ class TareaController extends Controller
                     $mimeType = $file->getClientMimeType();
                     $tamano = $file->getSize();
                     $nombreServidor = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('uploads/tareas', $nombreServidor, 'public');
+                    $destDir = public_path('uploads/tareas');
+                    if (!is_dir($destDir)) {
+                        @mkdir($destDir, 0755, true);
+                    }
+                    $file->move($destDir, $nombreServidor);
 
                     if (Schema::hasTable('adjuntos')) {
                         DB::table('adjuntos')->insert([
                             'id_tarea' => $id_tarea,
                             'nombre_original' => $nombreOriginal,
                             'nombre_servidor' => $nombreServidor,
-                            'ruta_archivo' => 'storage/' . $path,
+                            'ruta_archivo' => 'uploads/tareas/' . $nombreServidor,
                             'tipo_mime' => $mimeType,
                             'tamano' => $tamano,
                             'id_usuario_subida' => $id_creador,
