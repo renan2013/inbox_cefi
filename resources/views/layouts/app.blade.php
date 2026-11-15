@@ -1270,19 +1270,26 @@
             const theme = document.documentElement.getAttribute('data-theme') || 'light';
             updateThemeIcon(theme);
 
-            // Ocultar automáticamente cualquier ítem auto-detectado que haya sido desmarcado en Inbox Cloud Hub
+            // Ocultar automáticamente solo ítems auto-detectados cuyo nombre no esté habilitado en ningún otro menú activo
             @php
+                $_enabledAutoLabels = [];
                 $_disabledAutoLabels = [];
                 foreach (\App\Services\ModuleService::discoverNavbarTree() as $_mKey => $_mMeta) {
                     $_pOn = \App\Services\ModuleService::isEnabled($_mKey);
                     foreach ($_mMeta['children'] ?? [] as $_cKey => $_cMeta) {
-                        if ((!$_pOn || !\App\Services\ModuleService::isEnabled($_cKey)) && !empty($_cMeta['nombre'])) {
-                            $_disabledAutoLabels[] = mb_strtolower(trim($_cMeta['nombre']), 'UTF-8');
+                        if (!empty($_cMeta['nombre'])) {
+                            $_lbl = mb_strtolower(trim($_cMeta['nombre']), 'UTF-8');
+                            if ($_pOn && \App\Services\ModuleService::isEnabled($_cKey)) {
+                                $_enabledAutoLabels[] = $_lbl;
+                            } else {
+                                $_disabledAutoLabels[] = $_lbl;
+                            }
                         }
                     }
                 }
+                $_disabledAutoLabels = array_values(array_diff(array_unique($_disabledAutoLabels), array_unique($_enabledAutoLabels)));
             @endphp
-            const disabledLabels = @json(array_values(array_unique($_disabledAutoLabels)));
+            const disabledLabels = @json($_disabledAutoLabels);
             if (disabledLabels.length > 0) {
                 document.querySelectorAll('.navbar .dropdown-menu a.dropdown-item').forEach(a => {
                     const txt = (a.innerText || '').trim().replace(/\s+/g, ' ').toLowerCase();
