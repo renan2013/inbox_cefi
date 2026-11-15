@@ -890,7 +890,6 @@
                         <div class="d-flex justify-content-center mt-4">
                             {{ $tareas->links() }}
                         </div>
-                        </div>
                     </div>
 
                     <!-- 2. Vista de Tablero Kanban -->
@@ -985,24 +984,24 @@
 
                     <!-- 3. Vista de Cronograma Gantt Integrada -->
                     <div id="view-gantt-container" style="display: none;">
-                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-                            <div class="small task-subtitle-text">
-                                <i class="bi bi-bar-chart-steps text-info me-1"></i>
-                                Línea de tiempo y porcentaje de avance de las tareas filtradas.
+                        <div class="monday-summary-box rounded-3 px-3 py-2 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div class="small task-subtitle-text d-flex align-items-center">
+                                <i class="bi bi-bar-chart-steps text-info fs-6 me-2"></i>
+                                <span>Línea de tiempo y porcentaje de avance de las tareas filtradas.</span>
                             </div>
-                            <a href="{{ route('tareas.gantt', ['anio' => $anio_seleccionado, 'etiqueta' => $etiqueta_seleccionada]) }}" class="btn btn-sm btn-outline-info rounded-pill px-3">
-                                <i class="bi bi-arrows-fullscreen me-1"></i>Filtros Avanzados de Cronograma
+                            <a href="{{ route('tareas.gantt', ['anio' => $anio_seleccionado, 'etiqueta' => $etiqueta_seleccionada]) }}" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-semibold">
+                                <i class="bi bi-sliders me-1"></i>Filtros Avanzados de Cronograma
                             </a>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-custom table-hover align-middle mb-0">
                                 <thead>
                                     <tr class="table-header-row">
-                                        <th class="ps-3" style="width: 45px;">#</th>
-                                        <th style="min-width: 220px;">Tarea / Curso</th>
-                                        <th style="width: 140px;">Fechas (Inicio &rarr; Fin)</th>
-                                        <th style="min-width: 240px;">Cronograma &amp; Avance (Gantt)</th>
-                                        <th class="text-end pe-3" style="width: 80px;">Detalle</th>
+                                        <th class="ps-4" style="width: 50px;">#</th>
+                                        <th style="min-width: 240px;">Tarea / Curso</th>
+                                        <th style="width: 195px; white-space: nowrap;">Fechas (Inicio &rarr; Fin)</th>
+                                        <th style="min-width: 260px;">Cronograma &amp; Avance (Gantt)</th>
+                                        <th class="text-end pe-4" style="width: 90px;">Detalle</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1017,7 +1016,7 @@
                                             $colorGantt = $tg->estado === 'completada' ? '#00c875' : ($tg->estado === 'en_proceso' ? '#fdab3d' : ($tg->estado === 'cancelada' ? '#df2f4a' : '#579bfc'));
                                         @endphp
                                         <tr>
-                                            <td class="ps-3 task-subtitle-text small">{{ $tareas->firstItem() + $idx }}</td>
+                                            <td class="ps-4 task-subtitle-text small">{{ $tareas->firstItem() + $idx }}</td>
                                             <td>
                                                 <div class="task-title-text small cursor-pointer" onclick="abrirModalEditarTarea({{ $tg->id }})" style="cursor:pointer;">
                                                     {{ $tg->titulo }}
@@ -1043,7 +1042,7 @@
                                                     <span class="small fw-bold" style="min-width: 40px; color: {{ $colorGantt }};">{{ $pctGantt }}%</span>
                                                 </div>
                                             </td>
-                                            <td class="text-end pe-3">
+                                            <td class="text-end pe-4">
                                                 <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2 py-1" onclick="abrirModalEditarTarea({{ $tg->id }})" title="Editar Tarea">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
@@ -1051,8 +1050,9 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center py-4 task-subtitle-text">
-                                                No hay tareas registradas para mostrar en el cronograma Gantt.
+                                            <td colspan="5" class="text-center py-5 task-subtitle-text">
+                                                <i class="bi bi-calendar2-range fs-1 d-block mb-2 text-muted"></i>
+                                                <p class="mb-0">No hay tareas registradas para mostrar en el cronograma Gantt.</p>
                                             </td>
                                         </tr>
                                     @endforelse
