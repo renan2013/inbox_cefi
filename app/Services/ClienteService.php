@@ -216,12 +216,18 @@ class ClienteService
         $igText = $c['redes_instagram'] ?? ($db['cliente_redes_instagram'] ?? 'cefi_cr');
         $igUrl = $c['redes_instagram_url'] ?? ($db['cliente_redes_instagram_url'] ?? 'https://www.instagram.com/cefi_cr/');
 
-        $telText = $c['redes_telefono'] ?? ($db['cliente_redes_telefono'] ?? '2711 1010');
-        $telClean = preg_replace('/[^0-9+]/', '', (string)$telText);
-        $telUrl = 'tel:' . ($telClean ?: '+50627111010');
+        $telText = $c['redes_telefono'] ?? ($db['cliente_redes_telefono'] ?? ($c['telefono_display'] ?? ($c['telefono'] ?? '2711 1010')));
+        $telUrl = $c['redes_telefono_url'] ?? ($db['cliente_redes_telefono_url'] ?? '');
+        if (empty($telUrl)) {
+            $telClean = preg_replace('/[^0-9+]/', '', (string)$telText);
+            $telUrl = 'tel:' . ($telClean ?: '+50627111010');
+        }
 
         $mailText = $c['redes_email'] ?? ($db['cliente_redes_email'] ?? ($c['email_contacto'] ?? 'info@ceficr.com'));
-        $mailUrl = 'mailto:' . $mailText;
+        $mailUrl = $c['redes_email_url'] ?? ($db['cliente_redes_email_url'] ?? '');
+        if (empty($mailUrl)) {
+            $mailUrl = 'mailto:' . $mailText;
+        }
 
         $ytText = $c['redes_youtube'] ?? ($db['cliente_redes_youtube'] ?? '@ceficr');
         $ytUrl = $c['redes_youtube_url'] ?? ($db['cliente_redes_youtube_url'] ?? 'https://www.youtube.com/@ceficr');
@@ -229,9 +235,18 @@ class ClienteService
         $ttText = $c['redes_tiktok'] ?? ($db['cliente_redes_tiktok'] ?? '@cefi_cr');
         $ttUrl = $c['redes_tiktok_url'] ?? ($db['cliente_redes_tiktok_url'] ?? 'https://www.tiktok.com/@cefi_cr');
 
-        $waText = $c['redes_whatsapp'] ?? ($db['cliente_redes_whatsapp'] ?? '+506 8992 9180');
-        $waDigits = preg_replace('/[^0-9]/', '', (string)$waText);
-        $waUrl = 'https://wa.me/' . ($waDigits ?: '50689929180');
+        $waText = $c['redes_whatsapp'] ?? ($db['cliente_redes_whatsapp'] ?? ($c['telefono_display'] ?? '+506 8992 9180'));
+        $waUrl = $c['redes_whatsapp_url'] ?? ($db['cliente_redes_whatsapp_url'] ?? '');
+        if (empty($waUrl)) {
+            $waDigits = preg_replace('/[^0-9]/', '', (string)$waText);
+            $waUrl = 'https://wa.me/' . ($waDigits ?: '50689929180');
+        }
+
+        $webText = $c['redes_sitio_web'] ?? ($db['cliente_redes_sitio_web'] ?? ($c['sitio_web'] ?? 'ceficr.com'));
+        $webUrl = $c['redes_sitio_web_url'] ?? ($db['cliente_redes_sitio_web_url'] ?? ($c['sitio_web'] ?? 'https://ceficr.com'));
+
+        $liText = $c['redes_linkedin'] ?? ($db['cliente_redes_linkedin'] ?? 'ceficr');
+        $liUrl = $c['redes_linkedin_url'] ?? ($db['cliente_redes_linkedin_url'] ?? 'https://www.linkedin.com/company/ceficr');
 
         return [
             'facebook' => [
@@ -261,6 +276,14 @@ class ClienteService
             'whatsapp' => [
                 'text' => $waText,
                 'url'  => $waUrl,
+            ],
+            'web' => [
+                'text' => $webText,
+                'url'  => $webUrl,
+            ],
+            'linkedin' => [
+                'text' => $liText,
+                'url'  => $liUrl,
             ],
         ];
     }

@@ -126,12 +126,19 @@ class ConfiguracionController extends Controller
             'redes_instagram'      => 'nullable|string|max:100',
             'redes_instagram_url'  => 'nullable|string|max:255',
             'redes_telefono'       => 'nullable|string|max:50',
+            'redes_telefono_url'   => 'nullable|string|max:255',
             'redes_email'          => 'nullable|string|max:100',
+            'redes_email_url'      => 'nullable|string|max:255',
             'redes_youtube'        => 'nullable|string|max:100',
             'redes_youtube_url'    => 'nullable|string|max:255',
             'redes_tiktok'         => 'nullable|string|max:100',
             'redes_tiktok_url'     => 'nullable|string|max:255',
             'redes_whatsapp'       => 'nullable|string|max:50',
+            'redes_whatsapp_url'   => 'nullable|string|max:255',
+            'redes_sitio_web'      => 'nullable|string|max:100',
+            'redes_sitio_web_url'  => 'nullable|string|max:255',
+            'redes_linkedin'       => 'nullable|string|max:100',
+            'redes_linkedin_url'   => 'nullable|string|max:255',
         ]);
 
         $fields = [];
@@ -181,38 +188,21 @@ class ConfiguracionController extends Controller
         }
 
         // Redes Sociales y Contactos en Pie de Página (Folleto PDF y Vistas)
-        if ($request->has('redes_facebook')) {
-            $fields['cliente_redes_facebook'] = trim((string)$request->input('redes_facebook'));
-        }
-        if ($request->has('redes_facebook_url')) {
-            $fields['cliente_redes_facebook_url'] = trim((string)$request->input('redes_facebook_url'));
-        }
-        if ($request->has('redes_instagram')) {
-            $fields['cliente_redes_instagram'] = trim((string)$request->input('redes_instagram'));
-        }
-        if ($request->has('redes_instagram_url')) {
-            $fields['cliente_redes_instagram_url'] = trim((string)$request->input('redes_instagram_url'));
-        }
-        if ($request->has('redes_telefono')) {
-            $fields['cliente_redes_telefono'] = trim((string)$request->input('redes_telefono'));
-        }
-        if ($request->has('redes_email')) {
-            $fields['cliente_redes_email'] = trim((string)$request->input('redes_email'));
-        }
-        if ($request->has('redes_youtube')) {
-            $fields['cliente_redes_youtube'] = trim((string)$request->input('redes_youtube'));
-        }
-        if ($request->has('redes_youtube_url')) {
-            $fields['cliente_redes_youtube_url'] = trim((string)$request->input('redes_youtube_url'));
-        }
-        if ($request->has('redes_tiktok')) {
-            $fields['cliente_redes_tiktok'] = trim((string)$request->input('redes_tiktok'));
-        }
-        if ($request->has('redes_tiktok_url')) {
-            $fields['cliente_redes_tiktok_url'] = trim((string)$request->input('redes_tiktok_url'));
-        }
-        if ($request->has('redes_whatsapp')) {
-            $fields['cliente_redes_whatsapp'] = trim((string)$request->input('redes_whatsapp'));
+        $redesFields = [
+            'redes_facebook', 'redes_facebook_url',
+            'redes_instagram', 'redes_instagram_url',
+            'redes_telefono', 'redes_telefono_url',
+            'redes_email', 'redes_email_url',
+            'redes_youtube', 'redes_youtube_url',
+            'redes_tiktok', 'redes_tiktok_url',
+            'redes_whatsapp', 'redes_whatsapp_url',
+            'redes_sitio_web', 'redes_sitio_web_url',
+            'redes_linkedin', 'redes_linkedin_url',
+        ];
+        foreach ($redesFields as $rf) {
+            if ($request->has($rf)) {
+                $fields['cliente_' . $rf] = trim((string)$request->input($rf));
+            }
         }
 
         // 2. Parámetros n8n & Automatizaciones

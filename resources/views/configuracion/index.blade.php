@@ -416,6 +416,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link {{ $activeTab === 'redes' ? 'active' : '' }}" id="tab-btn-redes" data-bs-toggle="pill" data-bs-target="#pane-redes" type="button" role="tab">
+                <i class="bi bi-share-fill text-info"></i> Redes & Pie de Página PDF
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link {{ $activeTab === 'n8n' ? 'active' : '' }}" id="tab-btn-n8n" data-bs-toggle="pill" data-bs-target="#pane-n8n" type="button" role="tab">
                 <i class="bi bi-diagram-3-fill"></i> Automatizaciones & n8n
             </button>
@@ -514,72 +519,22 @@
                             </div>
                         </div>
 
-                        <!-- Redes Sociales y Pie de Página de Folletos PDF -->
-                        @php
-                            $redesFooter = \App\Services\ClienteService::getRedesFooter();
-                        @endphp
-                        <div class="config-card">
-                            <div class="config-card-header">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="bi bi-share-fill text-info fs-5"></i>
-                                    <h5 class="fw-bold mb-0 text-white">Redes Sociales y Pie de Página (Programas PDF)</h5>
-                                </div>
-                                <span class="badge bg-success bg-opacity-25 text-success">Enlaces Activos en PDF</span>
-                            </div>
-                            <div class="config-card-body">
-                                <p class="text-white-50 small mb-3">Estos textos y enlaces se incrustan en la barra inferior de los folletos PDF descargables de los programas y en las vistas del sistema.</p>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom"><i class="bi bi-facebook text-primary me-1"></i> Facebook (Texto Display)</label>
-                                        <input type="text" name="redes_facebook" class="form-control form-control-custom" value="{{ old('redes_facebook', $redesFooter['facebook']['text']) }}" placeholder="CEFI.">
+                        <!-- Acceso Directo a Redes Sociales y Pie de Página PDF -->
+                        <div class="config-card border-info border-opacity-50">
+                            <div class="config-card-body d-flex align-items-center justify-content-between flex-wrap gap-3" style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(95, 178, 48, 0.08) 100%);">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: rgba(14, 165, 233, 0.2); width: 50px; height: 50px;">
+                                        <i class="bi bi-share-fill text-info fs-4"></i>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom">Facebook (URL del Perfil)</label>
-                                        <input type="url" name="redes_facebook_url" class="form-control form-control-custom" value="{{ old('redes_facebook_url', $redesFooter['facebook']['url']) }}" placeholder="https://www.facebook.com/CEFI.">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom"><i class="bi bi-instagram text-danger me-1"></i> Instagram (Usuario Display)</label>
-                                        <input type="text" name="redes_instagram" class="form-control form-control-custom" value="{{ old('redes_instagram', $redesFooter['instagram']['text']) }}" placeholder="cefi_cr">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom">Instagram (URL del Perfil)</label>
-                                        <input type="url" name="redes_instagram_url" class="form-control form-control-custom" value="{{ old('redes_instagram_url', $redesFooter['instagram']['url']) }}" placeholder="https://www.instagram.com/cefi_cr/">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom"><i class="bi bi-telephone text-success me-1"></i> Teléfono Fijo en Pie de Página</label>
-                                        <input type="text" name="redes_telefono" class="form-control form-control-custom" value="{{ old('redes_telefono', $redesFooter['telefono']['text']) }}" placeholder="2711 1010">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom"><i class="bi bi-envelope text-warning me-1"></i> Correo Electrónico en Pie de Página</label>
-                                        <input type="email" name="redes_email" class="form-control form-control-custom" value="{{ old('redes_email', $redesFooter['email']['text']) }}" placeholder="info@ceficr.com">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom"><i class="bi bi-youtube text-danger me-1"></i> YouTube (Usuario Display)</label>
-                                        <input type="text" name="redes_youtube" class="form-control form-control-custom" value="{{ old('redes_youtube', $redesFooter['youtube']['text']) }}" placeholder="@ceficr">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom">YouTube (URL del Canal)</label>
-                                        <input type="url" name="redes_youtube_url" class="form-control form-control-custom" value="{{ old('redes_youtube_url', $redesFooter['youtube']['url']) }}" placeholder="https://www.youtube.com/@ceficr">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom"><i class="bi bi-tiktok text-light me-1"></i> TikTok (Usuario Display)</label>
-                                        <input type="text" name="redes_tiktok" class="form-control form-control-custom" value="{{ old('redes_tiktok', $redesFooter['tiktok']['text']) }}" placeholder="@cefi_cr">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label-custom">TikTok (URL del Perfil)</label>
-                                        <input type="url" name="redes_tiktok_url" class="form-control form-control-custom" value="{{ old('redes_tiktok_url', $redesFooter['tiktok']['url']) }}" placeholder="https://www.tiktok.com/@cefi_cr">
-                                    </div>
-
-                                    <div class="col-12">
-                                        <label class="form-label-custom"><i class="bi bi-whatsapp text-success me-1"></i> WhatsApp Oficial en Pie de Página</label>
-                                        <input type="text" name="redes_whatsapp" class="form-control form-control-custom" value="{{ old('redes_whatsapp', $redesFooter['whatsapp']['text']) }}" placeholder="+506 8992 9180">
-                                        <div class="form-text text-white-50 small">Este número se muestra en la franja derecha con enlace directo a wa.me.</div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1 text-white">Redes Sociales y Pie de Página (Programas PDF)</h6>
+                                        <p class="text-white-50 small mb-0">Gestione todas las redes, enlaces, auto-conexión y previsualización en vivo en su pestaña dedicada.</p>
                                     </div>
                                 </div>
+                                <button type="button" class="btn btn-info rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm text-white" onclick="document.getElementById('tab-btn-redes').click();">
+                                    <span>Abrir Pestaña de Redes</span>
+                                    <i class="bi bi-arrow-right"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -710,6 +665,368 @@
                     <div class="col-12 text-end">
                         <button type="submit" class="btn btn-primary px-5 py-3 fw-bold rounded-pill shadow-lg d-inline-flex align-items-center gap-2">
                             <i class="bi bi-check-circle-fill"></i> Guardar Identidad Gráfica & Logos
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- PESTAÑA: REDES SOCIALES & PIE DE PÁGINA PDF                        -->
+        <!-- =================================================================== -->
+        @php
+            $redesFooter = \App\Services\ClienteService::getRedesFooter();
+        @endphp
+        <div class="tab-pane fade {{ $activeTab === 'redes' ? 'show active' : '' }}" id="pane-redes" role="tabpanel">
+            <form action="{{ route('configuracion.guardar') }}" method="POST" id="formRedesSociales">
+                @csrf
+                <input type="hidden" name="active_tab" value="redes">
+
+                <!-- Header de la pestaña de redes -->
+                <div class="card p-3 mb-4 rounded-4 border-0 shadow-sm" style="background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(14, 165, 233, 0.35) !important;">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: rgba(14, 165, 233, 0.15); color: #0ea5e9; font-size: 1.4rem;">
+                                <i class="bi bi-share-fill"></i>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                    <h5 class="text-white fw-bold mb-0">Redes Sociales y Pie de Página de Folletos PDF</h5>
+                                    <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 small">
+                                        <i class="bi bi-lightning-charge-fill me-1"></i> Auto-Conexión Activa
+                                    </span>
+                                </div>
+                                <p class="text-white-50 small mb-0">
+                                    Configure el <strong>Texto / Usuario Visible</strong> y el <strong>Enlace Oficial (URL)</strong> para cada canal. Estos datos se sincronizan directamente en el pie de página descargable de los programas y en toda la plataforma.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <button type="button" class="btn btn-outline-info rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2" onclick="autoConectarTodos()">
+                                <i class="bi bi-magic"></i> Auto-Conectar Todos los Enlaces
+                            </button>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow">
+                                <i class="bi bi-check-circle-fill"></i> Guardar Redes & Enlaces
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Columna 1: Redes Sociales Principales -->
+                    <div class="col-lg-6">
+                        <div class="config-card h-100">
+                            <div class="config-card-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-globe-americas text-primary fs-5"></i>
+                                    <h5 class="fw-bold mb-0 text-white">Canales Digitales (Redes Sociales)</h5>
+                                </div>
+                                <span class="badge bg-primary bg-opacity-20 text-primary border border-primary border-opacity-25">Perfiles Oficiales</span>
+                            </div>
+                            <div class="config-card-body">
+                                <p class="text-white-50 small mb-4">Ingrese el usuario o nombre con el que se identifica la institución en cada red y su enlace directo.</p>
+
+                                <!-- Facebook -->
+                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook" width="22" height="22">
+                                            <strong class="text-white">Facebook</strong>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-info p-0 text-decoration-none small" onclick="autoConectarRed('facebook')">
+                                            <i class="bi bi-link-45deg me-1"></i> Auto-conectar link
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <label class="form-label-custom small">Nombre / Texto Visible</label>
+                                            <input type="text" name="redes_facebook" id="redes_facebook" class="form-control form-control-custom" value="{{ old('redes_facebook', $redesFooter['facebook']['text']) }}" placeholder="CEFI." oninput="syncRedesPreview('facebook')">
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="form-label-custom small">Enlace Oficial Directo (URL)</label>
+                                            <div class="input-group">
+                                                <input type="url" name="redes_facebook_url" id="redes_facebook_url" class="form-control form-control-custom" value="{{ old('redes_facebook_url', $redesFooter['facebook']['url']) }}" placeholder="https://www.facebook.com/CEFI." oninput="syncRedesPreview('facebook')">
+                                                <a href="{{ $redesFooter['facebook']['url'] }}" id="test_link_facebook" target="_blank" rel="noopener" class="btn btn-outline-secondary d-flex align-items-center" title="Probar enlace">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Instagram -->
+                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="22" height="22">
+                                            <strong class="text-white">Instagram</strong>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-info p-0 text-decoration-none small" onclick="autoConectarRed('instagram')">
+                                            <i class="bi bi-link-45deg me-1"></i> Auto-conectar link
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <label class="form-label-custom small">Usuario Visible</label>
+                                            <input type="text" name="redes_instagram" id="redes_instagram" class="form-control form-control-custom" value="{{ old('redes_instagram', $redesFooter['instagram']['text']) }}" placeholder="cefi_cr" oninput="syncRedesPreview('instagram')">
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="form-label-custom small">Enlace Oficial Directo (URL)</label>
+                                            <div class="input-group">
+                                                <input type="url" name="redes_instagram_url" id="redes_instagram_url" class="form-control form-control-custom" value="{{ old('redes_instagram_url', $redesFooter['instagram']['url']) }}" placeholder="https://www.instagram.com/cefi_cr/" oninput="syncRedesPreview('instagram')">
+                                                <a href="{{ $redesFooter['instagram']['url'] }}" id="test_link_instagram" target="_blank" rel="noopener" class="btn btn-outline-secondary d-flex align-items-center" title="Probar enlace">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- YouTube -->
+                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube" width="22" height="22">
+                                            <strong class="text-white">YouTube</strong>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-info p-0 text-decoration-none small" onclick="autoConectarRed('youtube')">
+                                            <i class="bi bi-link-45deg me-1"></i> Auto-conectar link
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <label class="form-label-custom small">Usuario / Canal Visible</label>
+                                            <input type="text" name="redes_youtube" id="redes_youtube" class="form-control form-control-custom" value="{{ old('redes_youtube', $redesFooter['youtube']['text']) }}" placeholder="@ceficr" oninput="syncRedesPreview('youtube')">
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="form-label-custom small">Enlace Oficial Directo (URL)</label>
+                                            <div class="input-group">
+                                                <input type="url" name="redes_youtube_url" id="redes_youtube_url" class="form-control form-control-custom" value="{{ old('redes_youtube_url', $redesFooter['youtube']['url']) }}" placeholder="https://www.youtube.com/@ceficr" oninput="syncRedesPreview('youtube')">
+                                                <a href="{{ $redesFooter['youtube']['url'] }}" id="test_link_youtube" target="_blank" rel="noopener" class="btn btn-outline-secondary d-flex align-items-center" title="Probar enlace">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TikTok -->
+                                <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="22" height="22">
+                                            <strong class="text-white">TikTok</strong>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-info p-0 text-decoration-none small" onclick="autoConectarRed('tiktok')">
+                                            <i class="bi bi-link-45deg me-1"></i> Auto-conectar link
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <label class="form-label-custom small">Usuario Visible</label>
+                                            <input type="text" name="redes_tiktok" id="redes_tiktok" class="form-control form-control-custom" value="{{ old('redes_tiktok', $redesFooter['tiktok']['text']) }}" placeholder="@cefi_cr" oninput="syncRedesPreview('tiktok')">
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="form-label-custom small">Enlace Oficial Directo (URL)</label>
+                                            <div class="input-group">
+                                                <input type="url" name="redes_tiktok_url" id="redes_tiktok_url" class="form-control form-control-custom" value="{{ old('redes_tiktok_url', $redesFooter['tiktok']['url']) }}" placeholder="https://www.tiktok.com/@cefi_cr" oninput="syncRedesPreview('tiktok')">
+                                                <a href="{{ $redesFooter['tiktok']['url'] }}" id="test_link_tiktok" target="_blank" rel="noopener" class="btn btn-outline-secondary d-flex align-items-center" title="Probar enlace">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna 2: Contacto Directo, WhatsApp & Web -->
+                    <div class="col-lg-6">
+                        <div class="config-card h-100">
+                            <div class="config-card-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-chat-dots-fill text-success fs-5"></i>
+                                    <h5 class="fw-bold mb-0 text-white">Canales de Contacto Directo & Mensajería</h5>
+                                </div>
+                                <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25">Conexión Inmediata</span>
+                            </div>
+                            <div class="config-card-body">
+                                <p class="text-white-50 small mb-4">Teléfonos de atención, correo institucional y el canal de WhatsApp prioritario de la franja derecha.</p>
+
+                                <!-- WhatsApp Oficial (Destacado) -->
+                                <div class="p-3 rounded-3 mb-3" style="background: rgba(34, 197, 94, 0.05); border: 1.5px solid rgba(34, 197, 94, 0.35);">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{{ asset('imgs/social/whatsapp_green.svg') }}" alt="WhatsApp" width="22" height="22">
+                                            <strong class="text-white">WhatsApp Oficial (Franja Derecha en PDF)</strong>
+                                            <span class="badge bg-success text-white small" style="font-size: 0.65rem;">DESTACADO</span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-success p-0 text-decoration-none small" onclick="autoConectarRed('whatsapp')">
+                                            <i class="bi bi-link-45deg me-1"></i> Auto-conectar wa.me
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <label class="form-label-custom small">Número Visible con Código</label>
+                                            <input type="text" name="redes_whatsapp" id="redes_whatsapp" class="form-control form-control-custom" value="{{ old('redes_whatsapp', $redesFooter['whatsapp']['text']) }}" placeholder="+506 8992 9180" oninput="syncRedesPreview('whatsapp')">
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="form-label-custom small">Enlace Directo wa.me (URL)</label>
+                                            <div class="input-group">
+                                                <input type="url" name="redes_whatsapp_url" id="redes_whatsapp_url" class="form-control form-control-custom" value="{{ old('redes_whatsapp_url', $redesFooter['whatsapp']['url']) }}" placeholder="https://wa.me/50689929180" oninput="syncRedesPreview('whatsapp')">
+                                                <a href="{{ $redesFooter['whatsapp']['url'] }}" id="test_link_whatsapp" target="_blank" rel="noopener" class="btn btn-outline-secondary d-flex align-items-center" title="Probar WhatsApp">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-white-50 d-block mt-2">
+                                        <i class="bi bi-info-circle me-1"></i> En el PDF del programa, este canal se posiciona en la franja blanca/verde con ícono vectorial blanco.
+                                    </small>
+                                </div>
+
+                                <!-- Teléfono Fijo / Central -->
+                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="22" height="22">
+                                            <strong class="text-white">Teléfono de Contacto (Llamadas)</strong>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-info p-0 text-decoration-none small" onclick="autoConectarRed('telefono')">
+                                            <i class="bi bi-link-45deg me-1"></i> Auto-conectar tel:
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <label class="form-label-custom small">Número Visible</label>
+                                            <input type="text" name="redes_telefono" id="redes_telefono" class="form-control form-control-custom" value="{{ old('redes_telefono', $redesFooter['telefono']['text']) }}" placeholder="2711 1010" oninput="syncRedesPreview('telefono')">
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="form-label-custom small">Enlace de Marcación (tel:...)</label>
+                                            <div class="input-group">
+                                                <input type="text" name="redes_telefono_url" id="redes_telefono_url" class="form-control form-control-custom" value="{{ old('redes_telefono_url', $redesFooter['telefono']['url']) }}" placeholder="tel:+50627111010" oninput="syncRedesPreview('telefono')">
+                                                <a href="{{ $redesFooter['telefono']['url'] }}" id="test_link_telefono" class="btn btn-outline-secondary d-flex align-items-center" title="Probar marcación">
+                                                    <i class="bi bi-telephone-outbound"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Correo Electrónico Institucional -->
+                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="{{ asset('imgs/social/email.svg') }}" alt="Email" width="22" height="22">
+                                            <strong class="text-white">Correo Electrónico Oficial</strong>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-info p-0 text-decoration-none small" onclick="autoConectarRed('email')">
+                                            <i class="bi bi-link-45deg me-1"></i> Auto-conectar mailto:
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <label class="form-label-custom small">Correo Visible</label>
+                                            <input type="email" name="redes_email" id="redes_email" class="form-control form-control-custom" value="{{ old('redes_email', $redesFooter['email']['text']) }}" placeholder="info@ceficr.com" oninput="syncRedesPreview('email')">
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="form-label-custom small">Enlace de Correo (mailto:...)</label>
+                                            <div class="input-group">
+                                                <input type="text" name="redes_email_url" id="redes_email_url" class="form-control form-control-custom" value="{{ old('redes_email_url', $redesFooter['email']['url']) }}" placeholder="mailto:info@ceficr.com" oninput="syncRedesPreview('email')">
+                                                <a href="{{ $redesFooter['email']['url'] }}" id="test_link_email" class="btn btn-outline-secondary d-flex align-items-center" title="Probar correo">
+                                                    <i class="bi bi-envelope-check"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sitio Web Oficial / Portal -->
+                                <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-globe2 text-info fs-5"></i>
+                                            <strong class="text-white">Sitio Web Institucional</strong>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-info p-0 text-decoration-none small" onclick="autoConectarRed('web')">
+                                            <i class="bi bi-link-45deg me-1"></i> Auto-conectar web
+                                        </button>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col-md-5">
+                                            <label class="form-label-custom small">Texto Display</label>
+                                            <input type="text" name="redes_sitio_web" id="redes_sitio_web" class="form-control form-control-custom" value="{{ old('redes_sitio_web', $redesFooter['web']['text'] ?? 'cefi.cr') }}" placeholder="cefi.cr" oninput="syncRedesPreview('web')">
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label class="form-label-custom small">Enlace Web Oficial (URL)</label>
+                                            <div class="input-group">
+                                                <input type="url" name="redes_sitio_web_url" id="redes_sitio_web_url" class="form-control form-control-custom" value="{{ old('redes_sitio_web_url', $redesFooter['web']['url'] ?? 'https://cefi.cr') }}" placeholder="https://ceficr.com" oninput="syncRedesPreview('web')">
+                                                <a href="{{ $redesFooter['web']['url'] ?? 'https://cefi.cr' }}" id="test_link_web" target="_blank" rel="noopener" class="btn btn-outline-secondary d-flex align-items-center" title="Probar Sitio Web">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Previsualización Interactiva en Vivo del Pie de Página de Folleto PDF -->
+                    <div class="col-12">
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-eye-fill text-warning fs-5"></i>
+                                    <h5 class="fw-bold mb-0 text-white">Previsualización Interactiva en Vivo (Pie de Página del Folleto PDF)</h5>
+                                </div>
+                                <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25">Tiempo Real</span>
+                            </div>
+                            <div class="config-card-body">
+                                <p class="text-white-50 small mb-3">
+                                    Esta barra simula el pie de página exacto que se imprime en los folletos y programas en PDF generados. Los enlaces son interactivos y pueden probarse directamente:
+                                </p>
+
+                                <div class="p-3 rounded-4 shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-3" style="background: #2b303a; border: 1.5px solid rgba(255,255,255,0.1);">
+                                    <div class="d-flex flex-wrap align-items-center gap-3 small">
+                                        <span class="text-white fw-bold d-none d-md-inline-block">
+                                            <i class="bi bi-share-fill text-success me-1"></i> Redes en Pie de Página:
+                                        </span>
+                                        <a href="{{ $redesFooter['facebook']['url'] }}" id="prev_link_facebook" target="_blank" rel="noopener" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
+                                            <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook" width="18" height="18"> <span id="prev_text_facebook" class="fw-medium">{{ $redesFooter['facebook']['text'] }}</span>
+                                        </a>
+                                        <a href="{{ $redesFooter['instagram']['url'] }}" id="prev_link_instagram" target="_blank" rel="noopener" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
+                                            <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="18" height="18"> <span id="prev_text_instagram" class="fw-medium">{{ $redesFooter['instagram']['text'] }}</span>
+                                        </a>
+                                        <a href="{{ $redesFooter['telefono']['url'] }}" id="prev_link_telefono" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
+                                            <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="18" height="18"> <span id="prev_text_telefono" class="fw-medium">{{ $redesFooter['telefono']['text'] }}</span>
+                                        </a>
+                                        <a href="{{ $redesFooter['email']['url'] }}" id="prev_link_email" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
+                                            <img src="{{ asset('imgs/social/email.svg') }}" alt="Email" width="18" height="18"> <span id="prev_text_email" class="fw-medium">{{ $redesFooter['email']['text'] }}</span>
+                                        </a>
+                                        <a href="{{ $redesFooter['youtube']['url'] }}" id="prev_link_youtube" target="_blank" rel="noopener" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
+                                            <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube" width="18" height="18"> <span id="prev_text_youtube" class="fw-medium">{{ $redesFooter['youtube']['text'] }}</span>
+                                        </a>
+                                        <a href="{{ $redesFooter['tiktok']['url'] }}" id="prev_link_tiktok" target="_blank" rel="noopener" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
+                                            <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="18" height="18"> <span id="prev_text_tiktok" class="fw-medium">{{ $redesFooter['tiktok']['text'] }}</span>
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <a href="{{ $redesFooter['whatsapp']['url'] }}" id="prev_link_whatsapp" target="_blank" rel="noopener" class="text-decoration-none text-white fw-bold d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill shadow-sm" style="background: linear-gradient(90deg, #16a34a 0%, #15803d 100%);">
+                                            <img src="{{ asset('imgs/social/whatsapp_white.svg') }}" alt="WhatsApp" width="18" height="18"> <span id="prev_text_whatsapp">{{ $redesFooter['whatsapp']['text'] }}</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botón de Guardado Inferior -->
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary px-5 py-3 fw-bold rounded-pill shadow-lg d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill"></i> Guardar Redes Sociales & Pie de Página PDF
                         </button>
                     </div>
                 </div>
@@ -1301,5 +1618,99 @@
             Swal.fire('Error de Red', err.message, 'error');
         });
     }
+
+    // -------------------------------------------------------------
+    // FUNCIONES DE AUTO-CONEXIÓN Y SINCRONIZACIÓN DE REDES SOCIALES
+    // -------------------------------------------------------------
+    function autoConectarRed(red) {
+        const textInput = document.getElementById('redes_' + red);
+        const urlInput = document.getElementById('redes_' + red + '_url');
+        if (!textInput || !urlInput) return;
+
+        let val = textInput.value.trim();
+        if (!val) return;
+
+        let url = '';
+        if (red === 'facebook') {
+            let handle = val.replace(/^https?:\/\/(www\.)?facebook\.com\//i, '').replace(/^\/+|\/+$/g, '').replace(/^@/, '');
+            url = 'https://www.facebook.com/' + handle;
+        } else if (red === 'instagram') {
+            let handle = val.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/^\/+|\/+$/g, '').replace(/^@/, '');
+            url = 'https://www.instagram.com/' + handle + '/';
+        } else if (red === 'youtube') {
+            let handle = val.replace(/^https?:\/\/(www\.)?youtube\.com\//i, '').replace(/^\/+|\/+$/g, '');
+            if (!handle.startsWith('@')) handle = '@' + handle;
+            url = 'https://www.youtube.com/' + handle;
+        } else if (red === 'tiktok') {
+            let handle = val.replace(/^https?:\/\/(www\.)?tiktok\.com\//i, '').replace(/^\/+|\/+$/g, '');
+            if (!handle.startsWith('@')) handle = '@' + handle;
+            url = 'https://www.tiktok.com/' + handle;
+        } else if (red === 'whatsapp') {
+            let digits = val.replace(/[^0-9]/g, '');
+            if (digits.length === 8) digits = '506' + digits;
+            url = 'https://wa.me/' + digits;
+        } else if (red === 'telefono') {
+            let digits = val.replace(/[^0-9+]/g, '');
+            if (digits.length === 8 && !digits.startsWith('+')) digits = '+506' + digits;
+            url = 'tel:' + digits;
+        } else if (red === 'email') {
+            url = 'mailto:' + val;
+        } else if (red === 'web') {
+            let domain = val.replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+            url = 'https://' + domain;
+        }
+
+        if (url) {
+            urlInput.value = url;
+            syncRedesPreview(red);
+        }
+    }
+
+    function autoConectarTodos() {
+        const redes = ['facebook', 'instagram', 'youtube', 'tiktok', 'whatsapp', 'telefono', 'email', 'web'];
+        redes.forEach(r => autoConectarRed(r));
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Enlaces Auto-Conectados!',
+                text: 'Se han generado y verificado los enlaces oficiales para todos los canales.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    }
+
+    function syncRedesPreview(red) {
+        const textInput = document.getElementById('redes_' + red);
+        const urlInput = document.getElementById('redes_' + red + '_url');
+        const prevText = document.getElementById('prev_text_' + red);
+        const prevLink = document.getElementById('prev_link_' + red);
+        const testLink = document.getElementById('test_link_' + red);
+
+        if (textInput && prevText) {
+            prevText.textContent = textInput.value || '...';
+        }
+        if (urlInput) {
+            let urlVal = urlInput.value || '#';
+            if (prevLink) prevLink.href = urlVal;
+            if (testLink) testLink.href = urlVal;
+        }
+    }
+
+    // Actualizar query string ?tab=... al cambiar de pestaña
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabElList = document.querySelectorAll('#configTabs button[data-bs-toggle="pill"]');
+        tabElList.forEach(tabEl => {
+            tabEl.addEventListener('shown.bs.tab', function(event) {
+                const targetId = event.target.getAttribute('data-bs-target');
+                if (targetId) {
+                    const tabKey = targetId.replace('#pane-', '');
+                    const url = new URL(window.location);
+                    url.searchParams.set('tab', tabKey);
+                    window.history.replaceState({}, '', url);
+                }
+            });
+        });
+    });
 </script>
 @endsection
