@@ -355,7 +355,7 @@ class SoporteController extends Controller
         // Sincronizar con Inbox Cloud Hub (https://hub.renangalvan.net/api/tickets.php) + n8n WhatsApp + Correo
         $this->dispatchOmnicanalAveria([
             'local_id'       => $soporte->id,
-            'client_id'      => env('INBOX_CLIENT_ID', 'inbox_cefi'),
+            'client_id'      => config('cliente.hub_client_id', 'inbox_cefi'),
             'client_siglas'  => config('cliente.siglas', 'CEFI'),
             'client_nombre'  => config('cliente.nombre', 'Inbox CEFI'),
             'titulo'         => $soporte->titulo,

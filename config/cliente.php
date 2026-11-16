@@ -13,6 +13,7 @@ return [
     */
 
     'id' => env('CLIENT_ID', 'cefi'),
+    'hub_client_id' => env('INBOX_CLIENT_ID', 'inbox_cefi'),
     'nombre' => env('CLIENT_NAME', 'CEFI'),
     'nombre_legal' => env('CLIENT_LEGAL_NAME', 'Centro de Estudios Financieros e Internacionales'),
     'siglas' => env('CLIENT_SHORT_NAME', 'CEFI'),
