@@ -230,17 +230,37 @@ class BoletaController extends Controller
      */
     public function buscarEstudianteAjax(Request $request)
     {
-        $term = $request->get('term') ?: $request->get('q');
-        if (strlen($term) < 2) {
+        $term = trim((string)($request->get('term') ?: $request->get('q')));
+        if (mb_strlen($term) < 2) {
             return response()->json([]);
         }
 
-        $estudiantes = Usuario::where(function($q) use ($term) {
-            $q->where('nombre', 'like', "%{$term}%")
-              ->orWhere('apellidos', 'like', "%{$term}%")
-              ->orWhere('email', 'like', "%{$term}%")
-              ->orWhere('cedula', 'like', "%{$term}%");
-        })->take(20)->get();
+        // Normalizar tildes y dividir en palabras para permitir búsquedas como "Jose Perez" aunque en BD diga "José Pérez"
+        $termLower = mb_strtolower($term, 'UTF-8');
+        $termSinTildes = strtr($termLower, [
+            'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n',
+        ]);
+        $tokens = array_values(array_filter(preg_split('/\s+/', $termSinTildes)));
+
+        $normCol = function (string $col): string {
+            return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE({$col}, '')),'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ñ','n')";
+        };
+
+        $estudiantes = Usuario::where(function($q) use ($tokens, $termSinTildes, $normCol) {
+            // Cada palabra debe coincidir en nombre, apellidos, email, cédula o teléfono
+            $q->where(function ($sub) use ($tokens, $normCol) {
+                foreach ($tokens as $tok) {
+                    $like = "%{$tok}%";
+                    $sub->where(function ($w) use ($like, $normCol) {
+                        $w->whereRaw($normCol('nombre') . ' LIKE ?', [$like])
+                          ->orWhereRaw($normCol('apellidos') . ' LIKE ?', [$like])
+                          ->orWhereRaw($normCol('email') . ' LIKE ?', [$like])
+                          ->orWhereRaw($normCol('cedula') . ' LIKE ?', [$like])
+                          ->orWhereRaw($normCol('telefono') . ' LIKE ?', [$like]);
+                    });
+                }
+            })->orWhereRaw($normCol("CONCAT_WS(' ', nombre, apellidos)") . ' LIKE ?', ["%{$termSinTildes}%"]);
+        })->orderByDesc('id')->take(25)->get();
 
         // Si la petición viene de Select2
         if ($request->has('q')) {
