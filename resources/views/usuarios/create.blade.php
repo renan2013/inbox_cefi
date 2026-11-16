@@ -170,28 +170,71 @@
                 
                 <!-- Success Details Card (from Session) -->
                 @if (session('new_user_details'))
-                    @php $details = session('new_user_details'); @endphp
+                    @php
+                        $details = session('new_user_details');
+                        $institucionNombre = \App\Services\ClienteService::nombre();
+                        $plataformaUrl = url('/');
+                        $nombreCompleto = trim(($details['nombre'] ?? '') . ' ' . ($details['apellidos'] ?? ''));
+                        $mensajeDefault = "¡Hola {$nombreCompleto}! 👋\n\nYa tienes acceso a la plataforma *{$institucionNombre}*.\n\n🔗 *Enlace de ingreso:* {$plataformaUrl}\n📧 *Correo:* {$details['email']}\n🔑 *Contraseña:* {$details['password']}\n\nTe recomendamos guardar tus credenciales y cambiar tu contraseña al ingresar.";
+                    @endphp
                     <div class="success-card text-center animate__animated animate__fadeIn">
-                        <div class="mb-3"><i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i></div>
+                        <div class="mb-2"><i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i></div>
                         <h4 class="text-success fw-bold">¡Registro Exitoso!</h4>
-                        <p class="text-white-50 small mb-4">Copia estos datos y compártelos con el usuario. <b>Esta información no volverá a mostrarse.</b></p>
-                        
-                        <div class="bg-dark p-4 rounded-4 border border-secondary shadow-sm text-start mx-auto" style="max-width: 450px;">
-                            <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                <span class="small text-white-50 fw-bold text-uppercase">Nombre:</span>
-                                <span class="fw-bold text-white">{{ $details['nombre'] }} {{ $details['apellidos'] }}</span>
+                        <p class="text-white-50 small mb-4">Edita, copia o envía directamente por WhatsApp la tarjeta de acceso. <b>La contraseña no volverá a mostrarse.</b></p>
+
+                        <div class="bg-dark p-4 rounded-4 border border-secondary shadow-sm text-start mx-auto" style="max-width: 620px;">
+                            <div class="row g-2 mb-3">
+                                <div class="col-sm-6">
+                                    <span class="small text-white-50 fw-bold text-uppercase d-block">Nombre:</span>
+                                    <span class="fw-bold text-white">{{ $nombreCompleto }}</span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <span class="small text-white-50 fw-bold text-uppercase d-block">Enlace Plataforma:</span>
+                                    <span class="copy-badge mt-1" onclick="copyText('{{ $plataformaUrl }}', 'Enlace')" title="Click para copiar">
+                                        {{ $plataformaUrl }} <i class="bi bi-clipboard ms-1"></i>
+                                    </span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <span class="small text-white-50 fw-bold text-uppercase d-block">Correo:</span>
+                                    <span class="copy-badge mt-1" onclick="copyText('{{ $details['email'] }}', 'Correo')" title="Click para copiar">
+                                        {{ $details['email'] }} <i class="bi bi-clipboard ms-1"></i>
+                                    </span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <span class="small text-white-50 fw-bold text-uppercase d-block">Contraseña:</span>
+                                    <span class="copy-badge mt-1" onclick="copyText('{{ $details['password'] }}', 'Contraseña')" title="Click para copiar">
+                                        {{ $details['password'] }} <i class="bi bi-clipboard ms-1"></i>
+                                    </span>
+                                </div>
                             </div>
-                            <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                <span class="small text-white-50 fw-bold text-uppercase">Correo:</span>
-                                <span class="copy-badge" onclick="copyText('{{ $details['email'] }}', 'Correo')" title="Click para copiar">
-                                    {{ $details['email'] }} <i class="bi bi-clipboard ms-1"></i>
-                                </span>
+
+                            <hr class="border-secondary opacity-25 my-3">
+
+                            <div class="mb-3">
+                                <label for="wa_target_phone" class="form-label small text-white-50 fw-bold text-uppercase mb-1">
+                                    <i class="bi bi-whatsapp text-success me-1"></i> Teléfono WhatsApp del Usuario
+                                </label>
+                                <input type="text" id="wa_target_phone" class="form-control form-control-sm form-control-custom"
+                                       value="{{ $details['telefono'] ?? '' }}" placeholder="Ej: 50688887777">
                             </div>
-                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                <span class="small text-white-50 fw-bold text-uppercase">Contraseña:</span>
-                                <span class="copy-badge" onclick="copyText('{{ $details['password'] }}', 'Contraseña')" title="Click para copiar">
-                                    {{ $details['password'] }} <i class="bi bi-clipboard ms-1"></i>
-                                </span>
+
+                            <div class="mb-3">
+                                <label for="wa_editable_card" class="form-label small text-white-50 fw-bold text-uppercase mb-1">
+                                    <i class="bi bi-pencil-square text-info me-1"></i> Tarjeta de Bienvenida (Editable)
+                                </label>
+                                <textarea id="wa_editable_card" rows="7" class="form-control form-control-custom" style="font-size: 0.9rem; line-height: 1.45;">{{ $mensajeDefault }}</textarea>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold" onclick="copiarTarjetaCompleta()">
+                                    <i class="bi bi-clipboard-check me-1"></i> Copiar Tarjeta
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm rounded-pill px-3 fw-semibold" onclick="abrirWhatsAppTarjeta()">
+                                    <i class="bi bi-whatsapp me-1"></i> Enviar por WhatsApp
+                                </button>
+                                <button type="button" id="btnAutoWaCreds" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold" onclick="enviarAutoWhatsappCredenciales()">
+                                    <i class="bi bi-send-fill me-1"></i> Envío Automático (n8n / API)
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -345,5 +388,58 @@
                 return password;
             }
         });
+
+        function copiarTarjetaCompleta() {
+            const texto = document.getElementById('wa_editable_card')?.value || '';
+            if (!texto) return;
+            navigator.clipboard.writeText(texto).then(() => {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Tarjeta copiada al portapapeles', showConfirmButton: false, timer: 1800 });
+            });
+        }
+
+        function abrirWhatsAppTarjeta() {
+            const texto = encodeURIComponent(document.getElementById('wa_editable_card')?.value || '');
+            let phone = (document.getElementById('wa_target_phone')?.value || '').replace(/\D+/g, '');
+            if (phone.length === 8) phone = '506' + phone;
+            const url = phone
+                ? `https://api.whatsapp.com/send?phone=${phone}&text=${texto}`
+                : `https://api.whatsapp.com/send?text=${texto}`;
+            window.open(url, '_blank');
+        }
+
+        async function enviarAutoWhatsappCredenciales() {
+            const telefono = (document.getElementById('wa_target_phone')?.value || '').trim();
+            const mensaje = (document.getElementById('wa_editable_card')?.value || '').trim();
+            if (!telefono) {
+                Swal.fire('Teléfono requerido', 'Ingresa el número de WhatsApp del usuario para enviarlo automáticamente.', 'warning');
+                return;
+            }
+            const btn = document.getElementById('btnAutoWaCreds');
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Enviando...';
+            try {
+                const res = await fetch("{{ route('usuarios.enviar_credenciales_wa') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ telefono, mensaje })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    Swal.fire('¡Enviado!', data.message || 'Credenciales enviadas por WhatsApp.', 'success');
+                } else {
+                    Swal.fire('Aviso', data.message || 'No se pudo enviar automáticamente. Usa "Enviar por WhatsApp".', 'warning');
+                }
+            } catch (e) {
+                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        }
     </script>
 @endsection

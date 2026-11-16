@@ -147,8 +147,34 @@ class UsuarioController extends Controller
             'nombre' => $request->nombre,
             'apellidos' => $request->apellidos,
             'email' => $request->email,
+            'telefono' => $request->telefono,
             'password' => $request->password,
         ]);
+    }
+
+    /**
+     * Envía las credenciales de acceso editables al WhatsApp del usuario vía n8n / Evolution API.
+     */
+    public function enviarCredencialesWhatsapp(Request $request)
+    {
+        $request->validate([
+            'telefono' => 'required|string|max:30',
+            'mensaje'  => 'required|string|max:3000',
+        ]);
+
+        $res = \App\Services\WhatsAppService::sendTo(
+            $request->input('telefono'),
+            $request->input('mensaje'),
+            null,
+            ['tipo' => 'credenciales_acceso']
+        );
+
+        return response()->json([
+            'success' => !empty($res['success']),
+            'message' => $res['message'] ?? (!empty($res['success'])
+                ? 'Credenciales enviadas automáticamente por WhatsApp.'
+                : 'No se pudo enviar automáticamente. Verifica la configuración de n8n / WhatsApp.'),
+        ], !empty($res['success']) ? 200 : 422);
     }
 
     /**
