@@ -27,6 +27,10 @@
         .logo-pulse {
             max-height: 110px;
             margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 24px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
             animation: float 3.5s ease-in-out infinite;
         }
         @keyframes float {
@@ -51,9 +55,9 @@
 </head>
 <body>
     <div class="stage">
-        <img src="{{ asset(config('cliente.logo_Institucional', 'imgs/logo_cefi_oficial.png')) }}"
+        <img src="{{ \App\Services\ClienteService::logoUrl() }}"
              onerror="this.src='{{ asset('imgs/SVG/logo_blanco.svg') }}'"
-             alt="Logo" class="logo-pulse">
+             alt="{{ \App\Services\ClienteService::nombre() }}" class="logo-pulse">
         <h1 class="fw-extrabold display-5 mb-2">{{ $titulo }}</h1>
         <h3 class="fw-normal text-info mb-3">{{ $subtitulo }}</h3>
         @if(!empty($expositor))
