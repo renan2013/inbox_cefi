@@ -295,12 +295,57 @@ class BaseDatosEventosController extends Controller
      */
     public function cortinaEvento(Request $request)
     {
-        $titulo    = $request->query('titulo', config('cliente.nombre_legal', 'CENTRO DE ENSEÑANZA DE FORMACIÓN INTEGRAL'));
-        $subtitulo = $request->query('subtitulo', 'Bienvenidos a Nuestra Sesión en Vivo');
-        $expositor = $request->query('expositor', '');
-        $minutos   = max(1, min(120, (int)$request->query('minutos', 5)));
-        $tema      = $request->query('tema', 'institucional');
+        $this->ensureTables();
 
-        return view('cortina.evento', compact('titulo', 'subtitulo', 'expositor', 'minutos', 'tema'));
+        $nombreLegal = \App\Services\ClienteService::nombreLegal();
+        $titulo      = "Evento Especial " . \App\Services\ClienteService::siglas();
+        $subtitulo   = $nombreLegal . " • Transmisión Oficial";
+        $expositor   = '';
+        $minutos     = 5;
+        $musica      = 1;
+        $pista       = 'ambient';
+        $tema        = 'institucional';
+
+        $idEvento     = (int)$request->query('id', 0);
+        $codigoEvento = trim((string)$request->query('e', ''));
+
+        if ($idEvento > 0 || $codigoEvento !== '') {
+            $ev = $idEvento > 0
+                ? DB::table('eventos_captacion')->where('id', $idEvento)->first()
+                : DB::table('eventos_captacion')->where('codigo', $codigoEvento)->first();
+
+            if ($ev) {
+                $titulo = $ev->nombre ?? $titulo;
+                if (!empty($ev->descripcion)) {
+                    $subtitulo = $ev->descripcion;
+                } elseif (!empty($ev->lugar)) {
+                    $subtitulo = "Sede: {$ev->lugar} • {$nombreLegal}";
+                }
+            }
+        }
+
+        if (trim((string)$request->query('titulo', '')) !== '') {
+            $titulo = trim((string)$request->query('titulo'));
+        }
+        if (trim((string)$request->query('subtitulo', '')) !== '') {
+            $subtitulo = trim((string)$request->query('subtitulo'));
+        }
+        if (trim((string)$request->query('expositor', '')) !== '') {
+            $expositor = trim((string)$request->query('expositor'));
+        }
+        if ($request->has('minutos')) {
+            $minutos = max(1, min(120, (int)$request->query('minutos', 5)));
+        }
+        if ($request->has('musica')) {
+            $musica = (int)$request->query('musica', 1) ? 1 : 0;
+        }
+        if (trim((string)$request->query('pista', '')) !== '') {
+            $pista = trim((string)$request->query('pista'));
+        }
+        if (trim((string)$request->query('tema', '')) !== '') {
+            $tema = trim((string)$request->query('tema'));
+        }
+
+        return view('cortina.evento', compact('titulo', 'subtitulo', 'expositor', 'minutos', 'musica', 'pista', 'tema'));
     }
 }
