@@ -344,6 +344,192 @@
     [data-theme="light"] .modal-content .btn-close-white {
         filter: invert(1) !important;
     }
+
+    /* ==============================================================
+       ESTILOS PREMIUM: PREVISUALIZACIÓN DE PIE DE PÁGINA PDF
+       ============================================================== */
+    .config-redes-hero {
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%);
+        border: 1.5px solid rgba(14, 165, 233, 0.35) !important;
+        border-radius: 1rem;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    [data-theme="light"] .config-redes-hero {
+        background: #ffffff !important;
+        border: 1.5px solid #cbd5e1 !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+    }
+    [data-theme="light"] .config-redes-hero h5 {
+        color: #0f172a !important;
+    }
+    [data-theme="light"] .config-redes-hero p {
+        color: #475569 !important;
+    }
+
+    .config-channel-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-dark);
+        border-radius: 0.85rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+    }
+    [data-theme="light"] .config-channel-card {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+    }
+    [data-theme="light"] .config-channel-card strong {
+        color: #0f172a !important;
+    }
+
+    .config-channel-whatsapp {
+        background: rgba(34, 197, 94, 0.05) !important;
+        border: 1.5px solid rgba(34, 197, 94, 0.35) !important;
+    }
+    [data-theme="light"] .config-channel-whatsapp {
+        background: #f0fdf4 !important;
+        border: 1.5px solid #86efac !important;
+    }
+
+    .preview-mode-slate {
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+        border: 1px solid #334155 !important;
+        border-radius: 1.25rem !important;
+        padding: 1.75rem !important;
+        transition: all 0.3s ease;
+    }
+    .preview-mode-paper {
+        background: #f8fafc !important;
+        border: 2px dashed #94a3b8 !important;
+        border-radius: 1.25rem !important;
+        padding: 1.75rem !important;
+        box-shadow: inset 0 2px 10px rgba(0,0,0,0.03) !important;
+        transition: all 0.3s ease;
+    }
+
+    /* MODO OSCURO */
+    .bar-dark-mode {
+        background: #1e293b !important;
+        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        border-radius: 9999px !important;
+        padding: 0.65rem 0.85rem 0.65rem 1.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 0.85rem !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35) !important;
+    }
+    .bar-dark-mode .pdf-footer-tag {
+        color: #38bdf8 !important;
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.3px !important;
+    }
+    .bar-dark-mode .pdf-social-chip {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.45rem !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        padding: 0.35rem 0.75rem !important;
+        border-radius: 9999px !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
+    }
+    .bar-dark-mode .pdf-social-chip:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.35) !important;
+        transform: translateY(-2px) !important;
+    }
+    .bar-dark-mode .pdf-social-chip span,
+    [data-theme="light"] .bar-dark-mode .pdf-social-chip span {
+        color: #f8fafc !important;
+        font-weight: 600 !important;
+        font-size: 0.84rem !important;
+    }
+
+    /* MODO CLARO (Hoja Blanca PDF) */
+    .bar-light-mode {
+        background: #ffffff !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 9999px !important;
+        padding: 0.65rem 0.85rem 0.65rem 1.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 0.85rem !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06) !important;
+    }
+    .bar-light-mode .pdf-footer-tag {
+        color: #0284c7 !important;
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.3px !important;
+    }
+    .bar-light-mode .pdf-social-chip {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.45rem !important;
+        background: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 0.35rem 0.75rem !important;
+        border-radius: 9999px !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
+    }
+    .bar-light-mode .pdf-social-chip:hover {
+        background: #e2e8f0 !important;
+        border-color: #94a3b8 !important;
+        transform: translateY(-2px) !important;
+    }
+    .bar-light-mode .pdf-social-chip span,
+    [data-theme="light"] .bar-light-mode .pdf-social-chip span {
+        color: #0f172a !important;
+        font-weight: 600 !important;
+        font-size: 0.84rem !important;
+    }
+
+    /* WhatsApp Pill Button */
+    .pdf-whatsapp-btn,
+    [data-theme="light"] .pdf-whatsapp-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+        border: 1.5px solid #4ade80 !important;
+        padding: 0.5rem 1.25rem !important;
+        border-radius: 9999px !important;
+        text-decoration: none !important;
+        box-shadow: 0 4px 14px rgba(34, 197, 94, 0.45) !important;
+        transition: all 0.2s ease !important;
+    }
+    .pdf-whatsapp-btn:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(34, 197, 94, 0.6) !important;
+    }
+    .pdf-whatsapp-btn span,
+    [data-theme="light"] .pdf-whatsapp-btn span {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 0.92rem !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    .badge-live-pulse {
+        background: rgba(34, 197, 94, 0.15) !important;
+        color: #16a34a !important;
+        border: 1px solid rgba(34, 197, 94, 0.3) !important;
+        font-weight: 700 !important;
+    }
+    [data-theme="dark"] .badge-live-pulse {
+        background: rgba(34, 197, 94, 0.25) !important;
+        color: #4ade80 !important;
+        border-color: rgba(34, 197, 94, 0.4) !important;
+    }
 </style>
 @endsection
 
@@ -683,10 +869,10 @@
                 <input type="hidden" name="active_tab" value="redes">
 
                 <!-- Header de la pestaña de redes -->
-                <div class="card p-3 mb-4 rounded-4 border-0 shadow-sm" style="background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(14, 165, 233, 0.35) !important;">
+                <div class="config-redes-hero shadow-sm">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: rgba(14, 165, 233, 0.15); color: #0ea5e9; font-size: 1.4rem;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background: rgba(14, 165, 233, 0.15); color: #0284c7; font-size: 1.4rem;">
                                 <i class="bi bi-share-fill"></i>
                             </div>
                             <div>
@@ -702,7 +888,7 @@
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <button type="button" class="btn btn-outline-info rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2" onclick="autoConectarTodos()">
+                            <button type="button" class="btn btn-outline-info rounded-pill px-3 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm" onclick="autoConectarTodos()">
                                 <i class="bi bi-magic"></i> Auto-Conectar Todos los Enlaces
                             </button>
                             <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow">
@@ -727,7 +913,7 @@
                                 <p class="text-white-50 small mb-4">Ingrese el usuario o nombre con el que se identifica la institución en cada red y su enlace directo.</p>
 
                                 <!-- Facebook -->
-                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                <div class="config-channel-card">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook" width="22" height="22">
@@ -755,7 +941,7 @@
                                 </div>
 
                                 <!-- Instagram -->
-                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                <div class="config-channel-card">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="22" height="22">
@@ -783,7 +969,7 @@
                                 </div>
 
                                 <!-- YouTube -->
-                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                <div class="config-channel-card">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube" width="22" height="22">
@@ -811,7 +997,7 @@
                                 </div>
 
                                 <!-- TikTok -->
-                                <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                <div class="config-channel-card">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="22" height="22">
@@ -827,6 +1013,16 @@
                                             <input type="text" name="redes_tiktok" id="redes_tiktok" class="form-control form-control-custom" value="{{ old('redes_tiktok', $redesFooter['tiktok']['text']) }}" placeholder="@cefi_cr" oninput="syncRedesPreview('tiktok')">
                                         </div>
                                         <div class="col-md-7">
+                                            <label class="form-label-custom small">Enlace Oficial Directo (URL)</label>
+                                            <div class="input-group">
+                                                <input type="url" name="redes_tiktok_url" id="redes_tiktok_url" class="form-control form-control-custom" value="{{ old('redes_tiktok_url', $redesFooter['tiktok']['url']) }}" placeholder="https://www.tiktok.com/@cefi_cr" oninput="syncRedesPreview('tiktok')">
+                                                <a href="{{ $redesFooter['tiktok']['url'] }}" id="test_link_tiktok" target="_blank" rel="noopener" class="btn btn-outline-secondary d-flex align-items-center" title="Probar enlace">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                             <label class="form-label-custom small">Enlace Oficial Directo (URL)</label>
                                             <div class="input-group">
                                                 <input type="url" name="redes_tiktok_url" id="redes_tiktok_url" class="form-control form-control-custom" value="{{ old('redes_tiktok_url', $redesFooter['tiktok']['url']) }}" placeholder="https://www.tiktok.com/@cefi_cr" oninput="syncRedesPreview('tiktok')">
@@ -855,7 +1051,7 @@
                                 <p class="text-white-50 small mb-4">Teléfonos de atención, correo institucional y el canal de WhatsApp prioritario de la franja derecha.</p>
 
                                 <!-- WhatsApp Oficial (Destacado) -->
-                                <div class="p-3 rounded-3 mb-3" style="background: rgba(34, 197, 94, 0.05); border: 1.5px solid rgba(34, 197, 94, 0.35);">
+                                <div class="config-channel-card config-channel-whatsapp">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <img src="{{ asset('imgs/social/whatsapp_green.svg') }}" alt="WhatsApp" width="22" height="22">
@@ -887,7 +1083,7 @@
                                 </div>
 
                                 <!-- Teléfono Fijo / Central -->
-                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                <div class="config-channel-card">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="22" height="22">
@@ -915,7 +1111,7 @@
                                 </div>
 
                                 <!-- Correo Electrónico Institucional -->
-                                <div class="p-3 rounded-3 mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                <div class="config-channel-card">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <img src="{{ asset('imgs/social/email.svg') }}" alt="Email" width="22" height="22">
@@ -943,7 +1139,7 @@
                                 </div>
 
                                 <!-- Sitio Web Oficial / Portal -->
-                                <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-dark);">
+                                <div class="config-channel-card">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <i class="bi bi-globe2 text-info fs-5"></i>
@@ -977,46 +1173,73 @@
                     <!-- Previsualización Interactiva en Vivo del Pie de Página de Folleto PDF -->
                     <div class="col-12">
                         <div class="config-card">
-                            <div class="config-card-header">
+                            <div class="config-card-header d-flex align-items-center justify-content-between flex-wrap gap-3">
                                 <div class="d-flex align-items-center gap-2">
-                                    <i class="bi bi-eye-fill text-warning fs-5"></i>
-                                    <h5 class="fw-bold mb-0 text-white">Previsualización Interactiva en Vivo (Pie de Página del Folleto PDF)</h5>
+                                    <div class="p-2 rounded-circle" style="background: rgba(14, 165, 233, 0.15); color: #0284c7;">
+                                        <i class="bi bi-eye-fill fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-0 text-white">Previsualización Interactiva en Vivo (Pie de Página PDF)</h5>
+                                        <small class="text-white-50">Enlaces verificables en tiempo real con máxima legibilidad y contraste.</small>
+                                    </div>
                                 </div>
-                                <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25">Tiempo Real</span>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <div class="btn-group btn-group-sm p-1 rounded-pill" style="background: rgba(0,0,0,0.06); border: 1px solid var(--border-dark);">
+                                        <button type="button" class="btn btn-sm btn-dark rounded-pill px-3 py-1 fw-semibold active" id="btnThemeDarkPreview" onclick="setPreviewMode('dark')">
+                                            <i class="bi bi-moon-stars-fill me-1 text-info"></i> Barra Oscura
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold" id="btnThemeLightPreview" onclick="setPreviewMode('light')">
+                                            <i class="bi bi-sun-fill me-1 text-warning"></i> Hoja Blanca (PDF Real)
+                                        </button>
+                                    </div>
+                                    <span class="badge badge-live-pulse rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5">
+                                        <span class="spinner-grow spinner-grow-sm text-success" style="width: 8px; height: 8px;" role="status"></span>
+                                        <span>EN VIVO</span>
+                                    </span>
+                                </div>
                             </div>
                             <div class="config-card-body">
                                 <p class="text-white-50 small mb-3">
                                     Esta barra simula el pie de página exacto que se imprime en los folletos y programas en PDF generados. Los enlaces son interactivos y pueden probarse directamente:
                                 </p>
 
-                                <div class="p-3 rounded-4 shadow-sm d-flex flex-wrap align-items-center justify-content-between gap-3" style="background: #2b303a; border: 1.5px solid rgba(255,255,255,0.1);">
-                                    <div class="d-flex flex-wrap align-items-center gap-3 small">
-                                        <span class="text-white fw-bold d-none d-md-inline-block">
-                                            <i class="bi bi-share-fill text-success me-1"></i> Redes en Pie de Página:
-                                        </span>
-                                        <a href="{{ $redesFooter['facebook']['url'] }}" id="prev_link_facebook" target="_blank" rel="noopener" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
-                                            <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook" width="18" height="18"> <span id="prev_text_facebook" class="fw-medium">{{ $redesFooter['facebook']['text'] }}</span>
-                                        </a>
-                                        <a href="{{ $redesFooter['instagram']['url'] }}" id="prev_link_instagram" target="_blank" rel="noopener" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
-                                            <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="18" height="18"> <span id="prev_text_instagram" class="fw-medium">{{ $redesFooter['instagram']['text'] }}</span>
-                                        </a>
-                                        <a href="{{ $redesFooter['telefono']['url'] }}" id="prev_link_telefono" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
-                                            <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="18" height="18"> <span id="prev_text_telefono" class="fw-medium">{{ $redesFooter['telefono']['text'] }}</span>
-                                        </a>
-                                        <a href="{{ $redesFooter['email']['url'] }}" id="prev_link_email" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
-                                            <img src="{{ asset('imgs/social/email.svg') }}" alt="Email" width="18" height="18"> <span id="prev_text_email" class="fw-medium">{{ $redesFooter['email']['text'] }}</span>
-                                        </a>
-                                        <a href="{{ $redesFooter['youtube']['url'] }}" id="prev_link_youtube" target="_blank" rel="noopener" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
-                                            <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube" width="18" height="18"> <span id="prev_text_youtube" class="fw-medium">{{ $redesFooter['youtube']['text'] }}</span>
-                                        </a>
-                                        <a href="{{ $redesFooter['tiktok']['url'] }}" id="prev_link_tiktok" target="_blank" rel="noopener" class="text-decoration-none text-light d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded hover-bg-dark">
-                                            <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="18" height="18"> <span id="prev_text_tiktok" class="fw-medium">{{ $redesFooter['tiktok']['text'] }}</span>
-                                        </a>
-                                    </div>
-                                    <div>
-                                        <a href="{{ $redesFooter['whatsapp']['url'] }}" id="prev_link_whatsapp" target="_blank" rel="noopener" class="text-decoration-none text-white fw-bold d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill shadow-sm" style="background: linear-gradient(90deg, #16a34a 0%, #15803d 100%);">
-                                            <img src="{{ asset('imgs/social/whatsapp_white.svg') }}" alt="WhatsApp" width="18" height="18"> <span id="prev_text_whatsapp">{{ $redesFooter['whatsapp']['text'] }}</span>
-                                        </a>
+                                <div id="footerPreviewContainer" class="preview-mode-slate shadow-sm">
+                                    <div id="footerPreviewBar" class="bar-dark-mode">
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <span class="pdf-footer-tag me-1">
+                                                <i class="bi bi-share-fill text-success"></i> Redes en PDF:
+                                            </span>
+                                            <a href="{{ $redesFooter['facebook']['url'] }}" id="prev_link_facebook" target="_blank" rel="noopener" class="pdf-social-chip" title="Probar Facebook: {{ $redesFooter['facebook']['url'] }}">
+                                                <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook">
+                                                <span id="prev_text_facebook">{{ $redesFooter['facebook']['text'] }}</span>
+                                            </a>
+                                            <a href="{{ $redesFooter['instagram']['url'] }}" id="prev_link_instagram" target="_blank" rel="noopener" class="pdf-social-chip" title="Probar Instagram: {{ $redesFooter['instagram']['url'] }}">
+                                                <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram">
+                                                <span id="prev_text_instagram">{{ $redesFooter['instagram']['text'] }}</span>
+                                            </a>
+                                            <a href="{{ $redesFooter['telefono']['url'] }}" id="prev_link_telefono" class="pdf-social-chip" title="Probar Teléfono: {{ $redesFooter['telefono']['url'] }}">
+                                                <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono">
+                                                <span id="prev_text_telefono">{{ $redesFooter['telefono']['text'] }}</span>
+                                            </a>
+                                            <a href="{{ $redesFooter['email']['url'] }}" id="prev_link_email" class="pdf-social-chip" title="Probar Email: {{ $redesFooter['email']['url'] }}">
+                                                <img src="{{ asset('imgs/social/email.svg') }}" alt="Email">
+                                                <span id="prev_text_email">{{ $redesFooter['email']['text'] }}</span>
+                                            </a>
+                                            <a href="{{ $redesFooter['youtube']['url'] }}" id="prev_link_youtube" target="_blank" rel="noopener" class="pdf-social-chip" title="Probar YouTube: {{ $redesFooter['youtube']['url'] }}">
+                                                <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube">
+                                                <span id="prev_text_youtube">{{ $redesFooter['youtube']['text'] }}</span>
+                                            </a>
+                                            <a href="{{ $redesFooter['tiktok']['url'] }}" id="prev_link_tiktok" target="_blank" rel="noopener" class="pdf-social-chip" title="Probar TikTok: {{ $redesFooter['tiktok']['url'] }}">
+                                                <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok">
+                                                <span id="prev_text_tiktok">{{ $redesFooter['tiktok']['text'] }}</span>
+                                            </a>
+                                        </div>
+                                        <div>
+                                            <a href="{{ $redesFooter['whatsapp']['url'] }}" id="prev_link_whatsapp" target="_blank" rel="noopener" class="pdf-whatsapp-btn" title="Probar WhatsApp: {{ $redesFooter['whatsapp']['url'] }}">
+                                                <img src="{{ asset('imgs/social/whatsapp_white.svg') }}" alt="WhatsApp" width="20" height="20">
+                                                <span id="prev_text_whatsapp">{{ $redesFooter['whatsapp']['text'] }}</span>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1694,6 +1917,35 @@
             let urlVal = urlInput.value || '#';
             if (prevLink) prevLink.href = urlVal;
             if (testLink) testLink.href = urlVal;
+        }
+    }
+
+    function setPreviewMode(mode) {
+        const bar = document.getElementById('footerPreviewBar');
+        const container = document.getElementById('footerPreviewContainer');
+        const btnDark = document.getElementById('btnThemeDarkPreview');
+        const btnLight = document.getElementById('btnThemeLightPreview');
+
+        if (!bar || !container) return;
+
+        if (mode === 'dark') {
+            container.classList.remove('preview-mode-paper');
+            container.classList.add('preview-mode-slate');
+            bar.classList.remove('bar-light-mode');
+            bar.classList.add('bar-dark-mode');
+            btnDark.classList.add('active', 'btn-dark');
+            btnDark.classList.remove('btn-outline-secondary');
+            btnLight.classList.remove('active', 'btn-dark');
+            btnLight.classList.add('btn-outline-secondary');
+        } else {
+            container.classList.add('preview-mode-paper');
+            container.classList.remove('preview-mode-slate');
+            bar.classList.add('bar-light-mode');
+            bar.classList.remove('bar-dark-mode');
+            btnLight.classList.add('active', 'btn-dark');
+            btnLight.classList.remove('btn-outline-secondary');
+            btnDark.classList.remove('active', 'btn-dark');
+            btnDark.classList.add('btn-outline-secondary');
         }
     }
 
