@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Usuario;
 use App\Models\Rol;
 use App\Models\ExpedienteDigital;
+use App\Services\ModuleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,16 @@ class UsuarioController extends Controller
      */
     public function index(Request $request)
     {
+        $moodleSyncEnabled = ModuleService::isEnabled('moodle_sync');
+
+        // Saneamiento automático: Si Moodle Sync no está activo, todos los usuarios operan 100% con la base de datos interna de Inbox
+        if (!$moodleSyncEnabled) {
+            Usuario::where('origen', 'moodle')->orWhereNotNull('id_moodle')->update([
+                'origen' => 'inbox',
+                'id_moodle' => null,
+            ]);
+        }
+
         $query = Usuario::with(['rol', 'expediente']);
 
         // Búsqueda por término
@@ -225,16 +236,25 @@ class UsuarioController extends Controller
             ], 404);
         }
 
-        // 4. Bloquear eliminación si el usuario proviene de Moodle
+        // 4. Bloquear eliminación del Administrador Principal (#ID 1)
+        if ($usuario->id === 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No es posible eliminar la cuenta del Administrador Principal del sistema.'
+            ], 422);
+        }
+
+        // 5. Bloquear eliminación si el usuario proviene de Moodle (únicamente cuando Moodle Sync esté contratado/activo)
+        $moodleSyncEnabled = ModuleService::isEnabled('moodle_sync');
         $origenUser = strtolower((string)$usuario->origen);
-        if ($origenUser === 'moodle' || !empty($usuario->id_moodle)) {
+        if ($moodleSyncEnabled && ($origenUser === 'moodle' || !empty($usuario->id_moodle))) {
             return response()->json([
                 'success' => false,
                 'message' => 'Operación no permitida: Los usuarios sincronizados desde Moodle no pueden eliminarse desde Inbox.'
             ], 422);
         }
 
-        // 5. Eliminar con captura segura de restricciones Foreign Key
+        // 6. Eliminar con captura segura de restricciones Foreign Key
         try {
             DB::beginTransaction();
             $nombreCompleto = trim($usuario->nombre . ' ' . $usuario->apellidos);

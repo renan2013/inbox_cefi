@@ -493,10 +493,14 @@
             </div>
         </div>
 
+        @php
+            $moodleSyncActivo = \App\Services\ModuleService::isEnabled('moodle_sync');
+        @endphp
+
         <!-- Filter Form & Instant Search -->
         <div class="filter-section">
             <form action="{{ route('usuarios.index') }}" method="GET" id="filterForm" class="row g-3 align-items-end">
-                <div class="col-lg-4 col-md-6">
+                <div class="{{ $moodleSyncActivo ? 'col-lg-4' : 'col-lg-5' }} col-md-6">
                     <label for="liveSearch" class="form-label text-white-50 fw-semibold mb-2 d-flex justify-content-between">
                         <span>Búsqueda Universal en Tiempo Real</span>
                         <span class="badge bg-secondary bg-opacity-25 text-white-50 font-monospace">Atajo: /</span>
@@ -528,14 +532,16 @@
                     </select>
                 </div>
 
-                <div class="col-lg-1 col-md-4">
-                    <label for="origenFilter" class="form-label text-white-50 fw-semibold mb-2">Origen</label>
-                    <select name="origen" id="origenFilter" class="form-select form-control-custom">
-                        <option value="">Todos</option>
-                        <option value="inbox" {{ request('origen') == 'inbox' ? 'selected' : '' }}>Inbox</option>
-                        <option value="moodle" {{ request('origen') == 'moodle' ? 'selected' : '' }}>Moodle</option>
-                    </select>
-                </div>
+                @if ($moodleSyncActivo)
+                    <div class="col-lg-1 col-md-4">
+                        <label for="origenFilter" class="form-label text-white-50 fw-semibold mb-2">Origen</label>
+                        <select name="origen" id="origenFilter" class="form-select form-control-custom">
+                            <option value="">Todos</option>
+                            <option value="inbox" {{ request('origen') == 'inbox' ? 'selected' : '' }}>Inbox</option>
+                            <option value="moodle" {{ request('origen') == 'moodle' ? 'selected' : '' }}>Moodle</option>
+                        </select>
+                    </div>
+                @endif
 
                 <div class="col-lg-2 col-md-4 d-flex gap-2">
                     <button type="submit" class="btn btn-search flex-grow-1" title="Búsqueda profunda en servidor">
@@ -564,7 +570,7 @@
                             <th>Identificación</th>
                             <th>Rol</th>
                             <th>Expediente Digital</th>
-                            <th>Origen</th>
+                            <th>{{ $moodleSyncActivo ? 'Origen' : 'Base de Datos' }}</th>
                             <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
@@ -575,7 +581,8 @@
                                 $apellidosFirst = trim($usuario->apellidos . ', ' . $usuario->nombre);
                                 $initial = strtoupper(substr($usuario->apellidos ?: $usuario->nombre, 0, 1));
                                 $isSelf = auth()->check() && auth()->id() === $usuario->id;
-                                $isMoodle = strtolower((string)$usuario->origen) === 'moodle' || !empty($usuario->id_moodle);
+                                $isMainAdmin = (int)$usuario->id === 1;
+                                $isMoodle = $moodleSyncActivo && (strtolower((string)$usuario->origen) === 'moodle' || !empty($usuario->id_moodle));
                                 $hasExpediente = !is_null($usuario->expediente);
                                 $exp = $usuario->expediente;
                                 $statusExp = $hasExpediente ? 'con_expediente' : 'sin_expediente';
@@ -665,7 +672,7 @@
                                     @if ($isMoodle)
                                         <span class="badge-origen-moodle" title="Sincronizado vía Moodle Bridge"><i class="bi bi-mortarboard-fill me-1"></i> Moodle</span>
                                     @else
-                                        <span class="badge-origen-inbox" title="Registrado en Inbox BPM"><i class="bi bi-shield-check me-1"></i> Inbox</span>
+                                        <span class="badge-origen-inbox" title="Base de datos interna Inbox"><i class="bi bi-database-check me-1"></i> Inbox</span>
                                     @endif
                                 </td>
                                 <td class="text-end">
@@ -683,21 +690,25 @@
                                             title="Editar datos de {{ $nombreCompleto }}">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
-                                        @if (!$isSelf && !$isMoodle)
+                                        @if ($isSelf)
+                                            <span class="btn-action-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted); cursor: not-allowed;" title="Tu propia cuenta en sesión">
+                                                <i class="bi bi-person-check"></i>
+                                            </span>
+                                        @elseif ($isMainAdmin)
+                                            <span class="btn-action-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted); cursor: not-allowed;" title="Administrador Principal protegido">
+                                                <i class="bi bi-shield-lock-fill"></i>
+                                            </span>
+                                        @elseif ($isMoodle)
+                                            <span class="btn-action-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted); cursor: not-allowed;" title="Usuario sincronizado vía Moodle">
+                                                <i class="bi bi-mortarboard-fill"></i>
+                                            </span>
+                                        @else
                                             <button type="button" class="btn-action-icon btn-action-delete btn-eliminar-usuario" 
                                                 data-id="{{ $usuario->id }}" 
                                                 data-nombre="{{ $nombreCompleto }}"
                                                 title="Eliminar usuario">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
-                                        @elseif ($isMoodle)
-                                            <span class="btn-action-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted); cursor: not-allowed;" title="Usuario sincronizado vía Moodle">
-                                                <i class="bi bi-mortarboard-fill"></i>
-                                            </span>
-                                        @else
-                                            <span class="btn-action-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted); cursor: not-allowed;" title="Tu propia cuenta en sesión">
-                                                <i class="bi bi-person-check"></i>
-                                            </span>
                                         @endif
                                     </div>
                                 </td>
@@ -865,7 +876,7 @@
                 const queryRaw = searchInput.value;
                 const terms = normalizar(queryRaw).split(/\s+/).filter(t => t.length > 0);
                 const rolVal = rolSelect.value;
-                const origenVal = origenSelect.value.toLowerCase();
+                const origenVal = origenSelect ? origenSelect.value.toLowerCase() : '';
                 const expVal = expSelect ? expSelect.value : '';
 
                 let visibles = 0;
@@ -928,7 +939,7 @@
             btnReset?.addEventListener('click', function() {
                 searchInput.value = '';
                 rolSelect.value = '';
-                origenSelect.value = '';
+                if (origenSelect) origenSelect.value = '';
                 if (expSelect) expSelect.value = '';
                 document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-kpi'));
                 aplicarFiltrosEnVivo();
