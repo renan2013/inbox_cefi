@@ -399,7 +399,7 @@
             ],
             "Configuración": [
                 { nombre: "Panel General de Configuración", ruta: "configuracion.index" },
-                { nombre: "Pagos, Morosidad e Intereses", ruta: "configuracion.pagos" },
+                { nombre: "Configuración de Pagos y Firmas", ruta: "configuracion.pagos" },
                 { nombre: "Configuración Alertas", ruta: "configuracion.alertas" }
             ],
             "Soporte": [

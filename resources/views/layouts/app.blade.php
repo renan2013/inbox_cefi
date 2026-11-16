@@ -664,9 +664,6 @@
                             @endmodule
                             @endmodule
 
-                            @module('item.parametros_pagos')
-                            <li><a class="dropdown-item dropdown-item-custom" href="{{ route('configuracion.pagos') }}"><i class="bi bi-gear-fill"></i> Configuración de Pagos y Firmas</a></li>
-                            @endmodule
                             @module('item.repositorio_actas')
                             <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('registro.repositorio_actas') }}"><i class="bi bi-journal-bookmark-fill text-danger"></i> Repositorio de Actas</a></li>
                             @endmodule
@@ -789,9 +786,9 @@
                             @module('item.cfg_panel')
                             <li><a class="dropdown-item dropdown-item-custom fw-bold" href="{{ route('configuracion.index') }}"><i class="bi bi-speedometer2 text-info me-2"></i> Panel de Configuración</a></li>
                             @endmodule
-                            @module('item.cfg_pagos')
-                            <li><a class="dropdown-item dropdown-item-custom fw-bold text-success" href="{{ route('configuracion.pagos') }}"><i class="bi bi-cash-coin text-success me-2"></i> Pagos, Morosidad e Intereses</a></li>
-                            @endmodule
+                            @if(\App\Services\ModuleService::isEnabled('item.cfg_pagos') || \App\Services\ModuleService::isEnabled('item.parametros_pagos'))
+                            <li><a class="dropdown-item dropdown-item-custom fw-bold text-success" href="{{ route('configuracion.pagos') }}"><i class="bi bi-gear-fill text-success me-2"></i> Configuración de Pagos y Firmas</a></li>
+                            @endif
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><h6 class="dropdown-header-custom"><i class="bi bi-robot text-success me-1"></i> Tutor AI</h6></li>
                             @module('item.cfg_rag')
