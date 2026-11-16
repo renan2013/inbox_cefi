@@ -518,53 +518,168 @@
                         <span class="badge-page-ref">Diseño Visual</span>
                     </div>
 
+                    @php
+                        $headerDisplay = (!empty($programa->imagen_encabezado) && file_exists(public_path($programa->imagen_encabezado)))
+                            ? $programa->imagen_encabezado
+                            : $headerInstitucional;
+
+                        $footerDisplay = (!empty($programa->imagen_footer) && file_exists(public_path($programa->imagen_footer)))
+                            ? $programa->imagen_footer
+                            : $footerInstitucional;
+
+                        $esHdrFijo = empty($programa->imagen_encabezado) || $programa->imagen_encabezado === $headerInstitucional;
+                        $esFtrFijo = empty($programa->imagen_footer) || $programa->imagen_footer === $footerInstitucional;
+                        $isFijoActivo = $esHdrFijo && $esFtrFijo;
+                    @endphp
+
+                    <!-- Banner de Fijación Institucional del Header y Footer -->
+                    <div class="card p-3 mb-4 rounded-4 border-0 shadow-sm" style="background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(95, 178, 48, 0.35) !important;">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: rgba(95, 178, 48, 0.15); color: #5fb230; font-size: 1.3rem;">
+                                    <i class="bi bi-pin-angle-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                        <h6 class="text-white fw-bold mb-0">Fijar Encabezado y Pie de Página Institucionales CEFI</h6>
+                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 rounded-pill px-2 py-0.5 small">Estándar Oficial Fijo</span>
+                                    </div>
+                                    <p class="text-white-50 small mb-0">Utiliza la franja superior y la barra inferior oficial de CEFI para todos los programas generados. Solo necesitas actualizar la <strong>Imagen Principal (Hero)</strong>.</p>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch fs-4 m-0">
+                                <input class="form-check-input" type="checkbox" role="switch" id="checkFijarPlantilla" name="usar_plantilla_fija" value="1" {{ $isFijoActivo ? 'checked' : '' }} style="cursor: pointer;" title="Activar/desactivar fijación estándar">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row g-4 mb-5">
+                        <!-- 1. Encabezado -->
                         <div class="col-md-6 col-lg-3">
-                            <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">1. Encabezado (Franja Superior)</label>
-                                @if(!empty($programa->imagen_encabezado) && file_exists(public_path($programa->imagen_encabezado)))
-                                    <img src="{{ asset($programa->imagen_encabezado) }}" class="img-current-preview d-block mx-auto" alt="Encabezado">
-                                @else
-                                    <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
-                                @endif
-                                <input type="file" name="imagen_encabezado" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Franja verde/azul CEFI sin texto (2100x380px)</small>
+                            <div class="img-upload-box h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <label class="form-label-custom d-block mb-2">1. Encabezado (Franja Superior)</label>
+                                    
+                                    <!-- Contenedor Fijo Institucional -->
+                                    <div id="hdrFijoContainer" class="{{ $isFijoActivo ? '' : 'd-none' }}">
+                                        @if(!empty($headerDisplay) && file_exists(public_path($headerDisplay)))
+                                            <img src="{{ asset($headerDisplay) }}" class="img-fluid rounded border border-secondary border-opacity-25 d-block mx-auto mb-2" style="max-height: 65px; width: 100%; object-fit: contain; background: #0b1329;" alt="Encabezado Oficial CEFI">
+                                        @else
+                                            <div class="p-2 rounded mb-2 text-center text-white small fw-bold" style="background: linear-gradient(90deg, #184a2c 0%, #0a5c96 100%);">
+                                                <i class="bi bi-mortarboard-fill me-1"></i> CEFI Oficial (2100x380px)
+                                            </div>
+                                        @endif
+                                        <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 mb-1 d-inline-block small">
+                                            <i class="bi bi-shield-check me-1"></i> Fijo Institucional
+                                        </span>
+                                        <small class="text-white-50 d-block">Franja verde/azul CEFI sin texto</small>
+                                        <button type="button" class="btn btn-sm btn-link text-white-50 p-0 text-decoration-none mt-2 small" onclick="toggleCustomHeader(true)">
+                                            <i class="bi bi-pencil-square me-1"></i> Cambiar / Personalizar
+                                        </button>
+                                    </div>
+
+                                    <!-- Contenedor Personalizado -->
+                                    <div id="hdrCustomContainer" class="{{ $isFijoActivo ? 'd-none' : '' }}">
+                                        @if(!empty($programa->imagen_encabezado) && file_exists(public_path($programa->imagen_encabezado)))
+                                            <img src="{{ asset($programa->imagen_encabezado) }}" class="img-fluid rounded border border-secondary border-opacity-25 d-block mx-auto mb-2" style="max-height: 65px; width: 100%; object-fit: contain; background: #0b1329;" alt="Encabezado">
+                                        @else
+                                            <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
+                                        @endif
+                                        <input type="file" name="imagen_encabezado" id="input_encabezado" class="form-control form-control-custom w-100" accept="image/*">
+                                        <small class="text-white-50 d-block mt-1">Sugerido: 2100x380px</small>
+                                        <div class="form-check mt-2 text-start">
+                                            <input class="form-check-input" type="checkbox" name="guardar_como_estandar_global" id="guardar_como_estandar_global_hdr" value="1">
+                                            <label class="form-check-label text-warning small" for="guardar_como_estandar_global_hdr" style="font-size: 0.72rem;">
+                                                Establecer como nuevo estándar oficial para todos
+                                            </label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-success p-0 text-decoration-none mt-2 small" onclick="toggleCustomHeader(false)">
+                                            <i class="bi bi-arrow-return-left me-1"></i> Usar el estándar oficial
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- 2. Imagen Principal (Hero Pág. 1) -->
                         <div class="col-md-6 col-lg-3">
-                            <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">2. Imagen Principal (Hero Pág. 1)</label>
-                                @if(!empty($programa->imagen_principal) && file_exists(public_path($programa->imagen_principal)))
-                                    <img src="{{ asset($programa->imagen_principal) }}" class="img-current-preview d-block mx-auto" alt="Principal">
-                                @else
-                                    <i class="bi bi-image text-white-50 display-6 d-block mb-3"></i>
-                                @endif
-                                <input type="file" name="imagen_principal" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Ilustración central Pág. 1 (2100x820px)</small>
+                            <div class="img-upload-box h-100 d-flex flex-column justify-content-between" style="border: 2px solid rgba(95, 178, 48, 0.7); box-shadow: 0 0 16px rgba(95, 178, 48, 0.15);">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <label class="form-label-custom mb-0">2. Imagen Principal</label>
+                                        <span class="badge bg-primary text-white font-monospace" style="font-size: 0.65rem;"><i class="bi bi-star-fill me-1"></i> Hero Pág. 1</span>
+                                    </div>
+                                    @if(!empty($programa->imagen_principal) && file_exists(public_path($programa->imagen_principal)))
+                                        <img src="{{ asset($programa->imagen_principal) }}" class="img-fluid rounded border border-secondary border-opacity-25 d-block mx-auto mb-2" style="max-height: 80px; width: 100%; object-fit: contain; background: #0b1329;" alt="Principal">
+                                    @else
+                                        <i class="bi bi-image text-success display-6 d-block mb-3"></i>
+                                    @endif
+                                    <input type="file" name="imagen_principal" class="form-control form-control-custom w-100" accept="image/*">
+                                    <small class="text-white-50 d-block mt-1">Ilustración central Pág. 1 (2100x820px)</small>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- 3. Imagen Secundaria (Opcional) -->
                         <div class="col-md-6 col-lg-3">
-                            <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">3. Imagen Secundaria (Opcional)</label>
-                                @if(!empty($programa->imagen_secundaria) && file_exists(public_path($programa->imagen_secundaria)))
-                                    <img src="{{ asset($programa->imagen_secundaria) }}" class="img-current-preview d-block mx-auto" alt="Secundaria">
-                                @else
-                                    <i class="bi bi-image text-white-50 display-6 d-block mb-3"></i>
-                                @endif
-                                <input type="file" name="imagen_secundaria" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Recurso visual adicional</small>
+                            <div class="img-upload-box h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <label class="form-label-custom d-block mb-2">3. Imagen Secundaria (Opcional)</label>
+                                    @if(!empty($programa->imagen_secundaria) && file_exists(public_path($programa->imagen_secundaria)))
+                                        <img src="{{ asset($programa->imagen_secundaria) }}" class="img-fluid rounded border border-secondary border-opacity-25 d-block mx-auto mb-2" style="max-height: 80px; width: 100%; object-fit: contain; background: #0b1329;" alt="Secundaria">
+                                    @else
+                                        <i class="bi bi-image text-white-50 display-6 d-block mb-3"></i>
+                                    @endif
+                                    <input type="file" name="imagen_secundaria" class="form-control form-control-custom w-100" accept="image/*">
+                                    <small class="text-white-50 d-block mt-1">Recurso visual adicional</small>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- 4. Pie de Página (Footer PDF) -->
                         <div class="col-md-6 col-lg-3">
-                            <div class="img-upload-box h-100">
-                                <label class="form-label-custom d-block">4. Pie de Página (Footer PDF)</label>
-                                @if(!empty($programa->imagen_footer) && file_exists(public_path($programa->imagen_footer)))
-                                    <img src="{{ asset($programa->imagen_footer) }}" class="img-current-preview d-block mx-auto" alt="Footer">
-                                @else
-                                    <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
-                                @endif
-                                <input type="file" name="imagen_footer" class="form-control form-control-custom w-100" accept="image/*">
-                                <small class="text-white-50 d-block mt-1">Barra inferior redes + WhatsApp (2100x160px)</small>
+                            <div class="img-upload-box h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <label class="form-label-custom d-block mb-2">4. Pie de Página (Footer PDF)</label>
+                                    
+                                    <!-- Contenedor Fijo Institucional -->
+                                    <div id="ftrFijoContainer" class="{{ $isFijoActivo ? '' : 'd-none' }}">
+                                        @if(!empty($footerDisplay) && file_exists(public_path($footerDisplay)))
+                                            <img src="{{ asset($footerDisplay) }}" class="img-fluid rounded border border-secondary border-opacity-25 d-block mx-auto mb-2" style="max-height: 40px; width: 100%; object-fit: contain; background: #0b1329;" alt="Footer Oficial CEFI">
+                                        @else
+                                            <div class="p-2 rounded mb-2 text-center text-white small fw-bold" style="background: linear-gradient(90deg, #184a2c 0%, #0a5c96 100%);">
+                                                <i class="bi bi-share-fill me-1"></i> Barra Redes & WhatsApp CEFI
+                                            </div>
+                                        @endif
+                                        <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 mb-1 d-inline-block small">
+                                            <i class="bi bi-shield-check me-1"></i> Fijo Institucional
+                                        </span>
+                                        <small class="text-white-50 d-block">Barra inferior redes + WhatsApp (2100x160px)</small>
+                                        <button type="button" class="btn btn-sm btn-link text-white-50 p-0 text-decoration-none mt-2 small" onclick="toggleCustomFooter(true)">
+                                            <i class="bi bi-pencil-square me-1"></i> Cambiar / Personalizar
+                                        </button>
+                                    </div>
+
+                                    <!-- Contenedor Personalizado -->
+                                    <div id="ftrCustomContainer" class="{{ $isFijoActivo ? 'd-none' : '' }}">
+                                        @if(!empty($programa->imagen_footer) && file_exists(public_path($programa->imagen_footer)))
+                                            <img src="{{ asset($programa->imagen_footer) }}" class="img-fluid rounded border border-secondary border-opacity-25 d-block mx-auto mb-2" style="max-height: 40px; width: 100%; object-fit: contain; background: #0b1329;" alt="Footer">
+                                        @else
+                                            <i class="bi bi-image-fill text-white-50 display-6 d-block mb-3"></i>
+                                        @endif
+                                        <input type="file" name="imagen_footer" id="input_footer" class="form-control form-control-custom w-100" accept="image/*">
+                                        <small class="text-white-50 d-block mt-1">Sugerido: 2100x160px</small>
+                                        <div class="form-check mt-2 text-start">
+                                            <input class="form-check-input" type="checkbox" name="guardar_como_estandar_global" id="guardar_como_estandar_global_ftr" value="1">
+                                            <label class="form-check-label text-warning small" for="guardar_como_estandar_global_ftr" style="font-size: 0.72rem;">
+                                                Establecer como nuevo estándar oficial para todos
+                                            </label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link text-success p-0 text-decoration-none mt-2 small" onclick="toggleCustomFooter(false)">
+                                            <i class="bi bi-arrow-return-left me-1"></i> Usar el estándar oficial
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -693,6 +808,48 @@ document.addEventListener('DOMContentLoaded', function () {
                 tr.querySelectorAll('input').forEach(i => i.value = '');
                 btn.removeAttribute('data-id-plan');
             }
+        });
+    }
+
+    // Funciones de fijación institucional de Header y Footer
+    window.toggleCustomHeader = function(custom) {
+        const hdrFijo = document.getElementById('hdrFijoContainer');
+        const hdrCustom = document.getElementById('hdrCustomContainer');
+        if (custom) {
+            if (hdrFijo) hdrFijo.classList.add('d-none');
+            if (hdrCustom) hdrCustom.classList.remove('d-none');
+            const inpHdr = document.getElementById('input_encabezado');
+            if (inpHdr) inpHdr.focus();
+        } else {
+            if (hdrFijo) hdrFijo.classList.remove('d-none');
+            if (hdrCustom) hdrCustom.classList.add('d-none');
+            const inpHdr = document.getElementById('input_encabezado');
+            if (inpHdr) inpHdr.value = '';
+        }
+    };
+
+    window.toggleCustomFooter = function(custom) {
+        const ftrFijo = document.getElementById('ftrFijoContainer');
+        const ftrCustom = document.getElementById('ftrCustomContainer');
+        if (custom) {
+            if (ftrFijo) ftrFijo.classList.add('d-none');
+            if (ftrCustom) ftrCustom.classList.remove('d-none');
+            const inpFtr = document.getElementById('input_footer');
+            if (inpFtr) inpFtr.focus();
+        } else {
+            if (ftrFijo) ftrFijo.classList.remove('d-none');
+            if (ftrCustom) ftrCustom.classList.add('d-none');
+            const inpFtr = document.getElementById('input_footer');
+            if (inpFtr) inpFtr.value = '';
+        }
+    };
+
+    const checkFijar = document.getElementById('checkFijarPlantilla');
+    if (checkFijar) {
+        checkFijar.addEventListener('change', function() {
+            const isFijo = this.checked;
+            toggleCustomHeader(!isFijo);
+            toggleCustomFooter(!isFijo);
         });
     }
 });

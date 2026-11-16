@@ -628,11 +628,14 @@ class ProgramaPdfService
         $pdf->duracion = (string)($programa->duracion ?? '12 meses');
         $pdf->modalidad = (string)($programa->modalidad ?? 'Presencial');
 
-        // 1. Imagen de Encabezado (personalizada del programa o plantilla global si existe)
+        // 1. Imagen de Encabezado (personalizada del programa o plantilla fija institucional)
         if (!empty($programa->imagen_encabezado) && file_exists(public_path($programa->imagen_encabezado))) {
             $pdf->header_path = public_path($programa->imagen_encabezado);
-        } elseif (file_exists(public_path('imgs/cefi_header_programa.png'))) {
-            $pdf->header_path = public_path('imgs/cefi_header_programa.png');
+        } else {
+            $defaultHeader = \App\Models\Programa::getHeaderInstitucional();
+            if ($defaultHeader && file_exists(public_path($defaultHeader))) {
+                $pdf->header_path = public_path($defaultHeader);
+            }
         }
 
         // 2. Imagen Principal (Hero central de Página 1)
@@ -645,11 +648,14 @@ class ProgramaPdfService
             $pdf->secondary_path = public_path($programa->imagen_secundaria);
         }
 
-        // 4. Imagen de Footer (personalizada del programa o plantilla global si existe)
+        // 4. Imagen de Footer (personalizada del programa o plantilla fija institucional)
         if (!empty($programa->imagen_footer) && file_exists(public_path($programa->imagen_footer))) {
             $pdf->footer_path = public_path($programa->imagen_footer);
-        } elseif (file_exists(public_path('imgs/cefi_footer_programa.png'))) {
-            $pdf->footer_path = public_path('imgs/cefi_footer_programa.png');
+        } else {
+            $defaultFooter = \App\Models\Programa::getFooterInstitucional();
+            if ($defaultFooter && file_exists(public_path($defaultFooter))) {
+                $pdf->footer_path = public_path($defaultFooter);
+            }
         }
 
         // =====================================================================

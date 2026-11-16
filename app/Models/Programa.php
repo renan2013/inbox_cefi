@@ -48,4 +48,70 @@ class Programa extends Model
     {
         return $this->hasMany(PlanEstudio::class, 'id_programa', 'id_programa');
     }
+
+    /**
+     * Obtiene la ruta del encabezado institucional estándar de CEFI.
+     */
+    public static function getHeaderInstitucional(): ?string
+    {
+        // 1. Configuración del sistema en BD
+        $val = \App\Models\ConfiguracionSistema::where('clave', 'programa_header_default')->value('valor');
+        if ($val && file_exists(public_path($val))) {
+            return $val;
+        }
+
+        // 2. Archivo fijo en imgs/
+        if (file_exists(public_path('imgs/cefi_header_programa.png'))) {
+            return 'imgs/cefi_header_programa.png';
+        }
+
+        // 3. Fallback inteligente: buscar en programas existentes que ya tengan encabezado
+        $first = self::whereNotNull('imagen_encabezado')
+            ->where('imagen_encabezado', '!=', '')
+            ->first();
+        if ($first && !empty($first->imagen_encabezado) && file_exists(public_path($first->imagen_encabezado))) {
+            try {
+                \App\Models\ConfiguracionSistema::updateOrCreate(
+                    ['clave' => 'programa_header_default'],
+                    ['valor' => $first->imagen_encabezado]
+                );
+            } catch (\Throwable $e) {}
+            return $first->imagen_encabezado;
+        }
+
+        return null;
+    }
+
+    /**
+     * Obtiene la ruta del pie de página (footer) institucional estándar de CEFI.
+     */
+    public static function getFooterInstitucional(): ?string
+    {
+        // 1. Configuración del sistema en BD
+        $val = \App\Models\ConfiguracionSistema::where('clave', 'programa_footer_default')->value('valor');
+        if ($val && file_exists(public_path($val))) {
+            return $val;
+        }
+
+        // 2. Archivo fijo en imgs/
+        if (file_exists(public_path('imgs/cefi_footer_programa.png'))) {
+            return 'imgs/cefi_footer_programa.png';
+        }
+
+        // 3. Fallback inteligente: buscar en programas existentes que ya tengan pie de página
+        $first = self::whereNotNull('imagen_footer')
+            ->where('imagen_footer', '!=', '')
+            ->first();
+        if ($first && !empty($first->imagen_footer) && file_exists(public_path($first->imagen_footer))) {
+            try {
+                \App\Models\ConfiguracionSistema::updateOrCreate(
+                    ['clave' => 'programa_footer_default'],
+                    ['valor' => $first->imagen_footer]
+                );
+            } catch (\Throwable $e) {}
+            return $first->imagen_footer;
+        }
+
+        return null;
+    }
 }

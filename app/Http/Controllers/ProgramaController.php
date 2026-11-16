@@ -98,7 +98,9 @@ class ProgramaController extends Controller
     public function create()
     {
         self::ensureProgramasColumns();
-        return view('programas.create');
+        $headerInstitucional = Programa::getHeaderInstitucional();
+        $footerInstitucional = Programa::getFooterInstitucional();
+        return view('programas.create', compact('headerInstitucional', 'footerInstitucional'));
     }
 
     /**
@@ -171,22 +173,68 @@ class ProgramaController extends Controller
             $data['requisitos_ingreso'] = $data['detalles_programa'];
         }
 
-        // Manejo de la subida de imágenes
+        // Manejo de la subida de imágenes con soporte para plantilla institucional fija
         $uploadDir = public_path('uploads/programas');
         if (!file_exists($uploadDir)) {
             @mkdir($uploadDir, 0755, true);
         }
 
-        $imageFields = ['imagen_principal', 'imagen_secundaria', 'imagen_encabezado', 'imagen_footer'];
-        foreach ($imageFields as $field) {
-            if ($request->hasFile($field)) {
-                $file = $request->file($field);
-                $filename = uniqid('prog_', true) . '.' . $file->getClientOriginalExtension();
-                $file->move($uploadDir, $filename);
-                $data[$field] = 'uploads/programas/' . $filename;
-            } else {
-                $data[$field] = null;
+        $usarPlantillaFija = $request->boolean('usar_plantilla_fija', true);
+        $headerDefault = Programa::getHeaderInstitucional();
+        $footerDefault = Programa::getFooterInstitucional();
+
+        // 1. Encabezado
+        if ($request->hasFile('imagen_encabezado')) {
+            $file = $request->file('imagen_encabezado');
+            $filename = uniqid('prog_hdr_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            $data['imagen_encabezado'] = 'uploads/programas/' . $filename;
+            if ($request->boolean('guardar_como_estandar_global')) {
+                try {
+                    \App\Models\ConfiguracionSistema::updateOrCreate(['clave' => 'programa_header_default'], ['valor' => $data['imagen_encabezado']]);
+                } catch (\Throwable $e) {}
             }
+        } elseif ($usarPlantillaFija && $headerDefault) {
+            $data['imagen_encabezado'] = $headerDefault;
+        } else {
+            $data['imagen_encabezado'] = null;
+        }
+
+        // 2. Imagen Principal (Hero Pág. 1)
+        if ($request->hasFile('imagen_principal')) {
+            $file = $request->file('imagen_principal');
+            $filename = uniqid('prog_hero_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            $data['imagen_principal'] = 'uploads/programas/' . $filename;
+        } else {
+            $data['imagen_principal'] = null;
+        }
+
+        // 3. Imagen Secundaria (Opcional)
+        if ($request->hasFile('imagen_secundaria')) {
+            $file = $request->file('imagen_secundaria');
+            $filename = uniqid('prog_sec_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            $data['imagen_secundaria'] = 'uploads/programas/' . $filename;
+        } else {
+            $data['imagen_secundaria'] = null;
+        }
+
+        // 4. Pie de Página (Footer PDF)
+        if ($request->hasFile('imagen_footer')) {
+            $file = $request->file('imagen_footer');
+            $filename = uniqid('prog_ftr_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            $data['imagen_footer'] = 'uploads/programas/' . $filename;
+            if ($request->boolean('guardar_como_estandar_global')) {
+                try {
+                    \App\Models\ConfiguracionSistema::updateOrCreate(['clave' => 'programa_footer_default'], ['valor' => $data['imagen_footer']]);
+                } catch (\Throwable $e) {}
+            }
+        } elseif ($usarPlantillaFija && $footerDefault) {
+            $data['imagen_footer'] = $footerDefault;
+        } else {
+            $data['imagen_footer'] = null;
         }
 
         $programa = Programa::create($data);
@@ -224,7 +272,10 @@ class ProgramaController extends Controller
             $q->orderBy('id_plan', 'asc');
         }])->findOrFail($id);
 
-        return view('programas.edit', compact('programa'));
+        $headerInstitucional = Programa::getHeaderInstitucional();
+        $footerInstitucional = Programa::getFooterInstitucional();
+
+        return view('programas.edit', compact('programa', 'headerInstitucional', 'footerInstitucional'));
     }
 
     /**
@@ -292,20 +343,60 @@ class ProgramaController extends Controller
             $data['detalles_programa'] = $data['requisitos_ingreso'];
         }
 
-        // Manejo de la subida de imágenes
+        // Manejo de la subida de imágenes con soporte para plantilla institucional fija
         $uploadDir = public_path('uploads/programas');
         if (!file_exists($uploadDir)) {
             @mkdir($uploadDir, 0755, true);
         }
 
-        $imageFields = ['imagen_principal', 'imagen_secundaria', 'imagen_encabezado', 'imagen_footer'];
-        foreach ($imageFields as $field) {
-            if ($request->hasFile($field)) {
-                $file = $request->file($field);
-                $filename = uniqid('prog_', true) . '.' . $file->getClientOriginalExtension();
-                $file->move($uploadDir, $filename);
-                $data[$field] = 'uploads/programas/' . $filename;
+        $usarPlantillaFija = $request->boolean('usar_plantilla_fija', false);
+        $headerDefault = Programa::getHeaderInstitucional();
+        $footerDefault = Programa::getFooterInstitucional();
+
+        // 1. Encabezado
+        if ($request->hasFile('imagen_encabezado')) {
+            $file = $request->file('imagen_encabezado');
+            $filename = uniqid('prog_hdr_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            $data['imagen_encabezado'] = 'uploads/programas/' . $filename;
+            if ($request->boolean('guardar_como_estandar_global')) {
+                try {
+                    \App\Models\ConfiguracionSistema::updateOrCreate(['clave' => 'programa_header_default'], ['valor' => $data['imagen_encabezado']]);
+                } catch (\Throwable $e) {}
             }
+        } elseif ($usarPlantillaFija && $headerDefault) {
+            $data['imagen_encabezado'] = $headerDefault;
+        }
+
+        // 2. Imagen Principal (Hero Pág. 1)
+        if ($request->hasFile('imagen_principal')) {
+            $file = $request->file('imagen_principal');
+            $filename = uniqid('prog_hero_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            $data['imagen_principal'] = 'uploads/programas/' . $filename;
+        }
+
+        // 3. Imagen Secundaria (Opcional)
+        if ($request->hasFile('imagen_secundaria')) {
+            $file = $request->file('imagen_secundaria');
+            $filename = uniqid('prog_sec_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            $data['imagen_secundaria'] = 'uploads/programas/' . $filename;
+        }
+
+        // 4. Pie de Página (Footer PDF)
+        if ($request->hasFile('imagen_footer')) {
+            $file = $request->file('imagen_footer');
+            $filename = uniqid('prog_ftr_', true) . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            $data['imagen_footer'] = 'uploads/programas/' . $filename;
+            if ($request->boolean('guardar_como_estandar_global')) {
+                try {
+                    \App\Models\ConfiguracionSistema::updateOrCreate(['clave' => 'programa_footer_default'], ['valor' => $data['imagen_footer']]);
+                } catch (\Throwable $e) {}
+            }
+        } elseif ($usarPlantillaFija && $footerDefault) {
+            $data['imagen_footer'] = $footerDefault;
         }
 
         $programa->update($data);
