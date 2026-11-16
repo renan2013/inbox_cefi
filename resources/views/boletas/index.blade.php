@@ -238,9 +238,6 @@
                 <p class="text-white-50 mb-0">Visualiza, consulta y descarga los comprobantes y facturas de matrícula de los estudiantes.</p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
-                <button type="button" id="btn-vaciar-pruebas" class="btn btn-outline-danger fw-semibold">
-                    <i class="bi bi-trash3 me-1"></i> Vaciar Boletas de Prueba
-                </button>
                 <a href="{{ route('boletas.generar') }}" class="btn btn-search">
                     <i class="bi bi-plus-circle me-1"></i> Generar Nueva Boleta
                 </a>
@@ -815,84 +812,6 @@
                 });
             });
 
-            // Botón Vaciar Todas las Boletas de Prueba
-            const btnVaciarPruebas = document.getElementById('btn-vaciar-pruebas');
-            if (btnVaciarPruebas) {
-                btnVaciarPruebas.addEventListener('click', function() {
-                    const isLight = (document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme')) === 'light';
-
-                    Swal.fire({
-                        title: '¿Vaciar TODAS las Boletas de Prueba?',
-                        html: `
-                            <div class="text-start">
-                                <div class="alert alert-danger py-2 px-3 small fw-bold mb-3" style="border-radius: 0.5rem;">
-                                    <i class="bi bi-trash3-fill me-1"></i> Se eliminarán todas las boletas de prueba generadas, sus cuotas de seguimiento y pagos registrados.
-                                </div>
-                                <p class="small mb-0" style="color: ${isLight ? '#475569' : '#94a3b8'};">
-                                    Esta opción dejará el módulo de boletas completamente limpio para continuar sus pruebas.
-                                </p>
-                            </div>
-                        `,
-                        icon: 'warning',
-                        iconColor: '#dc3545',
-                        showCancelButton: true,
-                        confirmButtonColor: '#dc3545',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Sí, vaciar todas',
-                        cancelButtonText: 'Cancelar',
-                        background: isLight ? '#ffffff' : '#1e293b',
-                        color: isLight ? '#0f172a' : '#f8fafc'
-                    }).then(async (result) => {
-                        if (result.isConfirmed) {
-                            Swal.fire({
-                                title: 'Vaciando boletas...',
-                                text: 'Restableciendo historial a limpio...',
-                                allowOutsideClick: false,
-                                didOpen: () => Swal.showLoading()
-                            });
-
-                            try {
-                                const res = await fetch(`{{ route('boletas.vaciar_pruebas') }}`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        'Accept': 'application/json'
-                                    }
-                                });
-
-                                let data;
-                                try {
-                                    data = await res.json();
-                                } catch (e) {
-                                    data = { success: false, message: 'Respuesta del servidor (HTTP ' + res.status + ')' };
-                                }
-
-                                if (res.ok && data.success) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: '¡Historial Vaciado!',
-                                        text: data.message,
-                                        confirmButtonColor: '#5fb230'
-                                    }).then(() => window.location.reload());
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error al Vaciar',
-                                        text: data.message || 'No se pudo vaciar el historial de boletas'
-                                    });
-                                }
-                            } catch (err) {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error de Red',
-                                    text: err.message
-                                });
-                            }
-                        }
-                    });
-                });
-            }
             // Enviar Boleta por WhatsApp
             document.querySelectorAll('.btn-enviar-wa-boleta').forEach(btn => {
                 btn.addEventListener('click', function() {

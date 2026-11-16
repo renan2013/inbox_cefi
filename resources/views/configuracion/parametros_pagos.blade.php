@@ -22,9 +22,6 @@
             <p class="text-muted small mb-0">Gestione la firma institucional en boletas, cálculo de morosidad y valores fijos predeterminados.</p>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
-            <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm fw-bold d-flex align-items-center gap-1" onclick="resetearPruebasBoletas()">
-                <i class="bi bi-radioactive"></i> Resetear Pruebas a 0
-            </button>
             <a href="{{ route('boletas.index') }}" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm fw-bold d-flex align-items-center gap-1">
                 <i class="bi bi-arrow-left"></i> Ir a Boletas
             </a>
@@ -293,78 +290,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-
-    // Resetear Pruebas a 0
-    window.resetearPruebasBoletas = function() {
-        Swal.fire({
-            title: '¿Reset Total de Boletas y Pagos?',
-            html: `
-                <div class="text-start">
-                    <div class="alert alert-danger py-2 px-3 small fw-bold mb-3">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i> ¡ADVERTENCIA CRÍTICA!
-                        <br>Esta acción vaciará completamente:
-                        <ul class="mb-0 ps-3 mt-1">
-                            <li>Todas las boletas generadas.</li>
-                            <li>Todas las cuotas y letras de vencimiento.</li>
-                            <li>Todo el historial de pagos y abonos.</li>
-                            <li>Todos los archivos PDF de boletas guardados.</li>
-                        </ul>
-                    </div>
-                    <label class="form-label fw-bold small text-muted text-uppercase mb-1">Ingrese su contraseña de administrador:</label>
-                </div>
-            `,
-            icon: 'warning',
-            input: 'password',
-            inputAttributes: {
-                autocapitalize: 'off',
-                placeholder: 'Contraseña de administrador...'
-            },
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="bi bi-trash-fill me-1"></i> Sí, Resetear Todo a 0',
-            cancelButtonText: 'Cancelar',
-            showLoaderOnConfirm: true,
-            preConfirm: async (password) => {
-                if (!password || password.trim() === '') {
-                    Swal.showValidationMessage('Debe ingresar su contraseña.');
-                    return false;
-                }
-                try {
-                    const fd = new FormData();
-                    fd.append('password', password);
-                    const resp = await fetch("{{ route('configuracion.pagos.reset_pruebas') }}", {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: fd
-                    });
-                    const res = await resp.json();
-                    if (!res.success) {
-                        throw new Error(res.message || 'Error al ejecutar el reset');
-                    }
-                    return res;
-                } catch (err) {
-                    Swal.showValidationMessage(err.message || 'Error de conexión con el servidor');
-                    return false;
-                }
-            },
-            allowOutsideClick: () => !Swal.isLoading()
-        }).then((result) => {
-            if (result.isConfirmed && result.value && result.value.success) {
-                Swal.fire({
-                    title: '¡Reset Completado!',
-                    text: result.value.message,
-                    icon: 'success',
-                    confirmButtonColor: '#5fb230'
-                }).then(() => {
-                    window.location.href = "{{ route('boletas.index') }}";
-                });
-            }
-        });
-    };
 });
 </script>
 @endsection
