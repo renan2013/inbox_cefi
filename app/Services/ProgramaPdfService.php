@@ -445,16 +445,18 @@ class ProgramaPDF extends FPDF
             $this->Rect(164, 281.2, 46, 15.8, 'F');
         }
 
+        $redes = \App\Services\ClienteService::getRedesFooter();
+
         // Íconos vectoriales generados y enlaces activos sobre la franja blanca izquierda
         $y = 283.6;
         $iconColor = [85, 88, 92];
         $items = [
-            ['type' => 'facebook',  'text' => 'CEFI.',           'w' => 21.5, 'url' => 'https://www.facebook.com/CEFI.'],
-            ['type' => 'instagram', 'text' => 'cefi_cr',         'w' => 24.5, 'url' => 'https://www.instagram.com/cefi_cr/'],
-            ['type' => 'phone',     'text' => '2711 1010',       'w' => 25.5, 'url' => 'tel:+50627111010'],
-            ['type' => 'email',     'text' => 'info@ceficr.com', 'w' => 35.0, 'url' => 'mailto:info@ceficr.com'],
-            ['type' => 'youtube',   'text' => '@ceficr',         'w' => 23.5, 'url' => 'https://www.youtube.com/@ceficr'],
-            ['type' => 'tiktok',    'text' => '@cefi_cr',        'w' => 23.5, 'url' => 'https://www.tiktok.com/@cefi_cr'],
+            ['type' => 'facebook',  'text' => $redes['facebook']['text'],  'w' => 21.5, 'url' => $redes['facebook']['url']],
+            ['type' => 'instagram', 'text' => $redes['instagram']['text'], 'w' => 24.5, 'url' => $redes['instagram']['url']],
+            ['type' => 'phone',     'text' => $redes['telefono']['text'],  'w' => 25.5, 'url' => $redes['telefono']['url']],
+            ['type' => 'email',     'text' => $redes['email']['text'],     'w' => 35.0, 'url' => $redes['email']['url']],
+            ['type' => 'youtube',   'text' => $redes['youtube']['text'],   'w' => 23.5, 'url' => $redes['youtube']['url']],
+            ['type' => 'tiktok',    'text' => $redes['tiktok']['text'],    'w' => 23.5, 'url' => $redes['tiktok']['url']],
         ];
 
         $x = 6.5;
@@ -475,15 +477,16 @@ class ProgramaPDF extends FPDF
         }
 
         // Ícono vectorial en blanco de WhatsApp + número de celular en blanco sobre la curva verde derecha (+1 punto: 8.5pt)
+        $waItem = $redes['whatsapp'];
         $this->drawSocialIconVector('whatsapp', 173.8, 288.2, 2.75, [255, 255, 255], false);
 
         $this->SetXY(177.5, 285.7);
         $this->SetFont('Arial', 'B', 8.5);
         $this->SetTextColor(255, 255, 255);
-        $this->Cell(28.5, 5.2, $this->toPdf('+506 8992 9180'), 0, 0, 'L');
+        $this->Cell(28.5, 5.2, $this->toPdf($waItem['text']), 0, 0, 'L');
 
         // Enlace directo a WhatsApp en el área derecha
-        $this->Link(169.5, 283.8, 35.5, 8.8, 'https://wa.me/50689929180');
+        $this->Link(169.5, 283.8, 35.5, 8.8, $waItem['url']);
     }
 
     function toPdf($txt): string

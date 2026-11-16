@@ -513,6 +513,75 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Redes Sociales y Pie de Página de Folletos PDF -->
+                        @php
+                            $redesFooter = \App\Services\ClienteService::getRedesFooter();
+                        @endphp
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-share-fill text-info fs-5"></i>
+                                    <h5 class="fw-bold mb-0 text-white">Redes Sociales y Pie de Página (Programas PDF)</h5>
+                                </div>
+                                <span class="badge bg-success bg-opacity-25 text-success">Enlaces Activos en PDF</span>
+                            </div>
+                            <div class="config-card-body">
+                                <p class="text-white-50 small mb-3">Estos textos y enlaces se incrustan en la barra inferior de los folletos PDF descargables de los programas y en las vistas del sistema.</p>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom"><i class="bi bi-facebook text-primary me-1"></i> Facebook (Texto Display)</label>
+                                        <input type="text" name="redes_facebook" class="form-control form-control-custom" value="{{ old('redes_facebook', $redesFooter['facebook']['text']) }}" placeholder="CEFI.">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Facebook (URL del Perfil)</label>
+                                        <input type="url" name="redes_facebook_url" class="form-control form-control-custom" value="{{ old('redes_facebook_url', $redesFooter['facebook']['url']) }}" placeholder="https://www.facebook.com/CEFI.">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom"><i class="bi bi-instagram text-danger me-1"></i> Instagram (Usuario Display)</label>
+                                        <input type="text" name="redes_instagram" class="form-control form-control-custom" value="{{ old('redes_instagram', $redesFooter['instagram']['text']) }}" placeholder="cefi_cr">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Instagram (URL del Perfil)</label>
+                                        <input type="url" name="redes_instagram_url" class="form-control form-control-custom" value="{{ old('redes_instagram_url', $redesFooter['instagram']['url']) }}" placeholder="https://www.instagram.com/cefi_cr/">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom"><i class="bi bi-telephone text-success me-1"></i> Teléfono Fijo en Pie de Página</label>
+                                        <input type="text" name="redes_telefono" class="form-control form-control-custom" value="{{ old('redes_telefono', $redesFooter['telefono']['text']) }}" placeholder="2711 1010">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom"><i class="bi bi-envelope text-warning me-1"></i> Correo Electrónico en Pie de Página</label>
+                                        <input type="email" name="redes_email" class="form-control form-control-custom" value="{{ old('redes_email', $redesFooter['email']['text']) }}" placeholder="info@ceficr.com">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom"><i class="bi bi-youtube text-danger me-1"></i> YouTube (Usuario Display)</label>
+                                        <input type="text" name="redes_youtube" class="form-control form-control-custom" value="{{ old('redes_youtube', $redesFooter['youtube']['text']) }}" placeholder="@ceficr">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">YouTube (URL del Canal)</label>
+                                        <input type="url" name="redes_youtube_url" class="form-control form-control-custom" value="{{ old('redes_youtube_url', $redesFooter['youtube']['url']) }}" placeholder="https://www.youtube.com/@ceficr">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom"><i class="bi bi-tiktok text-light me-1"></i> TikTok (Usuario Display)</label>
+                                        <input type="text" name="redes_tiktok" class="form-control form-control-custom" value="{{ old('redes_tiktok', $redesFooter['tiktok']['text']) }}" placeholder="@cefi_cr">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">TikTok (URL del Perfil)</label>
+                                        <input type="url" name="redes_tiktok_url" class="form-control form-control-custom" value="{{ old('redes_tiktok_url', $redesFooter['tiktok']['url']) }}" placeholder="https://www.tiktok.com/@cefi_cr">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label-custom"><i class="bi bi-whatsapp text-success me-1"></i> WhatsApp Oficial en Pie de Página</label>
+                                        <input type="text" name="redes_whatsapp" class="form-control form-control-custom" value="{{ old('redes_whatsapp', $redesFooter['whatsapp']['text']) }}" placeholder="+506 8992 9180">
+                                        <div class="form-text text-white-50 small">Este número se muestra en la franja derecha con enlace directo a wa.me.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-lg-5">

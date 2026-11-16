@@ -685,31 +685,39 @@
                     </div>
 
                     <!-- Vista previa de barra de redes sociales (SVG + Enlaces Directos) incluida en el PDF -->
+                    @php
+                        $redesFooter = \App\Services\ClienteService::getRedesFooter();
+                    @endphp
                     <div class="p-3 rounded-4 mb-5 d-flex flex-wrap align-items-center justify-content-between gap-3" style="background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-dark);">
                         <div class="d-flex flex-wrap align-items-center gap-3 small">
                             <span class="fw-bold text-white"><i class="bi bi-share-fill text-success me-1"></i> Redes en Pie de Página PDF (Con Enlace Activo):</span>
-                            <a href="https://www.facebook.com/CEFI." target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook" width="20" height="20"> <span>CEFI.</span>
+                            <a href="{{ $redesFooter['facebook']['url'] }}" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook" width="20" height="20"> <span>{{ $redesFooter['facebook']['text'] }}</span>
                             </a>
-                            <a href="https://www.instagram.com/cefi_cr/" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="20" height="20"> <span>cefi_cr</span>
+                            <a href="{{ $redesFooter['instagram']['url'] }}" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="20" height="20"> <span>{{ $redesFooter['instagram']['text'] }}</span>
                             </a>
-                            <a href="tel:+50627111010" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="20" height="20"> <span>2711 1010</span>
+                            <a href="{{ $redesFooter['telefono']['url'] }}" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="20" height="20"> <span>{{ $redesFooter['telefono']['text'] }}</span>
                             </a>
-                            <a href="mailto:info@ceficr.com" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                <img src="{{ asset('imgs/social/email.svg') }}" alt="Correo" width="20" height="20"> <span>info@ceficr.com</span>
+                            <a href="{{ $redesFooter['email']['url'] }}" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/email.svg') }}" alt="Correo" width="20" height="20"> <span>{{ $redesFooter['email']['text'] }}</span>
                             </a>
-                            <a href="https://www.youtube.com/@ceficr" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube" width="20" height="20"> <span>@ceficr</span>
+                            <a href="{{ $redesFooter['youtube']['url'] }}" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube" width="20" height="20"> <span>{{ $redesFooter['youtube']['text'] }}</span>
                             </a>
-                            <a href="https://www.tiktok.com/@cefi_cr" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="20" height="20"> <span>@cefi_cr</span>
+                            <a href="{{ $redesFooter['tiktok']['url'] }}" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="20" height="20"> <span>{{ $redesFooter['tiktok']['text'] }}</span>
                             </a>
                         </div>
-                        <a href="https://wa.me/50689929180" target="_blank" rel="noopener" class="text-white fw-bold small text-decoration-none d-inline-flex align-items-center gap-1">
-                            <img src="{{ asset('imgs/social/whatsapp_white.svg') }}" alt="WhatsApp" width="20" height="20"> <span>+506 8992 9180</span>
-                        </a>
+                        <div class="d-flex align-items-center gap-3">
+                            <a href="{{ $redesFooter['whatsapp']['url'] }}" target="_blank" rel="noopener" class="text-white fw-bold small text-decoration-none d-inline-flex align-items-center gap-1">
+                                <img src="{{ asset('imgs/social/whatsapp_white.svg') }}" alt="WhatsApp" width="20" height="20"> <span>{{ $redesFooter['whatsapp']['text'] }}</span>
+                            </a>
+                            <a href="{{ route('configuracion.index', ['tab' => 'parametros']) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0 text-white-50" style="font-size: 0.72rem;" title="Editar estas redes y contactos en Configuración">
+                                <i class="bi bi-gear-fill me-1"></i> Editar
+                            </a>
+                        </div>
                     </div>
 
                     <!-- NORMATIVA VIRTUAL OPCIONAL -->

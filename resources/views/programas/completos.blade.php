@@ -209,29 +209,32 @@
                             </div>
 
                             <!-- Barra de Redes Sociales CEFI con SVG y Enlaces Directos -->
+                            @php
+                                $redesFooter = \App\Services\ClienteService::getRedesFooter();
+                            @endphp
                             <div class="mt-4 pt-3 border-top border-secondary d-flex flex-wrap align-items-center justify-content-between gap-3">
                                 <div class="d-flex flex-wrap align-items-center gap-3 small">
-                                    <a href="https://www.facebook.com/CEFI." target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                        <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook" width="20" height="20"> <span>CEFI.</span>
+                                    <a href="{{ $redesFooter['facebook']['url'] }}" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                        <img src="{{ asset('imgs/social/facebook.svg') }}" alt="Facebook" width="20" height="20"> <span>{{ $redesFooter['facebook']['text'] }}</span>
                                     </a>
-                                    <a href="https://www.instagram.com/cefi_cr/" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                        <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="20" height="20"> <span>cefi_cr</span>
+                                    <a href="{{ $redesFooter['instagram']['url'] }}" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                        <img src="{{ asset('imgs/social/instagram.svg') }}" alt="Instagram" width="20" height="20"> <span>{{ $redesFooter['instagram']['text'] }}</span>
                                     </a>
-                                    <a href="tel:+50627111010" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                        <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="20" height="20"> <span>2711 1010</span>
+                                    <a href="{{ $redesFooter['telefono']['url'] }}" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                        <img src="{{ asset('imgs/social/phone.svg') }}" alt="Teléfono" width="20" height="20"> <span>{{ $redesFooter['telefono']['text'] }}</span>
                                     </a>
-                                    <a href="mailto:info@ceficr.com" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                        <img src="{{ asset('imgs/social/email.svg') }}" alt="Correo" width="20" height="20"> <span>info@ceficr.com</span>
+                                    <a href="{{ $redesFooter['email']['url'] }}" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                        <img src="{{ asset('imgs/social/email.svg') }}" alt="Correo" width="20" height="20"> <span>{{ $redesFooter['email']['text'] }}</span>
                                     </a>
-                                    <a href="https://www.youtube.com/@ceficr" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                        <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube" width="20" height="20"> <span>@ceficr</span>
+                                    <a href="{{ $redesFooter['youtube']['url'] }}" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                        <img src="{{ asset('imgs/social/youtube.svg') }}" alt="YouTube" width="20" height="20"> <span>{{ $redesFooter['youtube']['text'] }}</span>
                                     </a>
-                                    <a href="https://www.tiktok.com/@cefi_cr" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
-                                        <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="20" height="20"> <span>@cefi_cr</span>
+                                    <a href="{{ $redesFooter['tiktok']['url'] }}" target="_blank" rel="noopener" class="text-decoration-none text-white-50 d-inline-flex align-items-center gap-1">
+                                        <img src="{{ asset('imgs/social/tiktok.svg') }}" alt="TikTok" width="20" height="20"> <span>{{ $redesFooter['tiktok']['text'] }}</span>
                                     </a>
                                 </div>
-                                <a href="https://wa.me/50689929180" target="_blank" rel="noopener" class="text-white fw-bold small text-decoration-none d-inline-flex align-items-center gap-1">
-                                    <img src="{{ asset('imgs/social/whatsapp_white.svg') }}" alt="WhatsApp" width="20" height="20"> <span>+506 8992 9180</span>
+                                <a href="{{ $redesFooter['whatsapp']['url'] }}" target="_blank" rel="noopener" class="text-white fw-bold small text-decoration-none d-inline-flex align-items-center gap-1">
+                                    <img src="{{ asset('imgs/social/whatsapp_white.svg') }}" alt="WhatsApp" width="20" height="20"> <span>{{ $redesFooter['whatsapp']['text'] }}</span>
                                 </a>
                             </div>
 

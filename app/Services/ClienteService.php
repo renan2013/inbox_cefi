@@ -201,4 +201,67 @@ class ClienteService
             'data'           => $data
         ];
     }
+
+    /**
+     * Obtiene los enlaces y textos oficiales de redes sociales para el pie de página de folletos PDF y vistas.
+     */
+    public static function getRedesFooter(): array
+    {
+        $c = self::all();
+        $db = self::dbItems();
+
+        $fbText = $c['redes_facebook'] ?? ($db['cliente_redes_facebook'] ?? 'CEFI.');
+        $fbUrl = $c['redes_facebook_url'] ?? ($db['cliente_redes_facebook_url'] ?? 'https://www.facebook.com/CEFI.');
+
+        $igText = $c['redes_instagram'] ?? ($db['cliente_redes_instagram'] ?? 'cefi_cr');
+        $igUrl = $c['redes_instagram_url'] ?? ($db['cliente_redes_instagram_url'] ?? 'https://www.instagram.com/cefi_cr/');
+
+        $telText = $c['redes_telefono'] ?? ($db['cliente_redes_telefono'] ?? '2711 1010');
+        $telClean = preg_replace('/[^0-9+]/', '', (string)$telText);
+        $telUrl = 'tel:' . ($telClean ?: '+50627111010');
+
+        $mailText = $c['redes_email'] ?? ($db['cliente_redes_email'] ?? ($c['email_contacto'] ?? 'info@ceficr.com'));
+        $mailUrl = 'mailto:' . $mailText;
+
+        $ytText = $c['redes_youtube'] ?? ($db['cliente_redes_youtube'] ?? '@ceficr');
+        $ytUrl = $c['redes_youtube_url'] ?? ($db['cliente_redes_youtube_url'] ?? 'https://www.youtube.com/@ceficr');
+
+        $ttText = $c['redes_tiktok'] ?? ($db['cliente_redes_tiktok'] ?? '@cefi_cr');
+        $ttUrl = $c['redes_tiktok_url'] ?? ($db['cliente_redes_tiktok_url'] ?? 'https://www.tiktok.com/@cefi_cr');
+
+        $waText = $c['redes_whatsapp'] ?? ($db['cliente_redes_whatsapp'] ?? '+506 8992 9180');
+        $waDigits = preg_replace('/[^0-9]/', '', (string)$waText);
+        $waUrl = 'https://wa.me/' . ($waDigits ?: '50689929180');
+
+        return [
+            'facebook' => [
+                'text' => $fbText,
+                'url'  => $fbUrl,
+            ],
+            'instagram' => [
+                'text' => $igText,
+                'url'  => $igUrl,
+            ],
+            'telefono' => [
+                'text' => $telText,
+                'url'  => $telUrl,
+            ],
+            'email' => [
+                'text' => $mailText,
+                'url'  => $mailUrl,
+            ],
+            'youtube' => [
+                'text' => $ytText,
+                'url'  => $ytUrl,
+            ],
+            'tiktok' => [
+                'text' => $ttText,
+                'url'  => $ttUrl,
+            ],
+            'whatsapp' => [
+                'text' => $waText,
+                'url'  => $waUrl,
+            ],
+        ];
+    }
 }

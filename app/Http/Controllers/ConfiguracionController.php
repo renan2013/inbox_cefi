@@ -121,6 +121,17 @@ class ConfiguracionController extends Controller
             'banner_file'          => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:4096',
             'favicon_file'         => 'nullable|mimes:ico,png,svg|max:1024',
             'nueva_clave_maestra'  => 'nullable|string|min:4|max:100',
+            'redes_facebook'       => 'nullable|string|max:100',
+            'redes_facebook_url'   => 'nullable|string|max:255',
+            'redes_instagram'      => 'nullable|string|max:100',
+            'redes_instagram_url'  => 'nullable|string|max:255',
+            'redes_telefono'       => 'nullable|string|max:50',
+            'redes_email'          => 'nullable|string|max:100',
+            'redes_youtube'        => 'nullable|string|max:100',
+            'redes_youtube_url'    => 'nullable|string|max:255',
+            'redes_tiktok'         => 'nullable|string|max:100',
+            'redes_tiktok_url'     => 'nullable|string|max:255',
+            'redes_whatsapp'       => 'nullable|string|max:50',
         ]);
 
         $fields = [];
@@ -167,6 +178,41 @@ class ConfiguracionController extends Controller
         }
         if ($request->filled('max_upload_recursos_mb')) {
             $fields['max_upload_recursos_mb'] = max(1, min(1024, (int)$request->input('max_upload_recursos_mb')));
+        }
+
+        // Redes Sociales y Contactos en Pie de Página (Folleto PDF y Vistas)
+        if ($request->has('redes_facebook')) {
+            $fields['cliente_redes_facebook'] = trim((string)$request->input('redes_facebook'));
+        }
+        if ($request->has('redes_facebook_url')) {
+            $fields['cliente_redes_facebook_url'] = trim((string)$request->input('redes_facebook_url'));
+        }
+        if ($request->has('redes_instagram')) {
+            $fields['cliente_redes_instagram'] = trim((string)$request->input('redes_instagram'));
+        }
+        if ($request->has('redes_instagram_url')) {
+            $fields['cliente_redes_instagram_url'] = trim((string)$request->input('redes_instagram_url'));
+        }
+        if ($request->has('redes_telefono')) {
+            $fields['cliente_redes_telefono'] = trim((string)$request->input('redes_telefono'));
+        }
+        if ($request->has('redes_email')) {
+            $fields['cliente_redes_email'] = trim((string)$request->input('redes_email'));
+        }
+        if ($request->has('redes_youtube')) {
+            $fields['cliente_redes_youtube'] = trim((string)$request->input('redes_youtube'));
+        }
+        if ($request->has('redes_youtube_url')) {
+            $fields['cliente_redes_youtube_url'] = trim((string)$request->input('redes_youtube_url'));
+        }
+        if ($request->has('redes_tiktok')) {
+            $fields['cliente_redes_tiktok'] = trim((string)$request->input('redes_tiktok'));
+        }
+        if ($request->has('redes_tiktok_url')) {
+            $fields['cliente_redes_tiktok_url'] = trim((string)$request->input('redes_tiktok_url'));
+        }
+        if ($request->has('redes_whatsapp')) {
+            $fields['cliente_redes_whatsapp'] = trim((string)$request->input('redes_whatsapp'));
         }
 
         // 2. Parámetros n8n & Automatizaciones
