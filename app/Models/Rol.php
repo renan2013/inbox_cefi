@@ -56,17 +56,22 @@ class Rol extends Model
                     DB::table('roles')->where('id', $adminOp->id)->update(['nombre' => 'Administrador']);
                 }
             } else {
+                $plantilla = (array) DB::table('roles')->where('id', 1)->first();
+                unset($plantilla['id']);
+                $plantilla['nombre'] = 'Administrador';
+                if (array_key_exists('slug', $plantilla)) {
+                    $plantilla['slug'] = 'administrador';
+                }
+
                 try {
-                    DB::table('roles')->insert(['nombre' => 'Administrador']);
+                    DB::table('roles')->insert($plantilla);
                 } catch (\Throwable $e) {
                     $nextId = ((int) DB::table('roles')->max('id')) + 1;
                     if ($nextId < 4) {
                         $nextId = 4;
                     }
-                    DB::table('roles')->insert([
-                        'id' => $nextId,
-                        'nombre' => 'Administrador',
-                    ]);
+                    $plantilla['id'] = $nextId;
+                    DB::table('roles')->insert($plantilla);
                 }
             }
         } catch (\Throwable $e) {
