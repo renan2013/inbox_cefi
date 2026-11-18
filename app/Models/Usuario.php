@@ -86,11 +86,11 @@ class Usuario extends Authenticatable
      */
     public function esAlumno(): bool
     {
-        if ((int)$this->id_rol === 3) {
-            return true;
+        $nombreRol = strtolower(trim((string)(optional($this->rol)->nombre ?? '')));
+        if ($nombreRol !== '') {
+            return in_array($nombreRol, ['alumno', 'estudiante', 'miembro', 'alumnos', 'estudiantes']);
         }
-        $nombreRol = strtolower(optional($this->rol)->nombre ?? '');
-        return in_array($nombreRol, ['alumno', 'estudiante', 'miembro', 'alumnos', 'estudiantes']);
+        return (int)$this->id_rol === 3;
     }
 
     /**
@@ -106,11 +106,11 @@ class Usuario extends Authenticatable
      */
     public function esDocente(): bool
     {
-        if ((int)$this->id_rol === 2) {
-            return true;
+        $nombreRol = strtolower(trim((string)(optional($this->rol)->nombre ?? '')));
+        if ($nombreRol !== '') {
+            return in_array($nombreRol, ['profesor', 'docente', 'tutor', 'profesores', 'docentes', 'profesor activo']);
         }
-        $nombreRol = strtolower(optional($this->rol)->nombre ?? '');
-        return in_array($nombreRol, ['profesor', 'docente', 'tutor', 'profesores', 'docentes', 'profesor activo']);
+        return (int)$this->id_rol === 2;
     }
 
     /**
