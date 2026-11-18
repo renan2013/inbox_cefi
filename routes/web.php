@@ -250,7 +250,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/usuarios/enviar-credenciales-wa', [UsuarioController::class, 'enviarCredencialesWhatsapp'])->name('usuarios.enviar_credenciales_wa');
             Route::get('/usuarios/{id}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
             Route::post('/usuarios/{id}/actualizar', [UsuarioController::class, 'update'])->name('usuarios.update');
-            Route::post('/usuarios/{id}/eliminar', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+            Route::post('/usuarios/{id}/eliminar', [UsuarioController::class, 'destroy'])->name('usuarios.destroy')->middleware('admin.role:general');
         });
         
         // Cursos y Programas
@@ -338,8 +338,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/boletas/{id}/oficializar-firmada', [BoletaController::class, 'oficializarBoletaFirmada'])->name('boletas.oficializar_firmada');
         Route::get('/boletas/{id}/pdf', [BoletaController::class, 'verPdf'])->name('boletas.pdf');
         Route::post('/boletas/{id}/pago', [BoletaController::class, 'registrarPago'])->name('boletas.pago.store')->middleware('admin.role');
-        Route::post('/boletas/{id}/anular', [BoletaController::class, 'anular'])->name('boletas.anular')->middleware('admin.role');
-        Route::post('/boletas/{id}/eliminar', [BoletaController::class, 'eliminar'])->name('boletas.eliminar')->middleware('admin.role');
+        Route::post('/boletas/{id}/anular', [BoletaController::class, 'anular'])->name('boletas.anular')->middleware('admin.role:general');
+        Route::post('/boletas/{id}/eliminar', [BoletaController::class, 'eliminar'])->name('boletas.eliminar')->middleware('admin.role:general');
         Route::post('/boletas/{id}/enviar-whatsapp', [WhatsAppController::class, 'enviarBoleta'])->name('boletas.enviar_whatsapp');
         Route::post('/boletas/{id}/enviar-email', [BoletaController::class, 'enviarEmail'])->name('boletas.enviar_email');
     });
@@ -375,7 +375,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- DIFUSIÓN WHATSAPP & MARKETING PROSPECTOS ---
-    Route::middleware(['module:whatsapp_n8n', 'no.alumno', 'admin.role'])->group(function () {
+    Route::middleware(['module:whatsapp_n8n', 'no.alumno', 'admin.role:general'])->group(function () {
         // Campañas y Difusión Masiva (Oferta Académica)
         Route::get('/whatsapp/campanas', [CampanaWhatsAppController::class, 'index'])->name('whatsapp.campanas.index');
         Route::get('/whatsapp/campanas/destinatarios-ajax', [CampanaWhatsAppController::class, 'destinatariosAjax'])->name('whatsapp.campanas.destinatarios_ajax');
@@ -398,21 +398,21 @@ Route::middleware('auth')->group(function () {
         Route::get('/asistencia/marcar', [AsistenciaController::class, 'marcar'])->name('asistencia.marcar');
         Route::post('/asistencia/registrar', [AsistenciaController::class, 'registrarMarca'])->name('asistencia.registrar');
         Route::get('/asistencia/historial', [AsistenciaController::class, 'historial'])->name('asistencia.historial');
-        Route::post('/asistencia/manual', [AsistenciaController::class, 'guardarMarcaManual'])->name('asistencia.manual.store')->middleware('admin.role');
-        Route::post('/asistencia/manual/{id}/editar', [AsistenciaController::class, 'actualizarMarca'])->name('asistencia.manual.update')->middleware('admin.role');
-        Route::post('/asistencia/manual/{id}/eliminar', [AsistenciaController::class, 'eliminarMarca'])->name('asistencia.manual.delete')->middleware('admin.role');
+        Route::post('/asistencia/manual', [AsistenciaController::class, 'guardarMarcaManual'])->name('asistencia.manual.store')->middleware('admin.role:general');
+        Route::post('/asistencia/manual/{id}/editar', [AsistenciaController::class, 'actualizarMarca'])->name('asistencia.manual.update')->middleware('admin.role:general');
+        Route::post('/asistencia/manual/{id}/eliminar', [AsistenciaController::class, 'eliminarMarca'])->name('asistencia.manual.delete')->middleware('admin.role:general');
 
         Route::get('/planilla', [PlanillaController::class, 'index'])->name('planilla.index');
-        Route::post('/planilla/tarifa/categoria', [PlanillaController::class, 'guardarTarifaCategoria'])->name('planilla.tarifa.categoria')->middleware('admin.role');
+        Route::post('/planilla/tarifa/categoria', [PlanillaController::class, 'guardarTarifaCategoria'])->name('planilla.tarifa.categoria')->middleware('admin.role:general');
         Route::get('/planilla/empleados', [PlanillaController::class, 'empleados'])->name('planilla.empleados');
-        Route::post('/planilla/tarifa/empleado', [PlanillaController::class, 'guardarTarifaEmpleado'])->name('planilla.tarifa.empleado')->middleware('admin.role');
-        Route::post('/planilla/credencial/empleado', [PlanillaController::class, 'guardarCredencialEmpleado'])->name('planilla.credencial.empleado')->middleware('admin.role');
+        Route::post('/planilla/tarifa/empleado', [PlanillaController::class, 'guardarTarifaEmpleado'])->name('planilla.tarifa.empleado')->middleware('admin.role:general');
+        Route::post('/planilla/credencial/empleado', [PlanillaController::class, 'guardarCredencialEmpleado'])->name('planilla.credencial.empleado')->middleware('admin.role:general');
         Route::get('/planilla/credencial/{id?}', [PlanillaController::class, 'credencial'])->name('planilla.credencial');
         Route::get('/planilla/credencial/ver/{id}', [PlanillaController::class, 'credencial'])->name('planilla.credencial.ver');
         Route::get('/planilla/escanear', [PlanillaController::class, 'escanear'])->name('planilla.escanear');
-        Route::post('/planilla/procesar-marca-qr', [PlanillaController::class, 'procesarMarcaQR'])->name('planilla.escanear.marca')->middleware('admin.role');
+        Route::post('/planilla/procesar-marca-qr', [PlanillaController::class, 'procesarMarcaQR'])->name('planilla.escanear.marca')->middleware('admin.role:general');
         Route::get('/planilla/calcular', [PlanillaController::class, 'calcular'])->name('planilla.calcular');
-        Route::post('/planilla/calcular/pago', [PlanillaController::class, 'guardarPagoPlanilla'])->name('planilla.calcular.pago')->middleware('admin.role');
+        Route::post('/planilla/calcular/pago', [PlanillaController::class, 'guardarPagoPlanilla'])->name('planilla.calcular.pago')->middleware('admin.role:general');
         Route::get('/planilla/historial-pagos', [PlanillaController::class, 'historialPagos'])->name('planilla.historial_pagos');
     });
 
@@ -432,7 +432,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // --- BÓVEDA DE CLAVES Y CENTRO DE SOPORTE ---
-    Route::middleware(['module:soporte', 'no.alumno', 'admin.role'])->group(function () {
+    Route::middleware(['module:soporte', 'no.alumno', 'admin.role:general'])->group(function () {
         // Bóveda Claves
         Route::get('/claves', [BovedaClavesController::class, 'index'])->name('claves.index');
         Route::post('/claves/acceder', [BovedaClavesController::class, 'acceder'])->name('claves.acceder');

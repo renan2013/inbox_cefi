@@ -71,12 +71,13 @@ class UsuarioController extends Controller
               ->orderBy('nombre', 'asc');
 
         $usuarios = $query->paginate(30)->withQueryString();
-        $roles = Rol::all();
+        $roles = Rol::oficiales();
 
         // Conteo seguro para KPIs en tiempo real
         try {
             $totalUsuarios = Usuario::count();
-            $adminsCount = Usuario::where('id_rol', 1)->count();
+            $adminRolIds = Rol::whereIn('nombre', ['Administrador General', 'Administrador'])->pluck('id')->all();
+            $adminsCount = Usuario::whereIn('id_rol', !empty($adminRolIds) ? $adminRolIds : [1])->count();
             $docentesCount = Usuario::whereIn('id_rol', [2, 4])->count();
             $estudiantesCount = Usuario::where('id_rol', 3)->count();
             $moodleCount = Usuario::where('origen', 'moodle')->count();
@@ -115,7 +116,7 @@ class UsuarioController extends Controller
      */
     public function create()
     {
-        $roles = Rol::all();
+        $roles = Rol::oficiales(auth()->user()->esAdminGeneral());
         return view('usuarios.create', compact('roles'));
     }
 
@@ -138,8 +139,12 @@ class UsuarioController extends Controller
 
         $rolId = $request->input('id_rol');
         if (!$rolId) {
-            $miembroRol = Rol::where('nombre', 'Miembro')->orWhere('nombre', 'Estudiante')->first();
-            $rolId = $miembroRol ? $miembroRol->id : 3;
+            $estRol = Rol::where('nombre', 'Estudiante')->first();
+            $rolId = $estRol ? $estRol->id : 3;
+        }
+
+        if (!auth()->user()->esAdminGeneral() && (int)$rolId === 1) {
+            abort(403, 'Solo el Administrador General puede asignar el rol de Administrador General.');
         }
 
         $usuario = Usuario::create([
@@ -288,7 +293,11 @@ class UsuarioController extends Controller
     public function edit($id)
     {
         $usuario = Usuario::with('rol')->findOrFail($id);
-        $roles = Rol::all();
+        $esAdminGen = auth()->user()->esAdminGeneral();
+        if (!$esAdminGen && $usuario->esAdminGeneral()) {
+            abort(403, 'Solo el Administrador General puede editar esta cuenta.');
+        }
+        $roles = Rol::oficiales($esAdminGen);
         return view('usuarios.edit', compact('usuario', 'roles'));
     }
 
@@ -297,7 +306,8 @@ class UsuarioController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $usuario = Usuario::findOrFail($id);
+        $usuario = Usuario::with('rol')->findOrFail($id);
+        $esAdminGen = auth()->user()->esAdminGeneral();
 
         $request->validate([
             'nombre' => 'required|string|max:100',
@@ -315,6 +325,14 @@ class UsuarioController extends Controller
             'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
             'id_rol.exists' => 'El rol seleccionado no es válido.',
         ]);
+
+        if (!$esAdminGen && ($usuario->esAdminGeneral() || (int)$request->id_rol === 1)) {
+            $msg = 'Solo el Administrador General puede modificar cuentas o asignar el rol de Administrador General.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 403);
+            }
+            abort(403, $msg);
+        }
 
         $usuario->nombre = $request->nombre;
         $usuario->apellidos = $request->apellidos;

@@ -106,22 +106,42 @@ class Usuario extends Authenticatable
      */
     public function esDocente(): bool
     {
-        if ((int)$this->id_rol === 2 || (int)$this->id_rol === 4) {
+        if ((int)$this->id_rol === 2) {
             return true;
         }
         $nombreRol = strtolower(optional($this->rol)->nombre ?? '');
-        return in_array($nombreRol, ['profesor', 'docente', 'tutor', 'profesores', 'docentes']);
+        return in_array($nombreRol, ['profesor', 'docente', 'tutor', 'profesores', 'docentes', 'profesor activo']);
     }
 
     /**
-     * Determina si el usuario es Administrador.
+     * Determina si el usuario es Administrador General (acceso total al sistema).
      */
-    public function esAdmin(): bool
+    public function esAdminGeneral(): bool
     {
         if ((int)$this->id_rol === 1) {
             return true;
         }
         $nombreRol = strtolower(optional($this->rol)->nombre ?? '');
-        return in_array($nombreRol, ['administrador', 'admin', 'superadmin', 'coordinador']);
+        return in_array($nombreRol, ['administrador general', 'superadmin']);
+    }
+
+    /**
+     * Determina si el usuario tiene el rol operativo de Administrador.
+     */
+    public function esAdministrador(): bool
+    {
+        if ($this->esAdminGeneral()) {
+            return false;
+        }
+        $nombreRol = strtolower(optional($this->rol)->nombre ?? '');
+        return in_array($nombreRol, ['administrador', 'admin']);
+    }
+
+    /**
+     * Determina si el usuario es Administrador General o Administrador operativo.
+     */
+    public function esAdmin(): bool
+    {
+        return $this->esAdminGeneral() || $this->esAdministrador();
     }
 }

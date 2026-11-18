@@ -633,15 +633,18 @@
                                 <td>
                                     @php
                                         $roleClass = 'badge-role';
-                                        if ($usuario->id_rol == 1) {
+                                        $roleStyle = '';
+                                        if ($usuario->esAdminGeneral()) {
                                             $roleClass .= ' role-admin';
-                                        } elseif ($usuario->id_rol == 2) {
+                                        } elseif ($usuario->esAdministrador()) {
+                                            $roleStyle = 'background: rgba(59, 130, 246, 0.14); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3);';
+                                        } elseif ($usuario->esDocente()) {
                                             $roleClass .= ' role-teacher';
                                         } else {
                                             $roleClass .= ' role-student';
                                         }
                                     @endphp
-                                    <span class="{{ $roleClass }}">{{ $usuario->rol->nombre ?? 'Sin Rol' }}</span>
+                                    <span class="{{ $roleClass }}" @if($roleStyle) style="{{ $roleStyle }}" @endif>{{ $usuario->rol->nombre ?? 'Sin Rol' }}</span>
                                 </td>
                                 <td>
                                     @if ($hasExpediente)
@@ -796,7 +799,9 @@
                                     <label for="edit-user-rol" class="form-label form-label-custom small fw-bold">Rol Institucional</label>
                                     <select class="form-select form-control-custom" id="edit-user-rol" name="id_rol" required>
                                         @foreach ($roles as $rol)
-                                            <option value="{{ $rol->id }}">{{ $rol->nombre }}</option>
+                                            @if ($rol->id != 1 || Auth::user()->esAdminGeneral())
+                                                <option value="{{ $rol->id }}">{{ $rol->nombre }}</option>
+                                            @endif
                                         @endforeach
                                     </select>
                                 </div>

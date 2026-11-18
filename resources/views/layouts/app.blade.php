@@ -573,6 +573,7 @@
                              @module('item.lista_soporte')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('soporte.lista') }}">Lista de Soporte</a></li>
                              @endmodule
+                             @if(Auth::user()->esAdminGeneral())
                              <li><hr class="dropdown-divider-custom"></li>
                              @module('item.gestionar_claves')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('claves.index') }}">Gestionar Claves</a></li>
@@ -594,6 +595,7 @@
                              @module('item.prospectos_marketing')
                              <li><a class="dropdown-item dropdown-item-custom" href="{{ route('marketing.prospectos.index') }}"><i class="bi bi-person-lines-fill text-primary me-2"></i> Base de Prospectos (Marketing)</a></li>
                              @endmodule
+                             @endif
                         </ul>
                     </li>
                     @endmodule
@@ -613,6 +615,7 @@
                             @module('item.planilla_credencial')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('planilla.credencial') }}"><i class="bi bi-qr-code-scan"></i> Mi Credencial QR</a></li>
                             @endmodule
+                            @if(Auth::user()->esAdminGeneral())
                             <li><hr class="dropdown-divider-custom"></li>
                             <li><h6 class="dropdown-header-custom">Administración</h6></li>
                             @module('item.planilla_panel')
@@ -633,6 +636,7 @@
                             @module('item.planilla_pagos')
                             <li><a class="dropdown-item dropdown-item-custom" href="{{ route('planilla.historial_pagos') }}"><i class="bi bi-receipt-cutoff"></i> Historial de Pagos</a></li>
                             @endmodule
+                            @endif
                         </ul>
                     </li>
                     @endmodule
