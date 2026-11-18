@@ -229,6 +229,9 @@
                                 <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold" onclick="copiarTarjetaCompleta()">
                                     <i class="bi bi-clipboard-check me-1"></i> Copiar Tarjeta
                                 </button>
+                                <button type="button" id="btnEnviarEmailCreds" class="btn btn-info btn-sm rounded-pill px-3 fw-semibold text-white" onclick="enviarCredencialesPorCorreo({{ json_encode($details['email'] ?? '') }}, {{ json_encode(trim(($details['nombre'] ?? '') . ' ' . ($details['apellidos'] ?? ''))) }})">
+                                    <i class="bi bi-envelope-check-fill me-1"></i> Enviar por Correo (SMTP)
+                                </button>
                                 <button type="button" class="btn btn-success btn-sm rounded-pill px-3 fw-semibold" onclick="abrirWhatsAppTarjeta()">
                                     <i class="bi bi-whatsapp me-1"></i> Enviar por WhatsApp
                                 </button>
@@ -405,6 +408,40 @@
                 ? `https://api.whatsapp.com/send?phone=${phone}&text=${texto}`
                 : `https://api.whatsapp.com/send?text=${texto}`;
             window.open(url, '_blank');
+        }
+
+        async function enviarCredencialesPorCorreo(email, nombre) {
+            const mensaje = (document.getElementById('wa_editable_card')?.value || '').trim();
+            if (!email) {
+                Swal.fire('Correo requerido', 'El usuario no tiene un correo electrónico válido.', 'warning');
+                return;
+            }
+            const btn = document.getElementById('btnEnviarEmailCreds');
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Enviando...';
+            try {
+                const res = await fetch("{{ route('usuarios.enviar_credenciales_email') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, nombre, mensaje })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    Swal.fire('¡Correo Enviado!', data.message || 'Credenciales enviadas por correo con éxito.', 'success');
+                } else {
+                    Swal.fire('Error SMTP', data.message || 'No se pudo enviar el correo. Verifica la configuración SMTP.', 'error');
+                }
+            } catch (e) {
+                Swal.fire('Error de red', 'No se pudo conectar con el servidor.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
         }
 
         async function enviarAutoWhatsappCredenciales() {

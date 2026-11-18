@@ -6,9 +6,12 @@ use App\Models\Usuario;
 use App\Models\Rol;
 use App\Models\ExpedienteDigital;
 use App\Services\ModuleService;
+use App\Services\ClienteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class UsuarioController extends Controller
 {
@@ -189,6 +192,66 @@ class UsuarioController extends Controller
                 ? 'Credenciales enviadas automáticamente por WhatsApp.'
                 : 'No se pudo enviar automáticamente. Verifica la configuración de n8n / WhatsApp.'),
         ], !empty($res['success']) ? 200 : 422);
+    }
+
+    /**
+     * Envía la tarjeta editable de credenciales al correo electrónico del usuario vía SMTP.
+     */
+    public function enviarCredencialesEmail(Request $request)
+    {
+        $request->validate([
+            'email'   => 'required|email|max:255',
+            'nombre'  => 'nullable|string|max:255',
+            'mensaje' => 'required|string|max:3000',
+        ]);
+
+        $email = trim((string) $request->input('email'));
+        $nombre = trim((string) $request->input('nombre', ''));
+        $mensajeTexto = trim((string) $request->input('mensaje'));
+        $institucion = ClienteService::nombre();
+        $loginUrl = url('/');
+
+        $asunto = "Credenciales de Acceso | {$institucion}";
+        $mensajeHtml = nl2br(e($mensajeTexto));
+
+        $html = "
+        <div style='font-family:Arial,Helvetica,sans-serif;background:#f1f5f9;padding:24px;'>
+            <div style='max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 4px 16px rgba(15,23,42,0.06);'>
+                <div style='background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:22px 28px;color:#ffffff;'>
+                    <div style='font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#86efac;font-weight:bold;'>" . e($institucion) . " · Acceso a Plataforma</div>
+                    <h2 style='margin:6px 0 0;font-size:20px;color:#ffffff;'>Bienvenido(a) a la Plataforma</h2>
+                </div>
+                <div style='padding:26px 28px;color:#1e293b;font-size:14px;line-height:1.65;'>
+                    <div style='background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #5fb230;border-radius:10px;padding:18px;margin-bottom:22px;'>
+                        {$mensajeHtml}
+                    </div>
+                    <div style='text-align:center;'>
+                        <a href='" . e($loginUrl) . "' style='display:inline-block;background:#5fb230;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 28px;border-radius:999px;font-size:14px;'>Ingresar a la Plataforma</a>
+                    </div>
+                </div>
+                <div style='background:#f8fafc;padding:14px 28px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;text-align:center;'>
+                    Correo enviado automáticamente por " . e($institucion) . ".
+                </div>
+            </div>
+        </div>";
+
+        try {
+            Mail::html($html, function ($message) use ($email, $nombre, $asunto) {
+                $message->to($email, $nombre ?: null)->subject($asunto);
+            });
+
+            $destLabel = $nombre !== '' ? "{$nombre} ({$email})" : $email;
+            return response()->json([
+                'success' => true,
+                'message' => "Las credenciales han sido enviadas al correo de {$destLabel} con éxito.",
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("Error enviando credenciales por correo a {$email}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo enviar el correo SMTP: ' . $e->getMessage(),
+            ], 422);
+        }
     }
 
     /**
