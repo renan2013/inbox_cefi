@@ -22,6 +22,7 @@ class Rol extends Model
     ];
 
     protected static bool $oficialesAsegurados = false;
+    public static ?string $ultimoError = null;
 
     protected $fillable = [
         'nombre'
@@ -56,25 +57,60 @@ class Rol extends Model
                     DB::table('roles')->where('id', $adminOp->id)->update(['nombre' => 'Administrador']);
                 }
             } else {
-                $plantilla = (array) DB::table('roles')->where('id', 1)->first();
-                unset($plantilla['id']);
-                $plantilla['nombre'] = 'Administrador';
-                if (array_key_exists('slug', $plantilla)) {
-                    $plantilla['slug'] = 'administrador';
+                $payload = ['nombre' => 'Administrador'];
+                $necesitaIdManual = true;
+
+                try {
+                    $columnas = DB::select('SHOW COLUMNS FROM roles');
+                    foreach ($columnas as $col) {
+                        $field = $col->Field ?? '';
+                        $type = strtolower((string) ($col->Type ?? ''));
+                        $null = strtoupper((string) ($col->Null ?? 'YES'));
+                        $default = $col->Default ?? null;
+                        $extra = strtolower((string) ($col->Extra ?? ''));
+                        $key = strtoupper((string) ($col->Key ?? ''));
+
+                        if ($field === 'id') {
+                            if (str_contains($extra, 'auto_increment')) {
+                                $necesitaIdManual = false;
+                            }
+                            continue;
+                        }
+
+                        if ($field === 'nombre') {
+                            $payload['nombre'] = 'Administrador';
+                            continue;
+                        }
+
+                        if (($null === 'NO' && $default === null) || $key === 'UNI') {
+                            if (str_contains($type, 'int') || str_contains($type, 'decimal') || str_contains($type, 'float')) {
+                                $payload[$field] = 1;
+                            } elseif (str_contains($type, 'date') || str_contains($type, 'time')) {
+                                $payload[$field] = date('Y-m-d H:i:s');
+                            } else {
+                                $payload[$field] = 'administrador';
+                            }
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    // Continuar con payload mínimo si no es MySQL (ej. SQLite)
+                    $necesitaIdManual = false;
                 }
 
                 try {
-                    DB::table('roles')->insert($plantilla);
+                    if ($necesitaIdManual) {
+                        $nextId = ((int) DB::table('roles')->max('id')) + 1;
+                        $payload['id'] = max(4, $nextId);
+                    }
+                    DB::table('roles')->insert($payload);
                 } catch (\Throwable $e) {
                     $nextId = ((int) DB::table('roles')->max('id')) + 1;
-                    if ($nextId < 4) {
-                        $nextId = 4;
-                    }
-                    $plantilla['id'] = $nextId;
-                    DB::table('roles')->insert($plantilla);
+                    $payload['id'] = max(4, $nextId);
+                    DB::table('roles')->insert($payload);
                 }
             }
         } catch (\Throwable $e) {
+            self::$ultimoError = $e->getMessage();
             Log::error('Error en Rol::asegurarOficiales: ' . $e->getMessage());
         }
     }

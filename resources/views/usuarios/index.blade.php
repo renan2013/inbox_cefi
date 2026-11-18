@@ -497,6 +497,13 @@
             $moodleSyncActivo = \App\Services\ModuleService::isEnabled('moodle_sync');
         @endphp
 
+        @if(!empty(\App\Models\Rol::$ultimoError))
+            <div class="alert alert-danger border-0 rounded-4 mb-4 p-3 shadow-sm">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Error al sincronizar roles:</strong> {{ \App\Models\Rol::$ultimoError }}
+            </div>
+        @endif
+
         <!-- Filter Form & Instant Search -->
         <div class="filter-section">
             <form action="{{ route('usuarios.index') }}" method="GET" id="filterForm" class="row g-3 align-items-end">
