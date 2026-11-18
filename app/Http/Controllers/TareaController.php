@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use App\Services\TareaNotificationService;
 
 class TareaController extends Controller
 {
@@ -95,6 +96,7 @@ class TareaController extends Controller
         $id_tarea = DB::table('tareas')->insertGetId($taskData);
 
         // 2. Asignar responsables
+        $asignados = [];
         if ($request->has('id_asignado')) {
             $asignados = (array) $request->input('id_asignado');
             foreach ($asignados as $id_user) {
@@ -149,7 +151,19 @@ class TareaController extends Controller
             }
         }
 
-        return redirect()->route('dashboard')->with('success', 'Tarea Creada con Éxito');
+        // 5. Notificar por correo electrónico a los responsables asignados y al creador
+        $notifResult = TareaNotificationService::notificarCreacion((int) $id_tarea, $asignados, Auth::user());
+
+        $mensajeExito = 'Tarea Creada con Éxito.';
+        if (($notifResult['sent'] ?? 0) > 0) {
+            $mensajeExito .= ' Se envió notificación por correo a: ' . implode(', ', $notifResult['recipients']) . '.';
+        } elseif (!empty($notifResult['errors'])) {
+            return redirect()->route('dashboard')
+                ->with('success', $mensajeExito)
+                ->with('warning', 'La tarea se guardó, pero hubo un problema al enviar el correo SMTP. Verifique la configuración en Configuración > Correo Saliente (SMTP).');
+        }
+
+        return redirect()->route('dashboard')->with('success', $mensajeExito);
     }
 
     /**
