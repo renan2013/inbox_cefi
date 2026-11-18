@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Rol extends Model
 {
@@ -46,11 +47,30 @@ class Rol extends Model
             DB::table('roles')->updateOrInsert(['id' => 2], ['nombre' => 'Profesor']);
             DB::table('roles')->updateOrInsert(['id' => 3], ['nombre' => 'Estudiante']);
 
-            if (!DB::table('roles')->where('nombre', 'Administrador')->exists()) {
-                DB::table('roles')->insert(['nombre' => 'Administrador']);
+            $adminOp = DB::table('roles')
+                ->whereRaw('LOWER(TRIM(nombre)) = ?', ['administrador'])
+                ->first();
+
+            if ($adminOp) {
+                if ($adminOp->nombre !== 'Administrador') {
+                    DB::table('roles')->where('id', $adminOp->id)->update(['nombre' => 'Administrador']);
+                }
+            } else {
+                try {
+                    DB::table('roles')->insert(['nombre' => 'Administrador']);
+                } catch (\Throwable $e) {
+                    $nextId = ((int) DB::table('roles')->max('id')) + 1;
+                    if ($nextId < 4) {
+                        $nextId = 4;
+                    }
+                    DB::table('roles')->insert([
+                        'id' => $nextId,
+                        'nombre' => 'Administrador',
+                    ]);
+                }
             }
         } catch (\Throwable $e) {
-            // Ignorar si la tabla aún no está disponible
+            Log::error('Error en Rol::asegurarOficiales: ' . $e->getMessage());
         }
     }
 
@@ -65,10 +85,10 @@ class Rol extends Model
             ? self::NOMBRES_OFICIALES
             : ['Administrador', 'Profesor', 'Estudiante'];
 
-        $roles = self::whereIn('nombre', $nombres)->get()->keyBy('nombre');
+        $roles = self::all()->keyBy(fn ($r) => mb_strtolower(trim((string) $r->nombre)));
 
         return collect($nombres)
-            ->map(fn (string $nombre) => $roles->get($nombre))
+            ->map(fn (string $nombre) => $roles->get(mb_strtolower($nombre)))
             ->filter()
             ->values();
     }
