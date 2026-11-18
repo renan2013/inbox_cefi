@@ -688,6 +688,20 @@
     <div class="row g-4">
         <!-- Main Content Area: Tasks Table & Kanban -->
         <div class="{{ (count($cumpleaneros) > 0 || count($mis_cursos_asignados) > 0) ? 'col-lg-9' : 'col-12' }}">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show border-0 rounded-4 d-flex align-items-center mb-4 p-3 shadow-sm" role="alert" style="background-color: rgba(16, 185, 129, 0.14); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.35) !important;">
+                    <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                    <div class="fw-semibold">{{ session('success') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            @endif
+            @if (session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show border-0 rounded-4 d-flex align-items-center mb-4 p-3 shadow-sm" role="alert" style="background-color: rgba(245, 158, 11, 0.14); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.35) !important;">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                    <div class="fw-semibold">{{ session('warning') }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            @endif
             @php
                 $averias_abiertas_dash = 0;
                 try {
@@ -1653,6 +1667,28 @@
 
     $(document).ready(function() {
         recalcularProgresoMonday();
+
+        @if (session('success'))
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Confirmación!',
+                    text: @json(session('success')),
+                    confirmButtonColor: '#5fb230'
+                });
+            }
+        @endif
+
+        @if (session('warning'))
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atención',
+                    text: @json(session('warning')),
+                    confirmButtonColor: '#f59e0b'
+                });
+            }
+        @endif
     });
 </script>
 @endsection

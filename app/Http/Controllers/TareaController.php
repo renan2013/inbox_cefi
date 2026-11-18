@@ -154,13 +154,18 @@ class TareaController extends Controller
         // 5. Notificar por correo electrónico a los responsables asignados y al creador
         $notifResult = TareaNotificationService::notificarCreacion((int) $id_tarea, $asignados, Auth::user());
 
-        $mensajeExito = 'Tarea Creada con Éxito.';
-        if (($notifResult['sent'] ?? 0) > 0) {
-            $mensajeExito .= ' Se envió notificación por correo a: ' . implode(', ', $notifResult['recipients']) . '.';
+        $mensajeExito = 'Tarea creada con éxito.';
+        $details = $notifResult['details'] ?? [];
+        if (count($details) === 1) {
+            $d = $details[0];
+            $mensajeExito .= " El usuario {$d['nombre']} ha sido notificado a su correo {$d['email']} con éxito.";
+        } elseif (count($details) > 1) {
+            $lista = array_map(fn ($d) => "{$d['nombre']} ({$d['email']})", $details);
+            $mensajeExito .= ' Los siguientes usuarios han sido notificados a sus correos con éxito: ' . implode(', ', $lista) . '.';
         } elseif (!empty($notifResult['errors'])) {
             return redirect()->route('dashboard')
                 ->with('success', $mensajeExito)
-                ->with('warning', 'La tarea se guardó, pero hubo un problema al enviar el correo SMTP. Verifique la configuración en Configuración > Correo Saliente (SMTP).');
+                ->with('warning', 'La tarea se guardó, pero hubo un problema al enviar el correo SMTP: ' . $notifResult['errors'][0]);
         }
 
         return redirect()->route('dashboard')->with('success', $mensajeExito);

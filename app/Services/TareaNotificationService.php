@@ -14,17 +14,18 @@ class TareaNotificationService
      * @param  int         $idTarea
      * @param  array       $asignadosIds
      * @param  object|null $creador
-     * @return array{sent: int, recipients: array<int, string>, errors: array<int, string>}
+     * @return array{sent: int, recipients: array<int, string>, details: array<int, array{nombre: string, email: string, tipo: string}>, errors: array<int, string>}
      */
     public static function notificarCreacion(int $idTarea, array $asignadosIds = [], ?object $creador = null): array
     {
         $sent = 0;
         $recipients = [];
+        $details = [];
         $errors = [];
 
         $tarea = DB::table('tareas')->where('id', $idTarea)->first();
         if (!$tarea) {
-            return compact('sent', 'recipients', 'errors');
+            return compact('sent', 'recipients', 'details', 'errors');
         }
 
         $asignadosIds = array_values(array_unique(array_filter(array_map('intval', $asignadosIds))));
@@ -85,6 +86,11 @@ class TareaNotificationService
                 });
                 $emailsEnviados[] = strtolower($email);
                 $recipients[] = $email;
+                $details[] = [
+                    'nombre' => $nombreDestino ?: $email,
+                    'email'  => $email,
+                    'tipo'   => 'asignado',
+                ];
                 $sent++;
             } catch (\Throwable $e) {
                 $errors[] = "{$email}: " . $e->getMessage();
@@ -112,6 +118,11 @@ class TareaNotificationService
                     $message->to($emailCreador, $nombreCreador ?: null)->subject($asuntoCreador);
                 });
                 $recipients[] = $emailCreador;
+                $details[] = [
+                    'nombre' => $nombreCreador ?: $emailCreador,
+                    'email'  => $emailCreador,
+                    'tipo'   => 'creador',
+                ];
                 $sent++;
             } catch (\Throwable $e) {
                 $errors[] = "{$emailCreador}: " . $e->getMessage();
@@ -119,7 +130,7 @@ class TareaNotificationService
             }
         }
 
-        return compact('sent', 'recipients', 'errors');
+        return compact('sent', 'recipients', 'details', 'errors');
     }
 
     /**
