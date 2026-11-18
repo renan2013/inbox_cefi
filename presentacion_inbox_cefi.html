@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación Ejecutiva · Inbox CEFI 2.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --bg-card: #131c31;
+            --bg-card-soft: rgba(255, 255, 255, 0.04);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --cefi-green: #5fb230;
+            --cefi-green-glow: rgba(95, 178, 48, 0.25);
+            --cefi-blue: #0ea5e9;
+            --cefi-amber: #f59e0b;
+            --cefi-rose: #f43f5e;
+            --cefi-purple: #a855f7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            user-select: none;
+        }
+
+        /* Fondo decorativo sutil */
+        .ambient-glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                radial-gradient(circle at 12% 18%, rgba(95, 178, 48, 0.14), transparent 38%),
+                radial-gradient(circle at 88% 82%, rgba(14, 165, 233, 0.14), transparent 42%);
+        }
+
+        /* Contenedor de diapositivas */
+        .deck {
+            position: relative;
+            z-index: 1;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            padding: 3.2rem 4.5rem 5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(40px) scale(0.985);
+            transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0) scale(1);
+        }
+
+        .slide.prev {
+            transform: translateX(-40px) scale(0.985);
+        }
+
+        /* Header de cada slide */
+        .slide-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .slide-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--cefi-green);
+            background: rgba(95, 178, 48, 0.12);
+            border: 1px solid rgba(95, 178, 48, 0.3);
+            padding: 0.38rem 0.9rem;
+            border-radius: 999px;
+        }
+
+        .slide-brand-mini {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            opacity: 0.85;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .slide-brand-mini img {
+            height: 26px;
+            width: auto;
+        }
+
+        h1.hero-title {
+            font-size: clamp(2.6rem, 4.5vw, 4.1rem);
+            font-weight: 900;
+            line-height: 1.08;
+            letter-spacing: -1.5px;
+            margin-bottom: 1.25rem;
+        }
+
+        h2.slide-title {
+            font-size: clamp(1.85rem, 2.9vw, 2.65rem);
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .slide-subtitle {
+            font-size: 1.08rem;
+            color: var(--text-muted);
+            max-width: 820px;
+            line-height: 1.55;
+            margin-bottom: 2rem;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #86efac 0%, #5fb230 45%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Grids y Tarjetas */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.35rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.2rem; }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+        }
+
+        .card-accent-green { border-top: 3px solid var(--cefi-green); }
+        .card-accent-blue { border-top: 3px solid var(--cefi-blue); }
+        .card-accent-amber { border-top: 3px solid var(--cefi-amber); }
+        .card-accent-rose { border-top: 3px solid var(--cefi-rose); }
+        .card-accent-purple { border-top: 3px solid var(--cefi-purple); }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.45rem;
+            margin-bottom: 1rem;
+        }
+
+        .ic-green { background: rgba(95, 178, 48, 0.16); color: #86efac; }
+        .ic-blue { background: rgba(14, 165, 233, 0.16); color: #7dd3fc; }
+        .ic-amber { background: rgba(245, 158, 11, 0.16); color: #fcd34d; }
+        .ic-rose { background: rgba(244, 63, 94, 0.16); color: #fda4af; }
+        .ic-purple { background: rgba(168, 85, 247, 0.16); color: #d8b4fe; }
+
+        .card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.55rem;
+            color: #ffffff;
+        }
+
+        .card p, .card li {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        .clean-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            margin-top: 0.5rem;
+        }
+
+        .clean-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.55rem;
+        }
+
+        .clean-list li i {
+            color: var(--cefi-green);
+            margin-top: 0.15rem;
+            flex-shrink: 0;
+        }
+
+        /* Diagrama de flujo horizontal */
+        .flow-row {
+            display: flex;
+            align-items: stretch;
+            gap: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .flow-step {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1.15rem;
+            padding: 1.35rem 1.15rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .flow-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 999px;
+            background: var(--cefi-green);
+            color: #0b1120;
+            font-weight: 900;
+            font-size: 0.85rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cefi-blue);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Badges */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.28rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+        .pill-green { background: rgba(95, 178, 48, 0.18); color: #86efac; border: 1px solid rgba(95, 178, 48, 0.35); }
+        .pill-blue { background: rgba(14, 165, 233, 0.18); color: #7dd3fc; border: 1px solid rgba(14, 165, 233, 0.35); }
+        .pill-amber { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.35); }
+        .pill-rose { background: rgba(244, 63, 94, 0.18); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.35); }
+
+        /* Portada especial */
+        .cover-layout {
+            display: grid;
+            grid-template-columns: 1.25fr 0.9fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .cover-logos {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .cover-logos img {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .cover-divider {
+            width: 1px;
+            height: 36px;
+            background: var(--border-subtle);
+        }
+
+        .cover-visual-hub {
+            background: linear-gradient(145deg, rgba(19, 28, 49, 0.95), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(95, 178, 48, 0.35);
+            border-radius: 1.75rem;
+            padding: 2rem;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 0 40px rgba(95, 178, 48, 0.1);
+        }
+
+        .hub-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.9rem;
+        }
+
+        .hub-mini-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hub-mini-item i {
+            font-size: 1.4rem;
+        }
+
+        /* Diagrama central arquitectura (Slide 2) */
+        .arch-diagram {
+            display: grid;
+            grid-template-columns: 1fr 220px 1fr;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .arch-core {
+            background: linear-gradient(160deg, #166534, #0f172a);
+            border: 2px solid var(--cefi-green);
+            border-radius: 50%;
+            width: 210px;
+            height: 210px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1.2rem;
+            box-shadow: 0 0 45px var(--cefi-green-glow);
+        }
+
+        .arch-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Barra inferior de navegación */
+        .controls-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: rgba(11, 17, 32, 0.88);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-subtle);
+            padding: 0.75rem 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .progress-track {
+            position: fixed;
+            bottom: 58px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.07);
+            z-index: 51;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cefi-green), var(--cefi-blue));
+            transition: width 0.35s ease;
+        }
+
+        .ctrl-group {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .btn-ctrl {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #f8fafc;
+            border-radius: 999px;
+            padding: 0.45rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-ctrl:hover {
+            background: rgba(255, 255, 255, 0.16);
+            transform: translateY(-1px);
+        }
+
+        .btn-ctrl-primary {
+            background: var(--cefi-green);
+            border-color: var(--cefi-green);
+            color: #0b1120;
+            font-weight: 700;
+        }
+
+        .btn-ctrl-primary:hover {
+            background: #6cc938;
+            color: #0b1120;
+        }
+
+        .slide-counter {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            padding: 0 0.5rem;
+        }
+
+        /* Modal vista general de diapositivas */
+        .overview-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(11, 17, 32, 0.96);
+            backdrop-filter: blur(14px);
+            padding: 2.5rem 4rem;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .overview-overlay.open {
+            display: block;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .overview-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            padding: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .overview-item:hover, .overview-item.active-thumb {
+            border-color: var(--cefi-green);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 1024px) {
+            .slide { padding: 2rem 2rem 5rem; overflow-y: auto; justify-content: flex-start; }
+            .cover-layout, .grid-2, .grid-3, .grid-4, .arch-diagram { grid-template-columns: 1fr; }
+            .flow-row { flex-direction: column; }
+            .flow-arrow { transform: rotate(90deg); padding: 0.25rem 0; }
+        }
+
+        @media print {
+            body { overflow: visible; background: #0b1120; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .controls-bar, .progress-track, .overview-overlay { display: none !important; }
+            .slide { position: relative; opacity: 1 !important; visibility: visible !important; transform: none !important; page-break-after: always; min-height: 100vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+
+    <div class="deck" id="deck">
+
+        <!-- =================================================================
+             SLIDE 1: PORTADA EJECUTIVA
+        ================================================================== -->
+        <section class="slide active" data-title="Portada Ejecutiva">
+            <div class="cover-layout">
+                <div>
+                    <div class="cover-logos">
+                        <img src="public/imgs/logo_inbox_color.png" alt="Inbox 2.0" onerror="this.style.display='none'">
+                        <div class="cover-divider"></div>
+                        <img src="public/imgs/logo_cefi_blanco.svg" alt="CEFI" onerror="this.style.display='none'">
+                    </div>
+
+                    <div class="slide-kicker" style="margin-bottom: 1.25rem;">
+                        <i class="bi bi-stars"></i> Presentación de Plataforma · Noviembre 2026
+                    </div>
+
+                    <h1 class="hero-title">
+                        Gestión Académica, Financiera y Operativa <span class="gradient-text">en un Solo Lugar</span>
+                    </h1>
+
+                    <p class="slide-subtitle" style="margin-bottom: 2rem;">
+                        <strong>Inbox CEFI 2.0</strong> centraliza matrícula, expedientes 360°, boletas con firma digital, control docente, portal estudiantil, automatizaciones WhatsApp e Inteligencia Artificial en una arquitectura unificada.
+                    </p>
+
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button class="btn-ctrl btn-ctrl-primary" style="padding: 0.75rem 1.6rem; font-size: 0.95rem;" onclick="nextSlide()">
+                            Comenzar Recorrido <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <button class="btn-ctrl" style="padding: 0.75rem 1.4rem; font-size: 0.95rem;" onclick="toggleFullscreen()">
+                            <i class="bi bi-fullscreen"></i> Pantalla Completa (F)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cover-visual-hub">
+                    <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.2px; color: #86efac; font-weight: 700; margin-bottom: 1rem;">
+                        <i class="bi bi-cpu-fill me-1"></i> Ecosistema Integrado 360°
+                    </div>
+                    <div class="hub-mini-grid">
+                        <div class="hub-mini-item">
+                            <i class="bi bi-shield-check" style="color: #86efac;"></i>
+                            <div>
+                                <div style="font-weight: 700; font-size: 0.92rem;">4 Roles</div>
+                                <div style="font-size: 0.76rem; color: var(--text-muted);">Control por perfil</div>
+                            </div>
+                        </div>
+                        <div class="hub-mini-item">
+                            <i class="bi bi-folder2-open" style="color: #7dd3fc;"></i>
+                            <div>
+                                <div style="font-weight: 700; font-size: 0.92rem;">Expediente 360°</div>
+                                <div style="font-size: 0.76rem; color: var(--text-muted);">Digital + PDF/ZIP</div>
+                            </div>
+                        </div>
+                        <div class="hub-mini-item">
+                            <i class="bi bi-receipt" style="color: #fcd34d;"></i>
+                            <div>
+                                <div style="font-weight: 700; font-size: 0.92rem;">Boletas & Mora</div>
+                                <div style="font-size: 0.76rem; color: var(--text-muted);">Firmas e intereses</div>
+                            </div>
+                        </div>
+                        <div class="hub-mini-item">
+                            <i class="bi bi-mortarboard" style="color: #d8b4fe;"></i>
+                            <div>
+                                <div style="font-weight: 700; font-size: 0.92rem;">Programas PDF</div>
+                                <div style="font-size: 0.76rem; color: var(--text-muted);">Folletos dinámicos</div>
+                            </div>
+                        </div>
+                        <div class="hub-mini-item">
+                            <i class="bi bi-whatsapp" style="color: #4ade80;"></i>
+                            <div>
+                                <div style="font-weight: 700; font-size: 0.92rem;">n8n & WhatsApp</div>
+                                <div style="font-size: 0.76rem; color: var(--text-muted);">Alertas automáticas</div>
+                            </div>
+                        </div>
+                        <div class="hub-mini-item">
+                            <i class="bi bi-robot" style="color: #fda4af;"></i>
+                            <div>
+                                <div style="font-weight: 700; font-size: 0.92rem;">Inbox AI 2.0</div>
+                                <div style="font-size: 0.76rem; color: var(--text-muted);">Asistente inteligente</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SLIDE 2: ARQUITECTURA GENERAL DEL SISTEMA
+        ================================================================== -->
+        <section class="slide" data-title="Arquitectura del Ecosistema">
+            <div class="slide-top">
+                <span class="slide-kicker"><i class="bi bi-diagram-3-fill"></i> Visión Global</span>
+                <span class="slide-brand-mini">Inbox CEFI 2.0</span>
+            </div>
+            <h2 class="slide-title">¿Cómo funciona todo el sistema conectado?</h2>
+            <p class="slide-subtitle">Una base de datos institucional única conecta la gestión académica, financiera y operativa en tiempo real, evitando duplicidad de archivos y procesos manuales.</p>
+
+            <div class="arch-diagram">
+                <div class="arch-col">
+                    <div class="card card-accent-green">
+                        <h3><i class="bi bi-mortarboard-fill text-success me-2"></i> Área Académica</h3>
+                        <p>Programas con folletos PDF oficiales, Cursos, Sílabos, Grupos, Horarios, Supervisión Docente y Actas.</p>
+                    </div>
+                    <div class="card card-accent-blue">
+                        <h3><i class="bi bi-person-vcard-fill me-2" style="color:#38bdf8;"></i> Expediente 360° & TCU</h3>
+                        <p>Historial único por estudiante: documentos, matrícula, convalidaciones, retiros, graduaciones y bitácora TCU.</p>
+                    </div>
+                </div>
+
+                <div class="arch-core">
+                    <i class="bi bi-hdd-network-fill" style="font-size: 2.3rem; color: #86efac; margin-bottom: 0.5rem;"></i>
+                    <div style="font-weight: 900; font-size: 1.15rem; color: #ffffff;">Núcleo Inbox CEFI</div>
+                    <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 0.35rem;">Base de datos central, Roles, Permisos y Marca Blanca</div>
+                </div>
+
+                <div class="arch-col">
+                    <div class="card card-accent-amber">
+                        <h3><i class="bi bi-cash-coin me-2" style="color:#fbbf24;"></i> Finanzas & Cobros</h3>
+                        <p>Boletas de matrícula, firma digital remota, abonos, estados de cuenta y cálculo automático de morosidad.</p>
+                    </div>
+                    <div class="card card-accent-purple">
+                        <h3><i class="bi bi-lightning-charge-fill me-2" style="color:#c084fc;"></i> Operación, n8n & AI</h3>
+                        <p>Tareas Kanban con correo automático, asistencia QR, planilla, campañas WhatsApp y Cerebro Inbox AI 2.0.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SLIDE 3: LOS 4 ROLES OFICIALES Y SEGURIDAD
+        ================================================================== -->
+        <section class="slide" data-title="Roles y Seguridad">
+            <div class="slide-top">
+                <span class="slide-kicker"><i class="bi bi-shield-lock-fill"></i> Control de Acceso</span>
+                <span class="slide-brand-mini">Inbox CEFI 2.0</span>
+            </div>
+            <h2 class="slide-title">Estructura Clara de 4 Roles Institucionales</h2>
+            <p class="slide-subtitle">Cada usuario accede únicamente a las herramientas que corresponden a su función, protegiendo la información financiera y la configuración crítica.</p>
+
+            <div class="grid-4">
+                <div class="card card-accent-rose">
+                    <div class="icon-box ic-rose"><i class="bi bi-shield-fill-check"></i></div>
+                    <span class="pill pill-rose" style="margin-bottom: 0.65rem;">Control Total</span>
+                    <h3>1. Administrador General</h3>
+                    <ul class="clean-list">
+                        <li><i class="bi bi-check2"></i> Acceso total al sistema</li>
+                        <li><i class="bi bi-check2"></i> Configuración, SMTP, n8n y Logos</li>
+                        <li><i class="bi bi-check2"></i> Base de Datos, Inventario y Planilla</li>
+                        <li><i class="bi bi-check2"></i> Anular/eliminar boletas y usuarios</li>
+                    </ul>
+                </div>
+
+                <div class="card card-accent-blue">
+                    <div class="icon-box ic-blue"><i class="bi bi-person-workspace"></i></div>
+                    <span class="pill pill-blue" style="margin-bottom: 0.65rem;">Operativo</span>
+                    <h3>2. Administrador</h3>
+                    <ul class="clean-list">
+                        <li><i class="bi bi-check2"></i> Dashboard y Tareas BPM</li>
+                        <li><i class="bi bi-check2"></i> Registro: Programas, Cursos, Grupos</li>
+                        <li><i class="bi bi-check2"></i> Expedientes 360° y Boletas/Cobros</li>
+                        <li><i class="bi bi-lock-fill" style="color:#f59e0b;"></i> Sin acceso a Configuración crítica</li>
+                    </ul>
+                </div>
+
+                <div class="card card-accent-green">
+                    <div class="icon-box ic-green"><i class="bi bi-easel2-fill"></i></div>
+                    <span class="pill pill-green" style="margin-bottom: 0.65rem;">Académico</span>
+                    <h3>3. Profesor</h3>
+                    <ul class="clean-list">
+                        <li><i class="bi bi-check2"></i> Solo sus cursos asignados</li>
+                        <li><i class="bi bi-check2"></i> Toma de asistencia y calificaciones</li>
+                        <li><i class="bi bi-check2"></i> Recursos, videotutoriales y actas</li>
+                        <li><i class="bi bi-check2"></i> Marcación QR y tareas asignadas</li>
+                    </ul>
+                </div>
+
+                <div class="card card-accent-purple">
+                    <div class="icon-box ic-purple"><i class="bi bi-mortarboard-fill"></i></div>
+                    <span class="pill pill-amber" style="margin-bottom: 0.65rem;">Autogestión</span>
+                    <h3>4. Estudiante</h3>
+                    <ul class="clean-list">
+                        <li><i class="bi bi-check2"></i> Mi Portal Estudiantil exclusivo</li>
+                        <li><i class="bi bi-check2"></i> Consulta de notas y cursos activos</li>
+                        <li><i class="bi bi-check2"></i> Descarga de Expediente y Récord PDF</li>
+                        <li><i class="bi bi-check2"></i> Registro de Bitácora de TCU (150h)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SLIDE 4: GESTIÓN ACADÉMICA Y PROGRAMAS PDF
+        ================================================================== -->
+        <section class="slide" data-title="Gestión Académica y Folletos PDF">
+            <div class="slide-top">
+                <span class="slide-kicker"><i class="bi bi-book-half"></i> Oferta Académica</span>
+                <span class="slide-brand-mini">Inbox CEFI 2.0</span>
+            </div>
+            <h2 class="slide-title">De la Creación del Programa al Folleto PDF Oficial</h2>
+            <p class="slide-subtitle">Flujo optimizado para crear programas, cursos y grupos en minutos con identidad institucional fija y enlaces clicables automáticos.</p>
+
+            <div class="flow-row">
+                <div class="flow-step">
+                    <span class="flow-num">1</span>
+                    <h3>Diseño del Programa</h3>
+                    <p>Se registran descripción, perfil, objetivos, plan de estudios y costos. El <strong>Header y Footer CEFI</strong> vienen fijados por defecto: solo sube la imagen Hero.</p>
+                </div>
+                <div class="flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+                <div class="flow-step">
+                    <span class="flow-num">2</span>
+                    <h3>Folleto PDF Dinámico</h3>
+                    <p>Genera el PDF multipágina listo para compartir, con <strong>redes sociales y WhatsApp con enlaces activos</strong> sincronizados desde Configuración.</p>
+                </div>
+                <div class="flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+                <div class="flow-step">
+                    <span class="flow-num">3</span>
+                    <h3>Cursos y Descriptores</h3>
+                    <p>Creación de materias, sílabos oficiales y descarga automática de <strong>Descriptores en Word y PDF</strong> con formato institucional.</p>
+                </div>
+                <div class="flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+                <div class="flow-step">
+                    <span class="flow-num">4</span>
+                    <h3>Grupos y Matrícula</h3>
+                    <p>Apertura de grupos por periodo, asignación de profesores, formularios públicos de inscripción y generación de boletas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SLIDE 5: EXPEDIENTE DIGITAL 360° Y CONTROL ACADÉMICO
+        ================================================================== -->
+        <section class="slide" data-title="Expediente Digital 360°">
+            <div class="slide-top">
+                <span class="slide-kicker"><i class="bi bi-folder2-open"></i> Archivo Digital</span>
+                <span class="slide-brand-mini">Inbox CEFI 2.0</span>
+            </div>
+            <h2 class="slide-title">Expediente Digital 360° y Control Académico</h2>
+            <p class="slide-subtitle">Toda la vida académica y documental del estudiante organizada, auditada y exportable con un clic.</p>
+
+            <div class="grid-3">
+                <div class="card card-accent-blue">
+                    <div class="icon-box ic-blue"><i class="bi bi-file-earmark-zip-fill"></i></div>
+                    <h3>Documentos y Bitácora</h3>
+                    <p>Carga de cédula, títulos, fotografías y contratos. Exportación instantánea de todo el expediente en <strong>PDF consolidado o archivo ZIP</strong>, más observaciones internas.</p>
+                </div>
+                <div class="card card-accent-green">
+                    <div class="icon-box ic-green"><i class="bi bi-patch-check-fill"></i></div>
+                    <h3>Convalidaciones y Retiros</h3>
+                    <p>Control formal de homologaciones/convalidaciones de materias, retiros y cambios de curso con trazabilidad completa en el historial académico.</p>
+                </div>
+                <div class="card card-accent-amber">
+                    <div class="icon-box ic-amber"><i class="bi bi-award-fill"></i></div>
+                    <h3>TCU (150h) y Graduaciones</h3>
+                    <p>Seguimiento de horas de Trabajo Comunal Universitario, auditoría académica previa a graduación, generación de <strong>Récord Académico</strong> y Repositorio de Actas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SLIDE 6: CICLO FINANCIERO, BOLETAS Y FIRMAS
+        ================================================================== -->
+        <section class="slide" data-title="Ciclo Financiero y Boletas">
+            <div class="slide-top">
+                <span class="slide-kicker"><i class="bi bi-receipt-cutoff"></i> Finanzas & Facturación</span>
+                <span class="slide-brand-mini">Inbox CEFI 2.0</span>
+            </div>
+            <h2 class="slide-title">Ciclo Completo de Cobro: Boletas, Firmas y Morosidad</h2>
+            <p class="slide-subtitle">Control financiero transparente desde la emisión de la boleta de matrícula hasta el seguimiento automático de cuotas vencidas.</p>
+
+            <div class="flow-row">
+                <div class="flow-step">
+                    <span class="flow-num">1</span>
+                    <h3>Generación de Boleta</h3>
+                    <p>Cálculo automático de matrícula, materias, biblioteca e inscripción única con número oficial consecutivo.</p>
+                </div>
+                <div class="flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+                <div class="flow-step">
+                    <span class="flow-num">2</span>
+                    <h3>Firma Oficial y Digital</h3>
+                    <p>Estampa la firma manuscrita/sello configurada o envía enlace seguro para firma del estudiante.</p>
+                </div>
+                <div class="flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+                <div class="flow-step">
+                    <span class="flow-num">3</span>
+                    <h3>Envío Multicanal</h3>
+                    <p>Despacho del PDF oficial directamente al <strong>Correo Electrónico</strong> y <strong>WhatsApp</strong> del estudiante.</p>
+                </div>
+                <div class="flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+                <div class="flow-step">
+                    <span class="flow-num">4</span>
+                    <h3>Abonos y Morosidad</h3>
+                    <p>Estado de cuenta en vivo, registro de pagos parciales/totales y cálculo de intereses por mora con alertas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SLIDE 7: PORTAL DOCENTE Y PORTAL ESTUDIANTIL
+        ================================================================== -->
+        <section class="slide" data-title="Portales Docente y Estudiantil">
+            <div class="slide-top">
+                <span class="slide-kicker"><i class="bi bi-people-fill"></i> Experiencia de Usuario</span>
+                <span class="slide-brand-mini">Inbox CEFI 2.0</span>
+            </div>
+            <h2 class="slide-title">Portales Especializados para Docentes y Estudiantes</h2>
+            <p class="slide-subtitle">Interfaces enfocadas en lo que cada usuario necesita, evitando distracciones y garantizando privacidad.</p>
+
+            <div class="grid-2">
+                <div class="card card-accent-green">
+                    <div class="icon-box ic-green"><i class="bi bi-easel-fill"></i></div>
+                    <h3>Portal del Profesor (Mis Cursos)</h3>
+                    <ul class="clean-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Visualización exclusiva de los cursos y grupos asignados.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Registro de calificaciones por módulo y envío de notas por correo.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Gestión de recursos didácticos, biblioteca de medios y videotutoriales.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Encuestas de satisfacción estudiantil y supervisión académica.</li>
+                    </ul>
+                </div>
+
+                <div class="card card-accent-blue">
+                    <div class="icon-box ic-blue"><i class="bi bi-mortarboard-fill"></i></div>
+                    <h3>Mi Portal Estudiantil</h3>
+                    <ul class="clean-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Resumen de cursos activos, historial académico y notas aprobadas.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Descarga directa de <strong>Mi Expediente PDF</strong> y <strong>Mi Récord Académico PDF</strong>.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Registro y seguimiento de evidencias en la <strong>Bitácora de TCU</strong>.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Consulta de estado financiero, cuotas y boletas emitidas.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SLIDE 8: OPERACIÓN: TAREAS BPM, ASISTENCIA QR Y PLANILLA
+        ================================================================== -->
+        <section class="slide" data-title="Tareas BPM, QR y Planilla">
+            <div class="slide-top">
+                <span class="slide-kicker"><i class="bi bi-kanban-fill"></i> Productividad Interna</span>
+                <span class="slide-brand-mini">Inbox CEFI 2.0</span>
+            </div>
+            <h2 class="slide-title">Tareas BPM, Asistencia QR y Control de Planilla</h2>
+            <p class="slide-subtitle">Herramientas administrativas para coordinar al equipo, medir tiempos y automatizar el cálculo de pagos internos.</p>
+
+            <div class="grid-3">
+                <div class="card card-accent-green">
+                    <div class="icon-box ic-green"><i class="bi bi-kanban"></i></div>
+                    <h3>Dashboard & Tareas BPM</h3>
+                    <p>Tablero Kanban, diagrama de Gantt, plantillas de tareas, etiquetas y <strong>notificación automática por correo</strong> con confirmación exacta al asignar responsables.</p>
+                </div>
+                <div class="card card-accent-blue">
+                    <div class="icon-box ic-blue"><i class="bi bi-qr-code-scan"></i></div>
+                    <h3>Credencial QR & Asistencia</h3>
+                    <p>Cada colaborador y docente cuenta con su <strong>Credencial QR única</strong> para marcar entrada/salida en la estación de escaneo o mediante registro asistido.</p>
+                </div>
+                <div class="card card-accent-amber">
+                    <div class="icon-box ic-amber"><i class="bi bi-calculator-fill"></i></div>
+                    <h3>Cálculo de Planilla</h3>
+                    <p>Cálculo automatizado de horas trabajadas según tarifas por rol o empleado, generación de comprobantes e historial completo de pagos.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SLIDE 9: AUTOMATIZACIONES, WHATSAPP E INBOX AI 2.0
+        ================================================================== -->
+        <section class="slide" data-title="Automatizaciones e Inbox AI 2.0">
+            <div class="slide-top">
+                <span class="slide-kicker"><i class="bi bi-robot"></i> Inteligencia & Automatización</span>
+                <span class="slide-brand-mini">Inbox CEFI 2.0</span>
+            </div>
+            <h2 class="slide-title">Automatizaciones WhatsApp (n8n) y Cerebro Inbox AI 2.0</h2>
+            <p class="slide-subtitle">Comunicación proactiva con estudiantes y asistencia inteligente en tiempo real para el equipo administrativo y docente.</p>
+
+            <div class="grid-2">
+                <div class="card card-accent-green">
+                    <div class="icon-box ic-green"><i class="bi bi-whatsapp"></i></div>
+                    <h3>Orquestación n8n & WhatsApp</h3>
+                    <ul class="clean-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Envío automático de boletas de pago, credenciales y recordatorios de mora.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Módulo de <strong>Campañas y Difusión Masiva</strong> de oferta académica y saludos.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Base de Prospectos (Marketing) con importación CSV y seguimiento de leads.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Configuración centralizada de SMTP, Webhooks n8n y marca blanca.</li>
+                    </ul>
+                </div>
+
+                <div class="card card-accent-purple">
+                    <div class="icon-box ic-purple"><i class="bi bi-cpu-fill"></i></div>
+                    <h3>Cerebro Inbox AI 2.0 & Soporte</h3>
+                    <ul class="clean-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Asistente <strong>Inbox AI 2.0</strong> entrenado con la base de conocimiento institucional.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Respuestas rápidas sobre procesos académicos, reglamentos y pagos.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> <strong>Centro de Soporte y Averías</strong> con captura de evidencia y seguimiento.</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Bóveda de Claves segura y Bitácora de Auditoría de acciones críticas.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SLIDE 10: CIERRE Y DEMOSTRACIÓN EN VIVO
+        ================================================================== -->
+        <section class="slide" data-title="Inicio de Demostración en Vivo">
+            <div style="text-align: center; max-width: 860px; margin: 0 auto;">
+                <div class="slide-kicker" style="margin-bottom: 1.5rem;">
+                    <i class="bi bi-play-circle-fill"></i> Paso Siguiente: Demo en Vivo
+                </div>
+
+                <h1 class="hero-title" style="font-size: clamp(2.4rem, 4vw, 3.6rem);">
+                    Listos para ver <span class="gradient-text">Inbox CEFI 2.0</span> en Acción
+                </h1>
+
+                <p class="slide-subtitle" style="margin: 0 auto 2.2rem;">
+                    A continuación realizaremos un recorrido práctico en vivo por la plataforma en producción para mostrar la experiencia real de cada módulo.
+                </p>
+
+                <div class="grid-4" style="text-align: left; margin-bottom: 2.2rem;">
+                    <div class="card" style="padding: 1.1rem;">
+                        <div class="pill pill-green" style="margin-bottom: 0.5rem;">1. Roles & Usuarios</div>
+                        <p style="font-size: 0.84rem;">Los 4 roles oficiales y Expediente Digital 360°.</p>
+                    </div>
+                    <div class="card" style="padding: 1.1rem;">
+                        <div class="pill pill-blue" style="margin-bottom: 0.5rem;">2. Programas PDF</div>
+                        <p style="font-size: 0.84rem;">Plantilla fija CEFI y folleto PDF con enlaces vivos.</p>
+                    </div>
+                    <div class="card" style="padding: 1.1rem;">
+                        <div class="pill pill-amber" style="margin-bottom: 0.5rem;">3. Boletas & Mora</div>
+                        <p style="font-size: 0.84rem;">Emisión de cobro, firmas y estado de cuenta.</p>
+                    </div>
+                    <div class="card" style="padding: 1.1rem;">
+                        <div class="pill pill-rose" style="margin-bottom: 0.5rem;">4. Tareas & Config</div>
+                        <p style="font-size: 0.84rem;">Kanban con correo automático y panel central.</p>
+                    </div>
+                </div>
+
+                <a href="https://inbox.ceficr.com" target="_blank" rel="noopener" class="btn-ctrl btn-ctrl-primary" style="padding: 0.9rem 2.2rem; font-size: 1.05rem;">
+                    <i class="bi bi-box-arrow-up-right"></i> Abrir Plataforma en Vivo (inbox.ceficr.com)
+                </a>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Barra de progreso y controles -->
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width: 10%;"></div>
+    </div>
+
+    <div class="controls-bar">
+        <div class="ctrl-group">
+            <button class="btn-ctrl" onclick="toggleOverview()" title="Ver todas las diapositivas (G)">
+                <i class="bi bi-grid-3x3-gap-fill"></i> Índice
+            </button>
+            <button class="btn-ctrl" onclick="toggleFullscreen()" title="Pantalla completa (F)">
+                <i class="bi bi-arrows-fullscreen"></i>
+            </button>
+            <button class="btn-ctrl" onclick="window.print()" title="Imprimir o guardar como PDF">
+                <i class="bi bi-printer-fill"></i> PDF
+            </button>
+        </div>
+
+        <div class="ctrl-group">
+            <button class="btn-ctrl" onclick="prevSlide()" title="Anterior (←)">
+                <i class="bi bi-chevron-left"></i> Anterior
+            </button>
+            <span class="slide-counter" id="slideCounter">1 / 10</span>
+            <button class="btn-ctrl btn-ctrl-primary" onclick="nextSlide()" title="Siguiente (→ / Espacio)">
+                Siguiente <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Vista General (Índice rápido) -->
+    <div class="overview-overlay" id="overviewOverlay">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="font-size: 1.5rem; font-weight: 800;">Mapa de Diapositivas · Inbox CEFI 2.0</h2>
+            <button class="btn-ctrl" onclick="toggleOverview()"><i class="bi bi-x-lg"></i> Cerrar (Esc)</button>
+        </div>
+        <div class="overview-grid" id="overviewGrid"></div>
+    </div>
+
+    <script>
+        const slides = Array.from(document.querySelectorAll('.slide'));
+        const total = slides.length;
+        let current = 0;
+
+        const counterEl = document.getElementById('slideCounter');
+        const progressEl = document.getElementById('progressFill');
+        const overviewOverlay = document.getElementById('overviewOverlay');
+        const overviewGrid = document.getElementById('overviewGrid');
+
+        function renderSlide(index) {
+            current = Math.max(0, Math.min(index, total - 1));
+            slides.forEach((s, i) => {
+                s.classList.remove('active', 'prev');
+                if (i === current) s.classList.add('active');
+                else if (i < current) s.classList.add('prev');
+            });
+            counterEl.textContent = `${current + 1} / ${total}`;
+            progressEl.style.width = `${((current + 1) / total) * 100}%`;
+            buildOverview();
+        }
+
+        function nextSlide() {
+            if (current < total - 1) renderSlide(current + 1);
+        }
+
+        function prevSlide() {
+            if (current > 0) renderSlide(current - 1);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        function toggleOverview() {
+            overviewOverlay.classList.toggle('open');
+        }
+
+        function buildOverview() {
+            overviewGrid.innerHTML = '';
+            slides.forEach((s, i) => {
+                const div = document.createElement('div');
+                div.className = 'overview-item' + (i === current ? ' active-thumb' : '');
+                div.innerHTML = `
+                    <div style="font-size: 0.75rem; font-weight: 700; color: #5fb230; margin-bottom: 0.4rem;">DIAPOSITIVA ${i + 1}</div>
+                    <div style="font-weight: 700; font-size: 1rem; color: #fff;">${s.dataset.title || 'Sin título'}</div>
+                `;
+                div.onclick = () => {
+                    renderSlide(i);
+                    toggleOverview();
+                };
+                overviewGrid.appendChild(div);
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key.toLowerCase() === 'f') {
+                toggleFullscreen();
+            } else if (e.key.toLowerCase() === 'g') {
+                toggleOverview();
+            } else if (e.key === 'Escape' && overviewOverlay.classList.contains('open')) {
+                toggleOverview();
+            }
+        });
+
+        buildOverview();
+    </script>
+</body>
+</html>

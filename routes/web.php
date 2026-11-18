@@ -47,6 +47,11 @@ Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Presentación ejecutiva pública
+Route::get('/presentacion', function () {
+    return response()->file(public_path('presentacion.html'));
+})->name('presentacion.publica');
+
 // Rutas Públicas (Formulario de Inscripción Libre)
 Route::get('/solicitud-curso-libre/publica', [SolicitudCursoLibreController::class, 'showPublicForm'])->name('solicitudes.public');
 Route::post('/solicitud-curso-libre/publica', [SolicitudCursoLibreController::class, 'storePublic'])->name('solicitudes.public.store');
