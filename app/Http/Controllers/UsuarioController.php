@@ -212,9 +212,97 @@ class UsuarioController extends Controller
         $loginUrl = url('/');
 
         $asunto = "Credenciales de Acceso | {$institucion}";
+        $html = $this->buildCredencialesHtml($institucion, $mensajeTexto, $loginUrl);
+
+        try {
+            Mail::html($html, function ($message) use ($email, $nombre, $asunto) {
+                $message->to($email, $nombre ?: null)->subject($asunto);
+            });
+
+            $destLabel = $nombre !== '' ? "{$nombre} ({$email})" : $email;
+            return response()->json([
+                'success' => true,
+                'message' => "Las credenciales han sido enviadas al correo de {$destLabel} con éxito.",
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("Error enviando credenciales por correo a {$email}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo enviar el correo SMTP: ' . $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Restablece/asigna una contraseña temporal y envía los accesos por correo desde la lista de usuarios.
+     */
+    public function enviarAccesoEmailPorId(Request $request, $id)
+    {
+        $usuario = Usuario::findOrFail($id);
+        $email = trim((string) ($usuario->email ?? ''));
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este usuario no tiene un correo electrónico válido registrado.'
+            ], 422);
+        }
+
+        if (!auth()->user()->esAdminGeneral() && $usuario->esAdminGeneral()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solo el Administrador General puede enviar o restablecer accesos de esta cuenta.'
+            ], 403);
+        }
+
+        $nuevaClave = trim((string) $request->input('password', ''));
+        if ($nuevaClave !== '' && strlen($nuevaClave) < 6) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La contraseña temporal debe tener al menos 6 caracteres.'
+            ], 422);
+        }
+        if ($nuevaClave === '') {
+            $nuevaClave = \Illuminate\Support\Str::random(8);
+        }
+
+        $usuario->password = Hash::make($nuevaClave);
+        $usuario->save();
+
+        $nombre = trim(($usuario->nombre ?? '') . ' ' . ($usuario->apellidos ?? ''));
+        $institucion = ClienteService::nombre();
+        $loginUrl = url('/');
+
+        $mensajeTexto = "¡Hola {$nombre}!\n\nYa tienes acceso a la plataforma {$institucion}.\n\nEnlace de ingreso: {$loginUrl}\nCorreo: {$email}\nContraseña: {$nuevaClave}";
+        $asunto = "Credenciales de Acceso | {$institucion}";
+        $html = $this->buildCredencialesHtml($institucion, $mensajeTexto, $loginUrl);
+
+        try {
+            Mail::html($html, function ($message) use ($email, $nombre, $asunto) {
+                $message->to($email, $nombre ?: null)->subject($asunto);
+            });
+
+            $destLabel = $nombre !== '' ? "{$nombre} ({$email})" : $email;
+            return response()->json([
+                'success' => true,
+                'message' => "Las credenciales han sido enviadas al correo de {$destLabel} con éxito.",
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("Error enviando acceso por correo a {$email}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo enviar el correo SMTP: ' . $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Construye el HTML institucional para el envío de credenciales por correo.
+     */
+    protected function buildCredencialesHtml(string $institucion, string $mensajeTexto, string $loginUrl): string
+    {
         $mensajeHtml = nl2br(e($mensajeTexto));
 
-        $html = "
+        return "
         <div style='font-family:Arial,Helvetica,sans-serif;background:#f1f5f9;padding:24px;'>
             <div style='max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 4px 16px rgba(15,23,42,0.06);'>
                 <div style='background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:22px 28px;color:#ffffff;'>
@@ -234,24 +322,6 @@ class UsuarioController extends Controller
                 </div>
             </div>
         </div>";
-
-        try {
-            Mail::html($html, function ($message) use ($email, $nombre, $asunto) {
-                $message->to($email, $nombre ?: null)->subject($asunto);
-            });
-
-            $destLabel = $nombre !== '' ? "{$nombre} ({$email})" : $email;
-            return response()->json([
-                'success' => true,
-                'message' => "Las credenciales han sido enviadas al correo de {$destLabel} con éxito.",
-            ]);
-        } catch (\Throwable $e) {
-            Log::error("Error enviando credenciales por correo a {$email}: " . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'No se pudo enviar el correo SMTP: ' . $e->getMessage(),
-            ], 422);
-        }
     }
 
     /**

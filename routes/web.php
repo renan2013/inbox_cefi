@@ -254,6 +254,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/usuarios/crear', [UsuarioController::class, 'store'])->name('usuarios.store');
         Route::post('/usuarios/enviar-credenciales-wa', [UsuarioController::class, 'enviarCredencialesWhatsapp'])->name('usuarios.enviar_credenciales_wa');
         Route::post('/usuarios/enviar-credenciales-email', [UsuarioController::class, 'enviarCredencialesEmail'])->name('usuarios.enviar_credenciales_email');
+        Route::post('/usuarios/{id}/enviar-acceso-email', [UsuarioController::class, 'enviarAccesoEmailPorId'])->name('usuarios.enviar_acceso_email');
             Route::get('/usuarios/{id}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
             Route::post('/usuarios/{id}/actualizar', [UsuarioController::class, 'update'])->name('usuarios.update');
             Route::post('/usuarios/{id}/eliminar', [UsuarioController::class, 'destroy'])->name('usuarios.destroy')->middleware('admin.role:general');

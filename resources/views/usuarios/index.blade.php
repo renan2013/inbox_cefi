@@ -687,6 +687,17 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex justify-content-end align-items-center gap-2">
+                                        @if (!empty($usuario->email) && (!$usuario->esAdminGeneral() || Auth::user()->esAdminGeneral()))
+                                            <button type="button"
+                                                class="btn-action-icon btn-enviar-correo-usuario"
+                                                style="background: rgba(16, 185, 129, 0.14); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);"
+                                                data-id="{{ $usuario->id }}"
+                                                data-nombre="{{ $nombreCompleto }}"
+                                                data-email="{{ $usuario->email }}"
+                                                title="Enviar credenciales de acceso por correo a {{ $usuario->email }}">
+                                                <i class="bi bi-envelope-paper-fill"></i>
+                                            </button>
+                                        @endif
                                         <a href="{{ route('usuarios.edit', $usuario->id) }}" 
                                             class="btn-action-icon btn-action-edit btn-editar-usuario" 
                                             data-id="{{ $usuario->id }}"
@@ -1212,6 +1223,58 @@
                     });
                 }
             };
+        });
+
+        document.addEventListener('click', function(e) {
+            const btnCorreo = e.target.closest('.btn-enviar-correo-usuario');
+            if (!btnCorreo) return;
+
+            const userId = btnCorreo.dataset.id;
+            const nombre = btnCorreo.dataset.nombre || 'Usuario';
+            const email = btnCorreo.dataset.email || '';
+
+            Swal.fire({
+                title: 'Enviar Credenciales por Correo',
+                html: `
+                    <p class="small mb-2">Se generará y enviará una contraseña temporal de acceso al correo <strong>${email}</strong> para <strong>${nombre}</strong>.</p>
+                    <input type="text" id="swal-temp-pass" class="swal2-input" placeholder="Contraseña personalizada (opcional, mín. 6)">
+                    <small class="text-muted d-block">Déjalo vacío para generar una clave aleatoria segura automáticamente.</small>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-envelope-check me-1"></i> Enviar Correo',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#10b981',
+                showLoaderOnConfirm: true,
+                preConfirm: async () => {
+                    const password = (document.getElementById('swal-temp-pass')?.value || '').trim();
+                    try {
+                        const res = await fetch(`{{ url('/usuarios') }}/${userId}/enviar-acceso-email`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ password })
+                        });
+                        const data = await res.json();
+                        if (!res.ok || !data.success) {
+                            Swal.showValidationMessage(data.message || 'No se pudo enviar el correo.');
+                            return false;
+                        }
+                        return data;
+                    } catch (err) {
+                        Swal.showValidationMessage('Error de conexión con el servidor.');
+                        return false;
+                    }
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire('¡Correo Enviado!', result.value.message, 'success');
+                }
+            });
         });
     </script>
 @endsection
