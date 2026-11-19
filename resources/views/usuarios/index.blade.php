@@ -782,7 +782,7 @@
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
-                    <form id="form-editar-usuario" onsubmit="guardarEdicionUsuario(event)">
+                    <form id="form-editar-usuario" onsubmit="guardarEdicionUsuario(event)" autocomplete="off">
                         @csrf
                         <input type="hidden" id="edit-user-id" name="id">
                         <div class="modal-body px-4 py-4">
@@ -827,7 +827,7 @@
 
                             <div class="mb-2">
                                 <label for="edit-user-password" class="form-label form-label-custom small fw-bold">Nueva Contraseña (Opcional)</label>
-                                <input type="password" class="form-control form-control-custom" id="edit-user-password" name="password" placeholder="Dejar en blanco para conservar la actual">
+                                <input type="password" class="form-control form-control-custom" id="edit-user-password" name="password" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" readonly onfocus="this.removeAttribute('readonly')" placeholder="Dejar en blanco para conservar la actual">
                                 <small class="text-white-50 d-block mt-1">Escriba una contraseña solo si desea cambiarla (mínimo 6 caracteres).</small>
                             </div>
                         </div>
@@ -1107,7 +1107,9 @@
                     document.getElementById('edit-user-email').value = email;
                     document.getElementById('edit-user-telefono').value = telefono;
                     document.getElementById('edit-user-rol').value = rolId;
-                    document.getElementById('edit-user-password').value = '';
+                    const passField = document.getElementById('edit-user-password');
+                    passField.setAttribute('readonly', 'readonly');
+                    passField.value = '';
                     document.getElementById('modal-user-badge').textContent = 'ID #' + String(id).padStart(4, '0');
                     document.getElementById('modal-link-full-edit').href = `/usuarios/${id}/editar`;
 
@@ -1126,6 +1128,10 @@
                 btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Guardando...';
 
                 const formData = new FormData(form);
+                const passField = document.getElementById('edit-user-password');
+                if (!passField || passField.value.trim() === '') {
+                    formData.delete('password');
+                }
 
                 try {
                     const res = await fetch(`/usuarios/${id}/actualizar`, {

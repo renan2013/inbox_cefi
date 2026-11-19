@@ -154,7 +154,7 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('usuarios.update', $usuario->id) }}" method="post">
+                        <form action="{{ route('usuarios.update', $usuario->id) }}" method="post" autocomplete="off">
                             @csrf
                             <div class="row">
                                 <div class="col-md-6 mb-4">
@@ -197,7 +197,7 @@
                             <div class="mb-4">
                                 <label for="password" class="form-label form-label-custom"><i class="bi bi-shield-lock"></i> Contraseña Nueva (Opcional)</label>
                                 <div class="input-group">
-                                    <input type="password" name="password" id="password" class="form-control form-control-custom border-end-0" placeholder="Dejar en blanco para conservar la actual">
+                                    <input type="password" name="password" id="password" class="form-control form-control-custom border-end-0" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" readonly onfocus="this.removeAttribute('readonly')" placeholder="Dejar en blanco para conservar la actual">
                                     <button class="btn btn-outline-secondary border-start-0 px-3 border-2" type="button" id="togglePasswordVisibility" style="border-radius: 0 0.75rem 0.75rem 0; border-color: var(--border-dark); background-color: rgba(255,255,255,0.02);">
                                         <i class="bi bi-eye-slash text-white-50"></i>
                                     </button>
@@ -253,6 +253,7 @@
                 for (let i = 0; i < 10; i++) {
                     pass += chars.charAt(Math.floor(Math.random() * chars.length));
                 }
+                passwordInput.removeAttribute('readonly');
                 passwordInput.value = pass;
                 passwordInput.setAttribute('type', 'text');
                 const icon = toggleBtn ? toggleBtn.querySelector('i') : null;

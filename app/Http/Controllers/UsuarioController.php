@@ -472,8 +472,9 @@ class UsuarioController extends Controller
         $usuario->telefono = $request->telefono;
         $usuario->id_rol = $request->id_rol;
 
-        if ($request->filled('password')) {
-            $usuario->password = Hash::make($request->password);
+        $newPassword = trim((string) $request->input('password', ''));
+        if ($newPassword !== '') {
+            $usuario->password = Hash::make($newPassword);
         }
 
         $usuario->save();
