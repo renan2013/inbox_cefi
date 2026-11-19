@@ -286,7 +286,6 @@
                             @php $catOld = old('categoria', 'Carrera Técnica'); @endphp
                             <select name="categoria" id="categoria" class="form-select form-select-custom w-100" required>
                                 <option value="">Seleccione...</option>
-                                <option value="Técnico Parauniversitario" {{ $catOld === 'Técnico Parauniversitario' ? 'selected' : '' }}>Técnico Parauniversitario</option>
                                 <option value="Carrera Técnica" {{ $catOld === 'Carrera Técnica' ? 'selected' : '' }}>Carrera Técnica</option>
                                 <option value="Diplomado" {{ $catOld === 'Diplomado' ? 'selected' : '' }}>Diplomado</option>
                                 <option value="Curso Libre" {{ $catOld === 'Curso Libre' ? 'selected' : '' }}>Curso Libre</option>
@@ -741,7 +740,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnDemo) {
         btnDemo.addEventListener('click', function () {
             document.getElementById('nombre_programa').value = 'TÉCNICO EN DISEÑO GRÁFICO CON IA';
-            document.getElementById('categoria').value = 'Técnico Parauniversitario';
+            document.getElementById('categoria').value = 'Carrera Técnica';
             document.getElementById('duracion').value = '12 meses.';
             document.getElementById('modalidad').value = 'Presencial.';
 

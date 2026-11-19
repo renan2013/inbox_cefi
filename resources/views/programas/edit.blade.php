@@ -296,7 +296,6 @@
                             @php $catActual = old('categoria', $programa->categoria); @endphp
                             <select name="categoria" id="categoria" class="form-select form-select-custom w-100" required>
                                 <option value="">Seleccione...</option>
-                                <option value="Técnico Parauniversitario" {{ $catActual === 'Técnico Parauniversitario' ? 'selected' : '' }}>Técnico Parauniversitario</option>
                                 <option value="Carrera Técnica" {{ $catActual === 'Carrera Técnica' ? 'selected' : '' }}>Carrera Técnica</option>
                                 <option value="Diplomado" {{ $catActual === 'Diplomado' ? 'selected' : '' }}>Diplomado</option>
                                 <option value="Curso Libre" {{ $catActual === 'Curso Libre' ? 'selected' : '' }}>Curso Libre</option>
