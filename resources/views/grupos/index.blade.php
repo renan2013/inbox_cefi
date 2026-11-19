@@ -246,10 +246,10 @@
                     <div class="row g-4 mb-4">
                         <div class="col-md-5">
                             <label class="form-label-custom">Carrera / Programa Académico</label>
-                            <select id="id_programa_select" class="form-select form-select-custom w-100" required>
+                            <select name="id_programa" id="id_programa_select" class="form-select form-select-custom w-100" required>
                                 <option value="">Seleccione el Programa...</option>
                                 @foreach ($programas as $p)
-                                    <option value="{{ $p->id_programa }}">{{ $p->nombre_programa }}</option>
+                                    <option value="{{ $p->id_programa }}" {{ old('id_programa') == $p->id_programa ? 'selected' : '' }}>{{ $p->nombre_programa }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -261,7 +261,7 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label-custom">Identificador / Grupo</label>
-                            <input type="text" name="nombre_grupo" id="nombre_grupo" class="form-control form-control-custom w-100" placeholder="Ej: Grupo 01, Grupo 02...">
+                            <input type="text" name="nombre_grupo" id="nombre_grupo" class="form-control form-control-custom w-100" value="{{ old('nombre_grupo') }}" placeholder="Ej: Grupo 01, Grupo 02...">
                         </div>
                     </div>
 
@@ -296,39 +296,39 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label-custom text-success fw-bold"><i class="bi bi-cloud-download me-1"></i> ID Moodle</label>
-                            <input type="number" name="id_moodle" id="id_moodle_input" class="form-control form-control-custom w-100" placeholder="Ej: 125">
+                            <input type="number" name="id_moodle" id="id_moodle_input" class="form-control form-control-custom w-100" value="{{ old('id_moodle') }}" placeholder="Ej: 125">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label-custom text-success fw-bold">Enlace Zoom (Sincrónico)</label>
-                            <input type="url" name="enlace_zoom" id="enlace_zoom_input" class="form-control form-control-custom w-100" placeholder="https://zoom.us/j/...">
+                            <input type="url" name="enlace_zoom" id="enlace_zoom_input" class="form-control form-control-custom w-100" value="{{ old('enlace_zoom') }}" placeholder="https://zoom.us/j/...">
                         </div>
                     </div>
 
                     <div class="row g-4 mb-4">
                         <div class="col-md-3">
                             <label class="form-label-custom">Prefijo Título</label>
-                            <input type="text" name="titulo_prefijo" id="titulo_prefijo_input" class="form-control form-control-custom w-100" placeholder="Ej: Lic.">
+                            <input type="text" name="titulo_prefijo" id="titulo_prefijo_input" class="form-control form-control-custom w-100" value="{{ old('titulo_prefijo') }}" placeholder="Ej: Lic.">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label-custom">Sufijo Título</label>
-                            <input type="text" name="titulo_sufijo" id="titulo_sufijo_input" class="form-control form-control-custom w-100" placeholder="Ej: PhD.">
+                            <input type="text" name="titulo_sufijo" id="titulo_sufijo_input" class="form-control form-control-custom w-100" value="{{ old('titulo_sufijo') }}" placeholder="Ej: PhD.">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label-custom">Modalidad</label>
                             <select name="modalidad" id="modalidad_select" class="form-select form-select-custom w-100">
-                                <option value="Virtual">Virtual</option>
-                                <option value="Presencial">Presencial</option>
-                                <option value="Semi Presencial">Semi Presencial</option>
+                                <option value="Virtual" {{ old('modalidad', 'Virtual') == 'Virtual' ? 'selected' : '' }}>Virtual</option>
+                                <option value="Presencial" {{ old('modalidad') == 'Presencial' ? 'selected' : '' }}>Presencial</option>
+                                <option value="Semi Presencial" {{ old('modalidad') == 'Semi Presencial' ? 'selected' : '' }}>Semi Presencial</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label-custom">Tipo Curso</label>
                             <select name="tipo_curso" id="tipo_curso_select" class="form-select form-select-custom w-100">
-                                <option value="Regular">Regular</option>
-                                <option value="Tutoría">Tutoría</option>
-                                <option value="Seminario">Seminario</option>
-                                <option value="Taller">Taller</option>
-                                <option value="Curso Libre">Curso Libre / Intensivo</option>
+                                <option value="Regular" {{ old('tipo_curso', 'Regular') == 'Regular' ? 'selected' : '' }}>Regular</option>
+                                <option value="Tutoría" {{ old('tipo_curso') == 'Tutoría' ? 'selected' : '' }}>Tutoría</option>
+                                <option value="Seminario" {{ old('tipo_curso') == 'Seminario' ? 'selected' : '' }}>Seminario</option>
+                                <option value="Taller" {{ old('tipo_curso') == 'Taller' ? 'selected' : '' }}>Taller</option>
+                                <option value="Curso Libre" {{ old('tipo_curso') == 'Curso Libre' ? 'selected' : '' }}>Curso Libre / Intensivo</option>
                             </select>
                         </div>
                     </div>
@@ -339,7 +339,7 @@
                             <select name="id_profesor" id="id_profesor_select" class="form-select form-select-custom w-100">
                                 <option value="">Sin Profesor asignado (Asignar después)...</option>
                                 @foreach ($profesores as $prof)
-                                    <option value="{{ $prof->id }}">{{ $prof->apellidos }}, {{ $prof->nombre }}</option>
+                                    <option value="{{ $prof->id }}" {{ old('id_profesor') == $prof->id ? 'selected' : '' }}>{{ $prof->apellidos }}, {{ $prof->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -367,8 +367,8 @@
                                         <option value="Por definir">Por definir / Horario Flexible</option>
                                     </optgroup>
                                 </select>
-                                <input type="time" name="horario_inicio" id="horario_inicio_input" class="form-control form-control-custom">
-                                <input type="time" name="horario_fin" id="horario_fin_input" class="form-control form-control-custom">
+                                <input type="time" name="horario_inicio" id="horario_inicio_input" class="form-control form-control-custom" value="{{ old('horario_inicio') }}">
+                                <input type="time" name="horario_fin" id="horario_fin_input" class="form-control form-control-custom" value="{{ old('horario_fin') }}">
                             </div>
                         </div>
                     </div>
@@ -383,11 +383,11 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label-custom">Fecha Inicio</label>
-                            <input type="date" name="fecha_inicio" id="fecha_inicio_input" class="form-control form-control-custom w-100" required>
+                            <input type="date" name="fecha_inicio" id="fecha_inicio_input" class="form-control form-control-custom w-100" value="{{ old('fecha_inicio') }}" required>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label-custom">Fecha Final <span class="text-success fw-normal">(Calculada)</span></label>
-                            <input type="date" name="fecha_final" id="fecha_final_input" class="form-control form-control-custom w-100" required>
+                            <input type="date" name="fecha_final" id="fecha_final_input" class="form-control form-control-custom w-100" value="{{ old('fecha_final') }}" required>
                         </div>
                     </div>
 
@@ -642,6 +642,16 @@
 
             $('input[name="fecha_inicio"], #num_lecciones').on('change input', autoAjustarFechaFinal);
 
+            var oldProg = @json(old('id_programa'));
+            var oldPlan = @json(old('id_plan'));
+            var oldDia = @json(old('horario_dia'));
+            if (oldDia) {
+                $('#horario_dia_select').val(oldDia);
+            }
+            if (oldProg) {
+                cargarMateriasPrograma(oldProg, oldPlan);
+            }
+
             $('#id_programa_select').change(function() {
                 var id = $(this).val();
                 cargarMateriasPrograma(id);
@@ -651,7 +661,7 @@
                 var planId = $(this).val();
                 if (planId && materiasCargadas[planId]) {
                     var mat = materiasCargadas[planId];
-                    if (mat.modalidad) {
+                    if (mat.modalidad && $('select[name="modalidad"] option[value="' + mat.modalidad + '"]').length > 0) {
                         $('select[name="modalidad"]').val(mat.modalidad);
                     }
                     var lecc = parseSemanas(mat.duracion) || parseSemanas(mat.cuatrimestre);

@@ -123,11 +123,11 @@ class GrupoController extends Controller
             'fecha_final' => 'required|date',
             'titulo_prefijo' => 'nullable|string|max:50',
             'titulo_sufijo' => 'nullable|string|max:50',
-            'modalidad' => 'required|string|max:50',
-            'tipo_curso' => 'required|string|max:100',
+            'modalidad' => 'nullable|string|max:50',
+            'tipo_curso' => 'nullable|string|max:100',
             'id_moodle' => 'nullable|integer',
             'enlace_zoom' => 'nullable|url',
-            'horario_dia' => 'required|string',
+            'horario_dia' => 'nullable|string',
             'horario_inicio' => 'nullable',
             'horario_fin' => 'nullable',
         ], [
@@ -135,13 +135,12 @@ class GrupoController extends Controller
             'periodo.required' => 'Debe indicar el período lectivo.',
             'fecha_inicio.required' => 'Debe indicar la fecha de inicio.',
             'fecha_final.required' => 'Debe indicar la fecha final.',
-            'modalidad.required' => 'Debe seleccionar la modalidad.',
-            'tipo_curso.required' => 'Debe seleccionar el tipo de curso.',
-            'horario_dia.required' => 'Debe seleccionar el día u horario.',
             'enlace_zoom.url' => 'El enlace de Zoom debe ser una URL válida (ej: https://zoom.us/...).',
         ]);
 
-        $horario = $this->buildHorario($request->horario_dia, $request->horario_inicio, $request->horario_fin);
+        $modalidad = trim((string)$request->input('modalidad', '')) ?: 'Virtual';
+        $tipoCurso = trim((string)$request->input('tipo_curso', '')) ?: 'Regular';
+        $horario = $this->buildHorario($request->input('horario_dia', 'Por definir'), $request->horario_inicio, $request->horario_fin);
         $idProfesor = $request->filled('id_profesor') ? (int)$request->id_profesor : null;
 
         DB::beginTransaction();
@@ -154,8 +153,8 @@ class GrupoController extends Controller
                 'fecha_final' => $request->fecha_final,
                 'titulo_prefijo' => $request->titulo_prefijo,
                 'titulo_sufijo' => $request->titulo_sufijo,
-                'modalidad' => $request->modalidad,
-                'tipo_curso' => $request->tipo_curso,
+                'modalidad' => $modalidad,
+                'tipo_curso' => $tipoCurso,
                 'horario' => $horario,
                 'enlace_zoom' => $request->enlace_zoom,
                 'id_moodle' => $request->id_moodle,
@@ -228,16 +227,18 @@ class GrupoController extends Controller
             'fecha_final' => 'required|date',
             'titulo_prefijo' => 'nullable|string|max:50',
             'titulo_sufijo' => 'nullable|string|max:50',
-            'modalidad' => 'required|string|max:50',
-            'tipo_curso' => 'required|string|max:100',
+            'modalidad' => 'nullable|string|max:50',
+            'tipo_curso' => 'nullable|string|max:100',
             'id_moodle' => 'nullable|integer',
             'enlace_zoom' => 'nullable|url',
-            'horario_dia' => 'required|string',
+            'horario_dia' => 'nullable|string',
             'horario_inicio' => 'nullable',
             'horario_fin' => 'nullable',
         ]);
 
-        $horario = $this->buildHorario($request->horario_dia, $request->horario_inicio, $request->horario_fin);
+        $modalidad = trim((string)$request->input('modalidad', '')) ?: 'Virtual';
+        $tipoCurso = trim((string)$request->input('tipo_curso', '')) ?: 'Regular';
+        $horario = $this->buildHorario($request->input('horario_dia', 'Por definir'), $request->horario_inicio, $request->horario_fin);
         $idProfesor = $request->filled('id_profesor') ? (int)$request->id_profesor : null;
 
         DB::beginTransaction();
@@ -251,8 +252,8 @@ class GrupoController extends Controller
                 'fecha_final' => $request->fecha_final,
                 'titulo_prefijo' => $request->titulo_prefijo,
                 'titulo_sufijo' => $request->titulo_sufijo,
-                'modalidad' => $request->modalidad,
-                'tipo_curso' => $request->tipo_curso,
+                'modalidad' => $modalidad,
+                'tipo_curso' => $tipoCurso,
                 'horario' => $horario,
                 'enlace_zoom' => $request->enlace_zoom,
                 'id_moodle' => $request->id_moodle,
