@@ -133,10 +133,20 @@
                                     <td class="text-white-50 small">{{ $m->cedula ?: '—' }}</td>
                                     <td class="text-white-50 small">{{ $m->email }}</td>
                                     <td class="text-center">
-                                        @if (!empty($m->numero_boleta))
-                                            <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2 py-1">{{ $m->numero_boleta }}</span>
+                                        @if (!empty($m->id_boleta))
+                                            @if ($m->estado_boleta === 'pendiente_firma')
+                                                <a href="{{ route('boletas.pdf', $m->id_boleta) }}" target="_blank" class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-2 text-decoration-none" title="Ver PDF de Boleta">
+                                                    <i class="bi bi-clock-history me-1"></i> Boleta Generada (Pend. Firma) · {{ $m->numero_boleta }}
+                                                </a>
+                                            @else
+                                                <a href="{{ route('boletas.pdf', $m->id_boleta) }}" target="_blank" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 text-decoration-none" title="Ver PDF de Boleta">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Boleta Generada: {{ $m->numero_boleta }}
+                                                </a>
+                                            @endif
                                         @else
-                                            <span class="text-white-50 small">Manual</span>
+                                            <a href="{{ route('boletas.generar', ['id_estudiante' => $m->id_estudiante, 'id_plan_auto' => $grupo->id_plan, 'periodo_auto' => $grupo->periodo, 'id_curso_retorno' => $grupo->id_curso_activo]) }}" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fw-bold">
+                                                <i class="bi bi-receipt me-1"></i> Sin Boleta · Generar
+                                            </a>
                                         @endif
                                     </td>
                                     <td class="text-end pe-4">
