@@ -148,13 +148,17 @@ class GrupoController extends Controller
                 'modalidad' => $request->modalidad,
                 'tipo_curso' => $request->tipo_curso,
                 'horario' => $horario,
-                'hora_inicio' => $request->horario_inicio ?: null,
-                'hora_final' => $request->horario_fin ?: null,
                 'enlace_zoom' => $request->enlace_zoom,
                 'id_moodle' => $request->id_moodle,
                 'check_proceso' => 1,
                 'en_supervision' => 1
             ];
+            if (Schema::hasColumn('cursos_activos', 'hora_inicio')) {
+                $dataCreate['hora_inicio'] = $request->horario_inicio ?: null;
+            }
+            if (Schema::hasColumn('cursos_activos', 'hora_final')) {
+                $dataCreate['hora_final'] = $request->horario_fin ?: null;
+            }
             if (Schema::hasColumn('cursos_activos', 'nombre_grupo')) {
                 $dataCreate['nombre_grupo'] = $request->filled('nombre_grupo') ? trim($request->nombre_grupo) : null;
             }
@@ -241,11 +245,15 @@ class GrupoController extends Controller
                 'modalidad' => $request->modalidad,
                 'tipo_curso' => $request->tipo_curso,
                 'horario' => $horario,
-                'hora_inicio' => $request->horario_inicio ?: null,
-                'hora_final' => $request->horario_fin ?: null,
                 'enlace_zoom' => $request->enlace_zoom,
                 'id_moodle' => $request->id_moodle,
             ];
+            if (Schema::hasColumn('cursos_activos', 'hora_inicio')) {
+                $dataUpdate['hora_inicio'] = $request->horario_inicio ?: null;
+            }
+            if (Schema::hasColumn('cursos_activos', 'hora_final')) {
+                $dataUpdate['hora_final'] = $request->horario_fin ?: null;
+            }
             if ($request->filled('id_plan')) {
                 $dataUpdate['id_plan'] = (int)$request->id_plan;
             }

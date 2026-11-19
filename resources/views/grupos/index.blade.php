@@ -220,6 +220,13 @@
             </div>
         @endif
 
+        @if ($errors->any())
+            <div class="alert alert-danger border-0 rounded-4 d-flex align-items-center mb-4" style="background-color: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2) !important;">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                <div>{{ $errors->first() }}</div>
+            </div>
+        @endif
+
         <!-- FORMULARIO DE CONFIGURACIÓN / EDICIÓN -->
         <div class="card glass-card" id="card-formulario-grupo">
             <div class="card-body p-4 p-md-5">
