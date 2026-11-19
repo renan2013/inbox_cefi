@@ -22,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->clearCacheOnNewGitDeploy();
+
         Paginator::useBootstrapFive();
 
         Blade::if('module', function (string $moduleKey) {
@@ -57,6 +59,49 @@ class AppServiceProvider extends ServiceProvider
             }
         } catch (\Throwable $e) {
             // Ignorar en migraciones iniciales o consola sin conexión
+        }
+    }
+
+    /**
+     * Limpia automáticamente vistas compiladas y cachés cuando cambia el commit de Git tras un auto-deploy.
+     */
+    protected function clearCacheOnNewGitDeploy(): void
+    {
+        try {
+            if (app()->runningInConsole()) {
+                return;
+            }
+            $headFile = base_path('.git/HEAD');
+            if (!is_file($headFile)) {
+                return;
+            }
+            $head = trim((string) @file_get_contents($headFile));
+            if (str_starts_with($head, 'ref:')) {
+                $refPath = base_path('.git/' . trim(substr($head, 4)));
+                $rev = is_file($refPath) ? trim((string) @file_get_contents($refPath)) : $head;
+            } else {
+                $rev = $head;
+            }
+            if ($rev === '') {
+                return;
+            }
+
+            $marker = storage_path('framework/deploy_rev');
+            $lastRev = is_file($marker) ? trim((string) @file_get_contents($marker)) : '';
+            if ($lastRev !== $rev) {
+                foreach (glob(storage_path('framework/views/*.php')) ?: [] as $file) {
+                    @unlink($file);
+                }
+                foreach (glob(base_path('bootstrap/cache/*.php')) ?: [] as $file) {
+                    @unlink($file);
+                }
+                if (function_exists('opcache_reset')) {
+                    @opcache_reset();
+                }
+                @file_put_contents($marker, $rev);
+            }
+        } catch (\Throwable $e) {
+            // No interrumpir la petición ante errores de lectura/escritura
         }
     }
 }
