@@ -148,6 +148,8 @@ class GrupoController extends Controller
                 'modalidad' => $request->modalidad,
                 'tipo_curso' => $request->tipo_curso,
                 'horario' => $horario,
+                'hora_inicio' => $request->horario_inicio ?: null,
+                'hora_final' => $request->horario_fin ?: null,
                 'enlace_zoom' => $request->enlace_zoom,
                 'id_moodle' => $request->id_moodle,
                 'check_proceso' => 1,
@@ -157,8 +159,23 @@ class GrupoController extends Controller
                 $dataCreate['nombre_grupo'] = $request->filled('nombre_grupo') ? trim($request->nombre_grupo) : null;
             }
 
-            // 1. Crear el curso activo / grupo
-            $grupo = CursoActivo::create($dataCreate);
+            // 1. Si existe un curso auto-creado por matrícula/boleta sin configurar (sin profesor, horario ni nombre_grupo), completarlo
+            $grupo = CursoActivo::where('id_plan', $request->id_plan)
+                ->where('periodo', $request->periodo)
+                ->whereNull('id_profesor')
+                ->where(function ($q) {
+                    $q->whereNull('horario')->orWhere('horario', '');
+                })
+                ->when(Schema::hasColumn('cursos_activos', 'nombre_grupo'), function ($q) {
+                    $q->whereNull('nombre_grupo');
+                })
+                ->first();
+
+            if ($grupo) {
+                $grupo->update($dataCreate);
+            } else {
+                $grupo = CursoActivo::create($dataCreate);
+            }
 
             // 2. Si se seleccionó un profesor, matricularlo y asegurar rol docente
             if ($idProfesor) {
@@ -224,6 +241,8 @@ class GrupoController extends Controller
                 'modalidad' => $request->modalidad,
                 'tipo_curso' => $request->tipo_curso,
                 'horario' => $horario,
+                'hora_inicio' => $request->horario_inicio ?: null,
+                'hora_final' => $request->horario_fin ?: null,
                 'enlace_zoom' => $request->enlace_zoom,
                 'id_moodle' => $request->id_moodle,
             ];
