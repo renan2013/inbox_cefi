@@ -773,14 +773,14 @@ class DescriptorPdfService
             ['V', 'Metodología de enseñanza', (string)$prop('metodologia_ensenanza', $silabo->metodologia ?? '')],
             ['VI', 'Estrategias de aprendizaje', (string)$prop('estrategias_aprendizaje', $silabo->estrategias_aprendizaje ?? '')],
             ['VII', 'Evaluación de los aprendizajes', $evaluacionHtml],
-            ['VIII', 'Recursos didácticos', (string)$prop('recursos_didacticos', $silabo->recursos_aprendizaje ?? '')],
-            ['IX', 'Cronograma', $cronogramaHtml],
+            ['VIII', 'Cronograma', $cronogramaHtml],
         ];
 
         $biblio_cod_nom = trim(($plan->codigo ?? '') . ' ' . ($plan->materia ?? ''));
         $secciones_finales = [
-            ['X', 'Bibliografía obligatoria' . ($biblio_cod_nom ? ': ' . $biblio_cod_nom : ''), (string)$prop('bibliografia', $silabo->bibliografia ?? '')],
-            ['XI', 'Bibliografía complementaria' . ($biblio_cod_nom ? ': ' . $biblio_cod_nom : ''), (string)$prop('bibliografia_complementaria', '')],
+            ['X', 'Recursos didácticos', (string)$prop('recursos_didacticos', $silabo->recursos_aprendizaje ?? '')],
+            ['XI', 'Bibliografía obligatoria' . ($biblio_cod_nom ? ': ' . $biblio_cod_nom : ''), (string)$prop('bibliografia', $silabo->bibliografia ?? '')],
+            ['XII', 'Bibliografía complementaria' . ($biblio_cod_nom ? ': ' . $biblio_cod_nom : ''), (string)$prop('bibliografia_complementaria', '')],
         ];
 
         $tieneSecciones = !empty($rubricas_pdf) || !empty(trim(strip_tags((string)$prop('guias_evaluacion', ''))));
@@ -814,14 +814,14 @@ class DescriptorPdfService
                 $pdf->SetXY(17, $y);
                 $pdf->SetFont('Arial', 'B', 9.5);
                 $pdf->SetTextColor($pdf->azul_cefi[0], $pdf->azul_cefi[1], $pdf->azul_cefi[2]);
-                $pdf->Cell(181, 7.5, $pdf->toPdf('DESCRIPCIÓN DE LAS ESTRATEGIAS EVALUATIVAS Y RÚBRICAS'), 0, 1, 'L', false);
+                $pdf->Cell(181, 7.5, $pdf->toPdf('IX. DESCRIPCIÓN DE LAS ESTRATEGIAS EVALUATIVAS Y RÚBRICAS'), 0, 1, 'L', false);
                 $pdf->Ln(2.5);
 
                 foreach ($rubricas_pdf as $idx_r => $rub) {
                     $pdf->renderRubricaConesup($rub, $idx_r + 1);
                 }
             } elseif (!empty(trim(strip_tags((string)$prop('guias_evaluacion', ''))))) {
-                $pdf->renderSeccion('X', 'Descripción de las estrategias evaluativas y rúbricas', (string)$prop('guias_evaluacion', ''));
+                $pdf->renderSeccion('IX', 'Descripción de las estrategias evaluativas y rúbricas', (string)$prop('guias_evaluacion', ''));
             }
 
             foreach ($secciones_finales as $sec) {

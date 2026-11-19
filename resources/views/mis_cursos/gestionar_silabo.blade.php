@@ -350,17 +350,17 @@
                     </li>
                     <li class="nav-item">
                         <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#cronograma_tab" type="button">
-                            <i class="bi bi-calendar3"></i> IX. Cronograma
+                            <i class="bi bi-calendar3"></i> VIII. Cronograma
                         </button>
                     </li>
                     <li class="nav-item">
                         <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#rubricas_tab" type="button">
-                            <i class="bi bi-card-checklist"></i> Rúbricas de Evaluación
+                            <i class="bi bi-card-checklist"></i> IX. Rúbricas de Evaluación
                         </button>
                     </li>
                     <li class="nav-item">
                         <button class="nav-link d-flex align-items-center gap-2" data-bs-toggle="tab" data-bs-target="#biblio_tab" type="button">
-                            <i class="bi bi-book-half"></i> VIII & X. Recursos & Bibliografía
+                            <i class="bi bi-book-half"></i> X-XI. Recursos & Bibliografía
                         </button>
                     </li>
                 </ul>
@@ -687,14 +687,14 @@
                         <button type="button" class="btn btn-info text-white rounded-pill px-4 ms-2 mt-3 shadow-sm fw-bold" onclick="abrirGeneradorRubricaIA()"><i class="bi bi-cpu-fill me-2"></i> Crear con IA (Gemini)</button>
                     </div>
                     
-                    <!-- Tab VIII & X. Recursos & Bibliografía -->
+                    <!-- Tab X-XI. Recursos & Bibliografía -->
                     <div class="tab-pane fade" id="biblio_tab">
                         <div class="mb-4">
-                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">VIII</span> Recursos Didácticos y de Aprendizaje</label>
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">X</span> Recursos Didácticos y de Aprendizaje</label>
                             <textarea name="recursos_aprendizaje" id="recursos_aprendizaje" class="form-control editor-rico-normal">{{ $silabo->recursos_aprendizaje ?? $curso->planEstudio->recursos_didacticos ?? '' }}</textarea>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">X</span> Bibliografía Obligatoria / Oficial</label>
+                            <label class="form-label fw-bold"><span class="badge bg-info bg-opacity-15 text-primary me-1">XI</span> Bibliografía Oficial</label>
                             <textarea name="bibliografia" id="bibliografia" class="form-control editor-rico-normal">{{ $silabo->bibliografia ?? $curso->planEstudio->bibliografia ?? '' }}</textarea>
                         </div>
                     </div>
