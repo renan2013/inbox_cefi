@@ -130,6 +130,15 @@ class GrupoController extends Controller
             'horario_dia' => 'required|string',
             'horario_inicio' => 'nullable',
             'horario_fin' => 'nullable',
+        ], [
+            'id_plan.required' => 'Debe seleccionar una materia / curso específico.',
+            'periodo.required' => 'Debe indicar el período lectivo.',
+            'fecha_inicio.required' => 'Debe indicar la fecha de inicio.',
+            'fecha_final.required' => 'Debe indicar la fecha final.',
+            'modalidad.required' => 'Debe seleccionar la modalidad.',
+            'tipo_curso.required' => 'Debe seleccionar el tipo de curso.',
+            'horario_dia.required' => 'Debe seleccionar el día u horario.',
+            'enlace_zoom.url' => 'El enlace de Zoom debe ser una URL válida (ej: https://zoom.us/...).',
         ]);
 
         $horario = $this->buildHorario($request->horario_dia, $request->horario_inicio, $request->horario_fin);

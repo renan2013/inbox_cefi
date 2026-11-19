@@ -223,7 +223,7 @@
         @if ($errors->any())
             <div class="alert alert-danger border-0 rounded-4 d-flex align-items-center mb-4" style="background-color: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2) !important;">
                 <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
-                <div>{{ $errors->first() }}</div>
+                <div>{{ implode(' · ', $errors->all()) }}</div>
             </div>
         @endif
 
@@ -239,7 +239,7 @@
                     </button>
                 </div>
                 
-                <form action="{{ route('grupos.store') }}" method="POST" id="grupo-form">
+                <form action="{{ route('grupos.store') }}" method="POST" id="grupo-form" onsubmit="if (typeof actPeriodo === 'function') actPeriodo();">
                     @csrf
                     <input type="hidden" name="_method_custom" id="form_method_custom" value="POST">
                     
@@ -292,7 +292,7 @@
                                     <option value="{{ $anio }}">{{ $anio }}</option>
                                 @endfor
                             </select>
-                            <input type="hidden" name="periodo" id="periodo">
+                            <input type="hidden" name="periodo" id="periodo" value="I Cuatrimestre 2026">
                         </div>
                         <div class="col-md-2">
                             <label class="form-label-custom text-success fw-bold"><i class="bi bi-cloud-download me-1"></i> ID Moodle</label>
