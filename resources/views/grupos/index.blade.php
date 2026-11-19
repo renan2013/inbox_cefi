@@ -469,6 +469,9 @@
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
+                                            <a href="{{ route('grupos.estudiantes', $g->id_curso_activo) }}" class="action-btn-custom text-primary" title="Gestionar Estudiantes">
+                                                <i class="bi bi-people-fill"></i>
+                                            </a>
                                             <button type="button" 
                                                     onclick='editarGrupoEnFormulario(@json($g))' 
                                                     class="action-btn-custom text-info" 

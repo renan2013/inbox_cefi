@@ -368,4 +368,124 @@ class GrupoController extends Controller
             return redirect()->route('grupos.index')->with('error', 'Error al eliminar el grupo: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Muestra la vista para gestionar y matricular estudiantes en un grupo.
+     */
+    public function gestionarEstudiantes($id)
+    {
+        $grupo = CursoActivo::with(['planEstudio.programa', 'profesor'])->findOrFail($id);
+
+        $qMatriculados = DB::table('matriculas as m')
+            ->join('usuarios as u', 'm.id_estudiante', '=', 'u.id')
+            ->leftJoin('boletas as b', function ($join) {
+                $join->on('m.id_boleta', '=', 'b.id')
+                     ->where('b.estado', '!=', 'anulada');
+            })
+            ->where('m.id_curso_activo', $grupo->id_curso_activo);
+
+        if (!empty($grupo->id_profesor)) {
+            $qMatriculados->where('u.id', '!=', $grupo->id_profesor);
+        }
+
+        $matriculados = $qMatriculados
+            ->select(
+                'm.id_matricula',
+                'u.id as id_estudiante',
+                'u.nombre',
+                'u.apellidos',
+                'u.email',
+                'u.cedula',
+                'b.id as id_boleta',
+                'b.numero_boleta',
+                'b.estado as estado_boleta'
+            )
+            ->orderBy('u.apellidos', 'asc')
+            ->orderBy('u.nombre', 'asc')
+            ->get();
+
+        $idsExcluidos = $matriculados->pluck('id_estudiante')->toArray();
+        if (!empty($grupo->id_profesor)) {
+            $idsExcluidos[] = (int)$grupo->id_profesor;
+        }
+
+        $estudiantesDisponibles = Usuario::whereNotIn('id', $idsExcluidos)
+            ->orderBy('apellidos', 'asc')
+            ->orderBy('nombre', 'asc')
+            ->get(['id', 'nombre', 'apellidos', 'email', 'cedula', 'id_rol']);
+
+        return view('grupos.estudiantes', compact('grupo', 'matriculados', 'estudiantesDisponibles'));
+    }
+
+    /**
+     * Matricula un estudiante manualmente en el grupo seleccionado.
+     */
+    public function matricularEstudiante(Request $request, $id)
+    {
+        $grupo = CursoActivo::findOrFail($id);
+
+        $request->validate([
+            'id_estudiante' => 'required|exists:usuarios,id',
+        ], [
+            'id_estudiante.required' => 'Debe seleccionar un estudiante para matricular.',
+            'id_estudiante.exists' => 'El estudiante seleccionado no existe.',
+        ]);
+
+        $idEstudiante = (int)$request->id_estudiante;
+
+        if (!empty($grupo->id_profesor) && $idEstudiante === (int)$grupo->id_profesor) {
+            return redirect()->route('grupos.estudiantes', $grupo->id_curso_activo)
+                ->with('error', 'No puedes matricular al profesor asignado del grupo como estudiante.');
+        }
+
+        $existe = Matricula::where('id_estudiante', $idEstudiante)
+            ->where('id_curso_activo', $grupo->id_curso_activo)
+            ->exists();
+
+        if ($existe) {
+            return redirect()->route('grupos.estudiantes', $grupo->id_curso_activo)
+                ->with('error', 'El estudiante ya se encuentra matriculado en este grupo.');
+        }
+
+        Matricula::create([
+            'id_estudiante' => $idEstudiante,
+            'id_curso_activo' => $grupo->id_curso_activo,
+        ]);
+
+        return redirect()->route('grupos.estudiantes', $grupo->id_curso_activo)
+            ->with('success', 'Estudiante matriculado correctamente en el grupo.');
+    }
+
+    /**
+     * Elimina la matrícula de un estudiante en el grupo.
+     */
+    public function eliminarMatricula(Request $request, $id)
+    {
+        $grupo = CursoActivo::findOrFail($id);
+
+        $request->validate([
+            'id_matricula' => 'required|exists:matriculas,id_matricula',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $matricula = Matricula::where('id_matricula', $request->id_matricula)
+                ->where('id_curso_activo', $grupo->id_curso_activo)
+                ->firstOrFail();
+
+            if (Schema::hasTable('notas_rubros')) {
+                DB::table('notas_rubros')->where('id_matricula', $matricula->id_matricula)->delete();
+            }
+
+            $matricula->delete();
+            DB::commit();
+
+            return redirect()->route('grupos.estudiantes', $grupo->id_curso_activo)
+                ->with('success', 'Matrícula eliminada del grupo correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('grupos.estudiantes', $grupo->id_curso_activo)
+                ->with('error', 'No se pudo eliminar la matrícula: ' . $e->getMessage());
+        }
+    }
 }
