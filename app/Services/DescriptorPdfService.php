@@ -685,6 +685,43 @@ class DescriptorPdfService
             }
         }
 
+        // Si el cronograma en texto/HTML está vacío, construirlo desde la tabla silabo_cronograma del sílabo
+        $cronogramaHtml = (string)$prop('cronograma', $silabo->cronograma ?? '');
+        if (empty(trim(strip_tags($cronogramaHtml))) && $silabo) {
+            try {
+                $cronoRows = DB::table('silabo_cronograma')
+                    ->where('id_silabo', $silabo->id_silabo)
+                    ->orderByRaw('CAST(semana AS UNSIGNED) ASC')
+                    ->get();
+
+                if ($cronoRows->count() > 0) {
+                    $trs = '';
+                    foreach ($cronoRows as $cr) {
+                        $semTxt = 'Semana ' . e((string)($cr->semana ?? ''));
+                        $fechaTxt = trim((string)($cr->fecha ?? ''));
+                        if ($fechaTxt !== '') {
+                            $semTxt .= '<br>' . e($fechaTxt);
+                        }
+                        $actTxt = trim((string)($cr->actividad ?? ''));
+                        $tarTxt = trim((string)($cr->tareas ?? ''));
+                        $modTxt = e((string)($cr->modalidad_trabajo ?? 'Asincrónico'));
+
+                        $trs .= '<tr>'
+                            . '<td>' . $semTxt . '</td>'
+                            . '<td>' . ($actTxt !== '' ? $actTxt : '-') . '</td>'
+                            . '<td>' . ($tarTxt !== '' ? $tarTxt : '-') . '</td>'
+                            . '<td>' . $modTxt . '</td>'
+                            . '</tr>';
+                    }
+                    $cronogramaHtml = '<table><thead><tr>'
+                        . '<th>Semana</th><th>Actividades</th><th>Tareas / Entregables</th><th>Modalidad</th>'
+                        . '</tr></thead><tbody>' . $trs . '</tbody></table>';
+                }
+            } catch (\Throwable $e) {
+                // Continuar si no existe la tabla silabo_cronograma
+            }
+        }
+
         // Pasar las secciones curriculares a la segunda página para que la Ficha Técnica quede independiente en la primera página
         $secciones = [
             ['I', 'Descripción general del curso', (string)$prop('descripcion_curso', $silabo->descripcion ?? '')],
@@ -695,7 +732,7 @@ class DescriptorPdfService
             ['VI', 'Estrategias de aprendizaje', (string)$prop('estrategias_aprendizaje', $silabo->estrategias_aprendizaje ?? '')],
             ['VII', 'Evaluación de los aprendizajes', (string)$prop('evaluacion_aprendizajes', '')],
             ['VIII', 'Recursos didácticos', (string)$prop('recursos_didacticos', $silabo->recursos_aprendizaje ?? '')],
-            ['IX', 'Cronograma', (string)$prop('cronograma', $silabo->cronograma ?? '')],
+            ['IX', 'Cronograma', $cronogramaHtml],
         ];
 
         $biblio_cod_nom = trim(($plan->codigo ?? '') . ' ' . ($plan->materia ?? ''));

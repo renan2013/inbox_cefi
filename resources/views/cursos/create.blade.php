@@ -1511,9 +1511,9 @@ if (!function_exists('generarHtmlTareasMoodle')) {
 
               const btn = document.createElement('button');
               btn.type = 'button';
-              btn.className = `btn btn-sm ${btnClass} rounded-pill px-3 shadow-sm ${faltan <= 0 ? 'opacity-50' : ''}`;
+              btn.className = `btn btn-sm ${btnClass} rounded-pill px-3 shadow-sm ${faltan <= 0 ? 'opacity-75' : ''}`;
               btn.disabled = (faltan <= 0);
-              btn.innerHTML = `<i class="bi ${icon} me-1"></i> + ${r} <span class="badge ${faltan <= 0 ? 'bg-secondary' : 'bg-dark'} ms-1">${faltan > 0 ? faltan : 0}</span>`;
+              btn.innerHTML = `<i class="bi ${icon} me-1"></i> + ${r} <span class="badge ms-1" style="background-color: ${faltan <= 0 ? '#64748b' : '#0f172a'}; color: #ffffff !important; font-weight: 700; padding: 0.25em 0.55em; border-radius: 999px;">${faltan > 0 ? faltan : 0}</span>`;
               btn.onclick = () => {
                   if (faltan > 0) {
                       agregarActividadMoodle(mType, r);
