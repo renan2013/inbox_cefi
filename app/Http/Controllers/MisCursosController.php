@@ -1177,17 +1177,6 @@ class MisCursosController extends Controller
             }
         }
 
-        // Auto-llenar evaluaciones si está vacío
-        if (empty($evaluaciones)) {
-            $evaluaciones = [
-                (object)['id_evaluacion' => -1, 'rubro' => 'Asistencia y Participación', 'porcentaje' => 10, 'cantidad' => 1, 'anexo' => '', 'tipo_moodle' => ''],
-                (object)['id_evaluacion' => -2, 'rubro' => 'Tareas y Foros', 'porcentaje' => 20, 'cantidad' => 2, 'anexo' => '', 'tipo_moodle' => 'assign'],
-                (object)['id_evaluacion' => -3, 'rubro' => 'Examen Parcial I', 'porcentaje' => 20, 'cantidad' => 1, 'anexo' => '', 'tipo_moodle' => 'quiz'],
-                (object)['id_evaluacion' => -4, 'rubro' => 'Examen Parcial II', 'porcentaje' => 20, 'cantidad' => 1, 'anexo' => '', 'tipo_moodle' => 'quiz'],
-                (object)['id_evaluacion' => -5, 'rubro' => 'Proyecto Final', 'porcentaje' => 30, 'cantidad' => 1, 'anexo' => '', 'tipo_moodle' => '']
-            ];
-        }
-
         $revisiones_pendientes = DB::table('revisiones_curso')
             ->where('id_curso_activo', $id)
             ->where('estado', 'pendiente')
