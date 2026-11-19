@@ -685,6 +685,48 @@ class DescriptorPdfService
             }
         }
 
+        // Si evaluación en texto/HTML está vacía, construirla desde la tabla silabo_evaluacion del sílabo
+        $evaluacionHtml = (string)$prop('evaluacion_aprendizajes', '');
+        if (empty(trim(strip_tags($evaluacionHtml))) && $silabo) {
+            try {
+                $evalRows = DB::table('silabo_evaluacion')
+                    ->where('id_silabo', $silabo->id_silabo)
+                    ->orderBy('id_evaluacion', 'asc')
+                    ->get();
+
+                if ($evalRows->count() > 0) {
+                    $trsEval = '';
+                    $totalPct = 0;
+                    $totalCant = 0;
+                    foreach ($evalRows as $ev) {
+                        $pct = floatval($ev->porcentaje ?? 0);
+                        $cant = max(1, intval($ev->cantidad ?? 1));
+                        $unit = round($pct / $cant, 1);
+                        $totalPct += $pct;
+                        $totalCant += $cant;
+
+                        $trsEval .= '<tr>'
+                            . '<td>' . e((string)($ev->rubro ?? '')) . '</td>'
+                            . '<td>' . $pct . '%</td>'
+                            . '<td>' . $cant . '</td>'
+                            . '<td>' . $unit . '%</td>'
+                            . '</tr>';
+                    }
+                    $trsEval .= '<tr>'
+                        . '<td><strong>TOTAL</strong></td>'
+                        . '<td><strong>' . $totalPct . '%</strong></td>'
+                        . '<td><strong>' . $totalCant . '</strong></td>'
+                        . '<td></td>'
+                        . '</tr>';
+                    $evaluacionHtml = '<table><thead><tr>'
+                        . '<th>Rubro de Evaluación</th><th>Porcentaje</th><th>Cant.</th><th>Valor Unit.</th>'
+                        . '</tr></thead><tbody>' . $trsEval . '</tbody></table>';
+                }
+            } catch (\Throwable $e) {
+                // Continuar si no existe la tabla silabo_evaluacion
+            }
+        }
+
         // Si el cronograma en texto/HTML está vacío, construirlo desde la tabla silabo_cronograma del sílabo
         $cronogramaHtml = (string)$prop('cronograma', $silabo->cronograma ?? '');
         if (empty(trim(strip_tags($cronogramaHtml))) && $silabo) {
@@ -730,7 +772,7 @@ class DescriptorPdfService
             ['IV', 'Contenido conceptual', (string)$prop('contenidos_tematicos', $silabo->contenidos ?? '')],
             ['V', 'Metodología de enseñanza', (string)$prop('metodologia_ensenanza', $silabo->metodologia ?? '')],
             ['VI', 'Estrategias de aprendizaje', (string)$prop('estrategias_aprendizaje', $silabo->estrategias_aprendizaje ?? '')],
-            ['VII', 'Evaluación de los aprendizajes', (string)$prop('evaluacion_aprendizajes', '')],
+            ['VII', 'Evaluación de los aprendizajes', $evaluacionHtml],
             ['VIII', 'Recursos didácticos', (string)$prop('recursos_didacticos', $silabo->recursos_aprendizaje ?? '')],
             ['IX', 'Cronograma', $cronogramaHtml],
         ];
