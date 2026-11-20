@@ -1754,7 +1754,7 @@ if (!function_exists('generarHtmlTareasMoodle')) {
       item.className = 'card mb-4 rubrica-item border-0 shadow-sm rounded-4 overflow-hidden';
       
       const dataInicial = {
-          columnas: ["Excelente (5)", "Bueno (4)", "En proceso (3)", "Insuficiente (2)"],
+          columnas: ["Excelente (5)", "Bueno (3.5)", "En proceso (2)", "Insuficiente (0)"],
           filas: [{ criterio: "Criterio 1", valores: ["", "", "", ""] }]
       };
 
@@ -1974,20 +1974,26 @@ if (!function_exists('generarHtmlTareasMoodle')) {
       const scores = [];
       
       if (numCols === 4) {
+          // 4 niveles estándar CONESUP / Moodle: 100%, 75%, 50%, 0%
+          // REGLA MOODLE: El último nivel (Insuficiente) DEBE ser 0 absoluto para permitir calificar
           scores.push(ptsMax);
           scores.push(formatPuntajeLimpio(ptsMax * 0.75));
           scores.push(formatPuntajeLimpio(ptsMax * 0.50));
-          scores.push(formatPuntajeLimpio(ptsMax * 0.25));
+          scores.push(0);
       } else {
           for (let i = 0; i < numCols; i++) {
-              const factor = (numCols > 1) ? (1 - (i / numCols)) : 1.0;
-              scores.push(formatPuntajeLimpio(ptsMax * factor));
+              if (i === numCols - 1) {
+                  scores.push(0); // Último nivel siempre 0 en Moodle
+              } else {
+                  const factor = (numCols > 1) ? (1 - (i / (numCols - 1))) : 1.0;
+                  scores.push(formatPuntajeLimpio(ptsMax * factor));
+              }
           }
       }
       
       data.columnas = data.columnas.map((col, idx) => {
           const baseName = col.replace(/\s*\([^)]*\)/g, '').trim() || `Nivel ${idx + 1}`;
-          const sc = scores[idx] !== undefined ? scores[idx] : formatPuntajeLimpio(ptsMax * (1 - (idx / numCols)));
+          const sc = scores[idx] !== undefined ? scores[idx] : (idx === numCols - 1 ? 0 : formatPuntajeLimpio(ptsMax * (1 - (idx / (numCols - 1)))));
           return `${baseName} (${sc})`;
       });
       
@@ -2139,7 +2145,7 @@ if (!function_exists('generarHtmlTareasMoodle')) {
       }
 
       if (newRubricaData.columnas.length === 0) {
-          newRubricaData.columnas = ["Excelente (5)", "Bueno (4)", "En proceso (3)", "Insuficiente (2)"];
+          newRubricaData.columnas = ["Excelente (5)", "Bueno (3.5)", "En proceso (2)", "Insuficiente (0)"];
       }
 
       rubricaTargetInyeccion.querySelector('.rubrica-json-input').value = JSON.stringify(newRubricaData);
