@@ -299,6 +299,63 @@
                 </div>
             </div>
 
+            <!-- Combo Dinámico: Tipo de Cobro -->
+            <div class="p-3 mb-4 rounded-4 border bg-light">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-7">
+                        <label for="tipo-cobro-select" class="form-label small fw-bold text-uppercase text-muted mb-1">
+                            <i class="bi bi-ui-checks-grid me-1 text-primary"></i> Tipo de Cobro / Categoría
+                        </label>
+                        <select id="tipo-cobro-select" class="form-select fw-semibold">
+                            <option value="academico">Académico (Programas, Diplomados, Cursos Libres, Certificaciones...)</option>
+                            <option value="otros">Otros Rubros / Gastos (Constancias, Uniformes, Exámenes, Talleres...)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5 text-md-end">
+                        <button type="button" class="btn btn-outline-primary rounded-pill px-3 fw-bold w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#modalGestionarOtrosRubros">
+                            <i class="bi bi-tags-fill me-1"></i> Gestionar Otros Rubros y Precios
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Dinámico: Otros Rubros / Gastos -->
+            <div id="otros-rubros-panel" class="p-4 mb-4 rounded-4 border border-primary border-opacity-25 bg-white shadow-sm" style="display: none;">
+                <h6 class="fw-bold text-primary mb-3"><i class="bi bi-receipt-cutoff me-2"></i>Agregar Otros Rubros de Pago a la Boleta</h6>
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold mb-1">Rubro / Gasto</label>
+                        <select id="select-otro-rubro" class="form-select">
+                            <option value="">Seleccione un rubro...</option>
+                            @foreach (($otrosRubros ?? []) as $or)
+                                <option value="{{ $or->id }}" data-nombre="{{ $or->nombre }}" data-descripcion="{{ $or->descripcion ?? '' }}" data-precio="{{ $or->precio }}">
+                                    {{ $or->nombre }}@if((float)$or->precio > 0) — ¢{{ number_format((float)$or->precio, 0) }}@endif
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold mb-1">Descripción</label>
+                        <input type="text" id="otro-rubro-desc-input" class="form-control" placeholder="Detalle opcional...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold mb-1">Precio (¢)</label>
+                        <input type="number" id="otro-rubro-precio-input" class="form-control" min="0" step="100" value="0">
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label small fw-bold mb-1">Cant.</label>
+                        <input type="number" id="otro-rubro-cant-input" class="form-control" min="1" value="1">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="btn-agregar-otro-rubro" class="btn btn-primary w-100 fw-bold">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="lista-otros-rubros-seleccionados"></div>
+            </div>
+
             <!-- Acordeón de Programas por Categoría -->
             <div class="accordion" id="programas-accordion">
                 @foreach ($programas_agrupados as $categoria => $programas)
@@ -715,18 +772,124 @@
             }
         });
 
-        // Listener para checkboxes de cursos
-        $(document).on('change', '.curso-checkbox', function() {
-            const count = $('.curso-checkbox:checked').length;
-            if (count > 0) {
+        window.otrosRubrosSeleccionados = [];
+
+        function actualizarEstadoBotonPreparar() {
+            const countCursos = $('.curso-checkbox:checked').length;
+            const countOtros = window.otrosRubrosSeleccionados.length;
+            const totalItems = countCursos + countOtros;
+            if (totalItems > 0) {
                 $('#prepare-boleta-btn').fadeIn();
                 $('#floating-prepare-container').fadeIn();
-                $('#floating-badge-count').text(count);
+                $('#floating-badge-count').text(totalItems);
             } else {
                 $('#prepare-boleta-btn').fadeOut();
                 $('#floating-prepare-container').fadeOut();
             }
+        }
+
+        function renderListaOtrosRubrosSeleccionados() {
+            const cont = $('#lista-otros-rubros-seleccionados');
+            if (window.otrosRubrosSeleccionados.length === 0) {
+                cont.html('<p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i>Aún no has agregado rubros adicionales a esta boleta.</p>');
+            } else {
+                let html = '<ul class="list-group">';
+                window.otrosRubrosSeleccionados.forEach((item, idx) => {
+                    const sub = (parseFloat(item.precio) || 0) * (parseInt(item.cantidad, 10) || 1);
+                    const descTxt = item.descripcion ? ` <span class="text-muted small">— ${item.descripcion}</span>` : '';
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-bold text-dark">${item.nombre}</span>${descTxt}
+                                <span class="badge bg-light text-dark border ms-2">x${item.cantidad}</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="fw-bold text-success">${currencyFormatter.format(sub)}</span>
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0" onclick="quitarOtroRubro(${idx})">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </div>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                cont.html(html);
+            }
+            actualizarEstadoBotonPreparar();
+        }
+
+        window.quitarOtroRubro = function(idx) {
+            window.otrosRubrosSeleccionados.splice(idx, 1);
+            renderListaOtrosRubrosSeleccionados();
+        };
+
+        $('#tipo-cobro-select').on('change', function() {
+            if ($(this).val() === 'otros') {
+                $('#programas-accordion').slideUp(150);
+                $('#otros-rubros-panel').slideDown(150);
+            } else {
+                $('#otros-rubros-panel').slideUp(150);
+                $('#programas-accordion').slideDown(150);
+            }
         });
+
+        $('#select-otro-rubro').on('change', function() {
+            const opt = this.options[this.selectedIndex];
+            if (!opt || !opt.value) {
+                $('#otro-rubro-desc-input').val('');
+                $('#otro-rubro-precio-input').val(0);
+                return;
+            }
+            $('#otro-rubro-desc-input').val(opt.dataset.descripcion || '');
+            $('#otro-rubro-precio-input').val(opt.dataset.precio || 0);
+        });
+
+        $('#btn-agregar-otro-rubro').on('click', function() {
+            const sel = document.getElementById('select-otro-rubro');
+            const opt = sel ? sel.options[sel.selectedIndex] : null;
+            if (!opt || !opt.value) {
+                Swal.fire('Atención', 'Seleccione un rubro de pago del listado.', 'warning');
+                return;
+            }
+            const precio = parseFloat($('#otro-rubro-precio-input').val() || '0') || 0;
+            const cantidad = Math.max(1, parseInt($('#otro-rubro-cant-input').val() || '1', 10) || 1);
+            const descripcion = ($('#otro-rubro-desc-input').val() || '').trim();
+
+            window.otrosRubrosSeleccionados.push({
+                id: parseInt(opt.value, 10),
+                nombre: opt.dataset.nombre || opt.textContent,
+                descripcion: descripcion,
+                precio: precio,
+                cantidad: cantidad
+            });
+
+            $('#select-otro-rubro').val('');
+            $('#otro-rubro-desc-input').val('');
+            $('#otro-rubro-precio-input').val(0);
+            $('#otro-rubro-cant-input').val(1);
+            renderListaOtrosRubrosSeleccionados();
+        });
+
+        window.onOtrosRubrosUpdated = function() {
+            const sel = $('#select-otro-rubro');
+            const current = sel.val();
+            sel.empty().append('<option value="">Seleccione un rubro...</option>');
+            (window.OTROS_RUBROS_CATALOGO || []).forEach(r => {
+                const p = Number(r.precio || 0);
+                const label = p > 0 ? `${r.nombre} — ¢${p.toLocaleString('en-US')}` : r.nombre;
+                const opt = $('<option></option>').val(r.id).text(label)
+                    .attr('data-nombre', r.nombre)
+                    .attr('data-descripcion', r.descripcion || '')
+                    .attr('data-precio', r.precio || 0);
+                if (String(current) === String(r.id)) opt.prop('selected', true);
+                sel.append(opt);
+            });
+        };
+
+        renderListaOtrosRubrosSeleccionados();
+
+        // Listener para checkboxes de cursos
+        $(document).on('change', '.curso-checkbox', actualizarEstadoBotonPreparar);
 
         // Botón flotante
         $('#floating-prepare-btn').click(function() {
@@ -793,8 +956,8 @@
                 return $(this).val();
             }).get();
             
-            if (selectedCursos.length === 0) {
-                Swal.fire('Atención', 'Debe seleccionar al menos un curso para generar la boleta.', 'warning');
+            if (selectedCursos.length === 0 && window.otrosRubrosSeleccionados.length === 0) {
+                Swal.fire('Atención', 'Debe seleccionar al menos un curso o agregar un rubro de pago.', 'warning');
                 return;
             }
             
@@ -996,7 +1159,8 @@
             data: { 
                 _token: '{{ csrf_token() }}',
                 id_estudiante: id_estudiante, 
-                cursos_ids: selectedCursos
+                cursos_ids: selectedCursos,
+                otros_rubros: window.otrosRubrosSeleccionados
             },
             dataType: 'json',
             success: function(response) {
@@ -1004,9 +1168,14 @@
                     dataActual = response.data;
                     const u = response.data.usuario;
                     
-                    if (response.data.es_primera_boleta) {
+                    if (selectedCursos.length === 0) {
+                        $('#cobrar-inscripcion').prop('checked', false);
+                        $('#cobrar-biblioteca').prop('checked', false);
+                        $('#cobrar-matricula').prop('checked', false);
+                    } else if (response.data.es_primera_boleta) {
                         $('#cobrar-inscripcion').prop('checked', true);
                         $('#cobrar-biblioteca').prop('checked', true);
+                        $('#cobrar-matricula').prop('checked', true);
                         Swal.fire({
                             title: 'Estudiante de Nuevo Ingreso',
                             html: `Se han activado automáticamente los aranceles de <b>Inscripción Única</b> y <b>Biblioteca</b>.`,
@@ -1016,6 +1185,7 @@
                     } else {
                         $('#cobrar-inscripcion').prop('checked', false);
                         $('#cobrar-biblioteca').prop('checked', false);
+                        $('#cobrar-matricula').prop('checked', true);
                     }
 
                     $('#boleta-nombre-estudiante').text(`${u.nombre} ${u.apellidos || ''}`);
@@ -1067,6 +1237,21 @@
             $('#boleta-carrera').text(Array.from(programasNombres).join(', '));
             if ($('#cobrar-biblioteca').is(':checked') && valorBiblioteca === 0) valorBiblioteca = 5000;
             if ($('#cobrar-inscripcion').is(':checked') && valorInscripcion === 0) valorInscripcion = 8000;
+        } else {
+            $('#boleta-carrera').text('Otros Rubros / Gastos Administrativos');
+        }
+
+        if (window.otrosRubrosSeleccionados && window.otrosRubrosSeleccionados.length > 0) {
+            window.otrosRubrosSeleccionados.forEach((otro, idx) => {
+                const cant = parseInt(otro.cantidad, 10) || 1;
+                const pUnit = parseFloat(otro.precio) || 0;
+                const pLinea = pUnit * cant;
+                costoCursosBase += pLinea;
+                const cod = 'OTR-' + String(idx + 1).padStart(2, '0');
+                const descTxt = otro.descripcion ? ` — ${otro.descripcion}` : '';
+                const cantTxt = cant > 1 ? ` (x${cant})` : '';
+                $('#boleta-detalle-cargos').append(`<tr><td class="ps-4 fw-bold text-primary">${cod}</td><td>${otro.nombre}${descTxt}${cantTxt}</td><td class="text-end pe-4 fw-bold">${currencyFormatter.format(pLinea)}</td></tr>`);
+            });
         }
 
         let currentSubtotal = costoCursosBase;
@@ -1220,8 +1405,8 @@
             return;
         }
 
-        if (cursos_seleccionados.length === 0) {
-            Swal.fire('Atención', 'Debe seleccionar al menos un curso para generar la boleta.', 'warning');
+        if (cursos_seleccionados.length === 0 && window.otrosRubrosSeleccionados.length === 0) {
+            Swal.fire('Atención', 'Debe seleccionar al menos un curso o un rubro adicional para generar la boleta.', 'warning');
             return;
         }
 
@@ -1241,7 +1426,8 @@
                 cobrar_biblioteca: $('#cobrar-biblioteca').is(':checked') ? 1 : 0,
                 cobrar_matricula: $('#cobrar-matricula').is(':checked') ? 1 : 0,
                 fechas_vencimiento: fechas_vencimiento,
-                cursos_ids: cursos_seleccionados
+                cursos_ids: cursos_seleccionados,
+                otros_rubros: window.otrosRubrosSeleccionados
             },
             dataType: 'json',
             success: function(res) {
@@ -1312,8 +1498,8 @@
             return;
         }
 
-        if (cursos_seleccionados.length === 0) {
-            Swal.fire('Atención', 'Debe seleccionar al menos un curso para generar la boleta.', 'warning');
+        if (cursos_seleccionados.length === 0 && window.otrosRubrosSeleccionados.length === 0) {
+            Swal.fire('Atención', 'Debe seleccionar al menos un curso o un rubro adicional para generar la boleta.', 'warning');
             return;
         }
 
@@ -1349,6 +1535,7 @@
                         pago_inicial_referencia: $('#boleta-pago-inicial-referencia').val(),
                         fechas_vencimiento: fechas_vencimiento,
                         cursos_ids: cursos_seleccionados,
+                        otros_rubros: window.otrosRubrosSeleccionados,
                         signature: signatureBase64
                     },
                     dataType: 'json',
@@ -1469,4 +1656,5 @@
         }
     }
 </script>
+@include('partials.modal_otros_rubros')
 @endsection

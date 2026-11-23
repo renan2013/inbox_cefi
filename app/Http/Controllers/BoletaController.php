@@ -49,6 +49,7 @@ class BoletaController extends Controller
                 'pago_inicial_metodo' => "ALTER TABLE `boletas` ADD COLUMN `pago_inicial_metodo` VARCHAR(50) NULL",
                 'pago_inicial_referencia' => "ALTER TABLE `boletas` ADD COLUMN `pago_inicial_referencia` VARCHAR(255) NULL",
                 'fechas_vencimiento_json' => "ALTER TABLE `boletas` ADD COLUMN `fechas_vencimiento_json` TEXT NULL",
+                'otros_rubros_json' => "ALTER TABLE `boletas` ADD COLUMN `otros_rubros_json` LONGTEXT NULL",
                 'ruta_firma' => "ALTER TABLE `boletas` ADD COLUMN `ruta_firma` VARCHAR(255) NULL",
                 'fecha_firma' => "ALTER TABLE `boletas` ADD COLUMN `fecha_firma` DATETIME NULL",
                 'token_firma' => "ALTER TABLE `boletas` ADD COLUMN `token_firma` VARCHAR(100) NULL",
@@ -549,8 +550,11 @@ class BoletaController extends Controller
             }
         }
 
+        $otrosRubros = \App\Services\OtrosRubrosService::all();
+
         return view('boletas.create', compact(
             'programas_agrupados',
+            'otrosRubros',
             'id_programa_auto',
             'id_plan_auto',
             'categoria_auto',
@@ -634,9 +638,10 @@ class BoletaController extends Controller
 
         $id_estudiante = intval($request->get('id_estudiante', 0));
         $cursos_ids = $request->get('cursos_ids', []);
+        $otros_rubros = $request->get('otros_rubros', []);
 
-        if ($id_estudiante <= 0 || empty($cursos_ids)) {
-            return response()->json(['success' => false, 'message' => 'Datos insuficientes. Se requiere estudiante y cursos.']);
+        if ($id_estudiante <= 0 || (empty($cursos_ids) && empty($otros_rubros))) {
+            return response()->json(['success' => false, 'message' => 'Datos insuficientes. Se requiere estudiante y al menos un curso o rubro adicional.']);
         }
 
         $usuario = Usuario::find($id_estudiante);
@@ -651,20 +656,23 @@ class BoletaController extends Controller
         }
 
         // Cursos seleccionados con costos del plan y programa
-        $cursos = DB::table('plan_estudios as pe')
-            ->join('programas as p', 'pe.id_programa', '=', 'p.id_programa')
-            ->whereIn('pe.id_plan', $cursos_ids)
-            ->select(
-                'pe.id_plan',
-                'pe.codigo',
-                'pe.materia',
-                'p.nombre_programa',
-                DB::raw('CASE WHEN pe.precio > 0 THEN pe.precio ELSE IFNULL(p.costo_materia, 0) END as precio'),
-                DB::raw('IFNULL(p.costo_matricula, 0) as costo_matricula'),
-                DB::raw('IFNULL(p.costo_biblioteca, 0) as costo_biblioteca'),
-                DB::raw('IFNULL(p.costo_inscripcion_unica, 0) as costo_inscripcion_unica')
-            )
-            ->get();
+        $cursos = collect();
+        if (!empty($cursos_ids)) {
+            $cursos = DB::table('plan_estudios as pe')
+                ->join('programas as p', 'pe.id_programa', '=', 'p.id_programa')
+                ->whereIn('pe.id_plan', $cursos_ids)
+                ->select(
+                    'pe.id_plan',
+                    'pe.codigo',
+                    'pe.materia',
+                    'p.nombre_programa',
+                    DB::raw('CASE WHEN pe.precio > 0 THEN pe.precio ELSE IFNULL(p.costo_materia, 0) END as precio'),
+                    DB::raw('IFNULL(p.costo_matricula, 0) as costo_matricula'),
+                    DB::raw('IFNULL(p.costo_biblioteca, 0) as costo_biblioteca'),
+                    DB::raw('IFNULL(p.costo_inscripcion_unica, 0) as costo_inscripcion_unica')
+                )
+                ->get();
+        }
 
         // Verificar si es la primera boleta del estudiante
         $es_primera_boleta = Boleta::where('id_estudiante', $id_estudiante)
@@ -768,17 +776,23 @@ class BoletaController extends Controller
 
         $request->validate([
             'id_estudiante' => 'required|integer|exists:usuarios,id',
-            'cursos_ids' => 'required|array',
+            'cursos_ids' => 'nullable|array',
+            'otros_rubros' => 'nullable|array',
             'periodo' => 'required|string',
             'total' => 'required',
             'cuotas' => 'required|integer|min:1'
         ]);
 
+        $cursos_ids = is_array($request->cursos_ids) ? $request->cursos_ids : [];
+        $otros_rubros = is_array($request->otros_rubros) ? $request->otros_rubros : [];
+        if (empty($cursos_ids) && empty($otros_rubros)) {
+            return response()->json(['success' => false, 'message' => 'Debe seleccionar al menos un curso o un rubro de pago adicional.'], 422);
+        }
+
         try {
             DB::beginTransaction();
 
             $id_estudiante = (int)$request->id_estudiante;
-            $cursos_ids = $request->cursos_ids;
             $periodo = trim($request->periodo);
             $total_raw = (string)$request->total;
             $total = floatval(preg_replace('/[^\d.]/', '', str_replace(',', '.', str_replace(['.', ' '], ['', ''], $total_raw))));
@@ -811,6 +825,7 @@ class BoletaController extends Controller
                 'cobrar_biblioteca' => $cobrar_biblioteca,
                 'cobrar_matricula' => $cobrar_matricula,
                 'fechas_vencimiento_json' => !empty($fechas_vencimiento) ? json_encode($fechas_vencimiento) : null,
+                'otros_rubros_json' => !empty($otros_rubros) ? json_encode($otros_rubros) : null,
                 'token_firma' => $token_firma,
                 'token_expiracion' => $token_expiracion,
                 'fecha_creacion' => Carbon::now()
@@ -820,7 +835,9 @@ class BoletaController extends Controller
             $boleta->update(['numero_boleta' => $numero_boleta]);
 
             // Matricular estudiante en los cursos y vincular id_boleta
-            $this->matricularEstudianteEnCursos($id_estudiante, $cursos_ids, $periodo, $boleta->id);
+            if (!empty($cursos_ids)) {
+                $this->matricularEstudianteEnCursos($id_estudiante, $cursos_ids, $periodo, $boleta->id);
+            }
 
             DB::commit();
 
@@ -862,17 +879,23 @@ class BoletaController extends Controller
 
         $request->validate([
             'id_estudiante' => 'required|integer|exists:usuarios,id',
-            'cursos_ids' => 'required|array',
+            'cursos_ids' => 'nullable|array',
+            'otros_rubros' => 'nullable|array',
             'periodo' => 'required|string',
             'total' => 'required',
             'cuotas' => 'required|integer|min:1'
         ]);
 
+        $cursos_ids = is_array($request->cursos_ids) ? $request->cursos_ids : [];
+        $otros_rubros = is_array($request->otros_rubros) ? $request->otros_rubros : [];
+        if (empty($cursos_ids) && empty($otros_rubros)) {
+            return response()->json(['success' => false, 'message' => 'Debe seleccionar al menos un curso o un rubro de pago adicional.'], 422);
+        }
+
         try {
             DB::beginTransaction();
 
             $id_estudiante = (int)$request->id_estudiante;
-            $cursos_ids = $request->cursos_ids;
             $periodo = trim($request->periodo);
             $total_raw = $request->total;
             $total = floatval(preg_replace('/[^\d.]/', '', str_replace(',', '.', str_replace('.', '', $total_raw))));
@@ -925,6 +948,7 @@ class BoletaController extends Controller
                 'cobrar_biblioteca' => $cobrar_biblioteca,
                 'cobrar_matricula' => $cobrar_matricula,
                 'fechas_vencimiento_json' => !empty($fechas_vencimiento) ? json_encode($fechas_vencimiento) : null,
+                'otros_rubros_json' => !empty($otros_rubros) ? json_encode($otros_rubros) : null,
                 'ruta_firma' => $ruta_firma,
                 'fecha_firma' => $ruta_firma ? Carbon::now() : null,
                 'fecha_creacion' => Carbon::now()
@@ -934,7 +958,9 @@ class BoletaController extends Controller
             $boleta->update(['numero_boleta' => $numero_boleta]);
 
             // Matricular estudiante y asociar boleta
-            $this->matricularEstudianteEnCursos($id_estudiante, $cursos_ids, $periodo, $boleta->id);
+            if (!empty($cursos_ids)) {
+                $this->matricularEstudianteEnCursos($id_estudiante, $cursos_ids, $periodo, $boleta->id);
+            }
 
             // Registrar pago inicial si aplica
             if ($pago_inicial > 0) {

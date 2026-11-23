@@ -341,6 +341,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['module:boletas_matricula', 'no.alumno'])->group(function () {
         Route::get('/boletas', [BoletaController::class, 'index'])->name('boletas.index');
         Route::get('/boletas/generar', [BoletaController::class, 'generar'])->name('boletas.generar');
+        Route::post('/rubros-otros/guardar', [ProgramaController::class, 'guardarOtroRubro'])->name('rubros_otros.guardar');
+        Route::post('/rubros-otros/{id}/eliminar', [ProgramaController::class, 'eliminarOtroRubro'])->name('rubros_otros.eliminar');
         Route::get('/boletas/cursos-programa/{id}/ajax', [BoletaController::class, 'getCursosPorProgramaAjax'])->name('boletas.cursos_programa_ajax');
         Route::get('/boletas/matriculas-pendientes-ajax', [BoletaController::class, 'getMatriculasPendientesAjax'])->name('boletas.matriculas_pendientes_ajax');
         Route::post('/boletas/datos-ajax', [BoletaController::class, 'getBoletaDataAjax'])->name('boletas.datos_ajax');

@@ -220,6 +220,14 @@ class BoletaPdfService
             $subtotal_materias += $max_mat;
         }
 
+        $otrosRubros = [];
+        if (!empty($boleta->otros_rubros_json)) {
+            $decOtros = json_decode($boleta->otros_rubros_json, true);
+            if (is_array($decOtros)) {
+                $otrosRubros = $decOtros;
+            }
+        }
+
         if ($cursos->count() > 0) {
             foreach ($cursos as $c) {
                 $precio = floatval($c->precio > 0 ? $c->precio : ($c->costo_materia ?? 0));
@@ -228,7 +236,30 @@ class BoletaPdfService
                 $pdf->Cell(115, 5.5, $pdf->toPdf(" " . $c->materia), 1, 0, 'L');
                 $pdf->Cell(40, 5.5, 'CRC ' . number_format($precio, 2) . ' ', 1, 1, 'R');
             }
-        } else {
+        }
+
+        if (!empty($otrosRubros)) {
+            foreach ($otrosRubros as $idxOtro => $otro) {
+                $cant = max(1, intval($otro['cantidad'] ?? 1));
+                $precioUnit = floatval($otro['precio'] ?? 0);
+                $montoLinea = $precioUnit * $cant;
+                $subtotal_materias += $montoLinea;
+                $desc = trim((string)($otro['nombre'] ?? 'Rubro adicional'));
+                $detalleOtro = trim((string)($otro['descripcion'] ?? ''));
+                if ($detalleOtro !== '') {
+                    $desc .= ' - ' . $detalleOtro;
+                }
+                if ($cant > 1) {
+                    $desc .= " (x{$cant})";
+                }
+                $codOtro = 'OTR-' . str_pad((string)($idxOtro + 1), 2, '0', STR_PAD_LEFT);
+                $pdf->Cell(25, 5.5, $pdf->toPdf($codOtro), 1, 0, 'C');
+                $pdf->Cell(115, 5.5, $pdf->toPdf(" " . $desc), 1, 0, 'L');
+                $pdf->Cell(40, 5.5, 'CRC ' . number_format($montoLinea, 2) . ' ', 1, 1, 'R');
+            }
+        }
+
+        if ($cursos->count() === 0 && empty($otrosRubros)) {
             $pdf->Cell(180, 6, $pdf->toPdf('Matrícula regular del período'), 1, 1, 'L');
             $subtotal_materias = floatval($boleta->total);
         }

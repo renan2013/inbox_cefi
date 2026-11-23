@@ -540,4 +540,80 @@ class ProgramaController extends Controller
         self::ensureProgramasColumns();
         return \App\Services\ProgramaPdfService::generar((int)$id);
     }
+
+    /**
+     * Crea o actualiza un rubro en el catálogo de "Otros Rubros de Pago".
+     */
+    public function guardarOtroRubro(Request $request)
+    {
+        \App\Services\OtrosRubrosService::ensureTable();
+
+        $request->validate([
+            'id' => 'nullable|integer',
+            'nombre' => 'required|string|max:150',
+            'descripcion' => 'nullable|string|max:255',
+            'precio' => 'nullable|numeric|min:0',
+        ], [
+            'nombre.required' => 'Debe indicar el nombre del rubro.',
+        ]);
+
+        $id = $request->input('id') ? (int)$request->input('id') : null;
+        $nombre = mb_strtoupper(trim((string)$request->input('nombre')), 'UTF-8');
+        $descripcion = trim((string)$request->input('descripcion', '')) ?: null;
+        $precio = floatval($request->input('precio', 0));
+
+        $duplicado = DB::table('rubros_pago_otros')
+            ->whereRaw('LOWER(nombre) = ?', [mb_strtolower($nombre, 'UTF-8')])
+            ->when($id, fn($q) => $q->where('id', '!=', $id))
+            ->first();
+
+        if ($duplicado) {
+            return response()->json([
+                'success' => false,
+                'message' => "Ya existe otro rubro llamado '{$duplicado->nombre}'."
+            ], 422);
+        }
+
+        if ($id) {
+            DB::table('rubros_pago_otros')->where('id', $id)->update([
+                'nombre' => $nombre,
+                'descripcion' => $descripcion,
+                'precio' => $precio,
+                'activo' => 1,
+            ]);
+            $rubro = DB::table('rubros_pago_otros')->where('id', $id)->first();
+        } else {
+            $newId = DB::table('rubros_pago_otros')->insertGetId([
+                'nombre' => $nombre,
+                'descripcion' => $descripcion,
+                'precio' => $precio,
+                'activo' => 1,
+            ]);
+            $rubro = DB::table('rubros_pago_otros')->where('id', $newId)->first();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Rubro '{$nombre}' guardado correctamente.",
+            'rubro' => $rubro,
+        ]);
+    }
+
+    /**
+     * Elimina un rubro del catálogo de "Otros Rubros de Pago".
+     */
+    public function eliminarOtroRubro($id)
+    {
+        \App\Services\OtrosRubrosService::ensureTable();
+        $rubro = DB::table('rubros_pago_otros')->where('id', (int)$id)->first();
+        if (!$rubro) {
+            return response()->json(['success' => false, 'message' => 'Rubro no encontrado.'], 404);
+        }
+
+        DB::table('rubros_pago_otros')->where('id', (int)$id)->delete();
+        return response()->json([
+            'success' => true,
+            'message' => "Rubro '{$rubro->nombre}' eliminado correctamente.",
+        ]);
+    }
 }
