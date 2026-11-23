@@ -287,7 +287,15 @@
 
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-1">
-                                            <button onclick="openNotifModal({{ $c->id_curso_activo }}, '{{ addslashes($c->planEstudio->materia) }}', '{{ addslashes($c->planEstudio->codigo) }}', '{{ addslashes($c->planEstudio->programa->nombre_programa ?? '') }}', '{{ addslashes($c->horario) }}', '{{ $c->fecha_inicio ? $c->fecha_inicio->format('Y-m-d') : '' }}', '{{ addslashes(($c->profesor->nombre ?? '') . ' ' . ($c->profesor->apellidos ?? '')) }}')" class="btn btn-sm btn-outline-success rounded-pill" title="Notificar">
+                                            @if ($c->id_plan)
+                                                <a href="{{ route('cursos.edit', $c->id_plan) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill" title="Editar Curso / Sílabo">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                            @endif
+                                            <a href="{{ route('mis_cursos.ver', $c->id_curso_activo) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill" title="Ir al Curso">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
+                                            <button onclick="openNotifModal({{ $c->id_curso_activo }}, '{{ addslashes($c->planEstudio->materia ?? '') }}', '{{ addslashes($c->planEstudio->codigo ?? '') }}', '{{ addslashes($c->planEstudio->programa->nombre_programa ?? '') }}', '{{ addslashes($c->horario ?? '') }}', '{{ $c->fecha_inicio ? $c->fecha_inicio->format('Y-m-d') : '' }}', '{{ addslashes(($c->profesor->nombre ?? '') . ' ' . ($c->profesor->apellidos ?? '')) }}')" class="btn btn-sm btn-outline-success rounded-pill" title="Notificar">
                                                 <i class="bi bi-bell-fill"></i>
                                             </button>
                                             <button onclick="verHistorialNotif({{ $c->id_curso_activo }})" class="btn btn-sm btn-outline-info rounded-pill" title="Historial Notif.">
