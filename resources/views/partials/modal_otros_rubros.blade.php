@@ -114,7 +114,25 @@
     }
 
     async function eliminarOtroRubroModal(id, nombre) {
-        if (!confirm(`¿Eliminar el rubro "${nombre}" del catálogo?`)) return;
+        let confirmado = false;
+        if (typeof Swal !== 'undefined') {
+            const result = await Swal.fire({
+                title: '¿Eliminar rubro?',
+                html: `Se eliminará <strong>${escapeHtmlRubro(nombre)}</strong> del catálogo.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            });
+            confirmado = result.isConfirmed;
+        } else {
+            confirmado = confirm(`¿Eliminar el rubro "${nombre}" del catálogo?`);
+        }
+        if (!confirmado) return;
+
         try {
             const res = await fetch(`{{ url('/rubros-otros') }}/${id}/eliminar`, {
                 method: 'POST',
@@ -131,11 +149,30 @@
                     resetFormOtroRubro();
                 }
                 if (typeof window.onOtrosRubrosUpdated === 'function') window.onOtrosRubrosUpdated();
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Rubro eliminado',
+                        text: data.message || 'El rubro fue eliminado del catálogo.',
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                }
             } else {
-                alert(data.message || 'No se pudo eliminar el rubro.');
+                const msg = data.message || 'No se pudo eliminar el rubro.';
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire('Atención', msg, 'error');
+                } else {
+                    alert(msg);
+                }
             }
         } catch (err) {
-            alert('Error de conexión al eliminar el rubro.');
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Error', 'Error de conexión al eliminar el rubro.', 'error');
+            } else {
+                alert('Error de conexión al eliminar el rubro.');
+            }
         }
     }
 
@@ -192,14 +229,34 @@
                     `).join('');
                 }
 
+                const fueActualizacion = Boolean(id);
                 resetFormOtroRubro();
                 if (typeof window.onOtrosRubrosUpdated === 'function') window.onOtrosRubrosUpdated(r);
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: fueActualizacion ? 'Rubro actualizado' : 'Rubro guardado',
+                        text: data.message || 'Cambios aplicados correctamente.',
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                }
             } else {
-                alert(data.message || 'No se pudo guardar el rubro.');
+                const msg = data.message || 'No se pudo guardar el rubro.';
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire('Atención', msg, 'error');
+                } else {
+                    alert(msg);
+                }
             }
         } catch (err) {
             btn.disabled = false;
-            alert('Error de conexión al guardar el rubro.');
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Error', 'Error de conexión al guardar el rubro.', 'error');
+            } else {
+                alert('Error de conexión al guardar el rubro.');
+            }
         }
     });
 </script>
