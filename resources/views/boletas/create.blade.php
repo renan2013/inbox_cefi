@@ -1425,6 +1425,9 @@
                 cobrar_inscripcion: $('#cobrar-inscripcion').is(':checked') ? 1 : 0,
                 cobrar_biblioteca: $('#cobrar-biblioteca').is(':checked') ? 1 : 0,
                 cobrar_matricula: $('#cobrar-matricula').is(':checked') ? 1 : 0,
+                pago_inicial: $('#boleta-pago-inicial').val(),
+                pago_inicial_metodo: $('#boleta-pago-inicial-metodo').val(),
+                pago_inicial_referencia: $('#boleta-pago-inicial-referencia').val(),
                 fechas_vencimiento: fechas_vencimiento,
                 cursos_ids: cursos_seleccionados,
                 otros_rubros: window.otrosRubrosSeleccionados

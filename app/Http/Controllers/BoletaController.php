@@ -804,6 +804,12 @@ class BoletaController extends Controller
             $cobrar_inscripcion = (bool)($request->cobrar_inscripcion ?? false);
             $cobrar_biblioteca = (bool)($request->cobrar_biblioteca ?? false);
             $cobrar_matricula = (bool)($request->cobrar_matricula ?? true);
+            $pago_inicial = floatval($request->pago_inicial ?? 0);
+            $pago_inicial_metodo = $request->pago_inicial_metodo ?? 'Efectivo';
+            $funcionario = auth()->user()->nombre ?? 'Administración';
+            $ref_input = trim($request->pago_inicial_referencia ?? '');
+            $pago_inicial_referencia = empty($ref_input) ? "Cobrado por: {$funcionario}" : "{$ref_input} (Cobrado por: {$funcionario})";
+            $saldo_pendiente = max(0, $total - $pago_inicial);
             $fechas_vencimiento = $request->fechas_vencimiento ?? [];
 
             $token_firma = bin2hex(random_bytes(32));
@@ -815,8 +821,11 @@ class BoletaController extends Controller
                 'id_creador' => auth()->id() ?? 1,
                 'total' => $total,
                 'descuento' => $descuento,
-                'saldo_pendiente' => $total,
-                'monto_pagado' => 0.00,
+                'pago_inicial' => $pago_inicial,
+                'pago_inicial_metodo' => $pago_inicial_metodo,
+                'pago_inicial_referencia' => $pago_inicial_referencia,
+                'saldo_pendiente' => $saldo_pendiente,
+                'monto_pagado' => $pago_inicial,
                 'estado' => 'pendiente_firma',
                 'periodo' => $periodo,
                 'cuotas' => $cuotas,
@@ -1828,7 +1837,71 @@ class BoletaController extends Controller
         $numeroBoleta = $boleta->numero_boleta ?? ('B-' . str_pad($boleta->id, 6, '0', STR_PAD_LEFT));
         $periodo = $boleta->periodo ?? 'Vigente';
         $totalFmt = number_format($boleta->total, 2);
-        $cuotas = $boleta->cuotas ?? 1;
+        $descuentoVal = floatval($boleta->descuento ?? 0);
+        $subtotalVal = floatval($boleta->total) + $descuentoVal;
+        $pagoInicialVal = floatval($boleta->pago_inicial ?? 0) > 0 ? floatval($boleta->pago_inicial) : floatval($boleta->monto_pagado ?? 0);
+        $saldoFinanciarVal = max(0, floatval($boleta->total) - $pagoInicialVal);
+        $cuotas = max(1, (int)($boleta->cuotas ?? 1));
+        $montoCuotaFmt = number_format($saldoFinanciarVal / $cuotas, 2);
+        $fechasVencimiento = json_decode($boleta->fechas_vencimiento_json ?? '[]', true) ?: [];
+
+        $descuentoRowFirma = '';
+        if ($descuentoVal > 0) {
+            $descuentoRowFirma = "
+                <tr>
+                    <td style='padding: 4px 0; color: #64748b;'>Subtotal:</td>
+                    <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>¢" . number_format($subtotalVal, 2) . "</td>
+                </tr>
+                <tr>
+                    <td style='padding: 4px 0; color: #16a34a; font-weight: 600;'>Descuento Aplicado:</td>
+                    <td style='padding: 4px 0; font-weight: 700; color: #16a34a; text-align: right;'>-¢" . number_format($descuentoVal, 2) . "</td>
+                </tr>";
+        }
+
+        $abonoRowFirma = '';
+        if ($pagoInicialVal > 0) {
+            $abonoRowFirma = "
+                <tr>
+                    <td style='padding: 4px 0; color: #16a34a; font-weight: 600;'>Abono / Pago Inicial en Matrícula:</td>
+                    <td style='padding: 4px 0; font-weight: 700; color: #16a34a; text-align: right;'>-¢" . number_format($pagoInicialVal, 2) . "</td>
+                </tr>
+                <tr style='border-top: 1px dashed #cbd5e1;'>
+                    <td style='padding: 8px 0 4px 0; color: #1e293b; font-weight: bold; font-size: 15px;'>Saldo a Financiar:</td>
+                    <td style='padding: 8px 0 4px 0; font-weight: bold; color: #1066ad; font-size: 16px; text-align: right;'>¢" . number_format($saldoFinanciarVal, 2) . "</td>
+                </tr>";
+        }
+
+        $cuotasDetalleHtml = '';
+        if ($saldoFinanciarVal > 0 && $cuotas > 0) {
+            $cuotasDetalleHtml = "
+                <tr>
+                    <td style='padding: 4px 0; color: #64748b;'>Plan de Financiamiento:</td>
+                    <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>{$cuotas} cuota(s) de ¢{$montoCuotaFmt}</td>
+                </tr>";
+        } else {
+            $cuotasDetalleHtml = "
+                <tr>
+                    <td style='padding: 4px 0; color: #64748b;'>Plan de Financiamiento:</td>
+                    <td style='padding: 4px 0; font-weight: 600; color: #16a34a; text-align: right;'>Cancelado en totalidad</td>
+                </tr>";
+        }
+
+        $cuotasTablaHtml = '';
+        if ($saldoFinanciarVal > 0 && $cuotas > 0 && !empty($fechasVencimiento)) {
+            $cuotasTablaHtml = '<div style="margin: 15px 0; background: #f8fafc; border-radius: 8px; padding: 12px 16px; border: 1px solid #e2e8f0;">';
+            $cuotasTablaHtml .= '<p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #475569; text-transform: uppercase;">Desglose de Cuotas:</p>';
+            $cuotasTablaHtml .= '<table width="100%" style="font-size: 13px; border-collapse: collapse;">';
+            for ($idxC = 1; $idxC <= $cuotas; $idxC++) {
+                $fRaw = $fechasVencimiento[$idxC - 1] ?? null;
+                $venceTxt = $fRaw ? Carbon::parse($fRaw)->format('d/m/Y') : 'Por definir';
+                $cuotasTablaHtml .= '<tr style="border-bottom: 1px solid #e2e8f0;">'
+                    . '<td style="padding: 5px 0; color: #1e293b;">Cuota #' . $idxC . '</td>'
+                    . '<td style="padding: 5px 0; color: #64748b;">Vence: ' . $venceTxt . '</td>'
+                    . '<td style="padding: 5px 0; font-weight: 700; color: #0f172a; text-align: right;">¢' . $montoCuotaFmt . '</td>'
+                    . '</tr>';
+            }
+            $cuotasTablaHtml .= '</table></div>';
+        }
 
         // Cursos vinculados (con verificación dinámica de columnas en plan_estudios)
         try {
@@ -1916,18 +1989,18 @@ class BoletaController extends Controller
                                                 <td style='padding: 4px 0; color: #64748b;'>Periodo Lectivo:</td>
                                                 <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>{$periodo}</td>
                                             </tr>
-                                            <tr>
-                                                <td style='padding: 4px 0; color: #64748b;'>Plan de Financiamiento:</td>
-                                                <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>{$cuotas} cuota(s)</td>
-                                            </tr>
+                                            {$cuotasDetalleHtml}
+                                            {$descuentoRowFirma}
                                             <tr style='border-top: 1px dashed #cbd5e1;'>
-                                                <td style='padding: 8px 0 4px 0; color: #1e293b; font-weight: bold; font-size: 15px;'>Monto Total:</td>
+                                                <td style='padding: 8px 0 4px 0; color: #1e293b; font-weight: bold; font-size: 15px;'>Total Boleta:</td>
                                                 <td style='padding: 8px 0 4px 0; font-weight: bold; color: #1066ad; font-size: 16px; text-align: right;'>¢{$totalFmt}</td>
                                             </tr>
+                                            {$abonoRowFirma}
                                         </table>
                                     </div>
 
                                     {$cursosHtml}
+                                    {$cuotasTablaHtml}
 
                                     <p style='font-size: 14px; color: #475569; margin-bottom: 25px;'>
                                         Para revisar las condiciones del compromiso de pago y estampar su firma digital, por favor haga clic en el siguiente botón:
@@ -1994,9 +2067,41 @@ class BoletaController extends Controller
         $numeroBoleta = $boleta->numero_boleta ?? ('B-' . str_pad($boleta->id, 6, '0', STR_PAD_LEFT));
         $periodo = $boleta->periodo ?? 'Vigente';
         $totalFmt = number_format($boleta->total, 2);
+        $descuentoValOf = floatval($boleta->descuento ?? 0);
+        $subtotalValOf = floatval($boleta->total) + $descuentoValOf;
         $saldoFmt = number_format($boleta->saldo_pendiente, 2);
-        $pagadoFmt = number_format($boleta->monto_pagado, 2);
+        $pagadoValOf = floatval($boleta->monto_pagado ?? 0) > 0 ? floatval($boleta->monto_pagado) : floatval($boleta->pago_inicial ?? 0);
+        $pagadoFmt = number_format($pagadoValOf, 2);
         $estadoTexto = ucfirst(str_replace('_', ' ', $boleta->estado));
+
+        $descuentoRowOficial = '';
+        if ($descuentoValOf > 0) {
+            $descuentoRowOficial = "
+                <tr>
+                    <td style='padding: 4px 0; color: #64748b;'>Subtotal:</td>
+                    <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>¢" . number_format($subtotalValOf, 2) . "</td>
+                </tr>
+                <tr>
+                    <td style='padding: 4px 0; color: #16a34a; font-weight: 600;'>Descuento Aplicado:</td>
+                    <td style='padding: 4px 0; font-weight: 700; color: #16a34a; text-align: right;'>-¢" . number_format($descuentoValOf, 2) . "</td>
+                </tr>";
+        }
+
+        $cuotasTablaHtml = '';
+        if ($boleta->seguimientoPagos && $boleta->seguimientoPagos->isNotEmpty() && floatval($boleta->saldo_pendiente) > 0) {
+            $cuotasTablaHtml = '<div style="margin: 15px 0; background: #f8fafc; border-radius: 8px; padding: 12px 16px; border: 1px solid #e2e8f0;">';
+            $cuotasTablaHtml .= '<p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #475569; text-transform: uppercase;">Desglose de Cuotas Pendientes:</p>';
+            $cuotasTablaHtml .= '<table width="100%" style="font-size: 13px; border-collapse: collapse;">';
+            foreach ($boleta->seguimientoPagos->sortBy('numero_cuota') as $cuotaItem) {
+                $venceTxt = $cuotaItem->fecha_vencimiento ? Carbon::parse($cuotaItem->fecha_vencimiento)->format('d/m/Y') : 'Por definir';
+                $cuotasTablaHtml .= '<tr style="border-bottom: 1px solid #e2e8f0;">'
+                    . '<td style="padding: 5px 0; color: #1e293b;">Cuota #' . (int)$cuotaItem->numero_cuota . '</td>'
+                    . '<td style="padding: 5px 0; color: #64748b;">Vence: ' . $venceTxt . '</td>'
+                    . '<td style="padding: 5px 0; font-weight: 700; color: #0f172a; text-align: right;">¢' . number_format((float)$cuotaItem->monto_cuota, 2) . '</td>'
+                    . '</tr>';
+            }
+            $cuotasTablaHtml .= '</table></div>';
+        }
 
         // Asegurar que el PDF físico esté generado
         $pdfPath = public_path("uploads/boletas/boleta_{$boleta->id}.pdf");
@@ -2099,13 +2204,14 @@ class BoletaController extends Controller
                                                 <td style='padding: 4px 0; color: #64748b;'>Periodo:</td>
                                                 <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>{$periodo}</td>
                                             </tr>
+                                            {$descuentoRowOficial}
                                             <tr>
                                                 <td style='padding: 4px 0; color: #64748b;'>Total Inversión:</td>
                                                 <td style='padding: 4px 0; font-weight: 600; color: #0f172a; text-align: right;'>¢{$totalFmt}</td>
                                             </tr>
                                             <tr>
-                                                <td style='padding: 4px 0; color: #64748b;'>Monto Cancelado:</td>
-                                                <td style='padding: 4px 0; font-weight: 600; color: #16a34a; text-align: right;'>¢{$pagadoFmt}</td>
+                                                <td style='padding: 4px 0; color: #64748b;'>Monto Cancelado / Abono:</td>
+                                                <td style='padding: 4px 0; font-weight: 600; color: #16a34a; text-align: right;'>-¢{$pagadoFmt}</td>
                                             </tr>
                                             <tr style='border-top: 1px dashed #cbd5e1;'>
                                                 <td style='padding: 8px 0 4px 0; color: #1e293b; font-weight: bold; font-size: 15px;'>Saldo Restante:</td>
@@ -2115,6 +2221,7 @@ class BoletaController extends Controller
                                     </div>
 
                                     {$cursosHtml}
+                                    {$cuotasTablaHtml}
 
                                     <div style='text-align: center; margin: 25px 0;'>
                                         <a href='{$enlacePdf}' target='_blank' style='display: inline-block; background: linear-gradient(135deg, #1066ad 0%, #0d4b81 100%); color: #ffffff; text-decoration: none; padding: 13px 28px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 14px rgba(16, 102, 173, 0.3);'>
