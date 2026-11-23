@@ -230,10 +230,9 @@ class ExpedientePdfService
         $pdf->Cell(60, 5, $pdf->toPdf("Cantón: " . ($expediente->domicilio_canton ?: 'Central')), 0, 0, 'L');
         $pdf->Cell(60, 5, $pdf->toPdf("Distrito: " . ($expediente->domicilio_distrito ?: 'Carmen')), 0, 1, 'L');
 
-        $pdf->Cell(120, 5, $pdf->toPdf("Dirección: " . ($expediente->domicilio_direccion ?: 'San José, Costa Rica')), 0, 0, 'L');
-        $pdf->Cell(60, 5, $pdf->toPdf("Tel. Habitación: " . ($expediente->contacto_tel_habitacion ?: 'N/D')), 0, 1, 'L');
-
-        $pdf->Cell(180, 5, $pdf->toPdf("Contacto de Emergencia: " . ($expediente->contacto_otro_emergencias ?: 'No especificado')), 0, 1, 'L');
+        $pdf->MultiCell(180, 5, $pdf->toPdf("Dirección: " . ($expediente->domicilio_direccion ?: 'San José, Costa Rica')), 0, 'L');
+        $pdf->Cell(65, 5, $pdf->toPdf("Tel. Habitación: " . ($expediente->contacto_tel_habitacion ?: 'N/D')), 0, 0, 'L');
+        $pdf->MultiCell(115, 5, $pdf->toPdf("Contacto de Emergencia: " . ($expediente->contacto_otro_emergencias ?: 'No especificado')), 0, 'L');
         $pdf->Ln(2);
 
         // --- III. PROCEDENCIA ACADÉMICA ---
