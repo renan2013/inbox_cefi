@@ -6,18 +6,21 @@
     <title>{{ config('cliente.nombre', 'CEFI') }} - Iniciar Sesión</title>
 
     <!-- Meta etiquetas para previsualización en WhatsApp (Open Graph) -->
+    @php $ogBannerUrl = asset('imgs/og_banner_cefi.png'); @endphp
     <meta name="description" content="{{ config('cliente.nombre_legal', 'Centro de Enseñanza de Formación Integral') }} - Plataforma Académica y Administrativa">
     <meta property="og:site_name" content="{{ config('cliente.nombre', 'CEFI') }} - Inbox BPM">
     <meta property="og:title" content="{{ config('cliente.nombre', 'CEFI') }} - Inbox BPM">
     <meta property="og:description" content="{{ config('cliente.nombre_legal', 'Centro de Enseñanza de Formación Integral') }} · Portal Académico y Administrativo">
-    <meta property="og:image" content="{{ \App\Services\ClienteService::logoUrl() }}">
-    <meta property="og:image:secure_url" content="{{ \App\Services\ClienteService::logoUrl() }}">
+    <meta property="og:image" content="{{ $ogBannerUrl }}">
+    <meta property="og:image:secure_url" content="{{ $ogBannerUrl }}">
     <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:url" content="{{ url('/') }}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="{{ \App\Services\ClienteService::logoUrl() }}">
-    <link rel="image_src" href="{{ \App\Services\ClienteService::logoUrl() }}">
+    <meta name="twitter:image" content="{{ $ogBannerUrl }}">
+    <link rel="image_src" href="{{ $ogBannerUrl }}">
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
