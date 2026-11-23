@@ -431,13 +431,10 @@ class CursoController extends Controller
             $data['distribucion_horas'] = $request->input('distribucion_horas');
         }
 
-        // Precio sugerido o del programa
-        if ($request->filled('precio') && is_numeric($request->precio)) {
-            $data['precio'] = $request->precio;
-        } else {
-            $programa = Programa::find($request->id_programa);
-            $data['precio'] = $programa ? $programa->costo_materia : 0.00;
-        }
+        // Costo propio del curso (independiente del programa)
+        $data['precio'] = ($request->filled('precio') && is_numeric($request->precio))
+            ? max(0, floatval($request->precio))
+            : 0.00;
 
         // Subida de PDF
         if ($request->hasFile('adjunto_pdf')) {
@@ -818,13 +815,10 @@ class CursoController extends Controller
             $data['distribucion_horas'] = $request->input('distribucion_horas');
         }
 
-        // Precio
-        if ($request->filled('precio') && is_numeric($request->precio)) {
-            $data['precio'] = $request->precio;
-        } else {
-            $programa = Programa::find($request->id_programa);
-            $data['precio'] = $programa ? $programa->costo_materia : $curso->precio;
-        }
+        // Costo propio del curso (independiente del programa)
+        $data['precio'] = ($request->filled('precio') && is_numeric($request->precio))
+            ? max(0, floatval($request->precio))
+            : ($curso->precio ?? 0.00);
 
         if ($request->hasFile('adjunto_pdf')) {
             $file = $request->file('adjunto_pdf');

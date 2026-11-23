@@ -453,11 +453,10 @@ if (!function_exists('generarHtmlTareasMoodle')) {
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="precio_display" class="form-label">Precio Sugerido Materia</label>
+                                    <label for="precio_input" class="form-label">Costo del Curso (₡)</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-white">₡</span>
-                                        <input type="text" id="precio_display" class="form-control" placeholder="0.00" readonly>
-                                        <input type="hidden" name="precio" id="precio_input" value="{{ old('precio', $curso->precio) }}">
+                                        <input type="number" name="precio" id="precio_input" class="form-control" min="0" step="0.01" placeholder="0.00" value="{{ old('precio', $curso->precio ?? 0) }}">
                                     </div>
                                 </div>
                             </div>
@@ -2387,16 +2386,14 @@ No incluyas explicaciones adicionales, introducciones ni bloques de texto fuera 
       document.getElementById('formPlanEstudios').submit();
   }
 
-  // Sincronizar precio de programa
+  // Mantener costo propio del curso (no sobrescribir con el del programa)
   function actualizarPrecioPrograma(select) {
       if (!select) return;
+      const input = document.getElementById('precio_input');
+      if (!input || input.value !== '') return;
       const selected = select.options[select.selectedIndex];
       const costo = selected ? (selected.getAttribute('data-costo') || 0) : 0;
-      const formatted = parseFloat(costo).toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const display = document.getElementById('precio_display');
-      const input = document.getElementById('precio_input');
-      if (display) display.value = formatted;
-      if (input && (!input.value || input.value == 0)) input.value = costo;
+      input.value = costo;
   }
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -2405,13 +2402,6 @@ No incluyas explicaciones adicionales, introducciones ni bloques de texto fuera 
     sincronizarSilabo();
     inicializarResumenesMoodle();
     inicializarRubricasExistentes();
-
-    // Actualizar precio display inicial
-    const inputPrecio = document.getElementById('precio_input');
-    const displayPrecio = document.getElementById('precio_display');
-    if (inputPrecio && displayPrecio && inputPrecio.value) {
-        displayPrecio.value = parseFloat(inputPrecio.value).toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
 
     // Activar pestaña según sesión
     const activeTab = document.getElementById('active_tab_input')?.value || 'ficha_tecnica';
