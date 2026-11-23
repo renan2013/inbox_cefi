@@ -514,6 +514,9 @@
                             <option value="2">2 Cuotas (50% c/u)</option>
                             <option value="3">3 Cuotas (33.3% c/u)</option>
                             <option value="4" selected>4 Cuotas (Mensualidades)</option>
+                            @for ($c = 5; $c <= 24; $c++)
+                                <option value="{{ $c }}">{{ $c }} Cuotas (Mensualidades)</option>
+                            @endfor
                         </select>
 
                         <label class="small fw-bold text-muted mt-3 mb-2 d-block">Pago Inicial (Matrícula / Abono en ventanilla):</label>
