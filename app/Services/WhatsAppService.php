@@ -434,7 +434,7 @@ class WhatsAppService
         $firmaLegal = ClienteService::nombreLegal();
 
         if ($estado === 'pendiente_firma' && !empty($token)) {
-            $linkFirma = url("/boleta/firmar/{$token}");
+            $linkFirma = url("/boletas/firmar/{$token}");
             $mensaje = "🏛️ *{$nombreInstitucion} - Boleta de Matrícula*\n\n" .
                        "Estimado(a) estudiante *" . $nombre . "*,\n\n" .
                        "Se ha emitido su Boleta de Matrícula *" . $numBoleta . "* para el período *" . $periodo . "*.\n\n" .
@@ -482,7 +482,7 @@ class WhatsAppService
             'total' => (float)$boleta->total,
             'monto_pagado' => (float)$boleta->monto_pagado,
             'saldo_pendiente' => (float)$boleta->saldo_pendiente,
-            'link_firma' => ($estado === 'pendiente_firma' && !empty($token)) ? url("/boleta/firmar/{$token}") : null,
+            'link_firma' => ($estado === 'pendiente_firma' && !empty($token)) ? url("/boletas/firmar/{$token}") : null,
             'pdf_url' => route('boletas.pdf', $boleta->id),
             'nombre_institucion' => $nombreInstitucion,
         ];

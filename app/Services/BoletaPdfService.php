@@ -144,7 +144,7 @@ class BoletaPdfService
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->Cell(35, 6, $pdf->toPdf('Fecha Emisión:'), 1, 0, 'L', true);
         $pdf->SetFont('Arial', '', 9);
-        $pdf->Cell(55, 6, $boleta->fecha_creacion->format('d/m/Y H:i'), 1, 1, 'L');
+        $pdf->Cell(55, 6, $boleta->fecha_creacion ? $boleta->fecha_creacion->format('d/m/Y H:i') : date('d/m/Y H:i'), 1, 1, 'L');
 
         // Fila 2: Estudiante y Cédula
         $pdf->SetFont('Arial', 'B', 9);
@@ -233,7 +233,7 @@ class BoletaPdfService
                 $precio = floatval($c->precio > 0 ? $c->precio : ($c->costo_materia ?? 0));
                 $subtotal_materias += $precio;
                 $pdf->Cell(25, 5.5, $pdf->toPdf($c->codigo), 1, 0, 'C');
-                $pdf->Cell(115, 5.5, $pdf->toPdf(" " . $c->materia), 1, 0, 'L');
+                $pdf->Cell(115, 5.5, $pdf->toPdf(" " . mb_substr((string)$c->materia, 0, 58, 'UTF-8')), 1, 0, 'L');
                 $pdf->Cell(40, 5.5, 'CRC ' . number_format($precio, 2) . ' ', 1, 1, 'R');
             }
         }
@@ -254,7 +254,7 @@ class BoletaPdfService
                 }
                 $codOtro = 'OTR-' . str_pad((string)($idxOtro + 1), 2, '0', STR_PAD_LEFT);
                 $pdf->Cell(25, 5.5, $pdf->toPdf($codOtro), 1, 0, 'C');
-                $pdf->Cell(115, 5.5, $pdf->toPdf(" " . $desc), 1, 0, 'L');
+                $pdf->Cell(115, 5.5, $pdf->toPdf(" " . mb_substr($desc, 0, 58, 'UTF-8')), 1, 0, 'L');
                 $pdf->Cell(40, 5.5, 'CRC ' . number_format($montoLinea, 2) . ' ', 1, 1, 'R');
             }
         }
@@ -296,11 +296,27 @@ class BoletaPdfService
                 $pdf->Cell(40, 5.5, 'CRC ' . number_format($tot, 2) . ' ', 1, 1, 'R');
             }
         } else {
-            $pdf->Cell(20, 5.5, '#1', 1, 0, 'C');
-            $pdf->Cell(45, 5.5, $boleta->fecha_creacion ? $boleta->fecha_creacion->format('d/m/Y') : date('d/m/Y'), 1, 0, 'C');
-            $pdf->Cell(40, 5.5, 'CRC ' . number_format($boleta->total, 2) . ' ', 1, 0, 'R');
-            $pdf->Cell(35, 5.5, '- ', 1, 0, 'R');
-            $pdf->Cell(40, 5.5, 'CRC ' . number_format($boleta->total, 2) . ' ', 1, 1, 'R');
+            $numCuotas = max(1, intval($boleta->cuotas ?? 1));
+            $fechasPlan = json_decode($boleta->fechas_vencimiento_json ?? '[]', true);
+            if (!is_array($fechasPlan)) {
+                $fechasPlan = [];
+            }
+            $saldoPlan = max(0, floatval($boleta->total) - floatval($boleta->pago_inicial ?? 0));
+            $cuotaBasePlan = round($saldoPlan / $numCuotas, 2);
+            $residuoPlan = round($saldoPlan - ($cuotaBasePlan * ($numCuotas - 1)), 2);
+
+            for ($i = 1; $i <= $numCuotas; $i++) {
+                $montoPlan = ($i === $numCuotas) ? max(0.0, $residuoPlan) : $cuotaBasePlan;
+                $fechaTxt = !empty($fechasPlan[$i - 1])
+                    ? date('d/m/Y', strtotime((string)$fechasPlan[$i - 1]))
+                    : ($boleta->fecha_creacion ? $boleta->fecha_creacion->copy()->addMonthsNoOverflow($i - 1)->format('d/m/Y') : date('d/m/Y'));
+
+                $pdf->Cell(20, 5.5, '#' . $i, 1, 0, 'C');
+                $pdf->Cell(45, 5.5, $fechaTxt, 1, 0, 'C');
+                $pdf->Cell(40, 5.5, 'CRC ' . number_format($montoPlan, 2) . ' ', 1, 0, 'R');
+                $pdf->Cell(35, 5.5, '- ', 1, 0, 'R');
+                $pdf->Cell(40, 5.5, 'CRC ' . number_format($montoPlan, 2) . ' ', 1, 1, 'R');
+            }
         }
 
         // 4. Totales Finales

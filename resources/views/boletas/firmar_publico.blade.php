@@ -139,9 +139,11 @@
                     </thead>
                     <tbody>
                         @php
-                            $max_ins = $cursos->max('costo_inscripcion_unica') ?: 8000;
-                            $max_bib = $cursos->max('costo_biblioteca') ?: 5000;
-                            $max_mat = $cursos->max('costo_matricula') ?: 35000;
+                            $max_ins = $cursos->isNotEmpty() ? floatval($cursos->max('costo_inscripcion_unica') ?? 0) : 0;
+                            $max_bib = $cursos->isNotEmpty() ? floatval($cursos->max('costo_biblioteca') ?? 0) : 0;
+                            $max_mat = $cursos->isNotEmpty() ? floatval($cursos->max('costo_matricula') ?? 0) : 0;
+                            $otrosRubrosList = json_decode($boleta->otros_rubros_json ?? '[]', true);
+                            if (!is_array($otrosRubrosList)) $otrosRubrosList = [];
                             $subtotal_calc = 0;
                         @endphp
 
@@ -174,13 +176,30 @@
 
                         @foreach ($cursos as $c)
                             @php 
-                                $p = floatval($c->precio);
+                                $p = floatval($c->precio > 0 ? $c->precio : ($c->costo_materia ?? 0));
                                 $subtotal_calc += $p;
                             @endphp
                             <tr>
                                 <td class="ps-4 fw-bold text-primary">{{ $c->codigo }}</td>
                                 <td>{{ $c->materia }}</td>
                                 <td class="text-end pe-4 fw-bold">¢{{ number_format($p, 2) }}</td>
+                            </tr>
+                        @endforeach
+
+                        @foreach ($otrosRubrosList as $idxOtro => $otro)
+                            @php
+                                $cantOtro = max(1, intval($otro['cantidad'] ?? 1));
+                                $montoOtro = floatval($otro['precio'] ?? 0) * $cantOtro;
+                                $subtotal_calc += $montoOtro;
+                                $descOtro = trim((string)($otro['descripcion'] ?? ''));
+                            @endphp
+                            <tr>
+                                <td class="ps-4 fw-bold text-primary">OTR-{{ str_pad((string)($idxOtro + 1), 2, '0', STR_PAD_LEFT) }}</td>
+                                <td>
+                                    {{ $otro['nombre'] ?? 'Rubro adicional' }}@if($cantOtro > 1) (x{{ $cantOtro }})@endif
+                                    @if($descOtro !== '') <small class="text-muted d-block">{{ $descOtro }}</small> @endif
+                                </td>
+                                <td class="text-end pe-4 fw-bold">¢{{ number_format($montoOtro, 2) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -203,10 +222,19 @@
                             $fechas_saved = json_decode($boleta->fechas_vencimiento_json ?? '[]', true) ?: [];
                         @endphp
                         @if (!empty($fechas_saved))
-                            @php $monto_c = $boleta->total / max(1, count($fechas_saved)); @endphp
+                            @php
+                                $pago_ini = floatval($boleta->pago_inicial ?? 0);
+                                $saldo_financiar = max(0, floatval($boleta->total) - $pago_ini);
+                                $monto_c = $saldo_financiar / max(1, count($fechas_saved));
+                            @endphp
                             <tr class="table-light">
                                 <td colspan="3" class="p-3 text-start">
-                                    <div class="fw-bold text-dark mb-2"><i class="bi bi-calendar3 me-1 text-primary"></i> Calendario de Pagos / Letras de Vencimiento:</div>
+                                    <div class="fw-bold text-dark mb-2">
+                                        <i class="bi bi-calendar3 me-1 text-primary"></i> Calendario de Pagos / Letras de Vencimiento:
+                                        @if ($pago_ini > 0)
+                                            <span class="badge bg-success-subtle text-success border border-success ms-2">Abono Inicial: -¢{{ number_format($pago_ini, 2) }}</span>
+                                        @endif
+                                    </div>
                                     <div class="row g-2">
                                         @foreach ($fechas_saved as $idx => $f_venc)
                                             <div class="col-sm-6 col-md-3">

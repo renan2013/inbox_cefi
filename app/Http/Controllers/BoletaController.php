@@ -794,17 +794,13 @@ class BoletaController extends Controller
 
             $id_estudiante = (int)$request->id_estudiante;
             $periodo = trim($request->periodo);
-            $total_raw = (string)$request->total;
-            $total = floatval(preg_replace('/[^\d.]/', '', str_replace(',', '.', str_replace(['.', ' '], ['', ''], $total_raw))));
-            if ($total <= 0 && is_numeric($request->total)) {
-                $total = floatval($request->total);
-            }
-            $descuento = floatval($request->descuento ?? 0);
-            $cuotas = intval($request->cuotas ?? 1);
+            $total = $this->parseMoney($request->total);
+            $descuento = max(0, floatval($request->descuento ?? 0));
+            $cuotas = max(1, min(24, intval($request->cuotas ?? 1)));
             $cobrar_inscripcion = (bool)($request->cobrar_inscripcion ?? false);
             $cobrar_biblioteca = (bool)($request->cobrar_biblioteca ?? false);
             $cobrar_matricula = (bool)($request->cobrar_matricula ?? true);
-            $pago_inicial = floatval($request->pago_inicial ?? 0);
+            $pago_inicial = min($total, max(0, floatval($request->pago_inicial ?? 0)));
             $pago_inicial_metodo = $request->pago_inicial_metodo ?? 'Efectivo';
             $funcionario = auth()->user()->nombre ?? 'Administración';
             $ref_input = trim($request->pago_inicial_referencia ?? '');
@@ -906,14 +902,13 @@ class BoletaController extends Controller
 
             $id_estudiante = (int)$request->id_estudiante;
             $periodo = trim($request->periodo);
-            $total_raw = $request->total;
-            $total = floatval(preg_replace('/[^\d.]/', '', str_replace(',', '.', str_replace('.', '', $total_raw))));
-            $descuento = floatval($request->descuento ?? 0);
-            $cuotas = intval($request->cuotas ?? 1);
+            $total = $this->parseMoney($request->total);
+            $descuento = max(0, floatval($request->descuento ?? 0));
+            $cuotas = max(1, min(24, intval($request->cuotas ?? 1)));
             $cobrar_inscripcion = (bool)($request->cobrar_inscripcion ?? false);
             $cobrar_biblioteca = (bool)($request->cobrar_biblioteca ?? false);
             $cobrar_matricula = (bool)($request->cobrar_matricula ?? true);
-            $pago_inicial = floatval($request->pago_inicial ?? 0);
+            $pago_inicial = min($total, max(0, floatval($request->pago_inicial ?? 0)));
             $pago_inicial_metodo = $request->pago_inicial_metodo ?? 'Efectivo';
             $funcionario = auth()->user()->nombre ?? 'Administración';
             $ref_input = trim($request->pago_inicial_referencia ?? '');
@@ -983,23 +978,7 @@ class BoletaController extends Controller
             }
 
             // Generar Cuotas de Seguimiento
-            $monto_cuota = $saldo_pendiente / $cuotas;
-            for ($i = 1; $i <= $cuotas; $i++) {
-                $vencimiento = isset($fechas_vencimiento[$i - 1])
-                    ? Carbon::parse($fechas_vencimiento[$i - 1])
-                    : Carbon::today()->addMonths($i - 1);
-
-                SeguimientoPago::create([
-                    'id_boleta' => $boleta->id,
-                    'id_estudiante' => $id_estudiante,
-                    'numero_cuota' => $i,
-                    'monto_cuota' => $monto_cuota,
-                    'interes_acumulado' => 0.00,
-                    'fecha_vencimiento' => $vencimiento,
-                    'estado' => ($saldo_pendiente <= 0) ? 'pagado' : 'pendiente',
-                    'fecha_creacion' => Carbon::now()
-                ]);
-            }
+            $this->generarCuotasSeguimiento($boleta->id, $id_estudiante, $saldo_pendiente, $cuotas, is_array($fechas_vencimiento) ? $fechas_vencimiento : []);
 
             DB::commit();
 
@@ -1085,14 +1064,14 @@ class BoletaController extends Controller
         try {
             DB::beginTransaction();
 
-            $pago_inicial = floatval($request->pago_inicial ?? 0);
+            $total = floatval($boleta->total);
+            $pago_inicial = min($total, max(0, floatval($request->pago_inicial ?? 0)));
             $pago_inicial_metodo = $request->pago_inicial_metodo ?? 'Efectivo';
             $funcionario = auth()->user()->nombre ?? 'Administración';
             $ref_input = trim($request->pago_inicial_referencia ?? '');
             $pago_inicial_referencia = empty($ref_input) ? "Cobrado por: {$funcionario}" : "{$ref_input} (Cobrado por: {$funcionario})";
             $fechas_vencimiento = $request->fechas_vencimiento ?? [];
 
-            $total = floatval($boleta->total);
             $saldo_pendiente = max(0, $total - $pago_inicial);
             $estado = ($saldo_pendiente <= 0) ? 'pagada' : (($pago_inicial > 0) ? 'pago_parcial' : 'pendiente');
 
@@ -1120,24 +1099,7 @@ class BoletaController extends Controller
             // Generar o regenerar Cuotas de Seguimiento
             SeguimientoPago::where('id_boleta', $boleta->id)->delete();
             $cuotas = max(1, (int)$boleta->cuotas);
-            $monto_cuota = $saldo_pendiente / $cuotas;
-
-            for ($i = 1; $i <= $cuotas; $i++) {
-                $vencimiento = isset($fechas_vencimiento[$i - 1])
-                    ? Carbon::parse($fechas_vencimiento[$i - 1])
-                    : Carbon::today()->addMonths($i - 1);
-
-                SeguimientoPago::create([
-                    'id_boleta' => $boleta->id,
-                    'id_estudiante' => $boleta->id_estudiante,
-                    'numero_cuota' => $i,
-                    'monto_cuota' => $monto_cuota,
-                    'interes_acumulado' => 0.00,
-                    'fecha_vencimiento' => $vencimiento,
-                    'estado' => ($saldo_pendiente <= 0) ? 'pagado' : 'pendiente',
-                    'fecha_creacion' => Carbon::now()
-                ]);
-            }
+            $this->generarCuotasSeguimiento($boleta->id, (int)$boleta->id_estudiante, $saldo_pendiente, $cuotas, is_array($fechas_vencimiento) ? $fechas_vencimiento : []);
 
             DB::commit();
 
@@ -1221,6 +1183,13 @@ class BoletaController extends Controller
         $boleta = Boleta::where('token_firma', $token)
             ->where('estado', 'pendiente_firma')
             ->firstOrFail();
+
+        if ($boleta->token_expiracion && Carbon::now()->greaterThan($boleta->token_expiracion)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este enlace de firma ha expirado. Por favor solicite uno nuevo a la administración.'
+            ], 403);
+        }
 
         $request->validate([
             'signature' => 'required|string'
@@ -1336,18 +1305,32 @@ class BoletaController extends Controller
                 if ($monto_restante <= 0) break;
 
                 $monto_cuota = floatval($cuota->monto_cuota);
+                $interes_cuota = floatval($cuota->interes_acumulado ?? 0);
 
-                if ($monto_restante >= ($monto_cuota - 0.01)) {
+                // Amortizar mora acumulada primero, luego capital de la cuota
+                if ($interes_cuota > 0) {
+                    if ($monto_restante >= $interes_cuota) {
+                        $monto_restante -= $interes_cuota;
+                        $interes_cuota = 0.00;
+                    } else {
+                        $interes_cuota = round($interes_cuota - $monto_restante, 2);
+                        $monto_restante = 0;
+                    }
+                }
+
+                if ($monto_restante >= ($monto_cuota - 0.01) && $interes_cuota <= 0.00) {
                     $cuota->update([
                         'estado' => 'pagado',
                         'monto_cuota' => 0.00,
                         'interes_acumulado' => 0.00,
                         'fecha_pago' => Carbon::now()
                     ]);
-                    $monto_restante -= $monto_cuota;
+                    $monto_restante = max(0, $monto_restante - $monto_cuota);
                 } else {
+                    $nuevo_capital = max(0, round($monto_cuota - $monto_restante, 2));
                     $cuota->update([
-                        'monto_cuota' => max(0, $monto_cuota - $monto_restante)
+                        'monto_cuota' => $nuevo_capital,
+                        'interes_acumulado' => $interes_cuota,
                     ]);
                     $monto_restante = 0;
                 }
@@ -1946,6 +1929,7 @@ class BoletaController extends Controller
             }
             $cursosHtml .= '</ul></div>';
         }
+        $cursosHtml .= $this->buildOtrosRubrosHtml($boleta);
 
         $asunto = "Solicitud de Firma Digital - Boleta {$numeroBoleta} | {$institucion}";
 
@@ -2087,30 +2071,41 @@ class BoletaController extends Controller
                 </tr>";
         }
 
+        $moraValOf = floatval($boleta->interes_acumulado ?? 0);
+        if ($moraValOf > 0) {
+            $descuentoRowOficial .= "
+                <tr>
+                    <td style='padding: 4px 0; color: #b91c1c; font-weight: 600;'>Mora / Interés Acumulado:</td>
+                    <td style='padding: 4px 0; font-weight: 700; color: #b91c1c; text-align: right;'>+¢" . number_format($moraValOf, 2) . "</td>
+                </tr>";
+        }
+
         $cuotasTablaHtml = '';
-        if ($boleta->seguimientoPagos && $boleta->seguimientoPagos->isNotEmpty() && floatval($boleta->saldo_pendiente) > 0) {
+        $cuotasPendientesOf = $boleta->seguimientoPagos
+            ? $boleta->seguimientoPagos->where('estado', 'pendiente')->sortBy('numero_cuota')
+            : collect([]);
+        if ($cuotasPendientesOf->isNotEmpty() && floatval($boleta->saldo_pendiente) > 0) {
             $cuotasTablaHtml = '<div style="margin: 15px 0; background: #f8fafc; border-radius: 8px; padding: 12px 16px; border: 1px solid #e2e8f0;">';
             $cuotasTablaHtml .= '<p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #475569; text-transform: uppercase;">Desglose de Cuotas Pendientes:</p>';
             $cuotasTablaHtml .= '<table width="100%" style="font-size: 13px; border-collapse: collapse;">';
-            foreach ($boleta->seguimientoPagos->sortBy('numero_cuota') as $cuotaItem) {
+            foreach ($cuotasPendientesOf as $cuotaItem) {
                 $venceTxt = $cuotaItem->fecha_vencimiento ? Carbon::parse($cuotaItem->fecha_vencimiento)->format('d/m/Y') : 'Por definir';
+                $cuotaTotalItem = floatval($cuotaItem->monto_cuota) + floatval($cuotaItem->interes_acumulado ?? 0);
                 $cuotasTablaHtml .= '<tr style="border-bottom: 1px solid #e2e8f0;">'
                     . '<td style="padding: 5px 0; color: #1e293b;">Cuota #' . (int)$cuotaItem->numero_cuota . '</td>'
                     . '<td style="padding: 5px 0; color: #64748b;">Vence: ' . $venceTxt . '</td>'
-                    . '<td style="padding: 5px 0; font-weight: 700; color: #0f172a; text-align: right;">¢' . number_format((float)$cuotaItem->monto_cuota, 2) . '</td>'
+                    . '<td style="padding: 5px 0; font-weight: 700; color: #0f172a; text-align: right;">¢' . number_format($cuotaTotalItem, 2) . '</td>'
                     . '</tr>';
             }
             $cuotasTablaHtml .= '</table></div>';
         }
 
-        // Asegurar que el PDF físico esté generado
+        // Regenerar el PDF físico oficial para garantizar que incluya la versión más reciente
         $pdfPath = public_path("uploads/boletas/boleta_{$boleta->id}.pdf");
-        if (!file_exists($pdfPath)) {
-            try {
-                $pdfPath = BoletaPdfService::generar($boleta->id, 'F');
-            } catch (\Throwable $ePdf) {
-                \Illuminate\Support\Facades\Log::error("Error generando PDF para adjuntar a correo boleta #{$boleta->id}: " . $ePdf->getMessage());
-            }
+        try {
+            $pdfPath = BoletaPdfService::generar($boleta->id, 'F');
+        } catch (\Throwable $ePdf) {
+            \Illuminate\Support\Facades\Log::error("Error generando PDF para adjuntar a correo boleta #{$boleta->id}: " . $ePdf->getMessage());
         }
 
         // Cursos vinculados (con verificación dinámica de columnas en plan_estudios)
@@ -2156,6 +2151,7 @@ class BoletaController extends Controller
             }
             $cursosHtml .= '</ul></div>';
         }
+        $cursosHtml .= $this->buildOtrosRubrosHtml($boleta);
 
         $enlacePdf = route('boletas.pdf', ['id' => $boleta->id]);
         $asunto = "Boleta Oficial de Matrícula - {$numeroBoleta} | {$institucion}";
@@ -2412,5 +2408,100 @@ class BoletaController extends Controller
                 'message' => 'Error al enviar la alerta financiera por correo: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Convierte montos numéricos o formateados (ej. "₡150,000.00" o "₡150.000,00") a float seguro.
+     */
+    private function parseMoney($raw): float
+    {
+        if (is_int($raw) || is_float($raw)) {
+            return max(0.0, round((float)$raw, 2));
+        }
+
+        $str = trim(str_replace(["\xc2\xa0", ' ', '₡', 'CRC', '$'], '', (string)$raw));
+        if ($str === '') {
+            return 0.0;
+        }
+        if (is_numeric($str)) {
+            return max(0.0, round((float)$str, 2));
+        }
+
+        $lastComma = strrpos($str, ',');
+        $lastDot = strrpos($str, '.');
+
+        if ($lastComma !== false && $lastDot !== false) {
+            if ($lastDot > $lastComma) {
+                $str = str_replace(',', '', $str);
+            } else {
+                $str = str_replace('.', '', $str);
+                $str = str_replace(',', '.', $str);
+            }
+        } elseif ($lastComma !== false) {
+            $decimals = strlen($str) - $lastComma - 1;
+            $str = ($decimals === 2 || $decimals === 1)
+                ? str_replace(',', '.', $str)
+                : str_replace(',', '', $str);
+        } elseif ($lastDot !== false) {
+            $decimals = strlen($str) - $lastDot - 1;
+            if ($decimals !== 2 && $decimals !== 1) {
+                $str = str_replace('.', '', $str);
+            }
+        }
+
+        return max(0.0, round(floatval(preg_replace('/[^\d.]/', '', $str)), 2));
+    }
+
+    /**
+     * Genera cuotas de seguimiento ajustando el residuo de redondeo en la última cuota.
+     */
+    private function generarCuotasSeguimiento(int $boletaId, int $estudianteId, float $saldoPendiente, int $cuotas, array $fechasVencimiento = []): void
+    {
+        $cuotas = max(1, min(24, $cuotas));
+        $cuotaBase = round($saldoPendiente / $cuotas, 2);
+        $residuo = round($saldoPendiente - ($cuotaBase * ($cuotas - 1)), 2);
+
+        for ($i = 1; $i <= $cuotas; $i++) {
+            $monto = ($i === $cuotas) ? max(0.0, $residuo) : $cuotaBase;
+            $vencimiento = !empty($fechasVencimiento[$i - 1])
+                ? Carbon::parse($fechasVencimiento[$i - 1])
+                : Carbon::today()->addMonthsNoOverflow($i - 1);
+
+            SeguimientoPago::create([
+                'id_boleta' => $boletaId,
+                'id_estudiante' => $estudianteId,
+                'numero_cuota' => $i,
+                'monto_cuota' => $monto,
+                'interes_acumulado' => 0.00,
+                'fecha_vencimiento' => $vencimiento,
+                'estado' => ($saldoPendiente <= 0) ? 'pagado' : 'pendiente',
+                'fecha_creacion' => Carbon::now(),
+            ]);
+        }
+    }
+
+    /**
+     * Renderiza el bloque HTML de Otros Rubros Adicionales para correos de boleta.
+     */
+    private function buildOtrosRubrosHtml(Boleta $boleta): string
+    {
+        $otros = json_decode($boleta->otros_rubros_json ?? '[]', true);
+        if (!is_array($otros) || empty($otros)) {
+            return '';
+        }
+
+        $html = '<div style="margin: 15px 0; background: #f8fafc; border-radius: 8px; padding: 12px 16px; border: 1px solid #e2e8f0;">';
+        $html .= '<p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold; color: #475569; text-transform: uppercase;">Otros Rubros / Gastos Adicionales:</p><ul style="margin: 0; padding-left: 20px; color: #1e293b; font-size: 14px;">';
+        foreach ($otros as $item) {
+            $nombre = htmlspecialchars((string)($item['nombre'] ?? 'Rubro adicional'), ENT_QUOTES, 'UTF-8');
+            $desc = trim((string)($item['descripcion'] ?? ''));
+            $cant = max(1, intval($item['cantidad'] ?? 1));
+            $sub = floatval($item['precio'] ?? 0) * $cant;
+            $descTxt = $desc !== '' ? ' - ' . htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') : '';
+            $cantTxt = $cant > 1 ? " (x{$cant})" : '';
+            $html .= "<li style='margin-bottom: 4px;'><strong>{$nombre}</strong>{$descTxt}{$cantTxt} — ¢" . number_format($sub, 2) . '</li>';
+        }
+        $html .= '</ul></div>';
+        return $html;
     }
 }

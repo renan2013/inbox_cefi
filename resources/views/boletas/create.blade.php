@@ -1286,6 +1286,7 @@
     function recalculateTotal(subtotal) {
         const desc = parseFloat($('#boleta-descuento').val()) || 0;
         const total = Math.max(0, subtotal - desc);
+        window.boletaTotalNumerico = Math.round(total * 100) / 100;
         $('#boleta-subtotal').text(currencyFormatter.format(subtotal));
         $('#boleta-total').text(currencyFormatter.format(total));
         
@@ -1426,7 +1427,7 @@
             data: {
                 _token: '{{ csrf_token() }}',
                 id_estudiante: studentId,
-                total: $('#boleta-total').text(),
+                total: (typeof window.boletaTotalNumerico === 'number' ? window.boletaTotalNumerico : $('#boleta-total').text()),
                 periodo: $('#boleta-cuatrimestre').text(),
                 descuento: $('#boleta-descuento').val(),
                 cuotas: $('#boleta-cuotas').val(),
@@ -1534,7 +1535,7 @@
                     data: {
                         _token: '{{ csrf_token() }}',
                         id_estudiante: studentId,
-                        total: $('#boleta-total').text(),
+                        total: (typeof window.boletaTotalNumerico === 'number' ? window.boletaTotalNumerico : $('#boleta-total').text()),
                         periodo: $('#boleta-cuatrimestre').text(),
                         descuento: $('#boleta-descuento').val(),
                         cuotas: $('#boleta-cuotas').val(),
@@ -1585,7 +1586,7 @@
     function resetToProgramSelection() {
         $('#boleta-container').hide();
         $('#programa-select-card').show();
-        if ($('.curso-checkbox:checked').length > 0) {
+        if ($('.curso-checkbox:checked').length > 0 || (window.otrosRubrosSeleccionados && window.otrosRubrosSeleccionados.length > 0)) {
             $('#floating-prepare-container').show();
         }
         $('#boleta-descuento').val(0);

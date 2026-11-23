@@ -142,7 +142,10 @@ class ConvalidacionController extends Controller
             $file = $request->file('archivo_resolucion');
             if ($idExpediente) {
                 $nombreArchivo = 'CONV_' . time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $file->getClientOriginalName());
-                $rutaArchivo = ExpedienteStorageService::guardarDocumento($idExpediente, '04_Convalidaciones', $file, $nombreArchivo);
+                $nombreEst = trim(($estudiante->nombre ?? '') . ' ' . ($estudiante->apellidos ?? ''));
+                $dirInfo = ExpedienteStorageService::getTargetDir((int)$idExpediente, $nombreEst, '04_Convalidaciones');
+                $file->move($dirInfo['full_dir'], $nombreArchivo);
+                $rutaArchivo = 'uploads/expedientes/' . $dirInfo['relative_dir'] . $nombreArchivo;
             } else {
                 $nombreArchivo = 'conv_' . time() . '_' . $file->getClientOriginalName();
                 $rutaArchivo = $file->storeAs('convalidaciones', $nombreArchivo, 'public');

@@ -165,9 +165,11 @@
                     </thead>
                     <tbody>
                         @php
-                            $max_ins = $cursos->max('costo_inscripcion_unica') ?: 8000;
-                            $max_bib = $cursos->max('costo_biblioteca') ?: 5000;
-                            $max_mat = $cursos->max('costo_matricula') ?: 35000;
+                            $max_ins = $cursos->isNotEmpty() ? floatval($cursos->max('costo_inscripcion_unica') ?? 0) : 0;
+                            $max_bib = $cursos->isNotEmpty() ? floatval($cursos->max('costo_biblioteca') ?? 0) : 0;
+                            $max_mat = $cursos->isNotEmpty() ? floatval($cursos->max('costo_matricula') ?? 0) : 0;
+                            $otrosRubrosList = json_decode($boleta->otros_rubros_json ?? '[]', true);
+                            if (!is_array($otrosRubrosList)) $otrosRubrosList = [];
                             $subtotal_calc = 0;
                         @endphp
 
@@ -207,6 +209,23 @@
                                 <td class="ps-4 fw-bold text-primary">{{ $c->codigo }}</td>
                                 <td>{{ $c->materia }}</td>
                                 <td class="text-end pe-4 fw-bold">¢{{ number_format($p, 2) }}</td>
+                            </tr>
+                        @endforeach
+
+                        @foreach ($otrosRubrosList as $idxOtro => $otro)
+                            @php
+                                $cantOtro = max(1, intval($otro['cantidad'] ?? 1));
+                                $montoOtro = floatval($otro['precio'] ?? 0) * $cantOtro;
+                                $subtotal_calc += $montoOtro;
+                                $descOtro = trim((string)($otro['descripcion'] ?? ''));
+                            @endphp
+                            <tr>
+                                <td class="ps-4 fw-bold text-primary">OTR-{{ str_pad((string)($idxOtro + 1), 2, '0', STR_PAD_LEFT) }}</td>
+                                <td>
+                                    {{ $otro['nombre'] ?? 'Rubro adicional' }}@if($cantOtro > 1) (x{{ $cantOtro }})@endif
+                                    @if($descOtro !== '') <small class="text-muted d-block">{{ $descOtro }}</small> @endif
+                                </td>
+                                <td class="text-end pe-4 fw-bold">¢{{ number_format($montoOtro, 2) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -374,8 +393,11 @@
             if (parts.length === 3) {
                 const baseDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
                 for (let i = idx + 1; i <= cuotas; i++) {
-                    const d = new Date(baseDate);
-                    d.setMonth(d.getMonth() + (i - idx));
+                    const targetMonth = baseDate.getMonth() + (i - idx);
+                    const d = new Date(baseDate.getFullYear(), targetMonth, baseDate.getDate());
+                    if (d.getMonth() !== ((targetMonth % 12) + 12) % 12) {
+                        d.setDate(0);
+                    }
                     const y = d.getFullYear();
                     const m = String(d.getMonth() + 1).padStart(2, '0');
                     const day = String(d.getDate()).padStart(2, '0');
