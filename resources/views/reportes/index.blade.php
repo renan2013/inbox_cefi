@@ -143,7 +143,7 @@
                             <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Reporte de Accesos (PDF)
                         </a>
                         <a href="{{ route('reportes.ingresos_drive') }}" class="btn-report-pill" style="border-color: rgba(95, 178, 48, 0.4);">
-                            <i class="bi bi-file-earmark-spreadsheet-fill text-success"></i> <span class="text-success">Ingresos en Tiempo Real (Drive)</span>
+                            <i class="bi bi-door-open-fill text-success"></i> <span class="text-success">Registro de Ingresos al Sistema</span>
                         </a>
                     </div>
                 </div>
