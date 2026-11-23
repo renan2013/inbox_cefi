@@ -501,7 +501,10 @@
         const dateNow = new Date();
         const timeStr = dateNow.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        const header = `Estimado(a) profesor(a) *${profesor}*:\n\n`;
+        const profClean = (profesor || '').trim();
+        const header = profClean
+            ? `Estimado(a) profesor(a) *${profClean}*:\n\n`
+            : `Estimado(a) profesor(a):\n\n`;
         const footer = `\n------------------------------------------\n🔔 Acceso Inbox:\n{{ url('/') }}\n\n🔔 Atendido por: ${senderName}\n🕒 Hora de envío: ${timeStr}`;
 
         const campusName = "{{ config('cliente.nombre', 'CEFI') }} Virtual";
