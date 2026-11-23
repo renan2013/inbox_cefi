@@ -294,8 +294,8 @@ class InboxAiController extends Controller
             $palabrasNorm = $this->normalizeText($item->palabras_clave ?? '');
             $categoriaNorm = $this->normalizeText($item->categoria ?? '');
 
-            // 1. Coincidencia exacta de frase completa
-            if (!empty($queryNormalized)) {
+            // 1. Coincidencia exacta de frase completa (solo consultas suficientemente largas)
+            if (mb_strlen($queryNormalized) >= 8) {
                 if (str_contains($preguntaNorm, $queryNormalized)) {
                     $score += 50;
                 }
@@ -304,14 +304,14 @@ class InboxAiController extends Controller
                 }
             }
 
-            // 2. Coincidencia por palabras clave declaradas
+            // 2. Coincidencia por palabras clave declaradas (palabra/frase completa, sin falsos positivos cortos)
             if (!empty($item->palabras_clave)) {
                 $rawKeywords = array_map('trim', explode(',', $item->palabras_clave));
                 foreach ($rawKeywords as $rawKw) {
                     $normKw = $this->normalizeText($rawKw);
-                    if (!empty($normKw)) {
-                        if (str_contains($queryNormalized, $normKw)) {
-                            $score += 30;
+                    if (mb_strlen($normKw) >= 4) {
+                        if (preg_match('/\b' . preg_quote($normKw, '/') . '\b/u', $queryNormalized)) {
+                            $score += str_contains($normKw, ' ') ? 35 : 15;
                         }
                     }
                 }
@@ -344,8 +344,8 @@ class InboxAiController extends Controller
                 }
             }
 
-            // Bonus si todos los tokens del usuario coincidieron
-            if (!empty($queryTokens) && $matchedTokensCount === count($queryTokens)) {
+            // Bonus si todos los tokens del usuario coincidieron (al menos 2 tokens)
+            if (count($queryTokens) >= 2 && $matchedTokensCount === count($queryTokens)) {
                 $score += 25;
             }
 
@@ -356,7 +356,7 @@ class InboxAiController extends Controller
         }
 
         // Umbral de aceptación estricto para no interceptar preguntas generales
-        if ($highestScore >= 24) {
+        if ($highestScore >= 35) {
             return $bestItem;
         }
 
