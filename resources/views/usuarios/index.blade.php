@@ -428,6 +428,9 @@
                 <p class="text-white-50 mb-0">Directorio institucional ordenado por apellidos con búsqueda universal en vivo y borrado seguro.</p>
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
+                <button type="button" class="btn btn-outline-primary rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalGestionarEtiquetas">
+                    <i class="bi bi-tags-fill me-1"></i> Gestionar Etiquetas
+                </button>
                 <a href="{{ route('usuarios.create') }}" class="btn btn-search">
                     <i class="bi bi-person-plus-fill me-1"></i> Registrar Nuevo Usuario
                 </a>
@@ -516,11 +519,11 @@
                         <span class="input-group-text bg-transparent border-end-0 border-2" style="border-color: var(--border-dark); border-top-left-radius: 0.75rem; border-bottom-left-radius: 0.75rem; color: var(--text-muted);">
                             <i class="bi bi-search"></i>
                         </span>
-                        <input type="text" name="search" id="liveSearch" class="form-control form-control-custom border-start-0 ps-0" placeholder="Apellidos, nombre, cédula, email, teléfono, #ID..." value="{{ request('search') }}" autocomplete="off">
+                        <input type="text" name="search" id="liveSearch" class="form-control form-control-custom border-start-0 ps-0" placeholder="Nombre completo, apellidos, cédula, email, teléfono, rol, etiqueta, #ID..." value="{{ request('search') }}" autocomplete="off">
                     </div>
                 </div>
 
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-2 col-md-4">
                     <label for="expedienteFilter" class="form-label text-white-50 fw-semibold mb-2">Expediente Digital</label>
                     <select name="expediente_status" id="expedienteFilter" class="form-select form-control-custom">
                         <option value="">Todos los Usuarios</option>
@@ -535,6 +538,26 @@
                         <option value="">Todos los Roles</option>
                         @foreach ($roles as $rol)
                             <option value="{{ $rol->id }}" {{ request('rol_id') == $rol->id ? 'selected' : '' }}>{{ $rol->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <label for="etiquetaFilter" class="form-label text-white-50 fw-semibold mb-2">Filtrar por Etiqueta</label>
+                    <select name="etiqueta_id" id="etiquetaFilter" class="form-select form-control-custom">
+                        <option value="">Todas las Etiquetas</option>
+                        <option value="sin_etiqueta" {{ request('etiqueta_id') == 'sin_etiqueta' ? 'selected' : '' }}>Sin Etiqueta</option>
+                        @foreach (($etiquetasCatalogo ?? []) as $etq)
+                            <option value="{{ $etq->id }}" {{ request('etiqueta_id') == $etq->id ? 'selected' : '' }}>{{ $etq->nombre }} ({{ $etq->total_usuarios }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-lg-1 col-md-3">
+                    <label for="perPageFilter" class="form-label text-white-50 fw-semibold mb-2">Mostrar</label>
+                    <select name="per_page" id="perPageFilter" class="form-select form-control-custom" onchange="document.getElementById('filterForm').submit()">
+                        @foreach ([50, 100, 200, 500] as $pp)
+                            <option value="{{ $pp }}" {{ ($perPage ?? 100) == $pp ? 'selected' : '' }}>{{ $pp }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -576,6 +599,7 @@
                             <th>Contacto</th>
                             <th>Identificación</th>
                             <th>Rol</th>
+                            <th>Etiqueta</th>
                             <th>Expediente Digital</th>
                             <th>{{ $moodleSyncActivo ? 'Origen' : 'Base de Datos' }}</th>
                             <th class="text-end">Acciones</th>
@@ -593,6 +617,9 @@
                                 $hasExpediente = !is_null($usuario->expediente);
                                 $exp = $usuario->expediente;
                                 $statusExp = $hasExpediente ? 'con_expediente' : 'sin_expediente';
+                                $userTags = $etiquetasPorUsuario[$usuario->id] ?? [];
+                                $userTagNames = collect($userTags)->pluck('nombre')->implode(' ');
+                                $userTagIds = collect($userTags)->pluck('id_etiqueta')->implode(',');
                             @endphp
                             <tr class="user-row" 
                                 data-id="{{ $usuario->id }}"
@@ -602,6 +629,9 @@
                                 data-cedula="{{ $usuario->cedula }}"
                                 data-telefono="{{ $usuario->telefono }}"
                                 data-rol-id="{{ $usuario->id_rol }}"
+                                data-rol-nombre="{{ $usuario->rol->nombre ?? '' }}"
+                                data-etiquetas="{{ $userTagNames }}"
+                                data-etiqueta-ids="{{ $userTagIds }}"
                                 data-origen="{{ strtolower($usuario->origen) }}"
                                 data-expediente-status="{{ $statusExp }}">
                                 <td>
@@ -652,6 +682,26 @@
                                         }
                                     @endphp
                                     <span class="{{ $roleClass }}" @if($roleStyle) style="{{ $roleStyle }}" @endif>{{ $usuario->rol->nombre ?? 'Sin Rol' }}</span>
+                                </td>
+                                <td class="td-etiquetas-usuario">
+                                    <div class="d-flex flex-wrap align-items-center gap-1">
+                                        @forelse ($userTags as $ut)
+                                            <span class="badge rounded-pill px-2 py-1 fw-semibold" style="background-color: {{ $ut->color }}; color: #ffffff; font-size: 0.72rem;">
+                                                <i class="bi bi-tag-fill me-1"></i>{{ $ut->nombre }}
+                                            </span>
+                                        @empty
+                                            <span class="text-white-50 small">—</span>
+                                        @endforelse
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0 btn-asignar-etiquetas"
+                                            style="font-size: 0.72rem;"
+                                            data-id="{{ $usuario->id }}"
+                                            data-nombre="{{ $nombreCompleto }}"
+                                            data-etiqueta-ids="{{ $userTagIds }}"
+                                            title="Asignar o cambiar etiquetas de {{ $nombreCompleto }}">
+                                            <i class="bi bi-tags"></i>
+                                        </button>
+                                    </div>
                                 </td>
                                 <td>
                                     @if ($hasExpediente)
@@ -736,7 +786,7 @@
                             </tr>
                         @empty
                             <tr id="emptyServerRow">
-                                <td colspan="7" class="text-center py-5 text-white-50">
+                                <td colspan="8" class="text-center py-5 text-white-50">
                                     <i class="bi bi-people display-4 d-block mb-3 text-muted"></i>
                                     No se encontraron usuarios en la base de datos.
                                 </td>
@@ -767,6 +817,101 @@
                     </div>
                 </div>
             @endif
+        </div>
+
+        <!-- Modal: Creador y Gestor de Etiquetas -->
+        <div class="modal fade" id="modalGestionarEtiquetas" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content glass-card shadow-lg border-0">
+                    <div class="modal-header border-bottom px-4 py-3" style="border-color: var(--border-dark) !important;">
+                        <h5 class="modal-title fw-bold text-white mb-0">
+                            <i class="bi bi-tags-fill text-primary me-2"></i>Creador de Etiquetas de Usuarios
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form id="form-crear-etiqueta" class="mb-4">
+                            <label class="form-label form-label-custom small fw-bold">Nueva Etiqueta</label>
+                            <div class="input-group gap-2">
+                                <input type="text" id="nueva-etiqueta-nombre" class="form-control form-control-custom" placeholder="Ej: Beca 50%, VIP, Egresado, Moroso..." maxlength="80" required>
+                                <select id="nueva-etiqueta-color" class="form-select form-control-custom" style="max-width: 130px;">
+                                    <option value="#0ea5e9">Azul</option>
+                                    <option value="#10b981">Verde</option>
+                                    <option value="#f59e0b">Ámbar</option>
+                                    <option value="#8b5cf6">Morado</option>
+                                    <option value="#ef4444">Rojo</option>
+                                    <option value="#64748b">Gris</option>
+                                </select>
+                                <button type="submit" class="btn btn-search px-3" id="btn-crear-etiqueta">
+                                    <i class="bi bi-plus-lg"></i> Crear
+                                </button>
+                            </div>
+                        </form>
+
+                        <label class="form-label form-label-custom small fw-bold mb-2">Etiquetas Existentes</label>
+                        <div id="lista-etiquetas-catalogo" class="d-flex flex-column gap-2">
+                            @forelse (($etiquetasCatalogo ?? []) as $etq)
+                                <div class="d-flex justify-content-between align-items-center p-2 px-3 rounded-3 border item-etiqueta-catalogo" data-id="{{ $etq->id }}" style="border-color: var(--border-dark) !important;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge rounded-pill px-3 py-1 fw-semibold" style="background-color: {{ $etq->color }}; color: #fff;">
+                                            <i class="bi bi-tag-fill me-1"></i>{{ $etq->nombre }}
+                                        </span>
+                                        <small class="text-white-50">{{ $etq->total_usuarios }} usuario(s)</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0 btn-eliminar-etiqueta" data-id="{{ $etq->id }}" data-nombre="{{ $etq->nombre }}" title="Eliminar etiqueta">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </div>
+                            @empty
+                                <p class="text-white-50 small text-center py-3 mb-0" id="empty-etiquetas-msg">Aún no has creado etiquetas. Crea una arriba para comenzar.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Asignar Etiquetas a un Usuario -->
+        <div class="modal fade" id="modalAsignarEtiquetas" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content glass-card shadow-lg border-0">
+                    <div class="modal-header border-bottom px-4 py-3" style="border-color: var(--border-dark) !important;">
+                        <div>
+                            <h5 class="modal-title fw-bold text-white mb-0">
+                                <i class="bi bi-tag-fill text-primary me-2"></i>Etiquetar Usuario
+                            </h5>
+                            <small class="text-white-50" id="asignar-etiquetas-usuario-nombre"></small>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <form id="form-asignar-etiquetas">
+                        <input type="hidden" id="asignar-etiquetas-user-id">
+                        <div class="modal-body p-4">
+                            <div id="asignar-etiquetas-checks" class="d-flex flex-column gap-2">
+                                @forelse (($etiquetasCatalogo ?? []) as $etq)
+                                    <label class="d-flex align-items-center gap-2 p-2 px-3 rounded-3 border cursor-pointer" style="border-color: var(--border-dark) !important; cursor: pointer;">
+                                        <input type="checkbox" class="form-check-input mt-0 chk-etiqueta-usuario" value="{{ $etq->id }}">
+                                        <span class="badge rounded-pill px-3 py-1 fw-semibold" style="background-color: {{ $etq->color }}; color: #fff;">
+                                            <i class="bi bi-tag-fill me-1"></i>{{ $etq->nombre }}
+                                        </span>
+                                    </label>
+                                @empty
+                                    <p class="text-white-50 small text-center py-2 mb-0">Primero crea una etiqueta en "Gestionar Etiquetas".</p>
+                                @endforelse
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between" style="border-color: var(--border-dark) !important;">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modalGestionarEtiquetas">
+                                <i class="bi bi-plus-circle me-1"></i> Nueva Etiqueta
+                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" id="btn-guardar-etiquetas-usuario">Guardar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <!-- Modal de Edición Rápida de Usuario -->
@@ -857,6 +1002,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('liveSearch');
             const rolSelect = document.getElementById('rolFilter');
+            const etiquetaSelect = document.getElementById('etiquetaFilter');
             const origenSelect = document.getElementById('origenFilter');
             const expSelect = document.getElementById('expedienteFilter');
             const btnReset = document.getElementById('btnResetFilter');
@@ -899,6 +1045,7 @@
                 const queryRaw = searchInput.value;
                 const terms = normalizar(queryRaw).split(/\s+/).filter(t => t.length > 0);
                 const rolVal = rolSelect.value;
+                const etiquetaVal = etiquetaSelect ? etiquetaSelect.value : '';
                 const origenVal = origenSelect ? origenSelect.value.toLowerCase() : '';
                 const expVal = expSelect ? expSelect.value : '';
 
@@ -912,10 +1059,13 @@
                     const rowCedula = normalizar(row.dataset.cedula);
                     const rowTelefono = normalizar(row.dataset.telefono);
                     const rowRolId = row.dataset.rolId;
+                    const rowRolNombre = normalizar(row.dataset.rolNombre);
+                    const rowEtiquetas = normalizar(row.dataset.etiquetas);
+                    const rowEtiquetaIds = (row.dataset.etiquetaIds || '').split(',').filter(Boolean);
                     const rowOrigen = (row.dataset.origen || '').toLowerCase();
                     const rowExpStatus = row.dataset.expedienteStatus || 'sin_expediente';
 
-                    const searchBlob = `${rowNombre} ${rowApellidos} ${rowEmail} ${rowCedula} ${rowTelefono} #${rowId}`;
+                    const searchBlob = `${rowNombre} ${rowApellidos} ${rowEmail} ${rowCedula} ${rowTelefono} ${rowRolNombre} ${rowEtiquetas} ${rowOrigen} #${rowId}`;
 
                     // Coincidencia con todos los términos de búsqueda
                     let matchSearch = true;
@@ -929,13 +1079,21 @@
                     // Coincidencia de rol
                     const matchRol = !rolVal || rowRolId === rolVal;
 
+                    // Coincidencia de etiqueta
+                    let matchEtiqueta = true;
+                    if (etiquetaVal === 'sin_etiqueta') {
+                        matchEtiqueta = rowEtiquetaIds.length === 0;
+                    } else if (etiquetaVal) {
+                        matchEtiqueta = rowEtiquetaIds.includes(etiquetaVal);
+                    }
+
                     // Coincidencia de origen
                     const matchOrigen = !origenVal || rowOrigen === origenVal;
 
                     // Coincidencia de estado de expediente digital
                     const matchExp = !expVal || (rowExpStatus === expVal);
 
-                    if (matchSearch && matchRol && matchOrigen && matchExp) {
+                    if (matchSearch && matchRol && matchEtiqueta && matchOrigen && matchExp) {
                         row.style.display = '';
                         visibles++;
                     } else {
@@ -956,18 +1114,153 @@
 
             searchInput?.addEventListener('input', aplicarFiltrosEnVivo);
             rolSelect?.addEventListener('change', aplicarFiltrosEnVivo);
+            etiquetaSelect?.addEventListener('change', aplicarFiltrosEnVivo);
             origenSelect?.addEventListener('change', aplicarFiltrosEnVivo);
             expSelect?.addEventListener('change', aplicarFiltrosEnVivo);
 
             btnReset?.addEventListener('click', function() {
                 searchInput.value = '';
                 rolSelect.value = '';
+                if (etiquetaSelect) etiquetaSelect.value = '';
                 if (origenSelect) origenSelect.value = '';
                 if (expSelect) expSelect.value = '';
                 document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-kpi'));
                 aplicarFiltrosEnVivo();
                 if (window.location.search) {
                     window.location.href = "{{ route('usuarios.index') }}";
+                }
+            });
+
+            // Creador y asignación de etiquetas de usuarios
+            const modalAsignarEtiquetasEl = document.getElementById('modalAsignarEtiquetas');
+            const modalAsignarEtiquetas = (modalAsignarEtiquetasEl && typeof bootstrap !== 'undefined') ? new bootstrap.Modal(modalAsignarEtiquetasEl) : null;
+
+            document.getElementById('form-crear-etiqueta')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const nombreInp = document.getElementById('nueva-etiqueta-nombre');
+                const colorInp = document.getElementById('nueva-etiqueta-color');
+                const btn = document.getElementById('btn-crear-etiqueta');
+                const nombre = nombreInp.value.trim();
+                if (!nombre) return;
+
+                btn.disabled = true;
+                try {
+                    const res = await fetch("{{ route('usuarios.etiquetas.crear') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ nombre, color: colorInp.value })
+                    });
+                    const data = await res.json();
+                    btn.disabled = false;
+
+                    if (res.ok && data.success) {
+                        window.location.reload();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'No se pudo crear la etiqueta.' });
+                    }
+                } catch (err) {
+                    btn.disabled = false;
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Error de conexión al crear la etiqueta.' });
+                }
+            });
+
+            document.querySelectorAll('.btn-eliminar-etiqueta').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const nombre = this.dataset.nombre;
+                    Swal.fire({
+                        title: `¿Eliminar etiqueta "${nombre}"?`,
+                        text: 'Se quitará de todos los usuarios asignados.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then(async (result) => {
+                        if (!result.isConfirmed) return;
+                        const res = await fetch(`/usuarios/etiquetas/${id}/eliminar`, {
+                            method: 'POST',
+                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+                        });
+                        const data = await res.json();
+                        if (res.ok && data.success) {
+                            window.location.reload();
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'No se pudo eliminar.' });
+                        }
+                    });
+                });
+            });
+
+            document.querySelectorAll('.btn-asignar-etiquetas').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.dataset.id;
+                    const nombre = this.dataset.nombre;
+                    const currentIds = (this.dataset.etiquetaIds || '').split(',').filter(Boolean);
+
+                    document.getElementById('asignar-etiquetas-user-id').value = userId;
+                    document.getElementById('asignar-etiquetas-usuario-nombre').textContent = nombre;
+                    document.querySelectorAll('.chk-etiqueta-usuario').forEach(chk => {
+                        chk.checked = currentIds.includes(chk.value);
+                    });
+
+                    if (modalAsignarEtiquetas) modalAsignarEtiquetas.show();
+                });
+            });
+
+            document.getElementById('form-asignar-etiquetas')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const userId = document.getElementById('asignar-etiquetas-user-id').value;
+                const selected = Array.from(document.querySelectorAll('.chk-etiqueta-usuario:checked')).map(c => c.value);
+                const btn = document.getElementById('btn-guardar-etiquetas-usuario');
+                btn.disabled = true;
+
+                try {
+                    const res = await fetch(`/usuarios/${userId}/etiquetas`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ etiquetas: selected })
+                    });
+                    const data = await res.json();
+                    btn.disabled = false;
+
+                    if (res.ok && data.success) {
+                        if (modalAsignarEtiquetas) modalAsignarEtiquetas.hide();
+                        const row = document.querySelector(`.user-row[data-id="${userId}"]`);
+                        if (row) {
+                            const tags = data.etiquetas || [];
+                            const idsStr = tags.map(t => t.id_etiqueta).join(',');
+                            const namesStr = tags.map(t => t.nombre).join(' ');
+                            row.dataset.etiquetaIds = idsStr;
+                            row.dataset.etiquetas = namesStr;
+
+                            const cell = row.querySelector('.td-etiquetas-usuario > div');
+                            const btnAssign = row.querySelector('.btn-asignar-etiquetas');
+                            if (btnAssign) btnAssign.dataset.etiquetaIds = idsStr;
+
+                            if (cell) {
+                                const badgesHtml = tags.length > 0
+                                    ? tags.map(t => `<span class="badge rounded-pill px-2 py-1 fw-semibold" style="background-color: ${t.color}; color: #ffffff; font-size: 0.72rem;"><i class="bi bi-tag-fill me-1"></i>${t.nombre}</span>`).join('')
+                                    : `<span class="text-white-50 small">—</span>`;
+                                cell.innerHTML = badgesHtml;
+                                if (btnAssign) cell.appendChild(btnAssign);
+                            }
+                            aplicarFiltrosEnVivo();
+                        }
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: data.message || 'No se pudieron guardar las etiquetas.' });
+                    }
+                } catch (err) {
+                    btn.disabled = false;
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Error de conexión al guardar etiquetas.' });
                 }
             });
 

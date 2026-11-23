@@ -258,6 +258,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/usuarios/{id}/editar', [UsuarioController::class, 'edit'])->name('usuarios.edit');
             Route::post('/usuarios/{id}/actualizar', [UsuarioController::class, 'update'])->name('usuarios.update');
             Route::post('/usuarios/{id}/eliminar', [UsuarioController::class, 'destroy'])->name('usuarios.destroy')->middleware('admin.role:general');
+            Route::post('/usuarios/etiquetas/crear', [UsuarioController::class, 'crearEtiqueta'])->name('usuarios.etiquetas.crear');
+            Route::post('/usuarios/etiquetas/{id}/eliminar', [UsuarioController::class, 'eliminarEtiqueta'])->name('usuarios.etiquetas.eliminar');
+            Route::post('/usuarios/{id}/etiquetas', [UsuarioController::class, 'asignarEtiquetas'])->name('usuarios.etiquetas.asignar');
         });
         
         // Cursos y Programas

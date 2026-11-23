@@ -12,14 +12,52 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 
 class UsuarioController extends Controller
 {
+    /**
+     * Asegura la existencia de las tablas de etiquetas personalizadas de usuarios.
+     */
+    protected static function ensureEtiquetasTables(): void
+    {
+        try {
+            if (!Schema::hasTable('etiquetas_usuarios')) {
+                DB::statement("
+                    CREATE TABLE IF NOT EXISTS `etiquetas_usuarios` (
+                        `id` INT(11) NOT NULL AUTO_INCREMENT,
+                        `nombre` VARCHAR(80) NOT NULL,
+                        `color` VARCHAR(20) NOT NULL DEFAULT '#0ea5e9',
+                        `creado_en` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (`id`),
+                        UNIQUE KEY `uq_etiqueta_nombre` (`nombre`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                ");
+            }
+            if (!Schema::hasTable('usuario_etiqueta')) {
+                DB::statement("
+                    CREATE TABLE IF NOT EXISTS `usuario_etiqueta` (
+                        `id` INT(11) NOT NULL AUTO_INCREMENT,
+                        `id_usuario` INT(11) NOT NULL,
+                        `id_etiqueta` INT(11) NOT NULL,
+                        PRIMARY KEY (`id`),
+                        UNIQUE KEY `uq_usuario_etiqueta` (`id_usuario`, `id_etiqueta`),
+                        KEY `idx_ue_usuario` (`id_usuario`),
+                        KEY `idx_ue_etiqueta` (`id_etiqueta`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                ");
+            }
+        } catch (\Throwable $e) {
+            // Ignorar si ya existen o si no hay permisos DDL
+        }
+    }
+
     /**
      * Muestra el listado de usuarios con filtros, orden alfabético por apellidos y KPIs interactivos.
      */
     public function index(Request $request)
     {
+        self::ensureEtiquetasTables();
         $moodleSyncEnabled = ModuleService::isEnabled('moodle_sync');
 
         // Saneamiento automático: Si Moodle Sync no está activo, todos los usuarios operan 100% con la base de datos interna de Inbox
@@ -32,22 +70,56 @@ class UsuarioController extends Controller
 
         $query = Usuario::with(['rol', 'expediente']);
 
-        // Búsqueda por término
+        // Búsqueda por término ampliado (soporta nombre completo, rol, etiqueta, origen, expediente, cédula, teléfono, correo, #ID)
         if ($request->filled('search')) {
             $search = trim($request->search);
-            $query->where(function($q) use ($search) {
-                $q->where('nombre', 'like', "%{$search}%")
-                  ->orWhere('apellidos', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('cedula', 'like', "%{$search}%")
-                  ->orWhere('telefono', 'like', "%{$search}%")
-                  ->orWhere('id', 'like', "%{$search}%");
-            });
+            $terms = preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+            foreach ($terms as $term) {
+                $cleanId = ltrim($term, '#');
+                $query->where(function ($q) use ($term, $cleanId) {
+                    $q->where('nombre', 'like', "%{$term}%")
+                      ->orWhere('apellidos', 'like', "%{$term}%")
+                      ->orWhere('email', 'like', "%{$term}%")
+                      ->orWhere('cedula', 'like', "%{$term}%")
+                      ->orWhere('telefono', 'like', "%{$term}%")
+                      ->orWhere('origen', 'like', "%{$term}%")
+                      ->orWhere('id', 'like', "%{$cleanId}%")
+                      ->orWhereHas('rol', function ($qr) use ($term) {
+                          $qr->where('nombre', 'like', "%{$term}%");
+                      })
+                      ->orWhereExists(function ($qe) use ($term) {
+                          $qe->select(DB::raw(1))
+                             ->from('usuario_etiqueta as ue')
+                             ->join('etiquetas_usuarios as eu', 'ue.id_etiqueta', '=', 'eu.id')
+                             ->whereColumn('ue.id_usuario', 'usuarios.id')
+                             ->where('eu.nombre', 'like', "%{$term}%");
+                      });
+                });
+            }
         }
 
         // Filtro por Rol
         if ($request->filled('rol_id')) {
             $query->where('id_rol', $request->rol_id);
+        }
+
+        // Filtro por Etiqueta
+        if ($request->filled('etiqueta_id')) {
+            $etiquetaFiltro = $request->etiqueta_id;
+            if ($etiquetaFiltro === 'sin_etiqueta') {
+                $query->whereNotExists(function ($qe) {
+                    $qe->select(DB::raw(1))
+                       ->from('usuario_etiqueta as ue')
+                       ->whereColumn('ue.id_usuario', 'usuarios.id');
+                });
+            } else {
+                $query->whereExists(function ($qe) use ($etiquetaFiltro) {
+                    $qe->select(DB::raw(1))
+                       ->from('usuario_etiqueta as ue')
+                       ->whereColumn('ue.id_usuario', 'usuarios.id')
+                       ->where('ue.id_etiqueta', (int)$etiquetaFiltro);
+                });
+            }
         }
 
         // Filtro por Origen
@@ -69,8 +141,41 @@ class UsuarioController extends Controller
         $query->orderByRaw("COALESCE(NULLIF(apellidos, ''), 'ZZZ') ASC")
               ->orderBy('nombre', 'asc');
 
-        $usuarios = $query->paginate(30)->withQueryString();
+        $perPage = (int)$request->input('per_page', 100);
+        if (!in_array($perPage, [30, 50, 100, 200, 500], true)) {
+            $perPage = 100;
+        }
+
+        $usuarios = $query->paginate($perPage)->withQueryString();
         $roles = Rol::oficiales();
+
+        // Cargar catálogo de etiquetas y etiquetas asignadas por usuario
+        $etiquetasCatalogo = collect();
+        $etiquetasPorUsuario = [];
+        try {
+            $etiquetasCatalogo = DB::table('etiquetas_usuarios as eu')
+                ->leftJoin('usuario_etiqueta as ue', 'eu.id', '=', 'ue.id_etiqueta')
+                ->select('eu.id', 'eu.nombre', 'eu.color', DB::raw('COUNT(ue.id_usuario) as total_usuarios'))
+                ->groupBy('eu.id', 'eu.nombre', 'eu.color')
+                ->orderBy('eu.nombre', 'asc')
+                ->get();
+
+            $userIds = $usuarios->pluck('id')->all();
+            if (!empty($userIds)) {
+                $asignaciones = DB::table('usuario_etiqueta as ue')
+                    ->join('etiquetas_usuarios as eu', 'ue.id_etiqueta', '=', 'eu.id')
+                    ->whereIn('ue.id_usuario', $userIds)
+                    ->select('ue.id_usuario', 'eu.id as id_etiqueta', 'eu.nombre', 'eu.color')
+                    ->orderBy('eu.nombre', 'asc')
+                    ->get();
+
+                foreach ($asignaciones as $asig) {
+                    $etiquetasPorUsuario[$asig->id_usuario][] = $asig;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Si aún no existen tablas, continuar sin romper la vista
+        }
 
         // Conteo seguro para KPIs en tiempo real
         try {
@@ -109,7 +214,7 @@ class UsuarioController extends Controller
             'sin_expediente' => $sinExpediente,
         ];
 
-        return view('usuarios.index', compact('usuarios', 'roles', 'kpis'));
+        return view('usuarios.index', compact('usuarios', 'roles', 'kpis', 'etiquetasCatalogo', 'etiquetasPorUsuario', 'perPage'));
     }
 
     /**
@@ -488,5 +593,117 @@ class UsuarioController extends Controller
         }
 
         return redirect()->route('usuarios.index')->with('success', "Usuario '{$usuario->nombre} {$usuario->apellidos}' actualizado exitosamente.");
+    }
+
+    /**
+     * Crea una nueva etiqueta personalizada para clasificar usuarios.
+     */
+    public function crearEtiqueta(Request $request)
+    {
+        self::ensureEtiquetasTables();
+
+        $request->validate([
+            'nombre' => 'required|string|max:80',
+            'color' => 'nullable|string|max:20',
+        ], [
+            'nombre.required' => 'Debe escribir un nombre para la etiqueta.',
+        ]);
+
+        $nombre = trim((string)$request->input('nombre'));
+        $color = trim((string)$request->input('color', '#0ea5e9')) ?: '#0ea5e9';
+
+        $existe = DB::table('etiquetas_usuarios')->whereRaw('LOWER(nombre) = ?', [mb_strtolower($nombre, 'UTF-8')])->first();
+        if ($existe) {
+            return response()->json([
+                'success' => false,
+                'message' => "Ya existe una etiqueta llamada '{$existe->nombre}'."
+            ], 422);
+        }
+
+        $id = DB::table('etiquetas_usuarios')->insertGetId([
+            'nombre' => $nombre,
+            'color' => $color,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Etiqueta '{$nombre}' creada correctamente.",
+            'etiqueta' => [
+                'id' => $id,
+                'nombre' => $nombre,
+                'color' => $color,
+                'total_usuarios' => 0,
+            ],
+        ]);
+    }
+
+    /**
+     * Elimina una etiqueta del catálogo y sus asignaciones a usuarios.
+     */
+    public function eliminarEtiqueta($id)
+    {
+        self::ensureEtiquetasTables();
+        $etiqueta = DB::table('etiquetas_usuarios')->where('id', (int)$id)->first();
+        if (!$etiqueta) {
+            return response()->json(['success' => false, 'message' => 'Etiqueta no encontrada.'], 404);
+        }
+
+        DB::table('usuario_etiqueta')->where('id_etiqueta', (int)$id)->delete();
+        DB::table('etiquetas_usuarios')->where('id', (int)$id)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Etiqueta '{$etiqueta->nombre}' eliminada correctamente.",
+        ]);
+    }
+
+    /**
+     * Asigna o actualiza las etiquetas de un usuario específico.
+     */
+    public function asignarEtiquetas(Request $request, $id)
+    {
+        self::ensureEtiquetasTables();
+        $usuario = Usuario::findOrFail($id);
+
+        $etiquetaIds = $request->input('etiquetas', []);
+        if (!is_array($etiquetaIds)) {
+            $etiquetaIds = [];
+        }
+        $etiquetaIds = array_values(array_unique(array_filter(array_map('intval', $etiquetaIds), fn($v) => $v > 0)));
+
+        DB::beginTransaction();
+        try {
+            DB::table('usuario_etiqueta')->where('id_usuario', $usuario->id)->delete();
+
+            if (!empty($etiquetaIds)) {
+                $validIds = DB::table('etiquetas_usuarios')->whereIn('id', $etiquetaIds)->pluck('id')->all();
+                foreach ($validIds as $eid) {
+                    DB::table('usuario_etiqueta')->insert([
+                        'id_usuario' => $usuario->id,
+                        'id_etiqueta' => $eid,
+                    ]);
+                }
+            }
+
+            $etiquetasActuales = DB::table('usuario_etiqueta as ue')
+                ->join('etiquetas_usuarios as eu', 'ue.id_etiqueta', '=', 'eu.id')
+                ->where('ue.id_usuario', $usuario->id)
+                ->select('eu.id as id_etiqueta', 'eu.nombre', 'eu.color')
+                ->orderBy('eu.nombre', 'asc')
+                ->get();
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Etiquetas actualizadas correctamente.',
+                'etiquetas' => $etiquetasActuales,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar etiquetas: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }
