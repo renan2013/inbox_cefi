@@ -54,38 +54,22 @@ class LoginController extends Controller
             // Limpiar captcha
             session()->forget(['captcha_num1', 'captcha_num2']);
 
-            // Notificar ingreso a n8n en segundo plano para hoja de cálculo de accesos en tiempo real
+            // Registrar ingreso directamente en BD local de CEFI (sin depender de Drive)
             try {
                 $user = Auth::user();
                 $date_cr = new \DateTime("now", new \DateTimeZone("America/Costa_Rica"));
-                $n8n_webhook_url = config('app.n8n_webhook_url', 'https://n8n.renangalvan.net/webhook/ingreso-sistema');
-                $n8n_data = [
-                    "client_id" => config('cliente.id', 'cefi'),
-                    "client_name" => config('cliente.nombre', 'CEFI'),
-                    "nombre" => trim(($user->nombre ?? '') . ' ' . ($user->apellidos ?? '')),
-                    "email" => $user->email,
-                    "id_rol" => $user->id_rol ?? 2,
-                    "fecha" => $date_cr->format("Y-m-d H:i:s"),
-                    "origen" => "sistema_bpm_" . config('cliente.id', 'cefi')
-                ];
-
-                $ch = curl_init($n8n_webhook_url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($n8n_data));
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Content-Type: application/json',
-                    'Bypass-Tunnel-Reminder: true',
-                    'serveo-skip-browser-warning: true'
+                \App\Http\Controllers\ReporteController::ensureIngresosTable();
+                \Illuminate\Support\Facades\DB::table('ingresos_sistema')->insert([
+                    'id_usuario'    => $user->id ?? null,
+                    'nombre'        => trim(($user->nombre ?? '') . ' ' . ($user->apellidos ?? '')),
+                    'email'         => $user->email ?? '',
+                    'id_rol'        => (int)($user->id_rol ?? 2),
+                    'ip'            => $request->ip(),
+                    'origen'        => 'inbox_' . config('cliente.id', 'cefi'),
+                    'fecha_ingreso' => $date_cr->format('Y-m-d H:i:s'),
                 ]);
-                curl_setopt($ch, CURLOPT_USERAGENT, 'cURL Webhook');
-                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-                curl_exec($ch);
-                curl_close($ch);
-            } catch (\Exception $e) {
-                // Silenciosamente capturado si el webhook no responde
+            } catch (\Throwable $e) {
+                // No bloquear el login si falla el log de acceso
             }
 
             return $this->redirectDestinoSegunRol($user);

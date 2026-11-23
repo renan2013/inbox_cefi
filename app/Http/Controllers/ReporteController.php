@@ -145,13 +145,89 @@ class ReporteController extends Controller
     }
 
     /**
-     * Muestra la vista de Ingresos en Tiempo Real (Drive / n8n).
+     * Asegura que la tabla local de ingresos_sistema exista.
      */
-    public function ingresosDrive()
+    public static function ensureIngresosTable(): void
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('ingresos_sistema')) {
+            \Illuminate\Support\Facades\Schema::create('ingresos_sistema', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('id_usuario')->nullable()->index();
+                $table->string('nombre', 150);
+                $table->string('email', 150)->index();
+                $table->unsignedTinyInteger('id_rol')->default(2);
+                $table->string('ip', 45)->nullable();
+                $table->string('origen', 80)->default('inbox_cefi');
+                $table->dateTime('fecha_ingreso')->index();
+            });
+        }
+    }
+
+    /**
+     * Muestra el registro local de ingresos al sistema con impresión directa y exportación CSV.
+     */
+    public function ingresosDrive(Request $request)
     {
         if (Auth::user()->id_rol != 1) {
             return redirect()->route('dashboard')->with('error', 'No tiene permisos para acceder a esta sección.');
         }
-        return view('reportes.ingresos_drive');
+
+        self::ensureIngresosTable();
+
+        $buscar = trim((string)$request->get('buscar', ''));
+        $fechaDesde = trim((string)$request->get('fecha_desde', ''));
+        $fechaHasta = trim((string)$request->get('fecha_hasta', ''));
+        $idRol = $request->get('id_rol', '');
+
+        $query = DB::table('ingresos_sistema')->orderByDesc('fecha_ingreso');
+
+        if ($buscar !== '') {
+            $query->where(function ($q) use ($buscar) {
+                $q->where('nombre', 'like', "%{$buscar}%")
+                  ->orWhere('email', 'like', "%{$buscar}%");
+            });
+        }
+        if ($fechaDesde !== '') {
+            $query->whereDate('fecha_ingreso', '>=', $fechaDesde);
+        }
+        if ($fechaHasta !== '') {
+            $query->whereDate('fecha_ingreso', '<=', $fechaHasta);
+        }
+        if ($idRol !== '' && $idRol !== null) {
+            $query->where('id_rol', (int)$idRol);
+        }
+
+        $rolesMap = [
+            1 => 'Administrador',
+            2 => 'Docente',
+            3 => 'Estudiante',
+            4 => 'Registro / Gestión',
+        ];
+
+        if ($request->get('export') === 'csv') {
+            $rows = $query->limit(5000)->get();
+            $filename = 'ingresos_' . config('cliente.id', 'cefi') . '_' . date('Ymd_His') . '.csv';
+            return response()->streamDownload(function () use ($rows, $rolesMap) {
+                $out = fopen('php://output', 'w');
+                fwrite($out, "\xEF\xBB\xBF");
+                fputcsv($out, ['#', 'Nombre', 'Correo', 'Rol', 'Fecha y Hora', 'IP', 'Origen']);
+                foreach ($rows as $idx => $r) {
+                    fputcsv($out, [
+                        $idx + 1,
+                        $r->nombre,
+                        $r->email,
+                        $rolesMap[(int)$r->id_rol] ?? ('Rol ' . $r->id_rol),
+                        $r->fecha_ingreso,
+                        $r->ip ?? '',
+                        $r->origen ?? '',
+                    ]);
+                }
+                fclose($out);
+            }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }
+
+        $ingresos = $query->limit(500)->get();
+
+        return view('reportes.ingresos_drive', compact('ingresos', 'rolesMap', 'buscar', 'fechaDesde', 'fechaHasta', 'idRol'));
     }
 }
