@@ -233,79 +233,80 @@ class ModuleService
             return [];
         }
 
-        $content = @file_get_contents($layoutFile);
-        if (!$content) {
-            return [];
-        }
+        $cacheKey = 'navbar_tree_v1_' . (@filemtime($layoutFile) ?: 0);
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($layoutFile) {
+            $content = @file_get_contents($layoutFile);
+            if (!$content) {
+                return [];
+            }
 
-        $discovered = [];
-        // Extraer cada bloque <li class="nav-item dropdown"> ... </li>
-        if (preg_match_all('/<li\s+class=["\'][^"\']*nav-item\s+dropdown[^"\']*["\'][^>]*>\s*<a[^>]*dropdown-toggle[^>]*>(.*?)<\/a>\s*<ul[^>]*dropdown-menu[^>]*>(.*?)<\/ul>\s*<\/li>/is', $content, $menuMatches, PREG_SET_ORDER)) {
-            $menuMapByTitle = [
-                'logística'       => 'inventario',
-                'logistica'       => 'inventario',
-                'gestionar curso' => 'gestion_cursos',
-                'estudiante'      => 'estudiante_tcu',
-                'soporte'         => 'soporte',
-                'planilla'        => 'planilla',
-                'registro'        => 'registro_academico',
-                'base de datos'   => 'base_datos',
-                'configuración'   => 'menu_configuracion',
-                'configuracion'   => 'menu_configuracion',
-            ];
-
-            foreach ($menuMatches as $mm) {
-                $rawTitle = trim(preg_replace('/\s+/', ' ', strip_tags($mm[1])));
-                $ulHtml   = $mm[2];
-                $lowerTitle = mb_strtolower($rawTitle, 'UTF-8');
-
-                $parentKey = $menuMapByTitle[$lowerTitle] ?? ('menu_' . strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $rawTitle)));
-
-                $discovered[$parentKey] = [
-                    'key'         => $parentKey,
-                    'nombre'      => $rawTitle,
-                    'icono'       => 'bi-grid-fill',
-                    'color'       => 'primary',
-                    'categoria'   => 'Menú de Navegación',
-                    'descripcion' => 'Menú sincronizado en vivo desde app.blade.php (' . $rawTitle . ')',
-                    'default'     => true,
-                    'children'    => [],
+            $discovered = [];
+            // Extraer cada bloque <li class="nav-item dropdown"> ... </li>
+            if (preg_match_all('/<li\s+class=["\'][^"\']*nav-item\s+dropdown[^"\']*["\'][^>]*>\s*<a[^>]*dropdown-toggle[^>]*>(.*?)<\/a>\s*<ul[^>]*dropdown-menu[^>]*>(.*?)<\/ul>\s*<\/li>/is', $content, $menuMatches, PREG_SET_ORDER)) {
+                $menuMapByTitle = [
+                    'logística'       => 'inventario',
+                    'logistica'       => 'inventario',
+                    'gestionar curso' => 'gestion_cursos',
+                    'estudiante'      => 'estudiante_tcu',
+                    'soporte'         => 'soporte',
+                    'planilla'        => 'planilla',
+                    'registro'        => 'registro_academico',
+                    'base de datos'   => 'base_datos',
+                    'configuración'   => 'menu_configuracion',
+                    'configuracion'   => 'menu_configuracion',
                 ];
 
-                // Buscar todos los ítems <a class="dropdown-item..." href="...">...</a>
-                // Si tiene @module('item.xxx') justo antes, usar esa clave; si no, generar una clave automática determinista
-                $pattern = '/(?:@module\(\s*[\'"]([^\'"]+)[\'"]\s*\)\s*)?<li>\s*<a[^>]*class=["\'][^"\']*dropdown-item[^"\']*["\'][^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>\s*<\/li>/is';
-                if (preg_match_all($pattern, $ulHtml, $itemMatches, PREG_SET_ORDER)) {
-                    foreach ($itemMatches as $im) {
-                        $explicitKey = trim($im[1] ?? '');
-                        $rawHref     = trim($im[2] ?? '');
-                        $innerHtml   = $im[3] ?? '';
-                        $label       = trim(preg_replace('/\s+/', ' ', strip_tags($innerHtml)));
+                foreach ($menuMatches as $mm) {
+                    $rawTitle = trim(preg_replace('/\s+/', ' ', strip_tags($mm[1])));
+                    $ulHtml   = $mm[2];
+                    $lowerTitle = mb_strtolower($rawTitle, 'UTF-8');
 
-                        if ($label === '' || stripos($label, 'Bloquear Acceso') !== false) {
-                            continue;
+                    $parentKey = $menuMapByTitle[$lowerTitle] ?? ('menu_' . strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $rawTitle)));
+
+                    $discovered[$parentKey] = [
+                        'key'         => $parentKey,
+                        'nombre'      => $rawTitle,
+                        'icono'       => 'bi-grid-fill',
+                        'color'       => 'primary',
+                        'categoria'   => 'Menú de Navegación',
+                        'descripcion' => 'Menú sincronizado en vivo desde app.blade.php (' . $rawTitle . ')',
+                        'default'     => true,
+                        'children'    => [],
+                    ];
+
+                    $pattern = '/(?:@module\(\s*[\'"]([^\'"]+)[\'"]\s*\)\s*)?<li>\s*<a[^>]*class=["\'][^"\']*dropdown-item[^"\']*["\'][^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>\s*<\/li>/is';
+                    if (preg_match_all($pattern, $ulHtml, $itemMatches, PREG_SET_ORDER)) {
+                        foreach ($itemMatches as $im) {
+                            $explicitKey = trim($im[1] ?? '');
+                            $rawHref     = trim($im[2] ?? '');
+                            $innerHtml   = $im[3] ?? '';
+                            $label       = trim(preg_replace('/\s+/', ' ', strip_tags($innerHtml)));
+
+                            if ($label === '' || stripos($label, 'Bloquear Acceso') !== false) {
+                                continue;
+                            }
+
+                            $icon = 'bi-circle text-info';
+                            if (preg_match('/bi-[a-z0-9-]+(?:\s+text-[a-z]+)?/i', $innerHtml, $icMatch)) {
+                                $icon = $icMatch[0];
+                            }
+
+                            $itemKey = ($explicitKey !== '' && (str_starts_with($explicitKey, 'item.') || $explicitKey === 'inbox_ai' || $explicitKey === 'expedientes_360'))
+                                ? $explicitKey
+                                : ('item.auto_' . substr(md5($parentKey . ':' . $label), 0, 8));
+
+                            $discovered[$parentKey]['children'][$itemKey] = [
+                                'nombre'  => $label,
+                                'icono'   => $icon,
+                                'ruta'    => $rawHref,
+                                'default' => true,
+                            ];
                         }
-
-                        $icon = 'bi-circle text-info';
-                        if (preg_match('/bi-[a-z0-9-]+(?:\s+text-[a-z]+)?/i', $innerHtml, $icMatch)) {
-                            $icon = $icMatch[0];
-                        }
-
-                        $itemKey = ($explicitKey !== '' && (str_starts_with($explicitKey, 'item.') || $explicitKey === 'inbox_ai' || $explicitKey === 'expedientes_360'))
-                            ? $explicitKey
-                            : ('item.auto_' . substr(md5($parentKey . ':' . $label), 0, 8));
-
-                        $discovered[$parentKey]['children'][$itemKey] = [
-                            'nombre'  => $label,
-                            'icono'   => $icon,
-                            'ruta'    => $rawHref,
-                            'default' => true,
-                        ];
                     }
                 }
             }
-        }
 
-        return $discovered;
+            return $discovered;
+        });
     }
 }
