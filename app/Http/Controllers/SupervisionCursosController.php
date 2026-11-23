@@ -66,9 +66,11 @@ class SupervisionCursosController extends Controller
             }
         }
 
-        // Selector de cursos disponibles (en_supervision = 0)
+        // Selector de cursos disponibles (en_supervision = 0 o NULL)
         $query_disponibles = CursoActivo::with(['planEstudio.programa', 'profesor'])
-            ->where('en_supervision', 0);
+            ->where(function ($q) {
+                $q->where('en_supervision', 0)->orWhereNull('en_supervision');
+            });
 
         if ($periodo_actual !== 'todos' && !empty($periodo_actual)) {
             $query_disponibles->where('periodo', $periodo_actual);

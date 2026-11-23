@@ -739,6 +739,9 @@ class BoletaController extends Controller
                     if (Schema::hasColumn('cursos_activos', 'fecha_inicio')) {
                         $dataCurso['fecha_inicio'] = Carbon::now()->toDateString();
                     }
+                    if (Schema::hasColumn('cursos_activos', 'en_supervision')) {
+                        $dataCurso['en_supervision'] = 1;
+                    }
                     $id_curso_activo = DB::table('cursos_activos')->insertGetId($dataCurso, 'id_curso_activo');
                 }
 

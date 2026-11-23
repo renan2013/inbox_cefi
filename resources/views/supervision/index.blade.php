@@ -196,6 +196,27 @@
         <!-- ALERTAS FLASH DE ACCIONES -->
         <div id="alertContainer"></div>
 
+        @if (count($cursos_disponibles) > 0)
+            <div class="alert alert-info d-flex flex-wrap align-items-center justify-content-between gap-2 rounded-4 border-0 shadow-sm mb-3">
+                <div>
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Hay <strong>{{ count($cursos_disponibles) }}</strong> curso(s) activo(s) en <strong>{{ $periodo_actual }}</strong> que aún no están en supervisión:
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <select id="selectCursoAgregarSupervision" class="form-select form-select-sm" style="min-width: 260px;">
+                        @foreach ($cursos_disponibles as $cd)
+                            <option value="{{ $cd->id_curso_activo }}">
+                                {{ $cd->planEstudio->codigo ?? 'S/C' }} - {{ $cd->planEstudio->materia ?? 'Curso #' . $cd->id_curso_activo }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" onclick="agregarCursoSupervisionSeleccionado()">
+                        <i class="bi bi-plus-circle me-1"></i> Agregar a Supervisión
+                    </button>
+                </div>
+            </div>
+        @endif
+
         <!-- VIEW TABLA -->
         <div id="view-tabla" class="card glass-card border-0">
             <div class="table-responsive">
@@ -407,6 +428,21 @@
         }, function(res) {
             if(res.success) {
                 location.reload();
+            }
+        });
+    }
+
+    function agregarCursoSupervisionSeleccionado() {
+        const idCurso = document.getElementById('selectCursoAgregarSupervision')?.value;
+        if (!idCurso) return;
+        $.post("{{ route('supervision.toggle') }}", {
+            _token: "{{ csrf_token() }}",
+            id_curso_activo: idCurso
+        }, function(res) {
+            if (res.success) {
+                location.reload();
+            } else {
+                alert(res.message || 'No se pudo agregar el curso a supervisión.');
             }
         });
     }
