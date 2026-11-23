@@ -159,24 +159,34 @@ class InboxAiController extends Controller
                     'parts' => [['text' => "Consulta actual ({$user_name}): " . $query]],
                 ];
 
-                $response_g = Http::timeout(20)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$gemini_key}", [
+                $payload = [
                     'systemInstruction' => [
                         'parts' => [['text' => $sys_info]],
                     ],
                     'contents' => $contents,
-                ]);
+                ];
 
-                if ($response_g->successful()) {
-                    $data_g = $response_g->json();
-                    if (isset($data_g['candidates'][0]['content']['parts'][0]['text'])) {
-                        $raw_text = trim($data_g['candidates'][0]['content']['parts'][0]['text']);
-                        if (!empty($raw_text)) {
-                            $clean_text = e($raw_text);
-                            $clean_text = preg_replace('/\*\*(.*?)\*\*/s', '<strong>$1</strong>', $clean_text);
-                            $clean_text = preg_replace('/`([^`]+)`/', '<code style="background:rgba(14,165,233,0.1);padding:1px 5px;border-radius:4px;">$1</code>', $clean_text);
-                            $clean_text = nl2br($clean_text);
-                            return response()->json(['reply' => $clean_text]);
+                $models = ['gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash-lite'];
+                foreach ($models as $model) {
+                    $response_g = Http::timeout(20)->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$gemini_key}", $payload);
+
+                    if ($response_g->successful()) {
+                        $data_g = $response_g->json();
+                        if (isset($data_g['candidates'][0]['content']['parts'][0]['text'])) {
+                            $raw_text = trim($data_g['candidates'][0]['content']['parts'][0]['text']);
+                            if (!empty($raw_text)) {
+                                $clean_text = e($raw_text);
+                                $clean_text = preg_replace('/\*\*(.*?)\*\*/s', '<strong>$1</strong>', $clean_text);
+                                $clean_text = preg_replace('/`([^`]+)`/', '<code style="background:rgba(14,165,233,0.1);padding:1px 5px;border-radius:4px;">$1</code>', $clean_text);
+                                $clean_text = nl2br($clean_text);
+                                return response()->json(['reply' => $clean_text]);
+                            }
                         }
+                    }
+
+                    // Si no es error recuperable (ej. 400/401/403), no seguir intentando otros modelos
+                    if (!in_array($response_g->status(), [404, 429, 500, 503], true)) {
+                        break;
                     }
                 }
             } catch (\Exception $e) {}
@@ -247,9 +257,10 @@ class InboxAiController extends Controller
         $stopwords = [
             'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'del',
             'al', 'a', 'en', 'para', 'por', 'con', 'sin', 'y', 'o', 'u', 'e',
-            'que', 'como', 'donde', 'cuando', 'quien', 'cual', 'cuanto', 'cuanta',
+            'que', 'como', 'donde', 'cuando', 'quien', 'cual', 'cuanto', 'cuanta', 'cuantos', 'cuantas',
             'mi', 'mis', 'tu', 'tus', 'su', 'sus', 'yo', 'me', 'se', 'te',
-            'es', 'son', 'fue', 'era', 'hay', 'hacer', 'puedo', 'puedes', 'saber'
+            'es', 'son', 'fue', 'era', 'hay', 'hacer', 'puedo', 'puedes', 'saber',
+            'mas', 'menos', 'entre', 'sobre', 'todo', 'todos', 'esta', 'esto', 'ese', 'esa'
         ];
 
         $tokens = [];
@@ -314,15 +325,16 @@ class InboxAiController extends Controller
             $matchedTokensCount = 0;
             foreach ($queryTokens as $qToken) {
                 $tokenMatched = false;
-                if (in_array($qToken, $keywordsTokens, true) || str_contains($palabrasNorm, $qToken)) {
+                $allowSubstr = mb_strlen($qToken) >= 5;
+                if (in_array($qToken, $keywordsTokens, true) || ($allowSubstr && str_contains($palabrasNorm, $qToken))) {
                     $score += 15;
                     $tokenMatched = true;
                 }
-                if (in_array($qToken, $preguntaTokens, true) || str_contains($preguntaNorm, $qToken)) {
+                if (in_array($qToken, $preguntaTokens, true) || ($allowSubstr && str_contains($preguntaNorm, $qToken))) {
                     $score += 12;
                     $tokenMatched = true;
                 }
-                if (in_array($qToken, $categoriaTokens, true) || str_contains($categoriaNorm, $qToken)) {
+                if (in_array($qToken, $categoriaTokens, true)) {
                     $score += 5;
                     $tokenMatched = true;
                 }
@@ -343,8 +355,8 @@ class InboxAiController extends Controller
             }
         }
 
-        // Umbral de aceptación
-        if ($highestScore >= 12) {
+        // Umbral de aceptación estricto para no interceptar preguntas generales
+        if ($highestScore >= 24) {
             return $bestItem;
         }
 
