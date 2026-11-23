@@ -149,6 +149,13 @@ class ReporteController extends Controller
      */
     public static function ensureIngresosTable(): void
     {
+        static $checked = false;
+        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_ingresos_ok_v1')) {
+            $checked = true;
+            return;
+        }
+        $checked = true;
+
         if (!\Illuminate\Support\Facades\Schema::hasTable('ingresos_sistema')) {
             \Illuminate\Support\Facades\Schema::create('ingresos_sistema', function (\Illuminate\Database\Schema\Blueprint $table) {
                 $table->id();
@@ -161,6 +168,7 @@ class ReporteController extends Controller
                 $table->dateTime('fecha_ingreso')->index();
             });
         }
+        \Illuminate\Support\Facades\Cache::put('schema_ingresos_ok_v1', true, 86400);
     }
 
     /**

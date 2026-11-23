@@ -16,6 +16,13 @@ class ProgramaController extends Controller
      */
     public static function ensureProgramasColumns(): void
     {
+        static $checked = false;
+        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_programas_ok_v1')) {
+            $checked = true;
+            return;
+        }
+        $checked = true;
+
         try {
             if (Schema::hasTable('programas')) {
                 $existing = array_map('strtolower', Schema::getColumnListing('programas'));
@@ -60,6 +67,7 @@ class ProgramaController extends Controller
                     DB::statement("ALTER TABLE plan_estudios ADD COLUMN `duracion` VARCHAR(100) NULL DEFAULT '8 semanas'");
                 }
             }
+            \Illuminate\Support\Facades\Cache::put('schema_programas_ok_v1', true, 86400);
         } catch (\Throwable $e) {
             // Continuar silenciosamente si la columna ya existe o no hay permisos ALTER
         }

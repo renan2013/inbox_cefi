@@ -171,8 +171,13 @@ class InteresesService
     /**
      * Recalcula los intereses de todos los estudiantes con cuotas pendientes.
      */
-    public static function recalcularTodosLosIntereses()
+    public static function recalcularTodosLosIntereses(bool $force = false)
     {
+        if (!$force && \Illuminate\Support\Facades\Cache::has('intereses_recalculo_recent')) {
+            return;
+        }
+        \Illuminate\Support\Facades\Cache::put('intereses_recalculo_recent', true, 900);
+
         $estudiantesIds = SeguimientoPago::where('estado', 'pendiente')
             ->where(function($q) {
                 $q->whereDate('fecha_vencimiento', '<', Carbon::today())

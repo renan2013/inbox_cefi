@@ -18,6 +18,13 @@ class GrupoController extends Controller
      */
     protected static function ensureCursosActivosColumns(): void
     {
+        static $checked = false;
+        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_cursos_activos_ok_v1')) {
+            $checked = true;
+            return;
+        }
+        $checked = true;
+
         try {
             if (!Schema::hasTable('cursos_activos')) {
                 return;
@@ -26,6 +33,7 @@ class GrupoController extends Controller
                 DB::statement("ALTER TABLE `cursos_activos` ADD COLUMN `nombre_grupo` VARCHAR(100) NULL DEFAULT NULL AFTER `id_profesor`");
             }
             DB::statement("ALTER TABLE `cursos_activos` MODIFY COLUMN `id_profesor` INT(11) NULL DEFAULT NULL");
+            \Illuminate\Support\Facades\Cache::put('schema_cursos_activos_ok_v1', true, 86400);
         } catch (\Throwable $e) {
             // Ignorar si ya existe o si el motor no requiere alteración
         }

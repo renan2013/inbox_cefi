@@ -22,7 +22,9 @@ class ClienteService
         }
 
         try {
-            return self::$dbItems = ConfiguracionSistema::pluck('valor', 'clave')->all();
+            return self::$dbItems = \Illuminate\Support\Facades\Cache::remember('cliente_db_items_v1', 300, function () {
+                return ConfiguracionSistema::pluck('valor', 'clave')->all();
+            });
         } catch (\Throwable $e) {
             return self::$dbItems = [];
         }

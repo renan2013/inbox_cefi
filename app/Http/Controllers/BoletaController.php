@@ -27,10 +27,18 @@ class BoletaController extends Controller
      */
     protected static function ensureBoletasColumns()
     {
+        static $checked = false;
+        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_boletas_ok_v1')) {
+            $checked = true;
+            return;
+        }
+        $checked = true;
+
         try {
             if (!Schema::hasTable('boletas')) {
                 return;
             }
+            $existing = array_map('strtolower', Schema::getColumnListing('boletas'));
             $columns = [
                 'numero_boleta' => "ALTER TABLE `boletas` ADD COLUMN `numero_boleta` VARCHAR(50) NULL AFTER `id`",
                 'periodo' => "ALTER TABLE `boletas` ADD COLUMN `periodo` VARCHAR(100) NULL AFTER `numero_boleta`",
@@ -57,7 +65,7 @@ class BoletaController extends Controller
                 'enviado_email' => "ALTER TABLE `boletas` ADD COLUMN `enviado_email` TINYINT(1) NOT NULL DEFAULT 0",
             ];
             foreach ($columns as $col => $sql) {
-                if (!Schema::hasColumn('boletas', $col)) {
+                if (!in_array(strtolower($col), $existing, true)) {
                     DB::statement($sql);
                 }
             }
@@ -66,6 +74,8 @@ class BoletaController extends Controller
             try {
                 DB::statement("ALTER TABLE `boletas` MODIFY COLUMN `estado` VARCHAR(50) NOT NULL DEFAULT 'pendiente_firma'");
             } catch (\Throwable $eEstado) {}
+
+            \Illuminate\Support\Facades\Cache::put('schema_boletas_ok_v1', true, 86400);
 
             // Asegurar que matriculas tenga id_boleta
             if (Schema::hasTable('matriculas') && !Schema::hasColumn('matriculas', 'id_boleta')) {

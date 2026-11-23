@@ -16,6 +16,13 @@ class CursoController extends Controller
      */
     protected function ensurePlanEstudiosColumns()
     {
+        static $checked = false;
+        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_plan_estudios_ok_v1')) {
+            $checked = true;
+            return;
+        }
+        $checked = true;
+
         try {
             if (Schema::hasTable('plan_estudios')) {
                 $existing = array_map('strtolower', Schema::getColumnListing('plan_estudios'));
@@ -171,6 +178,7 @@ class CursoController extends Controller
                     } catch (\Throwable $e) {}
                 }
             }
+            \Illuminate\Support\Facades\Cache::put('schema_plan_estudios_ok_v1', true, 86400);
         } catch (\Throwable $e) {
             // Continuar
         }
