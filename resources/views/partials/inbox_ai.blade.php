@@ -241,27 +241,17 @@
             </div>
         </div>
         <div class="d-flex align-items-center gap-1">
-            <button type="button" class="btn btn-sm text-white p-1" id="inboxAiReset" title="Nueva conversación">
-                <i class="bi bi-arrow-clockwise fs-6 text-white"></i>
+            <button type="button" class="btn btn-sm p-1" id="inboxAiReset" title="Nueva conversación" style="color: #ffffff !important; background: transparent; border: none;">
+                <i class="bi bi-arrow-clockwise fs-6" style="color: #ffffff !important;"></i>
             </button>
-            <button type="button" class="btn btn-sm text-white p-1" id="inboxAiClose" title="Cerrar">
-                <i class="bi bi-x-lg fs-6 text-white"></i>
+            <button type="button" class="btn btn-sm p-1" id="inboxAiClose" title="Cerrar" style="color: #ffffff !important; background: transparent; border: none;">
+                <i class="bi bi-x-lg fs-6" style="color: #ffffff !important;"></i>
             </button>
         </div>
     </div>
 
     <!-- Body / Chat Messages -->
-    <div class="inbox-ai-body" id="inboxAiBody">
-        <div class="ai-msg ai-msg-bot">
-            <div>¡Hola! 👋 Soy <strong>Inbox AI</strong>. Puedo ayudarte con procesos de la plataforma <strong>y también responder cualquier consulta general</strong> (redacción, cálculos, tecnología, gestión académica).</div>
-            <div class="ai-chips">
-                <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cuál es el estado actual de morosidad?')">📊 Morosidad</button>
-                <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cuántos cursos activos tenemos?')">🎓 Cursos activos</button>
-                <button type="button" class="ai-chip" onclick="inboxAiAsk('Ayúdame a redactar un comunicado cordial para un estudiante')">✉️ Redactar correo</button>
-                <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cómo genero una boleta de pago o cobro de uniforme?')">💳 Cobros y boletas</button>
-            </div>
-        </div>
-    </div>
+    <div class="inbox-ai-body" id="inboxAiBody"></div>
 
     <!-- Footer / Input -->
     <div class="inbox-ai-footer">
@@ -298,17 +288,8 @@
 
         resetBtn.addEventListener('click', () => {
             chatHistory = [];
-            body.innerHTML = `
-                <div class="ai-msg ai-msg-bot">
-                    <div>¡Hola! 👋 Soy <strong>Inbox AI</strong>. Puedo ayudarte con procesos de la plataforma <strong>y también responder cualquier consulta general</strong>.</div>
-                    <div class="ai-chips">
-                        <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cuál es el estado actual de morosidad?')">📊 Morosidad</button>
-                        <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cuántos cursos activos tenemos?')">🎓 Cursos activos</button>
-                        <button type="button" class="ai-chip" onclick="inboxAiAsk('Ayúdame a redactar un comunicado cordial para un estudiante')">✉️ Redactar correo</button>
-                        <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cómo genero una boleta de pago o cobro de uniforme?')">💳 Cobros y boletas</button>
-                    </div>
-                </div>
-            `;
+            body.innerHTML = '';
+            input.focus();
         });
 
         window.inboxAiAsk = function(question) {
