@@ -213,6 +213,9 @@
                     <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" onclick="agregarCursoSupervisionSeleccionado()">
                         <i class="bi bi-plus-circle me-1"></i> Agregar a Supervisión
                     </button>
+                    <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-bold" onclick="agregarTodosSupervisionPeriodo()">
+                        <i class="bi bi-check2-all me-1"></i> Activar todos ({{ count($cursos_disponibles) }})
+                    </button>
                 </div>
             </div>
         @endif
@@ -432,19 +435,43 @@
         });
     }
 
-    function agregarCursoSupervisionSeleccionado() {
+    async function agregarCursoSupervisionSeleccionado() {
         const idCurso = document.getElementById('selectCursoAgregarSupervision')?.value;
         if (!idCurso) return;
-        $.post("{{ route('supervision.toggle') }}", {
-            _token: "{{ csrf_token() }}",
-            id_curso_activo: idCurso
-        }, function(res) {
-            if (res.success) {
-                location.reload();
-            } else {
-                alert(res.message || 'No se pudo agregar el curso a supervisión.');
-            }
+        const res = await fetch("{{ route('supervision.toggle') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ id: idCurso })
         });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'No se pudo agregar el curso a supervisión.');
+        }
+    }
+
+    async function agregarTodosSupervisionPeriodo() {
+        const select = document.getElementById('selectCursoAgregarSupervision');
+        if (!select) return;
+        const ids = Array.from(select.options).map(o => o.value).filter(Boolean);
+        if (!ids.length) return;
+        for (const idCurso of ids) {
+            await fetch("{{ route('supervision.toggle') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ id: idCurso })
+            });
+        }
+        location.reload();
     }
 
     function toggleSupervision(idCurso) {

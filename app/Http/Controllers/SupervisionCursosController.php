@@ -96,7 +96,7 @@ class SupervisionCursosController extends Controller
             return response()->json(['success' => false, 'message' => 'No autorizado']);
         }
 
-        $id = $request->input('id');
+        $id = $request->input('id') ?? $request->input('id_curso_activo');
         $curso = CursoActivo::findOrFail($id);
 
         $nuevo_estado = ($curso->en_supervision == 1) ? 0 : 1;
