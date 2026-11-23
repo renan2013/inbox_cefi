@@ -53,10 +53,10 @@
                                     <td class="text-muted small">{{ $or->descripcion ?: '—' }}</td>
                                     <td class="text-end font-monospace">¢{{ number_format((float)$or->precio, 2) }}</td>
                                     <td class="text-end">
-                                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" onclick='editarOtroRubroModal({{ $or->id }}, @js($or->nombre), @js($or->descripcion ?? ""), {{ (float)$or->precio }})' title="Editar">
+                                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editarOtroRubroPorId({{ (int)$or->id }})" title="Editar">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick='eliminarOtroRubroModal({{ $or->id }}, @js($or->nombre))' title="Eliminar">
+                                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarOtroRubroPorId({{ (int)$or->id }})" title="Eliminar">
                                             <i class="bi bi-trash3"></i>
                                         </button>
                                     </td>
@@ -82,6 +82,27 @@
         document.getElementById('btn-cancelar-otro-rubro').style.display = 'none';
     }
 
+    function escapeHtmlRubro(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function editarOtroRubroPorId(id) {
+        const item = (window.OTROS_RUBROS_CATALOGO || []).find(r => Number(r.id) === Number(id));
+        if (!item) return;
+        editarOtroRubroModal(item.id, item.nombre || '', item.descripcion || '', Number(item.precio || 0));
+    }
+
+    function eliminarOtroRubroPorId(id) {
+        const item = (window.OTROS_RUBROS_CATALOGO || []).find(r => Number(r.id) === Number(id));
+        const nombre = item ? item.nombre : `#${id}`;
+        eliminarOtroRubroModal(id, nombre);
+    }
+
     function editarOtroRubroModal(id, nombre, descripcion, precio) {
         document.getElementById('otro-rubro-id').value = id;
         document.getElementById('otro-rubro-nombre').value = nombre;
@@ -94,20 +115,27 @@
 
     async function eliminarOtroRubroModal(id, nombre) {
         if (!confirm(`¿Eliminar el rubro "${nombre}" del catálogo?`)) return;
-        const res = await fetch(`/rubros-otros/${id}/eliminar`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
+        try {
+            const res = await fetch(`{{ url('/rubros-otros') }}/${id}/eliminar`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                window.OTROS_RUBROS_CATALOGO = window.OTROS_RUBROS_CATALOGO.filter(r => Number(r.id) !== Number(id));
+                document.querySelector(`#tabla-otros-rubros-catalogo tr[data-id="${id}"]`)?.remove();
+                if (Number(document.getElementById('otro-rubro-id').value) === Number(id)) {
+                    resetFormOtroRubro();
+                }
+                if (typeof window.onOtrosRubrosUpdated === 'function') window.onOtrosRubrosUpdated();
+            } else {
+                alert(data.message || 'No se pudo eliminar el rubro.');
             }
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-            window.OTROS_RUBROS_CATALOGO = window.OTROS_RUBROS_CATALOGO.filter(r => Number(r.id) !== Number(id));
-            document.querySelector(`#tabla-otros-rubros-catalogo tr[data-id="${id}"]`)?.remove();
-            if (typeof window.onOtrosRubrosUpdated === 'function') window.onOtrosRubrosUpdated();
-        } else {
-            alert(data.message || 'No se pudo eliminar el rubro.');
+        } catch (err) {
+            alert('Error de conexión al eliminar el rubro.');
         }
     }
 
@@ -148,15 +176,15 @@
                 const tbody = document.querySelector('#tabla-otros-rubros-catalogo tbody');
                 if (tbody) {
                     tbody.innerHTML = window.OTROS_RUBROS_CATALOGO.map(item => `
-                        <tr data-id="${item.id}" data-nombre="${item.nombre}" data-descripcion="${item.descripcion || ''}" data-precio="${item.precio}">
-                            <td class="fw-semibold">${item.nombre}</td>
-                            <td class="text-muted small">${item.descripcion || '—'}</td>
+                        <tr data-id="${item.id}" data-nombre="${escapeHtmlRubro(item.nombre)}" data-descripcion="${escapeHtmlRubro(item.descripcion || '')}" data-precio="${item.precio}">
+                            <td class="fw-semibold">${escapeHtmlRubro(item.nombre)}</td>
+                            <td class="text-muted small">${item.descripcion ? escapeHtmlRubro(item.descripcion) : '—'}</td>
                             <td class="text-end font-monospace">¢${Number(item.precio).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             <td class="text-end">
-                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" onclick='editarOtroRubroModal(${item.id}, ${JSON.stringify(item.nombre)}, ${JSON.stringify(item.descripcion || "")}, ${Number(item.precio)})' title="Editar">
+                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" onclick="editarOtroRubroPorId(${Number(item.id)})" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick='eliminarOtroRubroModal(${item.id}, ${JSON.stringify(item.nombre)})' title="Eliminar">
+                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarOtroRubroPorId(${Number(item.id)})" title="Eliminar">
                                     <i class="bi bi-trash3"></i>
                                 </button>
                             </td>
