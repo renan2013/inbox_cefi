@@ -26,7 +26,7 @@
 
     <div class="sheet">
         <div class="text-center">
-            <img src="{{ asset(config('cliente.logo_Institucional', 'imgs/logo_cefi_oficial.png')) }}" alt="Logo" style="max-height: 95px;">
+            <img src="{{ asset(ltrim(config('cliente.logo_url', 'imgs/logo_cefi.png'), '/')) }}" alt="{{ config('cliente.nombre', 'CEFI') }}" style="max-height: 95px;">
             <h5 class="fw-bold mt-2 mb-0" style="color:#003b73;">{{ config('cliente.nombre_legal', 'CENTRO DE ENSEÑANZA DE FORMACIÓN INTEGRAL') }}</h5>
             <div class="fw-bold text-success">{{ $curso->planEstudio->programa->nombre_programa ?? 'Programa Académico' }}</div>
             <h4 class="fw-extrabold mt-2 mb-0">INFORME EJECUTIVO Y NÓMINA OFICIAL DE CURSO</h4>
