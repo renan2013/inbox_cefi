@@ -1,89 +1,109 @@
 @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
-<!-- Widget Flotante de Chat Inteligente: Inbox AI 2.0 (Laravel View) -->
+<!-- Widget Flotante de Asistente IA: Inbox AI -->
 <style>
     .inbox-ai-fab {
         position: fixed;
-        top: 50%;
-        right: 20px;
-        transform: translateY(-50%);
-        width: 60px;
-        height: 60px;
+        bottom: 26px;
+        right: 24px;
+        width: 66px;
+        height: 66px;
         border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary, #5fb230) 0%, #3b82f6 100%);
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #0ea5e9 100%);
         color: white;
-        border: none;
-        box-shadow: 0 10px 25px rgba(95, 178, 48, 0.4);
+        border: 2px solid rgba(56, 189, 248, 0.55);
+        box-shadow: 0 12px 30px rgba(14, 165, 233, 0.42), 0 0 0 0 rgba(56, 189, 248, 0.45);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.6rem;
         cursor: pointer;
         z-index: 9999;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: aiFabPulse 2.8s infinite;
+    }
+    @keyframes aiFabPulse {
+        0% { box-shadow: 0 12px 30px rgba(14, 165, 233, 0.42), 0 0 0 0 rgba(56, 189, 248, 0.45); }
+        70% { box-shadow: 0 12px 30px rgba(14, 165, 233, 0.42), 0 0 0 14px rgba(56, 189, 248, 0); }
+        100% { box-shadow: 0 12px 30px rgba(14, 165, 233, 0.42), 0 0 0 0 rgba(56, 189, 248, 0); }
     }
     .inbox-ai-fab:hover {
-        transform: translateY(-50%) scale(1.1) rotate(5deg);
-        box-shadow: 0 15px 30px rgba(95, 178, 48, 0.5);
+        transform: translateY(-4px) scale(1.08);
+        box-shadow: 0 18px 36px rgba(14, 165, 233, 0.58);
     }
     .inbox-ai-fab .ai-badge {
         position: absolute;
         top: -4px;
         right: -4px;
-        background: #ef4444;
-        color: white;
+        background: linear-gradient(135deg, #10b981, #0ea5e9);
+        color: #ffffff;
         font-size: 0.65rem;
         font-weight: 800;
-        padding: 2px 6px;
+        letter-spacing: 0.5px;
+        padding: 2px 7px;
         border-radius: 50rem;
         border: 2px solid #ffffff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     }
 
-    /* Modal de Chat */
+    /* Ventana de Chat IA */
     .inbox-ai-card {
         position: fixed;
-        top: 50%;
-        right: 92px;
-        transform: translateY(-50%);
-        width: 380px;
-        height: 520px;
-        max-width: calc(100vw - 110px);
-        max-height: calc(100vh - 80px);
+        bottom: 104px;
+        right: 24px;
+        width: 410px;
+        height: 560px;
+        max-width: calc(100vw - 32px);
+        max-height: calc(100vh - 130px);
         background: var(--card-dark, #ffffff);
-        border-radius: 1.5rem;
-        border: 1px solid var(--border-dark, #e2e8f0);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border-radius: 1.35rem;
+        border: 1px solid rgba(56, 189, 248, 0.28);
+        box-shadow: 0 24px 55px rgba(15, 23, 42, 0.34);
         display: none;
         flex-direction: column;
         z-index: 9999;
         overflow: hidden;
-        animation: aiSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: aiSlideUp 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     @media (max-width: 576px) {
         .inbox-ai-card {
             right: 16px;
+            bottom: 98px;
             max-width: calc(100vw - 32px);
         }
     }
 
     @keyframes aiSlideUp {
-        from { opacity: 0; transform: translateY(-45%) scale(0.95); }
-        to { opacity: 1; transform: translateY(-50%) scale(1); }
+        from { opacity: 0; transform: translateY(14px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .inbox-ai-header {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+        background: linear-gradient(135deg, #0b1120 0%, #1e293b 65%, #0f3a60 100%) !important;
         color: #ffffff !important;
-        padding: 1.15rem 1.25rem;
+        padding: 1rem 1.2rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.22);
+    }
+
+    .inbox-ai-avatar-wrap {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), rgba(16, 185, 129, 0.22));
+        border: 1px solid rgba(56, 189, 248, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
     }
 
     .inbox-ai-header-title {
         color: #ffffff !important;
         font-weight: 800 !important;
         font-size: 1rem !important;
+        letter-spacing: -0.01em;
     }
 
     .inbox-ai-body {
@@ -97,11 +117,11 @@
     }
 
     .ai-msg {
-        max-width: 85%;
-        padding: 0.85rem 1.1rem;
-        border-radius: 1.15rem;
+        max-width: 88%;
+        padding: 0.85rem 1.05rem;
+        border-radius: 1.1rem;
         font-size: 0.9rem;
-        line-height: 1.45;
+        line-height: 1.5;
         word-wrap: break-word;
     }
 
@@ -111,27 +131,28 @@
         border: 1px solid var(--border-dark, #e2e8f0);
         border-bottom-left-radius: 0.25rem;
         align-self: flex-start;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
     }
 
     .ai-msg-user {
-        background: linear-gradient(135deg, var(--primary, #5fb230) 0%, #4e9a26 100%);
-        color: white;
+        background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+        color: #ffffff;
         border-bottom-right-radius: 0.25rem;
         align-self: flex-end;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
     }
 
     .ai-chips {
         display: flex;
         flex-wrap: wrap;
         gap: 0.4rem;
-        margin-top: 0.5rem;
+        margin-top: 0.6rem;
     }
 
     .ai-chip {
-        background: var(--card-dark, #ffffff);
-        border: 1.5px solid var(--border-dark, #cbd5e1);
-        color: var(--text-light, #334155);
+        background: rgba(14, 165, 233, 0.08);
+        border: 1px solid rgba(14, 165, 233, 0.28);
+        color: #0284c7;
         font-size: 0.75rem;
         font-weight: 600;
         padding: 0.35rem 0.75rem;
@@ -141,9 +162,9 @@
     }
 
     .ai-chip:hover {
-        background: rgba(95, 178, 48, 0.15);
-        border-color: var(--primary, #5fb230);
-        color: var(--primary, #5fb230);
+        background: #0ea5e9;
+        border-color: #0ea5e9;
+        color: #ffffff;
     }
 
     .inbox-ai-footer {
@@ -164,7 +185,7 @@
     .typing-dot {
         width: 6px;
         height: 6px;
-        background: #94a3b8;
+        background: #38bdf8;
         border-radius: 50%;
         animation: typingDot 1.4s infinite ease-in-out;
     }
@@ -178,10 +199,20 @@
     }
 </style>
 
-<!-- Botón Flotante (FAB) -->
-<button type="button" class="inbox-ai-fab" id="inboxAiFab" title="Consultar a Inbox AI 2.0">
-    <i class="bi bi-robot"></i>
-    <span class="ai-badge">2.0</span>
+<!-- Botón Flotante (FAB) con Robot IA SVG -->
+<button type="button" class="inbox-ai-fab" id="inboxAiFab" title="Consultar a Inbox AI">
+    <svg width="34" height="34" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="24" y1="6" x2="24" y2="13" stroke="#38bdf8" stroke-width="2.6" stroke-linecap="round"/>
+        <circle cx="24" cy="5" r="3" fill="#34d399"/>
+        <rect x="9" y="13" width="30" height="23" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="2.4"/>
+        <rect x="13" y="18" width="22" height="11" rx="5" fill="#1e293b"/>
+        <circle cx="19" cy="23.5" r="2.7" fill="#38bdf8"/>
+        <circle cx="29" cy="23.5" r="2.7" fill="#34d399"/>
+        <path d="M18 32.5C20 34.2 28 34.2 30 32.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+        <rect x="5" y="20" width="4" height="8" rx="2" fill="#38bdf8"/>
+        <rect x="39" y="20" width="4" height="8" rx="2" fill="#38bdf8"/>
+    </svg>
+    <span class="ai-badge">IA</span>
 </button>
 
 <!-- Ventana de Chat -->
@@ -189,23 +220,31 @@
     <!-- Header -->
     <div class="inbox-ai-header">
         <div class="d-flex align-items-center gap-2">
-            <div class="p-2 rounded-circle text-white d-flex align-items-center justify-content-center" style="width:36px; height:36px; background-color: var(--primary, #5fb230) !important;">
-                <i class="bi bi-robot fs-5 text-white"></i>
+            <div class="inbox-ai-avatar-wrap">
+                <svg width="26" height="26" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <line x1="24" y1="6" x2="24" y2="13" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="24" cy="5" r="3" fill="#34d399"/>
+                    <rect x="9" y="13" width="30" height="23" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5"/>
+                    <circle cx="19" cy="23.5" r="2.8" fill="#38bdf8"/>
+                    <circle cx="29" cy="23.5" r="2.8" fill="#34d399"/>
+                    <path d="M18 32.5C20 34.2 28 34.2 30 32.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+                </svg>
             </div>
             <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <img src="{{ asset('imgs/SVG/logo_blanco.svg') }}" alt="Inbox Logo" style="height: 20px; width: auto;">
-                    <span class="inbox-ai-header-title">AI</span>
-                    <span class="badge bg-success rounded-pill x-small fw-bold" style="background-color: var(--primary, #5fb230) !important; color: #ffffff !important;">2.0</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="inbox-ai-header-title">Inbox AI</span>
+                    <span class="badge rounded-pill fw-bold" style="background: linear-gradient(135deg, #10b981, #0ea5e9); color: #ffffff; font-size: 0.65rem;">IA Generativa</span>
                 </div>
-                <small class="x-small" style="color: rgba(255,255,255,0.7) !important;"><i class="bi bi-circle-fill text-success me-1" style="font-size: 8px;"></i> Tutor Virtual del Sistema</small>
+                <small class="d-block" style="color: rgba(255,255,255,0.75) !important; font-size: 0.74rem;">
+                    <i class="bi bi-circle-fill me-1" style="font-size: 7px; color: #34d399;"></i> En línea · Asistente de Inbox y consultas generales
+                </small>
             </div>
         </div>
         <div class="d-flex align-items-center gap-1">
-            <button type="button" class="btn btn-sm text-white p-1 hover-white" id="inboxAiReset" title="Reiniciar chat">
+            <button type="button" class="btn btn-sm text-white p-1" id="inboxAiReset" title="Nueva conversación">
                 <i class="bi bi-arrow-clockwise fs-6 text-white"></i>
             </button>
-            <button type="button" class="btn btn-sm text-white p-1 hover-white" id="inboxAiClose">
+            <button type="button" class="btn btn-sm text-white p-1" id="inboxAiClose" title="Cerrar">
                 <i class="bi bi-x-lg fs-6 text-white"></i>
             </button>
         </div>
@@ -214,14 +253,20 @@
     <!-- Body / Chat Messages -->
     <div class="inbox-ai-body" id="inboxAiBody">
         <div class="ai-msg ai-msg-bot">
-            ¡Hola! 👋 ¿Qué quieres saber acerca de Inbox?
+            <div>¡Hola! 👋 Soy <strong>Inbox AI</strong>. Puedo ayudarte con procesos de la plataforma <strong>y también responder cualquier consulta general</strong> (redacción, cálculos, tecnología, gestión académica).</div>
+            <div class="ai-chips">
+                <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cuál es el estado actual de morosidad?')">📊 Morosidad</button>
+                <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cuántos cursos activos tenemos?')">🎓 Cursos activos</button>
+                <button type="button" class="ai-chip" onclick="inboxAiAsk('Ayúdame a redactar un comunicado cordial para un estudiante')">✉️ Redactar correo</button>
+                <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cómo genero una boleta de pago o cobro de uniforme?')">💳 Cobros y boletas</button>
+            </div>
         </div>
     </div>
 
     <!-- Footer / Input -->
     <div class="inbox-ai-footer">
-        <input type="text" id="inboxAiInput" class="form-control rounded-pill border-1" placeholder="¿Qué quieres saber acerca de Inbox?..." autocomplete="off">
-        <button type="button" class="btn btn-success rounded-circle d-flex align-items-center justify-content-center p-0" id="inboxAiSend" style="width: 40px; height: 40px; background-color: var(--primary, #5fb230) !important; border: none;">
+        <input type="text" id="inboxAiInput" class="form-control rounded-pill border-1" placeholder="Pregúntame sobre Inbox o cualquier tema..." autocomplete="off">
+        <button type="button" class="btn rounded-circle d-flex align-items-center justify-content-center p-0" id="inboxAiSend" style="width: 40px; height: 40px; background: linear-gradient(135deg, #0ea5e9, #10b981); border: none;">
             <i class="bi bi-send-fill text-white fs-6"></i>
         </button>
     </div>
@@ -239,6 +284,7 @@
 
         const n8nAiWebhookUrl = '{{ route('inbox_ai.chat') }}';
         const csrfToken = '{{ csrf_token() }}';
+        let chatHistory = [];
 
         if (!fab || !card) return;
 
@@ -251,9 +297,16 @@
         closeBtn.addEventListener('click', () => card.style.display = 'none');
 
         resetBtn.addEventListener('click', () => {
+            chatHistory = [];
             body.innerHTML = `
                 <div class="ai-msg ai-msg-bot">
-                    ¡Hola! 👋 ¿Qué quieres saber acerca de Inbox?
+                    <div>¡Hola! 👋 Soy <strong>Inbox AI</strong>. Puedo ayudarte con procesos de la plataforma <strong>y también responder cualquier consulta general</strong>.</div>
+                    <div class="ai-chips">
+                        <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cuál es el estado actual de morosidad?')">📊 Morosidad</button>
+                        <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cuántos cursos activos tenemos?')">🎓 Cursos activos</button>
+                        <button type="button" class="ai-chip" onclick="inboxAiAsk('Ayúdame a redactar un comunicado cordial para un estudiante')">✉️ Redactar correo</button>
+                        <button type="button" class="ai-chip" onclick="inboxAiAsk('¿Cómo genero una boleta de pago o cobro de uniforme?')">💳 Cobros y boletas</button>
+                    </div>
                 </div>
             `;
         });
@@ -272,15 +325,21 @@
             }
         });
 
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
         function sendMessage() {
             const text = input.value.trim();
             if (!text) return;
 
-            appendMessage(text, 'user');
+            appendMessage(escapeHtml(text), 'user');
             input.value = '';
 
             const typingId = appendTypingIndicator();
             scrollToBottom();
+
+            const historyToSend = chatHistory.slice(-8);
 
             fetch(n8nAiWebhookUrl, {
                 method: 'POST',
@@ -290,6 +349,7 @@
                 },
                 body: JSON.stringify({
                     query: text,
+                    history: historyToSend,
                     timestamp: new Date().toISOString(),
                     origen: 'inbox_bpm_laravel_2.0'
                 })
@@ -298,23 +358,21 @@
             .then(data => {
                 removeTypingIndicator(typingId);
                 let replyText = typeof data === 'string' ? data : (data.reply || data.output || data.message || JSON.stringify(data));
-                
+
                 if (replyText === "Workflow was started") {
-                    replyText = "💡 **Configuración en n8n:**<br>Recibí tu consulta. Por favor en tu n8n abre el primer nodo (<strong>Webhook Inbox AI</strong>), cambia el campo <strong>Respond</strong> a <strong>Using 'Respond to Webhook' Node</strong> y guarda cambios para ver la respuesta completa en tiempo real.";
+                    replyText = "💡 <strong>Configuración en n8n:</strong><br>Recibí tu consulta. En tu n8n abre el nodo Webhook y selecciona <strong>Using 'Respond to Webhook' Node</strong>.";
                 }
                 appendMessage(replyText, 'bot');
-            })
-            .catch(err => {
-                removeTypingIndicator(typingId);
-                let fallbackMsg = "Te estoy escuchando. En este momento el webhook de n8n VPS (`/inbox-ai-chat`) está inicializando.";
-                if (text.toLowerCase().includes('mora') || text.toLowerCase().includes('deudores')) {
-                    fallbackMsg = "📊 **Resumen de Morosidad (Inbox 2.0):**<br>Actualmente el sistema registra cuotas pendientes. Puedes consultar el listado en el <a href='{{ route('boletas.morosidad') }}'>Control de Morosidad</a>.";
-                } else if (text.toLowerCase().includes('curso') || text.toLowerCase().includes('activo')) {
-                    fallbackMsg = "🎓 **Cursos Activos (Inbox 2.0):**<br>Puedes revisar la oferta académica y notificaciones en el panel de <a href='{{ route('mis_cursos.index') }}'>Supervisión de Cursos</a>.";
-                } else if (text.toLowerCase().includes('boleta') || text.toLowerCase().includes('crear')) {
-                    fallbackMsg = "💡 **Ayuda de Boletas (Inbox 2.0):**<br>Para emitir una boleta de pago, dirígete al menú **Registro -> Generar Boleta de Pago**.";
+
+                chatHistory.push({ role: 'user', text: text });
+                const plainReply = replyText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                if (plainReply) {
+                    chatHistory.push({ role: 'model', text: plainReply.slice(0, 1200) });
                 }
-                appendMessage(fallbackMsg, 'bot');
+            })
+            .catch(() => {
+                removeTypingIndicator(typingId);
+                appendMessage("No se pudo conectar en este momento con el asistente IA. Intenta de nuevo en unos segundos.", 'bot');
             });
         }
 
@@ -333,7 +391,7 @@
             div.className = 'ai-msg ai-msg-bot';
             div.innerHTML = `
                 <div class="d-flex align-items-center gap-2">
-                    <span class="small text-muted">Inbox AI 2.0 pensando</span>
+                    <span class="small text-muted">Inbox AI pensando</span>
                     <div class="typing-indicator">
                         <div class="typing-dot"></div>
                         <div class="typing-dot"></div>

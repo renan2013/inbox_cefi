@@ -127,23 +127,43 @@ class InboxAiController extends Controller
             }
         } catch (\Exception $e) {}
 
-        // 2. PRIORIDAD 2: Conectar directamente con Google Gemini API (Gemini Pro / Flash)
+        // 2. PRIORIDAD 2: Conectar directamente con Google Gemini API (Asistente General + Contexto Inbox)
         $gemini_key = config('services.gemini.api_key', '');
         if (!empty($gemini_key)) {
             try {
                 $appName = config('app.name', 'Inbox BPM');
                 $appUrl = config('app.url', 'https://cefi.cr.com');
-                $sys_info = "REGLA OBLIGATORIA: Responde DIRECTAMENTE a la consulta sin presentaciones repetitivas, sin frases introductorias como 'Hola, soy Inbox AI...' ni saludos largos. Ve directo al grano con la respuesta o contenido solicitado. Eres el copiloto inteligente de {$appName}. El sitio web oficial es {$appUrl}. Responde en español con formato limpio, claro y estructurado.";
-                
-                $response_g = Http::timeout(8)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$gemini_key}", [
-                    'contents' => [
-                        [
-                            'role' => 'user',
-                            'parts' => [
-                                ['text' => $sys_info . "\n\nConsulta del usuario ({$user_name}): " . $query]
-                            ]
-                        ]
-                    ]
+                $totalVencidoFmt = number_format($total_vencido, 2);
+                $sys_info = "Eres Inbox AI, un asistente inteligente universal integrado en {$appName} ({$appUrl}). "
+                    . "Puedes responder con precisión tanto consultas sobre la plataforma {$appName} (módulos de Usuarios, Programas, Grupos, Boletas, Otros Rubros de Pago, Morosidad, Expedientes, Sílabos y Moodle) "
+                    . "como CUALQUIER consulta de conocimiento general (redacción de correos/cartas, educación, matemáticas, Excel, tecnología, administración, etc.). "
+                    . "Datos en tiempo real del sistema: Estudiantes con deuda pendiente = {$total_deudores}, Total vencido = ₡{$totalVencidoFmt}, Cursos activos = {$total_cursos_activos}. "
+                    . "Responde siempre en español de forma clara, directa, amable y bien estructurada, sin saludos repetitivos ni presentaciones largas.";
+
+                $contents = [];
+                $history = $request->input('history', []);
+                if (is_array($history)) {
+                    foreach (array_slice($history, -8) as $turn) {
+                        $role = ($turn['role'] ?? '') === 'model' ? 'model' : 'user';
+                        $txt = trim((string)($turn['text'] ?? ''));
+                        if ($txt !== '') {
+                            $contents[] = [
+                                'role' => $role,
+                                'parts' => [['text' => $txt]],
+                            ];
+                        }
+                    }
+                }
+                $contents[] = [
+                    'role' => 'user',
+                    'parts' => [['text' => "Consulta actual ({$user_name}): " . $query]],
+                ];
+
+                $response_g = Http::timeout(20)->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$gemini_key}", [
+                    'systemInstruction' => [
+                        'parts' => [['text' => $sys_info]],
+                    ],
+                    'contents' => $contents,
                 ]);
 
                 if ($response_g->successful()) {
@@ -151,8 +171,10 @@ class InboxAiController extends Controller
                     if (isset($data_g['candidates'][0]['content']['parts'][0]['text'])) {
                         $raw_text = trim($data_g['candidates'][0]['content']['parts'][0]['text']);
                         if (!empty($raw_text)) {
-                            $clean_text = nl2br(e($raw_text));
-                            $clean_text = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $clean_text);
+                            $clean_text = e($raw_text);
+                            $clean_text = preg_replace('/\*\*(.*?)\*\*/s', '<strong>$1</strong>', $clean_text);
+                            $clean_text = preg_replace('/`([^`]+)`/', '<code style="background:rgba(14,165,233,0.1);padding:1px 5px;border-radius:4px;">$1</code>', $clean_text);
+                            $clean_text = nl2br($clean_text);
                             return response()->json(['reply' => $clean_text]);
                         }
                     }
