@@ -231,8 +231,9 @@
                 <a href="{{ route('estudiante.mi_record_pdf', $pdfParams) }}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm">
                     <i class="bi bi-file-earmark-pdf me-2"></i> Mi Récord Académico (PDF)
                 </a>
-                @if(config('cliente.campus_url'))
-                    <a href="{{ config('cliente.campus_url') }}" target="_blank" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold shadow-sm">
+                @php $campusVirtualUrl = config('cliente.campus_virtual') ?: config('cliente.campus_url'); @endphp
+                @if($campusVirtualUrl)
+                    <a href="{{ $campusVirtualUrl }}" target="_blank" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold shadow-sm">
                         <i class="bi bi-mortarboard me-2"></i> Campus Virtual Moodle
                     </a>
                 @endif
@@ -381,8 +382,9 @@
                                     <i class="bi bi-camera-video me-1"></i> Clase en Vivo
                                 </a>
                             @endif
-                            @if(config('cliente.campus_url'))
-                                <a href="{{ config('cliente.campus_url') }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 flex-fill">
+                            @php $campusAulaUrl = config('cliente.campus_virtual') ?: config('cliente.campus_url'); @endphp
+                            @if($campusAulaUrl)
+                                <a href="{{ $campusAulaUrl }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 flex-fill">
                                     <i class="bi bi-box-arrow-up-right me-1"></i> Aula Virtual
                                 </a>
                             @endif
@@ -522,14 +524,17 @@
                                 </td>
                                 <td>
                                     @php
-                                        $estadoPago = $b->estado ?? 'Pendiente';
+                                        $estadoPagoRaw = strtolower((string)($b->estado ?? 'pendiente'));
+                                        $estadoPagoLabel = ucfirst(str_replace('_', ' ', $estadoPagoRaw));
                                     @endphp
-                                    @if($estadoPago === 'Pagada')
+                                    @if($estadoPagoRaw === 'pagada')
                                         <span class="badge bg-success bg-opacity-25 text-success rounded-pill px-2 py-1">Pagada</span>
-                                    @elseif($estadoPago === 'Parcial')
+                                    @elseif(in_array($estadoPagoRaw, ['pago_parcial', 'parcial'], true))
                                         <span class="badge bg-warning bg-opacity-25 text-warning rounded-pill px-2 py-1">Pago Parcial</span>
+                                    @elseif($estadoPagoRaw === 'pendiente_firma')
+                                        <span class="badge bg-info bg-opacity-25 text-info rounded-pill px-2 py-1">Pendiente Firma</span>
                                     @else
-                                        <span class="badge bg-danger bg-opacity-25 text-danger rounded-pill px-2 py-1">{{ $estadoPago }}</span>
+                                        <span class="badge bg-danger bg-opacity-25 text-danger rounded-pill px-2 py-1">{{ $estadoPagoLabel }}</span>
                                     @endif
                                 </td>
                                 <td class="text-end">
@@ -635,7 +640,12 @@
                                         <span class="text-muted small" style="font-size: 0.75rem;">{{ $arch->categoria ?? 'Expediente' }}</span>
                                     </div>
                                 </div>
-                                <a href="{{ asset('storage/' . $arch->ruta_archivo) }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle" title="Ver documento">
+                                @php
+                                    $docUrl = !empty($arch->nombre_servidor)
+                                        ? (\App\Services\ExpedienteStorageService::resolveFilePath($arch->nombre_servidor)['web_url'] ?? asset('storage/' . $arch->ruta_archivo))
+                                        : asset('storage/' . $arch->ruta_archivo);
+                                @endphp
+                                <a href="{{ $docUrl }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle" title="Ver documento">
                                     <i class="bi bi-eye"></i>
                                 </a>
                             </div>

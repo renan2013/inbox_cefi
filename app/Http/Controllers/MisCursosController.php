@@ -558,9 +558,9 @@ class MisCursosController extends Controller
 
             // Obtener ID de rol miembro / estudiante
             $default_id_rol = DB::table('roles')
-                ->where('nombre', 'Miembro')
-                ->orWhere('nombre', 'Estudiante')
-                ->value('id') ?? 2;
+                ->where('nombre', 'Estudiante')
+                ->orWhere('nombre', 'Miembro')
+                ->value('id') ?? 3;
 
             foreach ($moodle_users as $m_user) {
                 $email = trim($m_user['email'] ?? '');
@@ -971,7 +971,7 @@ class MisCursosController extends Controller
         if ($curso->id_moodle > 0 && file_exists(public_path('uploads/portadas/miniatura_curso_' . $id . '.png'))) {
             $miniatura_base64 = base64_encode(file_get_contents(public_path('uploads/portadas/miniatura_curso_' . $id . '.png')));
             
-            $bridge_img_url = rtrim(config('cliente.campus_virtual', 'https://virtual.cefi.cr'), '/') . '/moodle_bridge.php';
+            $bridge_img_url = rtrim(config('cliente.campus_virtual', 'https://virtual.cefi.cr'), '/') . '/webservice/moodle_bridge.php';
             try {
                 Http::withoutVerifying()->timeout(15)->post($bridge_img_url, [
                     'token' => config('services.moodle.token', ''),

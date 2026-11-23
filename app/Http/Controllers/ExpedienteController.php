@@ -88,6 +88,9 @@ class ExpedienteController extends Controller
             ->leftJoin('programas as p', 'pe.id_programa', '=', 'p.id_programa')
             ->leftJoin('usuarios as u_prof', 'ca.id_profesor', '=', 'u_prof.id')
             ->where('m.id_estudiante', $idUsuario)
+            ->where(function ($q) {
+                $q->whereNull('m.estado')->orWhere('m.estado', '!=', 'Retirado');
+            })
             ->select(
                 'm.id_matricula', 'm.calificacion', 'm.comentarios',
                 'ca.id_curso_activo', 'ca.periodo', 'ca.fecha_inicio', 'ca.fecha_final', 'ca.check_acta',
@@ -147,8 +150,9 @@ class ExpedienteController extends Controller
 
         $promedioGpa = ($totalCreditosCursados > 0) ? round($sumaPonderada / $totalCreditosCursados, 2) : 0.00;
 
-        // 3. Finanzas / Boletas y Cuotas
+        // 3. Finanzas / Boletas y Cuotas (excluyendo boletas anuladas)
         $boletas = Boleta::where('id_estudiante', $idUsuario)
+            ->whereRaw("LOWER(COALESCE(estado, '')) != 'anulada'")
             ->orderBy('fecha_creacion', 'desc')
             ->get();
 
@@ -164,9 +168,8 @@ class ExpedienteController extends Controller
             $totalPagado += (float)($b->monto_pagado ?? 0);
 
             $cuotas = DB::table('seguimiento_pagos as sp')
-                ->leftJoin('pagos as p', 'p.boleta_id', '=', 'sp.id_boleta')
                 ->where('sp.id_boleta', $b->id)
-                ->select('sp.*', 'p.fecha_pago', 'p.ruta_comprobante')
+                ->select('sp.*')
                 ->orderBy('sp.numero_cuota', 'asc')
                 ->get();
 
@@ -659,6 +662,9 @@ class ExpedienteController extends Controller
             ->leftJoin('programas as p', 'pe.id_programa', '=', 'p.id_programa')
             ->leftJoin('usuarios as u_prof', 'ca.id_profesor', '=', 'u_prof.id')
             ->where('m.id_estudiante', $idUsuario)
+            ->where(function ($q) {
+                $q->whereNull('m.estado')->orWhere('m.estado', '!=', 'Retirado');
+            })
             ->select(
                 'm.id_matricula', 'm.calificacion', 'm.comentarios', 'm.estado as matricula_estado',
                 'ca.periodo', 'ca.fecha_inicio', 'ca.fecha_final', 'ca.check_acta',

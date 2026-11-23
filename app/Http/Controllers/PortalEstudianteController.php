@@ -124,7 +124,7 @@ class PortalEstudianteController extends Controller
                 'profesor'        => ($ca && $ca->profesor) ? "{$ca->profesor->nombre} {$ca->profesor->apellidos}" : 'Docente asignado',
                 'enlace_zoom'     => $ca ? $ca->enlace_zoom : null,
                 'horario'         => $ca ? ($ca->horario ?: ($ca->hora_inicio ? "{$ca->hora_inicio} - {$ca->hora_final}" : 'Virtual Asincrónico')) : 'Virtual',
-                'moodle_course_id'=> $ca ? $ca->moodle_course_id : null,
+                'moodle_course_id'=> $ca ? ($ca->moodle_course_id ?: $ca->id_moodle) : null,
             ];
         }
 
@@ -178,7 +178,7 @@ class PortalEstudianteController extends Controller
                 });
 
                 if (Schema::hasColumn('boletas', 'estado')) {
-                    $boletaQuery->where('estado', '!=', 'Anulada');
+                    $boletaQuery->whereRaw("LOWER(COALESCE(estado, '')) != 'anulada'");
                 }
 
                 $boletas = $boletaQuery->orderBy('id', 'desc')->get();
@@ -187,7 +187,10 @@ class PortalEstudianteController extends Controller
                 });
 
                 $boletasPorFirmar = $boletas->filter(function ($b) {
-                    return !empty($b->token_firma) && empty($b->ruta_firma) && empty($b->fecha_firma);
+                    return strtolower((string)($b->estado ?? '')) === 'pendiente_firma'
+                        && !empty($b->token_firma)
+                        && empty($b->ruta_firma)
+                        && empty($b->fecha_firma);
                 });
             }
         } catch (\Throwable $e) {

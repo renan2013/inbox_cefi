@@ -76,8 +76,12 @@ class ExpedientePDF extends FPDF
     public function toPdf($txt): string
     {
         if ($txt === null) return '';
-        $txt = str_replace('&nbsp;', ' ', $txt);
+        $txt = str_replace('&nbsp;', ' ', (string)$txt);
         $txt = html_entity_decode($txt, ENT_QUOTES, 'UTF-8');
+        $txt = strtr($txt, [
+            '“' => '"', '”' => '"', '‘' => "'", '’' => "'",
+            '–' => '-', '—' => '-', '•' => '-', '…' => '...',
+        ]);
         return mb_convert_encoding($txt, 'ISO-8859-1', 'UTF-8');
     }
 
@@ -214,33 +218,33 @@ class ExpedientePdfService
 
         $fnac = $expediente->fecha_nacimiento ? date('d/m/Y', strtotime($expediente->fecha_nacimiento)) : 'N/D';
         $pdf->Cell(45, 5, $pdf->toPdf("Fecha de Nacimiento: " . $fnac), 0, 0, 'L');
-        $pdf->Cell(50, 5, $pdf->toPdf("Lugar: " . ($expediente->lugar_nacimiento ?: 'Costa Rica')), 0, 0, 'L');
-        $pdf->Cell(45, 5, $pdf->toPdf("Nacionalidad: " . ($expediente->nacionalidad ?: 'Costarricense')), 0, 0, 'L');
+        $pdf->Cell(50, 5, $pdf->toPdf("Lugar: " . mb_substr((string)($expediente->lugar_nacimiento ?: 'N/D'), 0, 22, 'UTF-8')), 0, 0, 'L');
+        $pdf->Cell(45, 5, $pdf->toPdf("Nacionalidad: " . mb_substr((string)($expediente->nacionalidad ?: 'N/D'), 0, 18, 'UTF-8')), 0, 0, 'L');
         $pdf->Cell(40, 5, $pdf->toPdf("Género: " . ($expediente->genero ?: 'N/D')), 0, 1, 'L');
 
-        $pdf->Cell(45, 5, $pdf->toPdf("Estado Civil: " . ($expediente->estado_civil ?: 'Soltero(a)')), 0, 0, 'L');
-        $pdf->Cell(95, 5, $pdf->toPdf("Correo Personal: " . ($usuario->email ?? 'N/D')), 0, 0, 'L');
+        $pdf->Cell(45, 5, $pdf->toPdf("Estado Civil: " . ($expediente->estado_civil ?: 'N/D')), 0, 0, 'L');
+        $pdf->Cell(95, 5, $pdf->toPdf("Correo Personal: " . mb_substr((string)($usuario->email ?? 'N/D'), 0, 42, 'UTF-8')), 0, 0, 'L');
         $pdf->Cell(40, 5, $pdf->toPdf("Tel. Celular: " . ($expediente->contacto_tel_celular ?: ($usuario->telefono ?? 'N/D'))), 0, 1, 'L');
         $pdf->Ln(2);
 
         // --- II. DOMICILIO Y CONTACTO DE EMERGENCIA ---
         $imprimirSeccion("II. RESIDENCIA Y CONTACTOS DE EMERGENCIA");
         $pdf->SetFont('Arial', '', 8.5);
-        $pdf->Cell(60, 5, $pdf->toPdf("Provincia: " . ($expediente->domicilio_provincia ?: 'San José')), 0, 0, 'L');
-        $pdf->Cell(60, 5, $pdf->toPdf("Cantón: " . ($expediente->domicilio_canton ?: 'Central')), 0, 0, 'L');
-        $pdf->Cell(60, 5, $pdf->toPdf("Distrito: " . ($expediente->domicilio_distrito ?: 'Carmen')), 0, 1, 'L');
+        $pdf->Cell(60, 5, $pdf->toPdf("Provincia: " . mb_substr((string)($expediente->domicilio_provincia ?: 'N/D'), 0, 24, 'UTF-8')), 0, 0, 'L');
+        $pdf->Cell(60, 5, $pdf->toPdf("Cantón: " . mb_substr((string)($expediente->domicilio_canton ?: 'N/D'), 0, 24, 'UTF-8')), 0, 0, 'L');
+        $pdf->Cell(60, 5, $pdf->toPdf("Distrito: " . mb_substr((string)($expediente->domicilio_distrito ?: 'N/D'), 0, 24, 'UTF-8')), 0, 1, 'L');
 
-        $pdf->MultiCell(180, 5, $pdf->toPdf("Dirección: " . ($expediente->domicilio_direccion ?: 'San José, Costa Rica')), 0, 'L');
-        $pdf->Cell(65, 5, $pdf->toPdf("Tel. Habitación: " . ($expediente->contacto_tel_habitacion ?: 'N/D')), 0, 0, 'L');
-        $pdf->MultiCell(115, 5, $pdf->toPdf("Contacto de Emergencia: " . ($expediente->contacto_otro_emergencias ?: 'No especificado')), 0, 'L');
+        $pdf->MultiCell(180, 5, $pdf->toPdf("Dirección: " . ($expediente->domicilio_direccion ?: 'N/D')), 0, 'L');
+        $pdf->Cell(180, 5, $pdf->toPdf("Tel. Habitación: " . ($expediente->contacto_tel_habitacion ?: 'N/D')), 0, 1, 'L');
+        $pdf->MultiCell(180, 5, $pdf->toPdf("Contacto de Emergencia: " . ($expediente->contacto_otro_emergencias ?: 'No especificado')), 0, 'L');
         $pdf->Ln(2);
 
         // --- III. PROCEDENCIA ACADÉMICA ---
         $imprimirSeccion("III. PROCEDENCIA ACADÉMICA (SECUNDARIA Y SUPERIOR)");
         $pdf->SetFont('Arial', '', 8.5);
-        $pdf->Cell(90, 5, $pdf->toPdf("Secundaria: " . ($expediente->procedencia_secundaria_institucion ?: 'Liceo de Costa Rica')), 0, 0, 'L');
-        $pdf->Cell(45, 5, $pdf->toPdf("Año Graduación: " . ($expediente->procedencia_secundaria_ano_graduacion ?: '2016')), 0, 0, 'L');
-        $pdf->Cell(45, 5, $pdf->toPdf("Grado: " . ($expediente->procedencia_secundaria_grado_obtenido ?: 'Bachiller en Educación Media')), 0, 1, 'L');
+        $pdf->Cell(90, 5, $pdf->toPdf("Secundaria: " . mb_substr((string)($expediente->procedencia_secundaria_institucion ?: 'N/D'), 0, 38, 'UTF-8')), 0, 0, 'L');
+        $pdf->Cell(45, 5, $pdf->toPdf("Año Graduación: " . ($expediente->procedencia_secundaria_ano_graduacion ?: 'N/D')), 0, 0, 'L');
+        $pdf->Cell(45, 5, $pdf->toPdf("Grado: " . mb_substr((string)($expediente->procedencia_secundaria_grado_obtenido ?: 'N/D'), 0, 20, 'UTF-8')), 0, 1, 'L');
 
         if (!empty($expediente->procedencia_universidad)) {
             $pdf->Cell(90, 5, $pdf->toPdf("Universidad Origen: " . $expediente->procedencia_universidad), 0, 0, 'L');
@@ -301,7 +305,12 @@ class ExpedientePdfService
         $imprimirSeccion("VI. FORMALIZACIÓN Y DICTAMEN DE REGISTRO");
         $pdf->SetFont('Arial', '', 8.5);
         $pdf->SetTextColor(15, 23, 42);
-        $obs = $expediente->registro_observaciones ?: "Expediente digital verificado y aprobado 100% conforme a los requisitos institucionales de admisión de CEFI.";
+        $estadoExp = $expediente->estado ?: 'Pendiente';
+        $esAprobado = strtolower($estadoExp) === 'aprobado';
+        $obsDefault = $esAprobado
+            ? "Expediente digital verificado y aprobado conforme a los requisitos institucionales de admisión."
+            : "Expediente en estado: {$estadoExp}. Pendiente de verificación final de requisitos.";
+        $obs = $expediente->registro_observaciones ?: $obsDefault;
         $pdf->MultiCell(180, 4.5, $pdf->toPdf("Observaciones de Registro: " . $obs), 0, 'L');
 
         // SELLO Y FIRMA
@@ -335,11 +344,17 @@ class ExpedientePdfService
         $pdf->Cell(60, 4, $pdf->toPdf("DIRECCIÓN DE REGISTRO Y ADMISIONES"), 0, 1, 'C');
         $pdf->SetX(115);
         $pdf->SetFont('Arial', '', 7.5);
-        $pdf->Cell(60, 3.5, $pdf->toPdf(config('cliente.nombre', 'CEFI') . " - Aprobación Oficial"), 0, 1, 'C');
+        $pdf->Cell(60, 3.5, $pdf->toPdf(config('cliente.nombre', 'CEFI') . " - Estado: " . $estadoExp), 0, 1, 'C');
         $pdf->SetX(115);
-        $pdf->SetTextColor(22, 163, 74);
+        if ($esAprobado) {
+            $pdf->SetTextColor(22, 163, 74);
+            $selloTxt = "EXPEDIENTE FORMALIZADO Y APROBADO";
+        } else {
+            $pdf->SetTextColor(217, 119, 6);
+            $selloTxt = "ESTADO: " . mb_strtoupper($estadoExp, 'UTF-8');
+        }
         $pdf->SetFont('Arial', 'B', 7.5);
-        $pdf->Cell(60, 3.5, $pdf->toPdf("EXPEDIENTE FORMALIZADO Y APROBADO"), 0, 0, 'C');
+        $pdf->Cell(60, 3.5, $pdf->toPdf($selloTxt), 0, 0, 'C');
 
         return $pdf->Output('S');
     }

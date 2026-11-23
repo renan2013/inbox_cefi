@@ -258,11 +258,11 @@
                                 <option value="I Cuatrimestre" {{ $cuatrimestre_auto_get == 'I Cuatrimestre' ? 'selected' : '' }}>I Cuatrimestre</option>
                                 <option value="II Cuatrimestre" {{ $cuatrimestre_auto_get == 'II Cuatrimestre' ? 'selected' : '' }}>II Cuatrimestre</option>
                                 <option value="III Cuatrimestre" {{ $cuatrimestre_auto_get == 'III Cuatrimestre' ? 'selected' : '' }}>III Cuatrimestre</option>
-                                <option value="I y II Cuatrimestre">I y II Cuatrimestre</option>
-                                <option value="II y III Cuatrimestre">II y III Cuatrimestre</option>
-                                <option value="I y III Cuatrimestre">I y III Cuatrimestre</option>
-                                <option value="I, II y III Cuatrimestre">I, II y III Cuatrimestre (3 Cuatrimestres / Técnico Completo)</option>
-                                <option value="Programa Completo (Anual)">Programa Completo (Anual)</option>
+                                <option value="I y II Cuatrimestre" {{ $cuatrimestre_auto_get == 'I y II Cuatrimestre' ? 'selected' : '' }}>I y II Cuatrimestre</option>
+                                <option value="II y III Cuatrimestre" {{ $cuatrimestre_auto_get == 'II y III Cuatrimestre' ? 'selected' : '' }}>II y III Cuatrimestre</option>
+                                <option value="I y III Cuatrimestre" {{ $cuatrimestre_auto_get == 'I y III Cuatrimestre' ? 'selected' : '' }}>I y III Cuatrimestre</option>
+                                <option value="I, II y III Cuatrimestre" {{ $cuatrimestre_auto_get == 'I, II y III Cuatrimestre' ? 'selected' : '' }}>I, II y III Cuatrimestre (3 Cuatrimestres / Técnico Completo)</option>
+                                <option value="Programa Completo (Anual)" {{ $cuatrimestre_auto_get == 'Programa Completo (Anual)' ? 'selected' : '' }}>Programa Completo (Anual)</option>
                             </select>
                         </div>
                         <div class="col-md-6">

@@ -42,7 +42,8 @@ class CursoActivo extends Model
         'fecha_notificacion',
         'fecha_whatsapp',
         'check_recursos',
-        'check_portada'
+        'check_portada',
+        'check_encuesta'
     ];
 
     protected $casts = [

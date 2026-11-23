@@ -580,10 +580,25 @@ class BoletaController extends Controller
         }
 
         try {
+            $periodosMatch = [$periodo];
+            if (preg_match('/(\d{4})/', $periodo, $ym)) {
+                $yr = $ym[1];
+                if (stripos($periodo, 'Programa Completo') !== false || stripos($periodo, 'I, II y III') !== false) {
+                    $periodosMatch = array_merge($periodosMatch, ["I Cuatrimestre {$yr}", "II Cuatrimestre {$yr}", "III Cuatrimestre {$yr}"]);
+                } elseif (stripos($periodo, 'I y II') !== false) {
+                    $periodosMatch = array_merge($periodosMatch, ["I Cuatrimestre {$yr}", "II Cuatrimestre {$yr}"]);
+                } elseif (stripos($periodo, 'II y III') !== false) {
+                    $periodosMatch = array_merge($periodosMatch, ["II Cuatrimestre {$yr}", "III Cuatrimestre {$yr}"]);
+                } elseif (stripos($periodo, 'I y III') !== false) {
+                    $periodosMatch = array_merge($periodosMatch, ["I Cuatrimestre {$yr}", "III Cuatrimestre {$yr}"]);
+                }
+            }
+            $periodosMatch = array_values(array_unique($periodosMatch));
+
             $cursos = DB::table('matriculas as m')
                 ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
                 ->where('m.id_estudiante', $id_estudiante)
-                ->where('ca.periodo', $periodo)
+                ->whereIn('ca.periodo', $periodosMatch)
                 ->whereNull('m.id_boleta')
                 ->pluck('ca.id_plan')
                 ->map(fn($id) => (int)$id)
@@ -1440,12 +1455,12 @@ class BoletaController extends Controller
      */
     public function apiCuotasVencimiento(Request $request)
     {
-        $clientMasterKey = config('cliente.moodle_key', 'cefi2026');
-        $api_key_server = config('services.n8n.api_key', $clientMasterKey);
-        $provided_key = $request->get('key', $request->header('X-API-KEY', ''));
+        $clientMasterKey = (string)(config('cliente.moodle_key') ?: 'cefi2026');
+        $api_key_server = (string)(config('services.n8n.api_key') ?: $clientMasterKey);
+        $provided_key = trim((string)$request->get('key', $request->header('X-API-KEY', '')));
         $is_admin = auth()->check() && in_array(auth()->user()->id_rol, [1, 2]);
 
-        if (!$is_admin && $provided_key !== $api_key_server && $provided_key !== $clientMasterKey) {
+        if (!$is_admin && ($provided_key === '' || ($provided_key !== $api_key_server && $provided_key !== $clientMasterKey))) {
             return response()->json([
                 'success' => false,
                 'message' => 'No autorizado. Se requiere API Key o sesión de administrador.'
