@@ -669,19 +669,27 @@
                                 </td>
                                 <td>
                                     @php
+                                        $rolNombre = $usuario->rol->nombre ?? 'Sin Rol';
+                                        $rolCorto = match ($rolNombre) {
+                                            'Administrador General' => 'Adm. Gen.',
+                                            'Administrador' => 'Adm.',
+                                            'Estudiante' => 'Est.',
+                                            'Docente' => 'Doc.',
+                                            default => $rolNombre,
+                                        };
                                         $roleClass = 'badge-role';
-                                        $roleStyle = '';
+                                        $roleStyle = 'white-space: nowrap;';
                                         if ($usuario->esAdminGeneral()) {
                                             $roleClass .= ' role-admin';
                                         } elseif ($usuario->esAdministrador()) {
-                                            $roleStyle = 'background: rgba(59, 130, 246, 0.14); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3);';
+                                            $roleStyle .= ' background: rgba(59, 130, 246, 0.14); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3);';
                                         } elseif ($usuario->esDocente()) {
                                             $roleClass .= ' role-teacher';
                                         } else {
                                             $roleClass .= ' role-student';
                                         }
                                     @endphp
-                                    <span class="{{ $roleClass }}" @if($roleStyle) style="{{ $roleStyle }}" @endif>{{ $usuario->rol->nombre ?? 'Sin Rol' }}</span>
+                                    <span class="{{ $roleClass }}" style="{{ $roleStyle }}" title="{{ $rolNombre }}">{{ $rolCorto }}</span>
                                 </td>
                                 <td class="td-etiquetas-usuario">
                                     <div class="d-flex flex-wrap align-items-center gap-1">
