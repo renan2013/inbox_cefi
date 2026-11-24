@@ -715,7 +715,7 @@
                                     @if ($hasExpediente)
                                         <div class="d-inline-flex align-items-center gap-2">
                                             <span class="badge-con-expediente" title="Expediente digital registrado">
-                                                <i class="bi bi-folder-check"></i> Con Expediente
+                                                <i class="bi bi-folder-check"></i> Con Exp.
                                             </span>
                                             <a href="{{ route('expedientes.ver', $exp->id_expediente) }}" 
                                                class="btn-ver-expediente" 
