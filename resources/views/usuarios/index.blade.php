@@ -725,13 +725,13 @@
                                         </div>
                                     @else
                                         <div class="d-inline-flex align-items-center gap-2">
-                                            <span class="badge-sin-expediente" title="Aún no se ha creado expediente para este usuario">
-                                                <i class="bi bi-folder-x"></i> Sin Expediente
+                                            <span class="badge-sin-expediente" title="Sin Expediente - Aún no se ha creado expediente para este usuario">
+                                                <i class="bi bi-folder-x"></i> Sin Exp.
                                             </span>
                                             <a href="{{ route('expedientes.create', ['id_usuario' => $usuario->id]) }}" 
                                                class="btn-crear-expediente" 
                                                title="Crear expediente digital para {{ $nombreCompleto }}">
-                                                <i class="bi bi-plus-circle-fill"></i> Crear Expediente
+                                                <i class="bi bi-plus-circle-fill"></i> Crear Exp.
                                             </a>
                                         </div>
                                     @endif
