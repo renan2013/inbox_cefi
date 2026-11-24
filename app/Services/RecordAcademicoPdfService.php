@@ -195,20 +195,24 @@ class RecordAcademicoPdfService
         $pdf->SetTextColor(15, 23, 42);
         $pdf->Cell(150, 5.5, $pdf->toPdf($expediente->grado_a_matricular ?: 'N/A'), 0, 1, 'L');
 
-        // --- RESUMEN KPI ACADÉMICO ---
-        $pdf->Ln(5);
+        // --- RESUMEN KPI ACADÉMICO (2 líneas) ---
+        $pdf->Ln(4);
         $pdf->SetFillColor(241, 245, 249);
-        $pdf->RoundedRect(15, 69, 180, 12, 2, 'DF');
-        $pdf->SetXY(18, 72);
+        $pdf->RoundedRect(15, 69, 180, 16, 2, 'DF');
 
-        $pdf->SetFont('Arial', 'B', 8);
-        $pdf->SetTextColor(71, 85, 105);
-        $pdf->Cell(38, 6, $pdf->toPdf("CRÉDITOS APROBADOS: ") . $cursosData['total_creditos_aprobados'], 0, 0, 'L');
-        $pdf->Cell(47, 6, $pdf->toPdf("ASIGNATURAS APROBADAS: ") . $cursosData['cursos_aprobados'], 0, 0, 'L');
-        $pdf->Cell(44, 6, $pdf->toPdf("ASIGNATURAS EN CURSO: ") . $cursosData['cursos_en_curso'], 0, 0, 'L');
+        $pdf->SetXY(18, 71);
         $pdf->SetFont('Arial', 'B', 8.5);
+        $pdf->SetTextColor(71, 85, 105);
+        $pdf->Cell(90, 6, $pdf->toPdf("CRÉDITOS APROBADOS: ") . $cursosData['total_creditos_aprobados'], 0, 0, 'L');
+        $pdf->Cell(84, 6, $pdf->toPdf("ASIGNATURAS APROBADAS: ") . $cursosData['cursos_aprobados'], 0, 1, 'R');
+
+        $pdf->SetX(18);
+        $pdf->SetFont('Arial', 'B', 8.5);
+        $pdf->SetTextColor(71, 85, 105);
+        $pdf->Cell(90, 6, $pdf->toPdf("ASIGNATURAS EN CURSO: ") . $cursosData['cursos_en_curso'], 0, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetTextColor(16, 102, 173);
-        $pdf->Cell(45, 6, $pdf->toPdf("PROMEDIO GPA: ") . number_format($cursosData['promedio_ponderado'], 2) . " / 100", 0, 1, 'R');
+        $pdf->Cell(84, 6, $pdf->toPdf("PROMEDIO GPA: ") . number_format($cursosData['promedio_ponderado'], 2) . " / 100", 0, 1, 'R');
 
         $pdf->Ln(5);
 
