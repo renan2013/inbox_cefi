@@ -140,10 +140,11 @@ class RecordAcademicoPdfService
         $pdf->SetFillColor(248, 250, 252);
         $pdf->SetDrawColor(203, 213, 225);
         $pdf->SetLineWidth(0.3);
-        $pdf->RoundedRect(15, 36, 180, 28, 2.5, 'DF');
+        $pdf->RoundedRect(15, 36, 180, 30, 2.5, 'DF');
 
         $nombreCompleto = $usuario ? "{$usuario->nombre} {$usuario->apellidos}" : 'Estudiante';
 
+        // Línea 1: Estudiante e Identificación
         $pdf->SetXY(18, 38);
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetTextColor(100, 116, 139);
@@ -159,49 +160,53 @@ class RecordAcademicoPdfService
         $pdf->SetTextColor(15, 23, 42);
         $pdf->Cell(42, 5, $pdf->toPdf($usuario->cedula ?? $expediente->cedula_residencia ?? $expediente->pasaporte ?? 'N/A'), 0, 1, 'L');
 
+        // Línea 2: Programa (ancho completo en una sola línea)
         $pdf->SetX(18);
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetTextColor(100, 116, 139);
-        $pdf->Cell(25, 5, $pdf->toPdf("PROGRAMA:"), 0, 0, 'L');
-        $pdf->SetFont('Arial', '', 9.5);
+        $pdf->Cell(25, 5.5, $pdf->toPdf("PROGRAMA:"), 0, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 9.5);
         $pdf->SetTextColor(16, 102, 173);
-        $pdf->Cell(85, 5, $pdf->toPdf($expediente->especialidad_deseada ?: 'Carrera General'), 0, 0, 'L');
+        $pdf->Cell(150, 5.5, $pdf->toPdf(mb_substr((string)($expediente->especialidad_deseada ?: 'Carrera General'), 0, 90, 'UTF-8')), 0, 1, 'L');
 
-        $pdf->SetFont('Arial', 'B', 9);
-        $pdf->SetTextColor(100, 116, 139);
-        $pdf->Cell(28, 5, $pdf->toPdf("GRADO:"), 0, 0, 'L');
-        $pdf->SetFont('Arial', '', 9.5);
-        $pdf->SetTextColor(15, 23, 42);
-        $pdf->Cell(42, 5, $pdf->toPdf($expediente->grado_a_matricular ?: 'N/A'), 0, 1, 'L');
-
+        // Línea 3: Correo y Fecha Ingreso
         $pdf->SetX(18);
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetTextColor(100, 116, 139);
-        $pdf->Cell(25, 5, $pdf->toPdf("CORREO:"), 0, 0, 'L');
+        $pdf->Cell(25, 5.5, $pdf->toPdf("CORREO:"), 0, 0, 'L');
         $pdf->SetFont('Arial', '', 9);
         $pdf->SetTextColor(15, 23, 42);
-        $pdf->Cell(85, 5, $pdf->toPdf($usuario->email ?? 'N/A'), 0, 0, 'L');
+        $pdf->Cell(85, 5.5, $pdf->toPdf($usuario->email ?? 'N/A'), 0, 0, 'L');
 
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetTextColor(100, 116, 139);
-        $pdf->Cell(28, 5, $pdf->toPdf("FECHA INGRESO:"), 0, 0, 'L');
+        $pdf->Cell(28, 5.5, $pdf->toPdf("FECHA INGRESO:"), 0, 0, 'L');
         $pdf->SetFont('Arial', '', 9);
         $pdf->SetTextColor(15, 23, 42);
         $fechaIngreso = $expediente->fecha_registro ? date('d/m/Y', strtotime($expediente->fecha_registro)) : 'N/A';
-        $pdf->Cell(42, 5, $pdf->toPdf($fechaIngreso), 0, 1, 'L');
+        $pdf->Cell(42, 5.5, $pdf->toPdf($fechaIngreso), 0, 1, 'L');
+
+        // Línea 4: Grado
+        $pdf->SetX(18);
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetTextColor(100, 116, 139);
+        $pdf->Cell(25, 5.5, $pdf->toPdf("GRADO:"), 0, 0, 'L');
+        $pdf->SetFont('Arial', '', 9.5);
+        $pdf->SetTextColor(15, 23, 42);
+        $pdf->Cell(150, 5.5, $pdf->toPdf($expediente->grado_a_matricular ?: 'N/A'), 0, 1, 'L');
 
         // --- RESUMEN KPI ACADÉMICO ---
-        $pdf->Ln(6);
+        $pdf->Ln(5);
         $pdf->SetFillColor(241, 245, 249);
-        $pdf->RoundedRect(15, 67, 180, 12, 2, 'DF');
-        $pdf->SetXY(18, 70);
+        $pdf->RoundedRect(15, 69, 180, 12, 2, 'DF');
+        $pdf->SetXY(18, 72);
 
-        $pdf->SetFont('Arial', 'B', 8.5);
+        $pdf->SetFont('Arial', 'B', 8);
         $pdf->SetTextColor(71, 85, 105);
-        $pdf->Cell(45, 6, $pdf->toPdf("CRÉDITOS APROBADOS: ") . $cursosData['total_creditos_aprobados'], 0, 0, 'L');
-        $pdf->Cell(45, 6, $pdf->toPdf("ASIGNATURAS APROBADAS: ") . $cursosData['cursos_aprobados'], 0, 0, 'L');
-        $pdf->Cell(45, 6, $pdf->toPdf("ASIGNATURAS EN CURSO: ") . $cursosData['cursos_en_curso'], 0, 0, 'L');
-        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->Cell(38, 6, $pdf->toPdf("CRÉDITOS APROBADOS: ") . $cursosData['total_creditos_aprobados'], 0, 0, 'L');
+        $pdf->Cell(47, 6, $pdf->toPdf("ASIGNATURAS APROBADAS: ") . $cursosData['cursos_aprobados'], 0, 0, 'L');
+        $pdf->Cell(44, 6, $pdf->toPdf("ASIGNATURAS EN CURSO: ") . $cursosData['cursos_en_curso'], 0, 0, 'L');
+        $pdf->SetFont('Arial', 'B', 8.5);
         $pdf->SetTextColor(16, 102, 173);
         $pdf->Cell(45, 6, $pdf->toPdf("PROMEDIO GPA: ") . number_format($cursosData['promedio_ponderado'], 2) . " / 100", 0, 1, 'R');
 
