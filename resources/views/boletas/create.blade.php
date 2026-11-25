@@ -345,7 +345,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small fw-bold mb-1">Precio (¢)</label>
-                        <input type="number" id="otro-rubro-precio-input" class="form-control" min="0" step="100" value="0">
+                        <input type="number" id="otro-rubro-precio-input" class="form-control" min="0" step="0.01" value="0">
                     </div>
                     <div class="col-md-1">
                         <label class="form-label small fw-bold mb-1">Cant.</label>
@@ -474,7 +474,7 @@
                                 <td class="text-end pe-4 py-2">
                                     <div class="input-group input-group-sm ms-auto" style="max-width: 160px;">
                                         <span class="input-group-text bg-white border-success text-success fw-bold">¢</span>
-                                        <input type="number" id="boleta-descuento" class="form-control border-success text-success fw-bold text-end" value="0" min="0" step="500">
+                                        <input type="number" id="boleta-descuento" class="form-control border-success text-success fw-bold text-end" value="0" min="0" step="0.01">
                                     </div>
                                 </td>
                             </tr>
@@ -528,7 +528,7 @@
                         <div class="input-group input-group-sm mb-2">
                             <span class="input-group-text bg-white border-2 border-end-0 text-muted fw-bold">¢</span>
                             <input type="number" id="boleta-pago-inicial" class="form-control form-control-sm border-2 fw-bold" 
-                                   value="0" min="0" step="500">
+                                   value="0" min="0" step="0.01">
                         </div>
 
                         <div id="pago-inicial-detalles-container" class="mt-2" style="display: none;">

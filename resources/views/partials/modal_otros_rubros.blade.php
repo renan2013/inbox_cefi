@@ -24,7 +24,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small fw-bold mb-1">Costo (¢)</label>
-                        <input type="number" id="otro-rubro-precio" class="form-control" min="0" step="100" value="0" placeholder="0.00">
+                        <input type="number" id="otro-rubro-precio" class="form-control" min="0" step="0.01" value="0" placeholder="0.00">
                     </div>
                     <div class="col-md-2 d-flex gap-1">
                         <button type="submit" class="btn btn-primary w-100 fw-bold" id="btn-guardar-otro-rubro">
