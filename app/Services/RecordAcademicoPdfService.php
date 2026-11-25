@@ -223,27 +223,59 @@ class RecordAcademicoPdfService
         $pdf->SetDrawColor(203, 213, 225);
 
         $pdf->Cell(18, 7, $pdf->toPdf("CÓDIGO"), 1, 0, 'C', true);
-        $pdf->Cell(68, 7, $pdf->toPdf("ASIGNATURA"), 1, 0, 'L', true);
-        $pdf->Cell(25, 7, $pdf->toPdf("PERÍODO"), 1, 0, 'C', true);
-        $pdf->Cell(14, 7, $pdf->toPdf("CRÉD."), 1, 0, 'C', true);
+        $pdf->Cell(58, 7, $pdf->toPdf("ASIGNATURA"), 1, 0, 'L', true);
+        $pdf->Cell(37, 7, $pdf->toPdf("PERÍODO"), 1, 0, 'C', true);
+        $pdf->Cell(13, 7, $pdf->toPdf("CRÉD."), 1, 0, 'C', true);
         $pdf->Cell(18, 7, $pdf->toPdf("NOTA"), 1, 0, 'C', true);
-        $pdf->Cell(37, 7, $pdf->toPdf("ESTADO"), 1, 1, 'C', true);
+        $pdf->Cell(36, 7, $pdf->toPdf("ESTADO"), 1, 1, 'C', true);
 
         $pdf->SetFont('Arial', '', 8);
         $fill = false;
 
         foreach ($cursosData['cursos'] as $c) {
-            $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
-            $pdf->SetTextColor(15, 23, 42);
+            if ($pdf->GetY() > 250) {
+                $pdf->AddPage();
+            }
+            $x = 15;
+            $y = $pdf->GetY();
 
-            $pdf->Cell(18, 6.5, $pdf->toPdf($c['codigo']), 1, 0, 'C', true);
-            $pdf->Cell(68, 6.5, $pdf->toPdf(mb_substr($c['materia'], 0, 42, 'UTF-8')), 1, 0, 'L', true);
-            $pdf->Cell(25, 6.5, $pdf->toPdf($c['periodo'] ?: 'N/A'), 1, 0, 'C', true);
-            $pdf->Cell(14, 6.5, $c['creditos_calc'], 1, 0, 'C', true);
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->SetXY($x + 18, $y);
+            $pdf->MultiCell(58, 4.5, $pdf->toPdf(' ' . trim((string)$c['materia'])), 0, 'L');
+            $yAsig = $pdf->GetY();
+
+            $pdf->SetXY($x + 76, $y);
+            $pdf->MultiCell(37, 4.5, $pdf->toPdf($c['periodo'] ?: 'N/A'), 0, 'C');
+            $yPer = $pdf->GetY();
+
+            $hRow = max(6.5, $yAsig - $y, $yPer - $y);
+
+            $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
+            $pdf->SetDrawColor(203, 213, 225);
+            $pdf->Rect($x, $y, 18, $hRow, 'DF');
+            $pdf->Rect($x + 18, $y, 58, $hRow, 'DF');
+            $pdf->Rect($x + 76, $y, 37, $hRow, 'DF');
+            $pdf->Rect($x + 113, $y, 13, $hRow, 'DF');
+            $pdf->Rect($x + 126, $y, 18, $hRow, 'DF');
+            $pdf->Rect($x + 144, $y, 36, $hRow, 'DF');
+
+            // Reimprimir textos dentro de los rectángulos de la fila
+            $pdf->SetTextColor(15, 23, 42);
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->SetXY($x, $y);
+            $pdf->Cell(18, $hRow, $pdf->toPdf($c['codigo']), 0, 0, 'C');
+
+            $pdf->SetXY($x + 18, $y + 1);
+            $pdf->MultiCell(58, 4.5, $pdf->toPdf(' ' . trim((string)$c['materia'])), 0, 'L');
+
+            $pdf->SetXY($x + 76, $y + 1);
+            $pdf->MultiCell(37, 4.5, $pdf->toPdf($c['periodo'] ?: 'N/A'), 0, 'C');
+
+            $pdf->SetXY($x + 113, $y);
+            $pdf->Cell(13, $hRow, $c['creditos_calc'], 0, 0, 'C');
 
             $notaStr = is_numeric($c['calificacion']) ? number_format((float)$c['calificacion'], 1) : ($c['calificacion'] ?: '-');
-            
-            // Color de nota y estado
+
             if ($c['estado_calc'] === 'APROBADO' || $c['estado_calc'] === 'CONVALIDADO') {
                 $pdf->SetTextColor(22, 163, 74); // Verde
             } elseif ($c['estado_calc'] === 'REPROBADO') {
@@ -254,10 +286,13 @@ class RecordAcademicoPdfService
                 $pdf->SetTextColor(100, 116, 139);
             }
             $pdf->SetFont('Arial', 'B', 8.5);
-            $pdf->Cell(18, 6.5, $notaStr, 1, 0, 'C', true);
+            $pdf->SetXY($x + 126, $y);
+            $pdf->Cell(18, $hRow, $notaStr, 0, 0, 'C');
 
-            $pdf->Cell(37, 6.5, $pdf->toPdf($c['estado_calc']), 1, 1, 'C', true);
+            $pdf->SetXY($x + 144, $y);
+            $pdf->Cell(36, $hRow, $pdf->toPdf($c['estado_calc']), 0, 0, 'C');
             $pdf->SetFont('Arial', '', 8);
+            $pdf->SetXY($x, $y + $hRow);
 
             $fill = !$fill;
         }
