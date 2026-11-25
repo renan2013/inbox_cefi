@@ -642,8 +642,8 @@
                     @endmodule
                     @endif
 
-                    <!-- Registro Dropdown (Jamás visible para el rol Alumno) -->
-                    @if(Auth::check() && Auth::user()->id_rol != 3 && !(method_exists(Auth::user(), 'esAlumno') && Auth::user()->esAlumno()))
+                    <!-- Registro Dropdown (Solo visible para Administrador y Administrador General) -->
+                    @if(Auth::check() && Auth::user()->esAdmin())
                     @if(\App\Services\ModuleService::isEnabled('registro_academico') || \App\Services\ModuleService::isEnabled('boletas_matricula') || \App\Services\ModuleService::isEnabled('finanzas') || \App\Services\ModuleService::isEnabled('expedientes_360'))
                     <li class="nav-item dropdown">
                         <a class="nav-link nav-link-custom dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
