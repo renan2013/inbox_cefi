@@ -228,13 +228,35 @@ class BoletaPdfService
             }
         }
 
+        $renderDetalleFila = function (string $codigo, string $descripcion, float $monto) use ($pdf) {
+            if ($pdf->GetY() > 250) {
+                $pdf->AddPage();
+            }
+            $x = 15;
+            $y = $pdf->GetY();
+
+            $pdf->SetXY($x + 25, $y);
+            $pdf->MultiCell(115, 5, $pdf->toPdf(' ' . trim($descripcion)), 0, 'L');
+            $hRow = max(5.5, $pdf->GetY() - $y);
+
+            $pdf->Rect($x, $y, 25, $hRow);
+            $pdf->Rect($x + 25, $y, 115, $hRow);
+            $pdf->Rect($x + 140, $y, 40, $hRow);
+
+            $pdf->SetXY($x, $y);
+            $pdf->Cell(25, $hRow, $pdf->toPdf($codigo), 0, 0, 'C');
+
+            $pdf->SetXY($x + 140, $y);
+            $pdf->Cell(40, $hRow, 'CRC ' . number_format($monto, 2) . ' ', 0, 0, 'R');
+
+            $pdf->SetXY($x, $y + $hRow);
+        };
+
         if ($cursos->count() > 0) {
             foreach ($cursos as $c) {
                 $precio = floatval($c->precio > 0 ? $c->precio : ($c->costo_materia ?? 0));
                 $subtotal_materias += $precio;
-                $pdf->Cell(25, 5.5, $pdf->toPdf($c->codigo), 1, 0, 'C');
-                $pdf->Cell(115, 5.5, $pdf->toPdf(" " . mb_substr((string)$c->materia, 0, 58, 'UTF-8')), 1, 0, 'L');
-                $pdf->Cell(40, 5.5, 'CRC ' . number_format($precio, 2) . ' ', 1, 1, 'R');
+                $renderDetalleFila((string)$c->codigo, (string)$c->materia, $precio);
             }
         }
 
@@ -253,9 +275,7 @@ class BoletaPdfService
                     $desc .= " (x{$cant})";
                 }
                 $codOtro = 'OTR-' . str_pad((string)($idxOtro + 1), 2, '0', STR_PAD_LEFT);
-                $pdf->Cell(25, 5.5, $pdf->toPdf($codOtro), 1, 0, 'C');
-                $pdf->Cell(115, 5.5, $pdf->toPdf(" " . mb_substr($desc, 0, 58, 'UTF-8')), 1, 0, 'L');
-                $pdf->Cell(40, 5.5, 'CRC ' . number_format($montoLinea, 2) . ' ', 1, 1, 'R');
+                $renderDetalleFila($codOtro, $desc, $montoLinea);
             }
         }
 
