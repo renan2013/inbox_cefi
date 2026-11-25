@@ -25,8 +25,11 @@ class DashboardController extends Controller
         $es_admin = ($user->id_rol == 1);
         $user_id = $user->id;
 
-        // 1. Estadísticas de Tareas
-        $queryStats = DB::table('tareas');
+        // 1. Estadísticas de Tareas (excluyendo registros internos de asistencia de clase)
+        $queryStats = DB::table('tareas')->where(function ($q) {
+            $q->whereNull('tareas.descripcion')
+              ->orWhere('tareas.descripcion', 'not like', 'Registro de asistencia correspondiente a la Clase%');
+        });
         if (!$es_admin) {
             $queryStats->join('tarea_asignaciones as ta', 'tareas.id', '=', 'ta.id_tarea')
                        ->where('ta.id_usuario', $user_id);
@@ -50,6 +53,10 @@ class DashboardController extends Controller
             ->join('tarea_asignaciones as ta', 't.id', '=', 'ta.id_tarea')
             ->where('ta.id_usuario', $user_id)
             ->where('t.estado', '!=', 'completada')
+            ->where(function ($q) {
+                $q->whereNull('t.descripcion')
+                  ->orWhere('t.descripcion', 'not like', 'Registro de asistencia correspondiente a la Clase%');
+            })
             ->count('t.id');
 
         // 3. Alerta de Inventario (Bajo Stock)
@@ -66,10 +73,14 @@ class DashboardController extends Controller
         $etiqueta_seleccionada = $request->input('etiqueta');
         $etiquetas_disponibles = DB::table('etiquetas')->orderBy('nombre', 'asc')->get();
 
-        // 5. Consulta de Tareas principal
+        // 5. Consulta de Tareas principal (excluyendo registros internos de asistencia de clase)
         $tasksQuery = DB::table('tareas as t')
             ->leftJoin('cursos_activos as ca', 't.id_curso_activo', '=', 'ca.id_curso_activo')
             ->leftJoin('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+            ->where(function ($q) {
+                $q->whereNull('t.descripcion')
+                  ->orWhere('t.descripcion', 'not like', 'Registro de asistencia correspondiente a la Clase%');
+            })
             ->select('t.*', 'pe.materia as curso_nombre', 'ca.periodo as curso_periodo');
 
         if (!$es_admin) {
