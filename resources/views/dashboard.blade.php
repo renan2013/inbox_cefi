@@ -761,7 +761,7 @@
                             <button type="button" class="btn btn-view-toggle rounded-pill px-3" id="btn-view-kanban" onclick="switchView('kanban')">
                                 <i class="bi bi-kanban me-1"></i> Tablero
                             </button>
-                            @if(\App\Services\ModuleService::isEnabled('dashboard') && \App\Services\ModuleService::isEnabled('item.gantt_tareas'))
+                            @if(\App\Services\ModuleService::isEnabled('dashboard'))
                             <button type="button" class="btn btn-view-toggle rounded-pill px-3" id="btn-view-gantt" onclick="switchView('gantt')">
                                 <i class="bi bi-bar-chart-steps me-1"></i> Gantt
                             </button>
@@ -1041,10 +1041,11 @@
                                 <thead>
                                     <tr class="table-header-row">
                                         <th class="ps-4" style="width: 50px;">#</th>
-                                        <th style="min-width: 240px;">Tarea / Curso</th>
+                                        <th style="min-width: 220px;">Tarea / Curso</th>
+                                        <th style="min-width: 150px;">Responsable(s)</th>
                                         <th style="width: 195px; white-space: nowrap;">Fechas (Inicio &rarr; Fin)</th>
-                                        <th style="min-width: 260px;">Cronograma &amp; Avance (Gantt)</th>
-                                        <th class="text-end pe-4" style="width: 90px;">Detalle</th>
+                                        <th style="min-width: 240px;">Cronograma &amp; Avance (Gantt)</th>
+                                        <th class="text-end pe-4" style="width: 120px;">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1057,6 +1058,7 @@
                                             $diasDuracion = max(1, $fCreacion->diffInDays($fVenc));
                                             $pctGantt = $tg->estado === 'completada' ? 100 : ($tg->estado === 'en_proceso' ? 55 : ($tg->estado === 'cancelada' ? 0 : 15));
                                             $colorGantt = $tg->estado === 'completada' ? '#00c875' : ($tg->estado === 'en_proceso' ? '#fdab3d' : ($tg->estado === 'cancelada' ? '#df2f4a' : '#579bfc'));
+                                            $asigsGantt = $asignaciones[$tg->id] ?? [];
                                         @endphp
                                         <tr>
                                             <td class="ps-4 task-subtitle-text small">{{ $tareas->firstItem() + $idx }}</td>
@@ -1073,6 +1075,15 @@
                                                     </span>
                                                 </div>
                                             </td>
+                                            <td class="small">
+                                                @if (!empty($asigsGantt))
+                                                    @foreach ($asigsGantt as $ag)
+                                                        <span class="badge bg-primary-subtle text-primary rounded-pill me-1 mb-1">{{ trim(($ag->nombre ?? '') . ' ' . ($ag->apellidos ?? '')) }}</span>
+                                                    @endforeach
+                                                @else
+                                                    <span class="text-muted">Sin asignar</span>
+                                                @endif
+                                            </td>
                                             <td class="small task-subtitle-text">
                                                 <div><i class="bi bi-play-circle text-info me-1"></i>{{ $fCreacion->format('d/m/Y') }}</div>
                                                 <div><i class="bi bi-flag text-warning me-1"></i>{{ $fVenc->format('d/m/Y') }} <span class="opacity-75">({{ $diasDuracion }}d)</span></div>
@@ -1086,14 +1097,19 @@
                                                 </div>
                                             </td>
                                             <td class="text-end pe-4">
-                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2 py-1" onclick="abrirModalEditarTarea({{ $tg->id }})" title="Editar Tarea">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
+                                                <div class="d-inline-flex gap-1">
+                                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-2 py-1" onclick="notificarResponsableTarea({{ (int)$tg->id }})" title="Notificar al responsable por correo">
+                                                        <i class="bi bi-bell-fill"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2 py-1" onclick="abrirModalEditarTarea({{ $tg->id }})" title="Editar Tarea">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center py-5 task-subtitle-text">
+                                            <td colspan="6" class="text-center py-5 task-subtitle-text">
                                                 <i class="bi bi-calendar2-range fs-1 d-block mb-2 text-muted"></i>
                                                 <p class="mb-0">No hay tareas registradas para mostrar en el cronograma Gantt.</p>
                                             </td>
@@ -1556,6 +1572,40 @@
     $(document).on('change input keyup click', '#edit-task-asignados', function() {
         setTimeout(renderPersonalAsignadoEdit, 0);
     });
+
+    async function notificarResponsableTarea(id) {
+        const result = await Swal.fire({
+            title: 'Notificar al responsable',
+            input: 'textarea',
+            inputLabel: 'Mensaje adicional (opcional)',
+            inputPlaceholder: 'Ej: Por favor confirmar el avance o cierre de esta tarea...',
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-send-fill me-1"></i> Enviar Correo',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#10b981'
+        });
+        if (!result.isConfirmed) return;
+
+        try {
+            const res = await fetch(`{{ url('/tareas') }}/${id}/notificar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ mensaje: result.value || '' })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'Notificación enviada', text: data.message, timer: 2500, showConfirmButton: false });
+            } else {
+                Swal.fire('Atención', data.message || 'No se pudo enviar la notificación.', 'warning');
+            }
+        } catch (err) {
+            Swal.fire('Error', 'Error de conexión al enviar la notificación.', 'error');
+        }
+    }
 
     function guardarEdicionTarea(e) {
         e.preventDefault();

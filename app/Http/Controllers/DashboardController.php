@@ -341,4 +341,87 @@ class DashboardController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    /**
+     * Envía notificación por correo a los responsables asignados a una tarea.
+     */
+    public function notificarResponsables(Request $request, $id)
+    {
+        $tarea = DB::table('tareas')->where('id', $id)->first();
+        if (!$tarea) {
+            return response()->json(['success' => false, 'message' => 'Tarea no encontrada.'], 404);
+        }
+
+        $responsables = DB::table('tarea_asignaciones as ta')
+            ->join('usuarios as u', 'ta.id_usuario', '=', 'u.id')
+            ->where('ta.id_tarea', $id)
+            ->select('u.id', 'u.nombre', 'u.apellidos', 'u.email')
+            ->get()
+            ->filter(fn($u) => !empty(trim((string)$u->email)));
+
+        if ($responsables->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta tarea aún no tiene responsables asignados con correo electrónico.'
+            ], 422);
+        }
+
+        $institucion = config('cliente.nombre', 'CEFI');
+        $notaAdmin = trim((string)$request->input('mensaje', ''));
+        $estadoTexto = ucfirst(str_replace('_', ' ', (string)($tarea->estado ?? 'pendiente')));
+        $prioridadTexto = ucfirst((string)($tarea->prioridad ?? 'media'));
+        $venceTexto = (!empty($tarea->fecha_vencimiento) && $tarea->fecha_vencimiento !== '0000-00-00')
+            ? Carbon::parse($tarea->fecha_vencimiento)->format('d/m/Y')
+            : 'Sin fecha límite';
+        $remitente = Auth::user() ? trim((Auth::user()->nombre ?? '') . ' ' . (Auth::user()->apellidos ?? '')) : 'Administración';
+        $dashboardUrl = route('dashboard');
+
+        $notaHtml = $notaAdmin !== ''
+            ? "<div style='margin: 14px 0; padding: 12px 14px; background: #eff6ff; border-left: 4px solid #2563eb; border-radius: 6px; color: #1e3a8a;'><strong>Mensaje de {$remitente}:</strong><br>" . nl2br(e($notaAdmin)) . "</div>"
+            : '';
+
+        $enviados = [];
+        foreach ($responsables as $resp) {
+            $nombreResp = trim(($resp->nombre ?? '') . ' ' . ($resp->apellidos ?? ''));
+            $asunto = "Seguimiento de Tarea #{$tarea->id}: {$tarea->titulo} | {$institucion}";
+            $html = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;'>
+                <div style='background: #003b73; color: #ffffff; padding: 18px 24px;'>
+                    <h2 style='margin: 0; font-size: 18px;'>{$institucion} — Seguimiento de Tarea</h2>
+                </div>
+                <div style='padding: 22px 24px; color: #334155; font-size: 14px; line-height: 1.6;'>
+                    <p style='margin-top: 0;'>Estimado/a <strong>" . e($nombreResp) . "</strong>,</p>
+                    <p>Se le solicita revisar y actualizar el avance de la siguiente tarea asignada:</p>
+                    <div style='background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px;'>
+                        <div style='font-weight: bold; font-size: 15px; color: #0f172a; margin-bottom: 6px;'>" . e($tarea->titulo) . "</div>
+                        " . (!empty($tarea->descripcion) ? "<div style='color: #475569; margin-bottom: 8px;'>" . nl2br(e($tarea->descripcion)) . "</div>" : "") . "
+                        <div><strong>Estado actual:</strong> " . e($estadoTexto) . " &nbsp;|&nbsp; <strong>Prioridad:</strong> " . e($prioridadTexto) . "</div>
+                        <div><strong>Fecha límite:</strong> " . e($venceTexto) . "</div>
+                    </div>
+                    {$notaHtml}
+                    <p style='text-align: center; margin: 22px 0 6px 0;'>
+                        <a href='{$dashboardUrl}' style='display: inline-block; background: #10b981; color: #ffffff; text-decoration: none; font-weight: bold; padding: 10px 22px; border-radius: 999px;'>Ir al Dashboard de Tareas</a>
+                    </p>
+                </div>
+            </div>";
+
+            try {
+                \Illuminate\Support\Facades\Mail::html($html, function ($message) use ($resp, $nombreResp, $asunto) {
+                    $message->to($resp->email, $nombreResp)->subject($asunto);
+                });
+                $enviados[] = $nombreResp . " ({$resp->email})";
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Error enviando notificación de tarea #{$id} a {$resp->email}: " . $e->getMessage());
+            }
+        }
+
+        if (empty($enviados)) {
+            return response()->json(['success' => false, 'message' => 'No se pudo enviar el correo. Verifique la configuración SMTP.'], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notificación enviada a: ' . implode(', ', $enviados),
+        ]);
+    }
 }

@@ -227,6 +227,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/tareas/crear-rapida', [DashboardController::class, 'crearTareaRapida'])->name('tareas.crear_rapida');
         Route::get('/tareas/{id}/detalle', [DashboardController::class, 'obtenerTarea'])->name('tareas.obtener');
         Route::post('/tareas/{id}/actualizar', [DashboardController::class, 'actualizarTarea'])->name('tareas.actualizar');
+        Route::post('/tareas/{id}/notificar', [DashboardController::class, 'notificarResponsables'])->name('tareas.notificar');
         Route::delete('/tareas/{id}/eliminar', [DashboardController::class, 'eliminarTarea'])->name('tareas.eliminar');
     });
 
