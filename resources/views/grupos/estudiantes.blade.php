@@ -101,6 +101,14 @@
                         <i class="bi bi-plus-circle me-2"></i> Agregar al Grupo
                     </button>
                 </form>
+
+                <hr class="my-4 opacity-25">
+                <div class="text-center">
+                    <p class="small text-muted mb-2">¿Necesitas inscribir varios estudiantes de un programa o grupo anterior?</p>
+                    <button type="button" class="btn btn-outline-primary w-100 py-2 rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalMatricularBloque">
+                        <i class="bi bi-people-fill me-2"></i> Matricular en Bloque
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -175,6 +183,110 @@
     </div>
 
 </div>
+
+<!-- Modal: Matricular en Bloque -->
+<div class="modal fade" id="modalMatricularBloque" tabindex="-1" aria-labelledby="modalMatricularBloqueLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <form action="{{ route('grupos.estudiantes.matricular_bloque', $grupo->id_curso_activo) }}" method="POST" id="form-matricular-bloque">
+                @csrf
+                <div class="modal-header border-bottom">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalMatricularBloqueLabel">
+                            <i class="bi bi-people-fill text-primary me-2"></i>Matrícula en Bloque
+                        </h5>
+                        <small class="text-muted">Seleccione estudiantes por grupo anterior, programa académico o búsqueda rápida.</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">1. Traer de un Grupo anterior</label>
+                            <select id="bloque-filtro-grupo" class="form-select form-select-sm">
+                                <option value="">— Ninguno (solo filtrar) —</option>
+                                @foreach ($gruposOrigen as $go)
+                                    <option value="{{ $go->id_curso_activo }}">
+                                        {{ $go->codigo }} · {{ $go->materia }} ({{ $go->nombre_grupo ?: $go->periodo }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">2. Filtrar por Programa</label>
+                            <select id="bloque-filtro-programa" class="form-select form-select-sm">
+                                <option value="all">Todos los estudiantes disponibles</option>
+                                @foreach ($programas as $prog)
+                                    <option value="{{ $prog->id_programa }}" {{ (int)($grupo->planEstudio->id_programa ?? 0) === (int)$prog->id_programa ? 'data-programa-actual="1"' : '' }}>
+                                        {{ $prog->nombre_programa }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">3. Buscar por nombre, cédula o correo</label>
+                            <input type="text" id="bloque-buscar" class="form-control form-control-sm" placeholder="Escriba para filtrar la lista...">
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3" id="btn-bloque-marcar-visibles">
+                                <i class="bi bi-check2-all me-1"></i> Marcar visibles
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="btn-bloque-desmarcar">
+                                <i class="bi bi-x-lg me-1"></i> Desmarcar todos
+                            </button>
+                        </div>
+                        <span class="badge bg-primary rounded-pill px-3 py-2" id="bloque-contador">0 seleccionado(s)</span>
+                    </div>
+
+                    <div class="table-responsive border rounded-3" style="max-height: 360px; overflow-y: auto;">
+                        <table class="table table-hover table-sm align-middle mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="ps-3" style="width: 45px;">Sel.</th>
+                                    <th>Estudiante</th>
+                                    <th>Cédula</th>
+                                    <th>Correo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bloque-tabla-estudiantes">
+                                @forelse ($estudiantesDisponibles as $est)
+                                    @php
+                                        $searchBlob = strtolower(trim(($est->apellidos ?? '') . ' ' . ($est->nombre ?? '') . ' ' . ($est->cedula ?? '') . ' ' . ($est->email ?? '')));
+                                    @endphp
+                                    <tr class="bloque-fila-est" data-id="{{ $est->id }}" data-search="{{ $searchBlob }}">
+                                        <td class="ps-3">
+                                            <input type="checkbox" class="form-check-input bloque-est-check" name="estudiantes_ids[]" value="{{ $est->id }}" id="bloque-est-{{ $est->id }}">
+                                        </td>
+                                        <td>
+                                            <label class="fw-semibold cursor-pointer mb-0 d-block" for="bloque-est-{{ $est->id }}">
+                                                {{ $est->apellidos }}, {{ $est->nombre }}
+                                            </label>
+                                        </td>
+                                        <td class="small text-muted">{{ $est->cedula ?: '—' }}</td>
+                                        <td class="small text-muted">{{ $est->email }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">No hay estudiantes disponibles para agregar.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" id="btn-bloque-enviar" disabled>
+                        <i class="bi bi-people-fill me-1"></i> Matricular Seleccionados
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -210,6 +322,79 @@
                 }
             });
         });
+
+        // Lógica de Matrícula en Bloque
+        const programasEstudiantesMap = @json($programasEstudiantesMap ?? []);
+        const gruposEstudiantesMap = @json($gruposEstudiantesMap ?? []);
+
+        function actualizarContadorBloque() {
+            const count = $('.bloque-est-check:checked').length;
+            $('#bloque-contador').text(count + ' seleccionado(s)');
+            $('#btn-bloque-enviar').prop('disabled', count === 0);
+        }
+
+        function filtrarTablaBloque() {
+            const progId = $('#bloque-filtro-programa').val();
+            const grupoId = $('#bloque-filtro-grupo').val();
+            const q = ($('#bloque-buscar').val() || '').trim().toLowerCase();
+
+            const allowedByProg = (progId && progId !== 'all')
+                ? new Set((programasEstudiantesMap[progId] || []).map(Number))
+                : null;
+            const allowedByGrupo = grupoId
+                ? new Set((gruposEstudiantesMap[grupoId] || []).map(Number))
+                : null;
+
+            $('.bloque-fila-est').each(function() {
+                const row = $(this);
+                const estId = Number(row.data('id'));
+                const blob = String(row.data('search') || '');
+
+                let visible = true;
+                if (allowedByGrupo && !allowedByGrupo.has(estId)) visible = false;
+                if (visible && allowedByProg && !allowedByProg.has(estId)) visible = false;
+                if (visible && q !== '' && !blob.includes(q)) visible = false;
+
+                row.toggle(visible);
+            });
+        }
+
+        $('#bloque-filtro-grupo').on('change', function() {
+            const grupoId = $(this).val();
+            $('.bloque-est-check').prop('checked', false);
+            if (grupoId) {
+                $('#bloque-filtro-programa').val('all');
+                const ids = new Set((gruposEstudiantesMap[grupoId] || []).map(Number));
+                $('.bloque-est-check').each(function() {
+                    if (ids.has(Number($(this).val()))) {
+                        $(this).prop('checked', true);
+                    }
+                });
+            }
+            filtrarTablaBloque();
+            actualizarContadorBloque();
+        });
+
+        $('#bloque-filtro-programa, #bloque-buscar').on('change input', filtrarTablaBloque);
+
+        $('#btn-bloque-marcar-visibles').on('click', function() {
+            $('.bloque-fila-est:visible .bloque-est-check').prop('checked', true);
+            actualizarContadorBloque();
+        });
+
+        $('#btn-bloque-desmarcar').on('click', function() {
+            $('.bloque-est-check').prop('checked', false);
+            actualizarContadorBloque();
+        });
+
+        $(document).on('change', '.bloque-est-check', actualizarContadorBloque);
+
+        // Preseleccionar programa actual si tiene estudiantes disponibles
+        const optProgActual = $('#bloque-filtro-programa option[data-programa-actual="1"]');
+        if (optProgActual.length && (programasEstudiantesMap[optProgActual.val()] || []).length > 0) {
+            $('#bloque-filtro-programa').val(optProgActual.val());
+            filtrarTablaBloque();
+        }
     });
 </script>
 @endsection

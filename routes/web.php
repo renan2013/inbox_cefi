@@ -293,6 +293,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/grupos/eliminar', [GrupoController::class, 'destroy'])->name('grupos.destroy');
         Route::get('/grupos/{id}/estudiantes', [GrupoController::class, 'gestionarEstudiantes'])->name('grupos.estudiantes');
         Route::post('/grupos/{id}/estudiantes/matricular', [GrupoController::class, 'matricularEstudiante'])->name('grupos.estudiantes.matricular');
+        Route::post('/grupos/{id}/estudiantes/matricular-bloque', [GrupoController::class, 'matricularEstudiantesBloque'])->name('grupos.estudiantes.matricular_bloque');
         Route::post('/grupos/{id}/estudiantes/eliminar', [GrupoController::class, 'eliminarMatricula'])->name('grupos.estudiantes.eliminar');
 
         // Solicitudes Cursos Libres

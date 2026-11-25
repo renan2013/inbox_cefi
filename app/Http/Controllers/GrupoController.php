@@ -422,7 +422,69 @@ class GrupoController extends Controller
             ->orderBy('nombre', 'asc')
             ->get(['id', 'nombre', 'apellidos', 'email', 'cedula', 'id_rol']);
 
-        return view('grupos.estudiantes', compact('grupo', 'matriculados', 'estudiantesDisponibles'));
+        // Datos para Matrícula en Bloque: programas y grupos anteriores con sus estudiantes
+        $programas = DB::table('programas')
+            ->orderBy('nombre_programa', 'asc')
+            ->get(['id_programa', 'nombre_programa']);
+
+        $matriculasProgramas = DB::table('matriculas as m')
+            ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
+            ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+            ->select('m.id_estudiante', 'pe.id_programa', 'ca.id_curso_activo')
+            ->distinct()
+            ->get();
+
+        $programasEstudiantesMap = [];
+        $gruposEstudiantesMap = [];
+        foreach ($matriculasProgramas as $mp) {
+            $estId = (int) $mp->id_estudiante;
+            $progId = (int) $mp->id_programa;
+            $caId = (int) $mp->id_curso_activo;
+
+            if (!isset($programasEstudiantesMap[$progId])) {
+                $programasEstudiantesMap[$progId] = [];
+            }
+            if (!in_array($estId, $programasEstudiantesMap[$progId], true)) {
+                $programasEstudiantesMap[$progId][] = $estId;
+            }
+
+            if ($caId !== (int) $grupo->id_curso_activo) {
+                if (!isset($gruposEstudiantesMap[$caId])) {
+                    $gruposEstudiantesMap[$caId] = [];
+                }
+                if (!in_array($estId, $gruposEstudiantesMap[$caId], true)) {
+                    $gruposEstudiantesMap[$caId][] = $estId;
+                }
+            }
+        }
+
+        $gruposOrigenIds = array_keys($gruposEstudiantesMap);
+        $gruposOrigen = empty($gruposOrigenIds) ? collect() : DB::table('cursos_activos as ca')
+            ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+            ->join('programas as p', 'pe.id_programa', '=', 'p.id_programa')
+            ->whereIn('ca.id_curso_activo', $gruposOrigenIds)
+            ->select(
+                'ca.id_curso_activo',
+                'ca.periodo',
+                'ca.nombre_grupo',
+                'pe.id_programa',
+                'pe.codigo',
+                'pe.materia',
+                'p.nombre_programa'
+            )
+            ->orderByRaw('CASE WHEN pe.id_programa = ? THEN 0 ELSE 1 END', [(int) ($grupo->planEstudio->id_programa ?? 0)])
+            ->orderByDesc('ca.id_curso_activo')
+            ->get();
+
+        return view('grupos.estudiantes', compact(
+            'grupo',
+            'matriculados',
+            'estudiantesDisponibles',
+            'programas',
+            'programasEstudiantesMap',
+            'gruposOrigen',
+            'gruposEstudiantesMap'
+        ));
     }
 
     /**
@@ -462,6 +524,67 @@ class GrupoController extends Controller
 
         return redirect()->route('grupos.estudiantes', $grupo->id_curso_activo)
             ->with('success', 'Estudiante matriculado correctamente en el grupo.');
+    }
+
+    /**
+     * Matricula múltiples estudiantes en bloque en el grupo seleccionado.
+     */
+    public function matricularEstudiantesBloque(Request $request, $id)
+    {
+        $grupo = CursoActivo::findOrFail($id);
+
+        $request->validate([
+            'estudiantes_ids' => 'required|array|min:1',
+            'estudiantes_ids.*' => 'integer|exists:usuarios,id',
+        ], [
+            'estudiantes_ids.required' => 'Debe seleccionar al menos un estudiante para matricular en bloque.',
+            'estudiantes_ids.min' => 'Debe seleccionar al menos un estudiante para matricular en bloque.',
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', $request->estudiantes_ids)));
+        $agregados = 0;
+        $omitidos = 0;
+
+        DB::beginTransaction();
+        try {
+            $existentes = Matricula::where('id_curso_activo', $grupo->id_curso_activo)
+                ->whereIn('id_estudiante', $ids)
+                ->pluck('id_estudiante')
+                ->map(fn($v) => (int) $v)
+                ->toArray();
+
+            foreach ($ids as $idEstudiante) {
+                if ((!empty($grupo->id_profesor) && $idEstudiante === (int) $grupo->id_profesor) || in_array($idEstudiante, $existentes, true)) {
+                    $omitidos++;
+                    continue;
+                }
+
+                Matricula::create([
+                    'id_estudiante' => $idEstudiante,
+                    'id_curso_activo' => $grupo->id_curso_activo,
+                ]);
+                $agregados++;
+            }
+
+            DB::commit();
+
+            if ($agregados === 0) {
+                return redirect()->route('grupos.estudiantes', $grupo->id_curso_activo)
+                    ->with('error', 'Ningún estudiante nuevo fue matriculado (ya estaban inscritos o corresponden al docente del grupo).');
+            }
+
+            $msg = "Se matricularon {$agregados} estudiante(s) en bloque correctamente.";
+            if ($omitidos > 0) {
+                $msg .= " ({$omitidos} omitido(s) por estar ya inscritos).";
+            }
+
+            return redirect()->route('grupos.estudiantes', $grupo->id_curso_activo)
+                ->with('success', $msg);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->route('grupos.estudiantes', $grupo->id_curso_activo)
+                ->with('error', 'Error al matricular en bloque: ' . $e->getMessage());
+        }
     }
 
     /**
