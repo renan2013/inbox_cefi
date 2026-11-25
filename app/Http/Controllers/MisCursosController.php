@@ -314,6 +314,72 @@ class MisCursosController extends Controller
     }
 
     /**
+     * Resuelve la cantidad de semanas del curso según su plan de estudios o fechas del grupo.
+     */
+    protected function resolverNumeroSemanas(CursoActivo $curso, int $default = 15): int
+    {
+        $duracionRaw = (string) ($curso->planEstudio->duracion ?? '');
+        $semanas = (int) preg_replace('/[^0-9]/', '', $duracionRaw);
+        if ($semanas > 0) {
+            return min(52, $semanas);
+        }
+        if ($curso->fecha_inicio && $curso->fecha_final) {
+            $dias = $curso->fecha_inicio->diffInDays($curso->fecha_final) + 1;
+            if ($dias > 0) {
+                return min(52, max(1, (int) ceil($dias / 7)));
+            }
+        }
+        return $default;
+    }
+
+    /**
+     * Genera el calendario base de sesiones según las semanas del curso y su fecha/horario.
+     */
+    protected function generarCronogramaBase(CursoActivo $curso, bool $modoSilabo = false): array
+    {
+        $numSemanas = $this->resolverNumeroSemanas($curso);
+        $fecha_inicio = $curso->fecha_inicio ? $curso->fecha_inicio->format('Y-m-d') : date('Y-m-d');
+        $horario_dia = explode(' ', trim((string) $curso->horario))[0] ?? 'Lunes';
+
+        $dias_map = [
+            'Lunes' => 'Monday', 'Martes' => 'Tuesday', 'Miércoles' => 'Wednesday', 'Miercoles' => 'Wednesday',
+            'Jueves' => 'Thursday', 'Viernes' => 'Friday', 'Sábado' => 'Saturday', 'Sabado' => 'Saturday', 'Domingo' => 'Sunday'
+        ];
+        $dia_ingles = $dias_map[$horario_dia] ?? 'Monday';
+
+        $start_date = new Carbon($fecha_inicio);
+        if ($start_date->format('l') !== $dia_ingles) {
+            $start_date->modify("next $dia_ingles");
+        }
+
+        $items = [];
+        for ($w = 1; $w <= $numSemanas; $w++) {
+            if ($modoSilabo) {
+                $items[] = (object) [
+                    'id_cronograma' => -$w,
+                    'semana' => (string) $w,
+                    'fecha' => $start_date->format('Y-m-d'),
+                    'actividad' => '',
+                    'tareas' => '',
+                    'modalidad_trabajo' => 'Asincrónico',
+                    'actividades_moodle' => ''
+                ];
+            } else {
+                $items[] = (object) [
+                    'id_cronograma' => -$w,
+                    'semana' => (string) $w,
+                    'fecha' => $start_date->format('Y-m-d'),
+                    'actividad' => 'Sesión de clase ordinaria número ' . $w,
+                    'tareas' => 'Lectura estándar semana ' . $w
+                ];
+            }
+            $start_date->addWeek();
+        }
+
+        return $items;
+    }
+
+    /**
      * Muestra el panel de registro de asistencia de estudiantes.
      */
     public function verAsistencia(Request $request, $id)
@@ -344,31 +410,9 @@ class MisCursosController extends Controller
                 ->toArray();
         }
 
-        // Auto-generar calendario de 15 semanas si cronograma está vacío
+        // Auto-generar calendario según duración en semanas si cronograma está vacío
         if (empty($cronograma)) {
-            $fecha_inicio = $curso->fecha_inicio ? $curso->fecha_inicio->format('Y-m-d') : date('Y-m-d');
-            $horario_dia = explode(' ', trim($curso->horario))[0] ?? 'Lunes';
-            
-            $dias_map = [
-                'Lunes' => 'Monday', 'Martes' => 'Tuesday', 'Miércoles' => 'Wednesday', 'Miercoles' => 'Wednesday',
-                'Jueves' => 'Thursday', 'Viernes' => 'Friday', 'Sábado' => 'Saturday', 'Sabado' => 'Saturday', 'Domingo' => 'Sunday'
-            ];
-            $dia_ingles = $dias_map[$horario_dia] ?? 'Monday';
-
-            $start_date = new Carbon($fecha_inicio);
-            if ($start_date->format('l') !== $dia_ingles) {
-                $start_date->modify("next $dia_ingles");
-            }
-
-            for ($w = 1; $w <= 15; $w++) {
-                $cronograma[] = [
-                    'id_cronograma' => -$w,
-                    'semana' => (string)$w,
-                    'fecha' => $start_date->format('Y-m-d'),
-                    'actividad' => 'Sesión de clase ordinaria número ' . $w
-                ];
-                $start_date->addWeek();
-            }
+            $cronograma = $this->generarCronogramaBase($curso, false);
         }
 
         // Convertir cronograma items a arrays standarizado
@@ -1029,31 +1073,9 @@ class MisCursosController extends Controller
                 ->toArray();
         }
 
-        // Auto-generar calendario de 15 semanas si cronograma está vacío
+        // Auto-generar calendario según duración en semanas si cronograma está vacío
         if (empty($cronograma)) {
-            $fecha_inicio = $curso->fecha_inicio ? $curso->fecha_inicio->format('Y-m-d') : date('Y-m-d');
-            $horario_dia = explode(' ', trim($curso->horario))[0] ?? 'Lunes';
-            
-            $dias_map = [
-                'Lunes' => 'Monday', 'Martes' => 'Tuesday', 'Miércoles' => 'Wednesday', 'Miercoles' => 'Wednesday',
-                'Jueves' => 'Thursday', 'Viernes' => 'Friday', 'Sábado' => 'Saturday', 'Sabado' => 'Saturday', 'Domingo' => 'Sunday'
-            ];
-            $dia_ingles = $dias_map[$horario_dia] ?? 'Monday';
-
-            $start_date = new Carbon($fecha_inicio);
-            if ($start_date->format('l') !== $dia_ingles) {
-                $start_date->modify("next $dia_ingles");
-            }
-
-            for ($w = 1; $w <= 15; $w++) {
-                $cronograma[] = (object)[
-                    'semana' => (string)$w,
-                    'fecha' => $start_date->format('Y-m-d'),
-                    'actividad' => 'Sesión de clase ordinaria número ' . $w,
-                    'tareas' => 'Lectura estándar semana ' . $w
-                ];
-                $start_date->addWeek();
-            }
+            $cronograma = $this->generarCronogramaBase($curso, false);
         }
 
         return view('mis_cursos.notificaciones_clase', compact('curso', 'cronograma'));
@@ -1147,34 +1169,9 @@ class MisCursosController extends Controller
                 ->toArray();
         }
 
-        // Auto-llenar 15 semanas si está vacío
+        // Auto-llenar según duración en semanas si está vacío
         if (empty($cronograma)) {
-            $fecha_inicio = $curso->fecha_inicio ? $curso->fecha_inicio->format('Y-m-d') : date('Y-m-d');
-            $horario_dia = explode(' ', trim($curso->horario))[0] ?? 'Lunes';
-            
-            $dias_map = [
-                'Lunes' => 'Monday', 'Martes' => 'Tuesday', 'Miércoles' => 'Wednesday', 'Miercoles' => 'Wednesday',
-                'Jueves' => 'Thursday', 'Viernes' => 'Friday', 'Sábado' => 'Saturday', 'Sabado' => 'Saturday', 'Domingo' => 'Sunday'
-            ];
-            $dia_ingles = $dias_map[$horario_dia] ?? 'Monday';
-
-            $start_date = new Carbon($fecha_inicio);
-            if ($start_date->format('l') !== $dia_ingles) {
-                $start_date->modify("next $dia_ingles");
-            }
-
-            for ($w = 1; $w <= 15; $w++) {
-                $cronograma[] = (object)[
-                    'id_cronograma' => -$w,
-                    'semana' => (string)$w,
-                    'fecha' => $start_date->format('Y-m-d'),
-                    'actividad' => '',
-                    'tareas' => '',
-                    'modalidad_trabajo' => 'Asincrónico',
-                    'actividades_moodle' => ''
-                ];
-                $start_date->addWeek();
-            }
+            $cronograma = $this->generarCronogramaBase($curso, true);
         }
 
         $revisiones_pendientes = DB::table('revisiones_curso')
