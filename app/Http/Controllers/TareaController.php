@@ -283,6 +283,10 @@ class TareaController extends Controller
 
         $query = DB::table('tareas as t')
             ->leftJoin('usuarios as u_creador', 't.id_creador', '=', 'u_creador.id')
+            ->where(function ($q) {
+                $q->whereNull('t.descripcion')
+                  ->orWhere('t.descripcion', 'not like', 'Registro de asistencia correspondiente a la Clase%');
+            })
             ->select('t.*', 'u_creador.nombre as creador_nombre', 'u_creador.apellidos as creador_apellidos');
 
         if ($filtroAnio !== '' && $filtroAnio !== 'todos') {
