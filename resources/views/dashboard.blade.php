@@ -1230,6 +1230,14 @@
                                 @endforeach
                             </select>
                             <small class="task-modal-help mt-1 d-block"><i class="bi bi-info-circle me-1"></i> Mantén presionado Ctrl (Cmd en Mac) para elegir varios.</small>
+                            <div class="mt-2 p-2 rounded-3 border bg-light bg-opacity-50" id="edit-task-personal-asignado-box">
+                                <small class="fw-bold text-primary d-block mb-1" style="font-size: 0.75rem;">
+                                    <i class="bi bi-person-check-fill me-1"></i>Personal Asignado:
+                                </small>
+                                <div id="edit-task-personal-asignado-list" class="d-flex flex-wrap gap-1">
+                                    <span class="text-muted small">Ningún responsable asignado</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="edit-task-etiquetas" class="form-label form-label-task"><i class="bi bi-tags me-1"></i> Categorías / Etiquetas</label>
@@ -1517,6 +1525,7 @@
                 // Asignados
                 const asignados = res.asignados || [];
                 $('#edit-task-asignados').val(asignados);
+                renderPersonalAsignadoEdit();
 
                 // Etiquetas
                 const etiquetas = res.etiquetas || [];
@@ -1534,6 +1543,35 @@
             });
         });
     }
+
+    function renderPersonalAsignadoEdit() {
+        const cont = document.getElementById('edit-task-personal-asignado-list');
+        const sel = document.getElementById('edit-task-asignados');
+        if (!cont || !sel) return;
+        const selectedOpts = Array.from(sel.selectedOptions || []);
+        if (selectedOpts.length === 0) {
+            cont.innerHTML = '<span class="text-muted small">Ningún responsable asignado</span>';
+            return;
+        }
+        cont.innerHTML = selectedOpts.map(opt => {
+            const safeName = String(opt.text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeVal = String(opt.value || '').replace(/"/g, '&quot;');
+            return `<span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 d-inline-flex align-items-center gap-1" style="font-size: 0.78rem;">
+                        ${safeName}
+                        <i class="bi bi-x-circle-fill" style="cursor:pointer;" title="Quitar" onclick="quitarResponsableEdit('${safeVal}')"></i>
+                    </span>`;
+        }).join('');
+    }
+
+    window.quitarResponsableEdit = function(userId) {
+        const sel = document.getElementById('edit-task-asignados');
+        if (!sel) return;
+        const opt = Array.from(sel.options).find(o => String(o.value) === String(userId));
+        if (opt) opt.selected = false;
+        renderPersonalAsignadoEdit();
+    };
+
+    document.getElementById('edit-task-asignados')?.addEventListener('change', renderPersonalAsignadoEdit);
 
     function guardarEdicionTarea(e) {
         e.preventDefault();
