@@ -26,6 +26,7 @@ class Boleta extends Model
         'pago_inicial_referencia',
         'fechas_vencimiento_json',
         'otros_rubros_json',
+        'cursos_precios_json',
         'estado',
         'cuotas',
         'aplicar_cargos_fijos',

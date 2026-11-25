@@ -28,7 +28,7 @@ class BoletaController extends Controller
     protected static function ensureBoletasColumns()
     {
         static $checked = false;
-        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_boletas_ok_v1')) {
+        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_boletas_ok_v2')) {
             $checked = true;
             return;
         }
@@ -58,6 +58,7 @@ class BoletaController extends Controller
                 'pago_inicial_referencia' => "ALTER TABLE `boletas` ADD COLUMN `pago_inicial_referencia` VARCHAR(255) NULL",
                 'fechas_vencimiento_json' => "ALTER TABLE `boletas` ADD COLUMN `fechas_vencimiento_json` TEXT NULL",
                 'otros_rubros_json' => "ALTER TABLE `boletas` ADD COLUMN `otros_rubros_json` LONGTEXT NULL",
+                'cursos_precios_json' => "ALTER TABLE `boletas` ADD COLUMN `cursos_precios_json` LONGTEXT NULL AFTER `otros_rubros_json`",
                 'ruta_firma' => "ALTER TABLE `boletas` ADD COLUMN `ruta_firma` VARCHAR(255) NULL",
                 'fecha_firma' => "ALTER TABLE `boletas` ADD COLUMN `fecha_firma` DATETIME NULL",
                 'token_firma' => "ALTER TABLE `boletas` ADD COLUMN `token_firma` VARCHAR(100) NULL",
@@ -75,7 +76,7 @@ class BoletaController extends Controller
                 DB::statement("ALTER TABLE `boletas` MODIFY COLUMN `estado` VARCHAR(50) NOT NULL DEFAULT 'pendiente_firma'");
             } catch (\Throwable $eEstado) {}
 
-            \Illuminate\Support\Facades\Cache::put('schema_boletas_ok_v1', true, 86400);
+            \Illuminate\Support\Facades\Cache::put('schema_boletas_ok_v2', true, 86400);
 
             // Asegurar que matriculas tenga id_boleta
             if (Schema::hasTable('matriculas') && !Schema::hasColumn('matriculas', 'id_boleta')) {
@@ -796,6 +797,43 @@ class BoletaController extends Controller
     }
 
     /**
+     * Normaliza el mapa de precios personalizados por id_plan enviado desde la boleta.
+     */
+    protected function parseCursosPrecios($raw): array
+    {
+        if (!is_array($raw)) {
+            return [];
+        }
+        $result = [];
+        foreach ($raw as $idPlan => $precio) {
+            $planKey = (string) ((int) $idPlan);
+            if ($planKey !== '0' && is_numeric($precio)) {
+                $result[$planKey] = round(max(0, floatval($precio)), 2);
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Aplica precios personalizados guardados en la boleta sobre la colección de cursos.
+     */
+    protected function aplicarPreciosPersonalizadosCursos($cursos, ?string $cursosPreciosJson)
+    {
+        $cursosPrecios = json_decode($cursosPreciosJson ?? '{}', true) ?: [];
+        if (empty($cursosPrecios)) {
+            return $cursos;
+        }
+        foreach ($cursos as $c) {
+            $planKey = (string) ($c->id_plan ?? '');
+            if ($planKey !== '' && array_key_exists($planKey, $cursosPrecios)) {
+                $c->precio = max(0, floatval($cursosPrecios[$planKey]));
+                $c->precio_personalizado = true;
+            }
+        }
+        return $cursos;
+    }
+
+    /**
      * Enviar Boleta al Estudiante para Firma Digital (Paso 3 - Acción 1)
      */
     public function enviarEnlaceFirma(Request $request)
@@ -835,6 +873,7 @@ class BoletaController extends Controller
             $pago_inicial_referencia = empty($ref_input) ? "Cobrado por: {$funcionario}" : "{$ref_input} (Cobrado por: {$funcionario})";
             $saldo_pendiente = max(0, $total - $pago_inicial);
             $fechas_vencimiento = $request->fechas_vencimiento ?? [];
+            $cursos_precios = $this->parseCursosPrecios($request->input('cursos_precios', []));
 
             $token_firma = bin2hex(random_bytes(32));
             $token_expiracion = Carbon::now()->addDays(7);
@@ -859,6 +898,7 @@ class BoletaController extends Controller
                 'cobrar_matricula' => $cobrar_matricula,
                 'fechas_vencimiento_json' => !empty($fechas_vencimiento) ? json_encode($fechas_vencimiento) : null,
                 'otros_rubros_json' => !empty($otros_rubros) ? json_encode($otros_rubros) : null,
+                'cursos_precios_json' => !empty($cursos_precios) ? json_encode($cursos_precios) : null,
                 'token_firma' => $token_firma,
                 'token_expiracion' => $token_expiracion,
                 'fecha_creacion' => Carbon::now()
@@ -942,6 +982,7 @@ class BoletaController extends Controller
             $ref_input = trim($request->pago_inicial_referencia ?? '');
             $pago_inicial_referencia = empty($ref_input) ? "Cobrado por: {$funcionario}" : "{$ref_input} (Cobrado por: {$funcionario})";
             $fechas_vencimiento = $request->fechas_vencimiento ?? [];
+            $cursos_precios = $this->parseCursosPrecios($request->input('cursos_precios', []));
 
             // Procesar firma en canvas si se dibujó
             $ruta_firma = null;
@@ -981,6 +1022,7 @@ class BoletaController extends Controller
                 'cobrar_matricula' => $cobrar_matricula,
                 'fechas_vencimiento_json' => !empty($fechas_vencimiento) ? json_encode($fechas_vencimiento) : null,
                 'otros_rubros_json' => !empty($otros_rubros) ? json_encode($otros_rubros) : null,
+                'cursos_precios_json' => !empty($cursos_precios) ? json_encode($cursos_precios) : null,
                 'ruta_firma' => $ruta_firma,
                 'fecha_firma' => $ruta_firma ? Carbon::now() : null,
                 'fecha_creacion' => Carbon::now()
@@ -1075,6 +1117,8 @@ class BoletaController extends Controller
             )
             ->get();
 
+        $cursos = $this->aplicarPreciosPersonalizadosCursos($cursos, $boleta->cursos_precios_json);
+
         $fechas_vencimiento_saved = json_decode($boleta->fechas_vencimiento_json ?? '[]', true) ?: [];
 
         return view('boletas.procesar', compact('boleta', 'estudiante', 'cursos', 'fechas_vencimiento_saved'));
@@ -1099,6 +1143,7 @@ class BoletaController extends Controller
             $ref_input = trim($request->pago_inicial_referencia ?? '');
             $pago_inicial_referencia = empty($ref_input) ? "Cobrado por: {$funcionario}" : "{$ref_input} (Cobrado por: {$funcionario})";
             $fechas_vencimiento = $request->fechas_vencimiento ?? [];
+            $cursos_precios = $this->parseCursosPrecios($request->input('cursos_precios', []));
 
             $saldo_pendiente = max(0, $total - $pago_inicial);
             $estado = ($saldo_pendiente <= 0) ? 'pagada' : (($pago_inicial > 0) ? 'pago_parcial' : 'pendiente');
@@ -1195,8 +1240,10 @@ class BoletaController extends Controller
             ->join('programas as p', 'pe.id_programa', '=', 'p.id_programa')
             ->where('m.id_boleta', $boleta->id)
             ->where('m.id_estudiante', $boleta->id_estudiante)
-            ->select('pe.codigo', 'pe.materia', 'pe.precio', 'p.nombre_programa', 'p.costo_materia', 'p.costo_matricula', 'p.costo_biblioteca', 'p.costo_inscripcion_unica')
+            ->select('pe.id_plan', 'pe.codigo', 'pe.materia', 'pe.precio', 'p.nombre_programa', 'p.costo_materia', 'p.costo_matricula', 'p.costo_biblioteca', 'p.costo_inscripcion_unica')
             ->get();
+
+        $cursos = $this->aplicarPreciosPersonalizadosCursos($cursos, $boleta->cursos_precios_json);
 
         return view('boletas.firmar_publico', compact('boleta', 'estudiante', 'cursos'));
     }

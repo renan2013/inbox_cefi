@@ -118,8 +118,8 @@ class BoletaPdfService
             ->join('programas as p', 'pe.id_programa', '=', 'p.id_programa')
             ->where('m.id_boleta', $id_boleta)
             ->where('m.id_estudiante', $boleta->id_estudiante)
-            ->select('pe.codigo', 'pe.materia', 'pe.precio', 'p.nombre_programa', 'p.costo_materia', 'p.costo_matricula', 'p.costo_biblioteca', 'p.costo_inscripcion_unica')
-            ->groupBy('ca.id_plan', 'pe.codigo', 'pe.materia', 'pe.precio', 'p.nombre_programa', 'p.costo_materia', 'p.costo_matricula', 'p.costo_biblioteca', 'p.costo_inscripcion_unica')
+            ->select('pe.id_plan', 'pe.codigo', 'pe.materia', 'pe.precio', 'p.nombre_programa', 'p.costo_materia', 'p.costo_matricula', 'p.costo_biblioteca', 'p.costo_inscripcion_unica')
+            ->groupBy('ca.id_plan', 'pe.id_plan', 'pe.codigo', 'pe.materia', 'pe.precio', 'p.nombre_programa', 'p.costo_materia', 'p.costo_matricula', 'p.costo_biblioteca', 'p.costo_inscripcion_unica')
             ->get();
 
         $pdf = new BoletaPDFEngine();
@@ -252,9 +252,16 @@ class BoletaPdfService
             $pdf->SetXY($x, $y + $hRow);
         };
 
+        $cursosPrecios = json_decode($boleta->cursos_precios_json ?? '{}', true) ?: [];
+
         if ($cursos->count() > 0) {
             foreach ($cursos as $c) {
-                $precio = floatval($c->precio > 0 ? $c->precio : ($c->costo_materia ?? 0));
+                $planKey = (string) ($c->id_plan ?? '');
+                if ($planKey !== '' && array_key_exists($planKey, $cursosPrecios)) {
+                    $precio = max(0, floatval($cursosPrecios[$planKey]));
+                } else {
+                    $precio = floatval($c->precio > 0 ? $c->precio : ($c->costo_materia ?? 0));
+                }
                 $subtotal_materias += $precio;
                 $renderDetalleFila((string)$c->codigo, (string)$c->materia, $precio);
             }

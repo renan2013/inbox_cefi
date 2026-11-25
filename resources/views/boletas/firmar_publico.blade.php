@@ -176,7 +176,9 @@
 
                         @foreach ($cursos as $c)
                             @php 
-                                $p = floatval($c->precio > 0 ? $c->precio : ($c->costo_materia ?? 0));
+                                $p = isset($c->precio_personalizado)
+                                    ? floatval($c->precio)
+                                    : floatval($c->precio > 0 ? $c->precio : ($c->costo_materia ?? 0));
                                 $subtotal_calc += $p;
                             @endphp
                             <tr>

@@ -1222,7 +1222,7 @@
         let programasNombres = new Set();
 
         if (dataActual && dataActual.cursos.length > 0) {
-            dataActual.cursos.forEach(curso => {
+            dataActual.cursos.forEach((curso, idx) => {
                 programasNombres.add(curso.nombre_programa);
                 if ($('#cobrar-matricula').is(':checked')) {
                     const vm = parseFloat(curso.costo_matricula) || 0;
@@ -1237,9 +1237,20 @@
                     if (vi > valorInscripcion) valorInscripcion = vi;
                 }
                 
-                const p = parseFloat(curso.precio) || 0;
+                const p = Math.max(0, parseFloat(curso.precio) || 0);
                 costoCursosBase += p;
-                $('#boleta-detalle-cargos').append(`<tr><td class="ps-4 fw-bold text-primary">${curso.codigo}</td><td>${curso.materia}</td><td class="text-end pe-4 fw-bold">${currencyFormatter.format(p)}</td></tr>`);
+                $('#boleta-detalle-cargos').append(`
+                    <tr>
+                        <td class="ps-4 fw-bold text-primary">${curso.codigo}</td>
+                        <td>${curso.materia}</td>
+                        <td class="text-end pe-4" style="width: 190px;">
+                            <div class="input-group input-group-sm justify-content-end">
+                                <span class="input-group-text bg-light fw-bold">₡</span>
+                                <input type="number" min="0" step="0.01" class="form-control form-control-sm text-end fw-bold boleta-curso-precio-input" data-index="${idx}" data-id-plan="${curso.id_plan}" value="${p.toFixed(2)}">
+                            </div>
+                        </td>
+                    </tr>
+                `);
             });
             
             $('#boleta-carrera').text(Array.from(programasNombres).join(', '));
@@ -1282,6 +1293,62 @@
 
         recalculateTotal(currentSubtotal);
     }
+
+    function getCursosPreciosMap() {
+        const map = {};
+        if (dataActual && Array.isArray(dataActual.cursos)) {
+            dataActual.cursos.forEach(c => {
+                map[c.id_plan] = Math.max(0, parseFloat(c.precio) || 0);
+            });
+        }
+        return map;
+    }
+
+    function recalculateFromEditablePrices() {
+        let subtotal = 0;
+        if (dataActual && Array.isArray(dataActual.cursos)) {
+            let valorMatricula = 0;
+            let valorBiblioteca = 0;
+            let valorInscripcion = 0;
+            dataActual.cursos.forEach(curso => {
+                subtotal += Math.max(0, parseFloat(curso.precio) || 0);
+                if ($('#cobrar-matricula').is(':checked')) {
+                    const vm = parseFloat(curso.costo_matricula) || 0;
+                    if (vm > valorMatricula) valorMatricula = vm;
+                }
+                if ($('#cobrar-biblioteca').is(':checked')) {
+                    const vb = parseFloat(curso.costo_biblioteca) || 0;
+                    if (vb > valorBiblioteca) valorBiblioteca = vb;
+                }
+                if ($('#cobrar-inscripcion').is(':checked')) {
+                    const vi = parseFloat(curso.costo_inscripcion_unica) || 0;
+                    if (vi > valorInscripcion) valorInscripcion = vi;
+                }
+            });
+            if (dataActual.cursos.length > 0) {
+                if ($('#cobrar-biblioteca').is(':checked') && valorBiblioteca === 0) valorBiblioteca = 5000;
+                if ($('#cobrar-inscripcion').is(':checked') && valorInscripcion === 0) valorInscripcion = 8000;
+            }
+            subtotal += valorMatricula + valorBiblioteca + valorInscripcion;
+        }
+        if (window.otrosRubrosSeleccionados && window.otrosRubrosSeleccionados.length > 0) {
+            window.otrosRubrosSeleccionados.forEach(otro => {
+                const cant = parseInt(otro.cantidad, 10) || 1;
+                const pUnit = parseFloat(otro.precio) || 0;
+                subtotal += pUnit * cant;
+            });
+        }
+        recalculateTotal(subtotal);
+    }
+
+    $(document).on('input', '.boleta-curso-precio-input', function() {
+        const idx = parseInt($(this).data('index'), 10);
+        const val = Math.max(0, parseFloat($(this).val()) || 0);
+        if (dataActual && Array.isArray(dataActual.cursos) && dataActual.cursos[idx]) {
+            dataActual.cursos[idx].precio = val;
+        }
+        recalculateFromEditablePrices();
+    });
 
     function recalculateTotal(subtotal) {
         const desc = parseFloat($('#boleta-descuento').val()) || 0;
@@ -1439,6 +1506,7 @@
                 pago_inicial_referencia: $('#boleta-pago-inicial-referencia').val(),
                 fechas_vencimiento: fechas_vencimiento,
                 cursos_ids: cursos_seleccionados,
+                cursos_precios: getCursosPreciosMap(),
                 otros_rubros: window.otrosRubrosSeleccionados
             },
             dataType: 'json',
@@ -1547,6 +1615,7 @@
                         pago_inicial_referencia: $('#boleta-pago-inicial-referencia').val(),
                         fechas_vencimiento: fechas_vencimiento,
                         cursos_ids: cursos_seleccionados,
+                        cursos_precios: getCursosPreciosMap(),
                         otros_rubros: window.otrosRubrosSeleccionados,
                         signature: signatureBase64
                     },
