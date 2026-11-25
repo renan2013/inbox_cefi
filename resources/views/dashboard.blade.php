@@ -807,7 +807,7 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <div class="d-flex align-items-center gap-1">
+                                                <div class="d-flex align-items-center gap-1" id="task-responsables-{{ $tarea->id }}">
                                                     @if(isset($asignaciones[$tarea->id]) && count($asignaciones[$tarea->id]) > 0)
                                                         @foreach($asignaciones[$tarea->id] as $asig)
                                                             @php
@@ -1250,18 +1250,6 @@
                         </div>
                     </div>
 
-                    <!-- Curso Vinculado (Opcional) -->
-                    @if (count($cursos_activos_disponibles) > 0)
-                        <div class="mb-2">
-                            <label for="edit-task-curso" class="form-label form-label-task"><i class="bi bi-mortarboard me-1"></i> Vinculado a Curso Activo (Opcional)</label>
-                            <select class="form-select form-select-dash" id="edit-task-curso" name="id_curso_activo">
-                                <option value="">Ninguno (Tarea General / Administrativa)</option>
-                                @foreach ($cursos_activos_disponibles as $c)
-                                    <option value="{{ $c->id_curso_activo }}">{{ $c->codigo }} - {{ $c->materia }} ({{ $c->periodo }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    @endif
                 </div>
                 <div class="modal-footer modal-task-footer px-4 py-3 d-flex justify-content-between">
                     <div>
@@ -1516,12 +1504,6 @@
                     $('#edit-task-vencimiento').val('');
                 }
 
-                if (t.id_curso_activo) {
-                    $('#edit-task-curso').val(t.id_curso_activo);
-                } else {
-                    $('#edit-task-curso').val('');
-                }
-
                 // Asignados
                 const asignados = res.asignados || [];
                 $('#edit-task-asignados').val(asignados);
@@ -1571,7 +1553,9 @@
         renderPersonalAsignadoEdit();
     };
 
-    document.getElementById('edit-task-asignados')?.addEventListener('change', renderPersonalAsignadoEdit);
+    $(document).on('change input keyup click', '#edit-task-asignados', function() {
+        setTimeout(renderPersonalAsignadoEdit, 0);
+    });
 
     function guardarEdicionTarea(e) {
         e.preventDefault();
@@ -1597,7 +1581,25 @@
                 if (row.length) {
                     row.find('.task-title-text').first().text(nuevoTitulo);
                     row.find('.small.task-subtitle-text.text-truncate').text(nuevaDesc);
-                    
+
+                    // Actualizar columna Responsable al instante sin recargar
+                    const respCont = $(`#task-responsables-${id}`);
+                    if (respCont.length) {
+                        const selAsig = document.getElementById('edit-task-asignados');
+                        const selectedAsig = selAsig ? Array.from(selAsig.selectedOptions || []) : [];
+                        if (selectedAsig.length > 0) {
+                            respCont.html(selectedAsig.map(opt => {
+                                const fullName = String(opt.text || '').trim();
+                                const parts = fullName.split(/\s+/);
+                                const initials = ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || '?';
+                                const safeName = fullName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                                return `<span class="monday-avatar" title="${safeName}" data-bs-toggle="tooltip">${initials}</span>`;
+                            }).join(''));
+                        } else {
+                            respCont.html('<span class="monday-avatar monday-avatar-empty" title="Sin Asignar" data-bs-toggle="tooltip"><i class="bi bi-person"></i></span>');
+                        }
+                    }
+
                     cambiarEstadoAjax(id, nuevoEstado);
                     cambiarPrioridadAjax(id, nuevaPrioridad);
                 } else {
