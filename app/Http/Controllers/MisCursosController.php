@@ -1208,8 +1208,9 @@ class MisCursosController extends Controller
             $contenidos = $request->input('contenidos', $request->input('contenidos_tematicos', ''));
             $cronograma_txt = $request->input('cronograma_txt', '');
             $biblio = $request->input('bibliografia', '');
-            $mod = $request->input('modalidad', 'Virtual (aprendizaje electrónico)');
-            $tipo_curso = $request->input('tipo_curso', $request->input('naturaleza', 'Teórico-práctica'));
+            $planEstudio = $curso->id_plan ? DB::table('plan_estudios')->where('id_plan', $curso->id_plan)->first() : null;
+            $mod = $curso->modalidad ?: ($planEstudio->modalidad ?? 'Virtual (aprendizaje electrónico)');
+            $tipo_curso = $planEstudio->naturaleza ?? 'Teórico-práctica';
             $obj_gen_post = $request->input('objetivo_general', '');
             $obj_esp_post = $request->input('objetivos_especificos', '');
             $anexos = $request->input('anexos', '');
@@ -1219,7 +1220,7 @@ class MisCursosController extends Controller
             $h_fin = $request->input('horario_hora_fin', '');
             $horario = trim("$h_dia $h_inicio - $h_fin");
 
-            // Sincronizar ficha técnica con plan_estudios si vienen los campos CONESUP
+            // Sincronizar contenidos académicos del sílabo (sin modificar la ficha técnica programada por Administración)
             if ($curso->id_plan) {
                 $planUpdate = [
                     'descripcion_curso' => $desc,
@@ -1231,11 +1232,6 @@ class MisCursosController extends Controller
                     'recursos_didacticos' => $recursos_apr,
                     'bibliografia' => $biblio,
                 ];
-                foreach (['creditos', 'duracion', 'modalidad', 'naturaleza', 'requisitos', 'correquisitos', 'horas_teoricas', 'horas_practicas', 'horas_independientes', 'horas_totales', 'distribucion_horas'] as $colPlan) {
-                    if ($request->has($colPlan)) {
-                        $planUpdate[$colPlan] = $request->input($colPlan);
-                    }
-                }
                 try {
                     DB::table('plan_estudios')->where('id_plan', $curso->id_plan)->update($planUpdate);
                 } catch (\Throwable $ePlan) {

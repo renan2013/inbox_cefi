@@ -372,7 +372,12 @@
                     <!-- PESTAÑA 1: FICHA TÉCNICA CONESUP -->
                     <div class="tab-pane fade show active" id="ficha_tecnica">
                         <div class="p-3 rounded-4 border bg-light bg-opacity-50 mb-4">
-                            <h6 class="fw-bold text-primary mb-3"><i class="bi bi-card-checklist me-1"></i> Datos Oficiales del Curso (Estándar CONESUP)</h6>
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                <h6 class="fw-bold text-primary mb-0"><i class="bi bi-card-checklist me-1"></i> Datos Oficiales del Curso (Estándar CONESUP)</h6>
+                                <span class="badge bg-secondary bg-opacity-15 text-secondary border border-secondary border-opacity-25 px-3 py-2 rounded-pill">
+                                    <i class="bi bi-lock-fill me-1"></i> Solo lectura — Programado desde Administración
+                                </span>
+                            </div>
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label small fw-bold">Programa / Carrera</label>
@@ -388,32 +393,32 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label small fw-bold">Créditos</label>
-                                    <input type="number" name="creditos" class="form-control text-center fw-bold" value="{{ $curso->planEstudio->creditos ?? 4 }}">
+                                    <input type="number" class="form-control bg-white text-center fw-bold" value="{{ $curso->planEstudio->creditos ?? 4 }}" readonly>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label small fw-bold">Duración (Semanas)</label>
                                     <div class="input-group">
-                                        <input type="number" name="duracion" class="form-control text-center fw-bold" value="{{ preg_replace('/[^0-9]/', '', $curso->planEstudio->duracion ?? '15') ?: 15 }}">
+                                        <input type="number" class="form-control bg-white text-center fw-bold" value="{{ preg_replace('/[^0-9]/', '', $curso->planEstudio->duracion ?? '15') ?: 15 }}" readonly>
                                         <span class="input-group-text">semanas</span>
                                     </div>
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-bold">Modalidad</label>
-                                    <input type="text" name="modalidad" class="form-control" value="{{ $silabo->modalidad ?? $curso->planEstudio->modalidad ?? 'Virtual (aprendizaje electrónico)' }}">
+                                    <input type="text" class="form-control bg-white" value="{{ $curso->modalidad ?: ($curso->planEstudio->modalidad ?? ($silabo->modalidad ?? 'Virtual (aprendizaje electrónico)')) }}" readonly>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label small fw-bold">Naturaleza</label>
-                                    <input type="text" name="naturaleza" class="form-control" value="{{ $curso->planEstudio->naturaleza ?? 'Teórico-práctica' }}">
+                                    <input type="text" class="form-control bg-white" value="{{ $curso->planEstudio->naturaleza ?? 'Teórico-práctica' }}" readonly>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold">Requisitos Previos</label>
-                                    <input type="text" name="requisitos" class="form-control" value="{{ $curso->planEstudio->requisitos ?? 'No tiene' }}">
+                                    <input type="text" class="form-control bg-white" value="{{ $curso->planEstudio->requisitos ?? 'No tiene' }}" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold">Correquisitos</label>
-                                    <input type="text" name="correquisitos" class="form-control" value="{{ $curso->planEstudio->correquisitos ?? 'No tiene' }}">
+                                    <input type="text" class="form-control bg-white" value="{{ $curso->planEstudio->correquisitos ?? 'No tiene' }}" readonly>
                                 </div>
 
                                 <div class="col-12 mt-3">
@@ -423,33 +428,33 @@
                                             <div class="col-md-3 col-6">
                                                 <label class="form-label small mb-1 fw-bold text-secondary">Horas Teóricas</label>
                                                 <div class="input-group input-group-sm">
-                                                    <input type="number" name="horas_teoricas" id="horas_teoricas" class="form-control text-center fw-bold" min="0" value="{{ $curso->planEstudio->horas_teoricas ?? 3 }}" oninput="calcularDistribucionHoras()">
+                                                    <input type="number" id="horas_teoricas" class="form-control bg-light text-center fw-bold" value="{{ $curso->planEstudio->horas_teoricas ?? 3 }}" readonly>
                                                     <span class="input-group-text">hrs</span>
                                                 </div>
                                             </div>
                                             <div class="col-md-3 col-6">
                                                 <label class="form-label small mb-1 fw-bold text-secondary">Horas Prácticas</label>
                                                 <div class="input-group input-group-sm">
-                                                    <input type="number" name="horas_practicas" id="horas_practicas" class="form-control text-center fw-bold" min="0" value="{{ $curso->planEstudio->horas_practicas ?? 1 }}" oninput="calcularDistribucionHoras()">
+                                                    <input type="number" id="horas_practicas" class="form-control bg-light text-center fw-bold" value="{{ $curso->planEstudio->horas_practicas ?? 1 }}" readonly>
                                                     <span class="input-group-text">hrs</span>
                                                 </div>
                                             </div>
                                             <div class="col-md-3 col-6">
                                                 <label class="form-label small mb-1 fw-bold text-secondary">Estudio Independiente</label>
                                                 <div class="input-group input-group-sm">
-                                                    <input type="number" name="horas_independientes" id="horas_independientes" class="form-control text-center fw-bold" min="0" value="{{ $curso->planEstudio->horas_independientes ?? 8 }}" oninput="calcularDistribucionHoras()">
+                                                    <input type="number" id="horas_independientes" class="form-control bg-light text-center fw-bold" value="{{ $curso->planEstudio->horas_independientes ?? 8 }}" readonly>
                                                     <span class="input-group-text">hrs</span>
                                                 </div>
                                             </div>
                                             <div class="col-md-3 col-6">
                                                 <label class="form-label small mb-1 fw-bold text-primary">Total Horas / Sem.</label>
                                                 <div class="input-group input-group-sm">
-                                                    <input type="number" name="horas_totales" id="horas_totales" class="form-control text-center fw-bold text-primary bg-light border-primary" value="{{ $curso->planEstudio->horas_totales ?? 12 }}" readonly>
+                                                    <input type="number" id="horas_totales" class="form-control text-center fw-bold text-primary bg-light border-primary" value="{{ $curso->planEstudio->horas_totales ?? 12 }}" readonly>
                                                     <span class="input-group-text bg-primary text-white">hrs</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <textarea name="distribucion_horas" id="distribucion_horas" class="form-control form-control-sm text-muted bg-light" rows="2" readonly>{{ $curso->planEstudio->distribucion_horas ?? 'Este curso comprende un total de 12 horas distribuidas en 3 horas teóricas, 1 hora práctica y 8 horas de estudio independiente.' }}</textarea>
+                                        <textarea id="distribucion_horas" class="form-control form-control-sm text-muted bg-light" rows="2" readonly>{{ $curso->planEstudio->distribucion_horas ?? 'Este curso comprende un total de 12 horas distribuidas en 3 horas teóricas, 1 hora práctica y 8 horas de estudio independiente.' }}</textarea>
                                     </div>
                                 </div>
                             </div>
