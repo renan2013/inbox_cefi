@@ -155,6 +155,7 @@
                         <th style="width: 130px;">Estado</th>
                         <th style="width: 170px;">Fechas (Inicio → Fin)</th>
                         <th>Línea de Tiempo & Avance (Gantt)</th>
+                        <th class="text-end pe-3" style="width: 110px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -238,10 +239,20 @@
                                     </div>
                                 </div>
                             </td>
+                            <td class="text-end pe-3">
+                                <div class="d-inline-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-2 py-1" onclick="verHistorialNotifTarea({{ (int)$t->id }})" title="Historial de notificaciones">
+                                        <i class="bi bi-clock-history"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1" onclick="notificarResponsableTarea({{ (int)$t->id }})" title="Notificar al responsable por correo">
+                                        <i class="bi bi-bell-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="bi bi-calendar2-x fs-1 d-block mb-2"></i>
                                 No hay tareas registradas para los filtros seleccionados.
                             </td>
@@ -278,6 +289,78 @@ function cambiarEstadoGantt(idTarea, nuevoEstado) {
             }).then(() => window.location.reload());
         }
     });
+}
+
+async function notificarResponsableTarea(id) {
+    const result = await Swal.fire({
+        title: 'Notificar al responsable',
+        input: 'textarea',
+        inputLabel: 'Mensaje adicional (opcional)',
+        inputPlaceholder: 'Ej: Por favor confirmar el avance o cierre de esta tarea...',
+        showCancelButton: true,
+        confirmButtonText: '<i class="bi bi-send-fill me-1"></i> Enviar Correo',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#dc2626'
+    });
+    if (!result.isConfirmed) return;
+
+    try {
+        const res = await fetch(`{{ url('/tareas') }}/${id}/notificar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ mensaje: result.value || '' })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            Swal.fire({ icon: 'success', title: 'Notificación enviada', text: data.message, timer: 2500, showConfirmButton: false });
+        } else {
+            Swal.fire('Atención', data.message || 'No se pudo enviar la notificación.', 'warning');
+        }
+    } catch (err) {
+        Swal.fire('Error', 'Error de conexión al enviar la notificación.', 'error');
+    }
+}
+
+async function verHistorialNotifTarea(id) {
+    try {
+        const res = await fetch(`{{ url('/tareas') }}/${id}/historial-notificaciones`, {
+            headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+        const list = (data && Array.isArray(data.historial)) ? data.historial : [];
+        if (list.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Historial de Notificaciones',
+                text: 'Aún no se han enviado notificaciones de seguimiento para esta tarea.'
+            });
+            return;
+        }
+        const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const html = `<div class="text-start" style="max-height: 340px; overflow-y: auto;">` + list.map(item => `
+            <div class="p-2 mb-2 rounded-3 border bg-light small">
+                <div class="d-flex justify-content-between fw-bold text-dark mb-1">
+                    <span><i class="bi bi-person-badge me-1 text-primary"></i>${esc(item.remitente_nombre)}</span>
+                    <span class="text-muted">${esc(item.fecha_envio)}</span>
+                </div>
+                <div class="text-muted mb-1"><strong>Para:</strong> ${esc(item.destinatarios)}</div>
+                ${item.mensaje ? `<div class="text-dark border-top pt-1 mt-1">${esc(item.mensaje)}</div>` : ''}
+            </div>
+        `).join('') + `</div>`;
+
+        Swal.fire({
+            title: `Historial de Seguimiento (${list.length})`,
+            html,
+            width: 600,
+            confirmButtonText: 'Cerrar'
+        });
+    } catch (err) {
+        Swal.fire('Error', 'No se pudo cargar el historial de notificaciones.', 'error');
+    }
 }
 </script>
 @endsection
