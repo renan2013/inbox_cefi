@@ -965,7 +965,7 @@
                                         <div class="fw-bold task-title-text small mb-1">{{ $t->titulo }}</div>
                                         <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary">
                                             <span class="badge bg-warning-subtle text-dark border border-warning small" style="font-size: 0.68rem;">{{ ucfirst($t->prioridad ?? 'Media') }}</span>
-                                            <button class="btn btn-sm btn-outline-info py-0 px-2" style="font-size: 0.7rem;" onclick="cambiarEstadoAjax({{ $t->id }}, 'en_proceso')">Procesar &rarr;</button>
+                                            <span class="badge bg-warning text-dark small" style="font-size: 0.68rem;">Pendiente</span>
                                         </div>
                                     </div>
                                 @endforeach
@@ -984,7 +984,7 @@
                                         <div class="fw-bold task-title-text small mb-1">{{ $t->titulo }}</div>
                                         <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary">
                                             <span class="badge bg-info-subtle text-dark border border-info small" style="font-size: 0.68rem;">{{ ucfirst($t->prioridad ?? 'Media') }}</span>
-                                            <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.7rem;" onclick="cambiarEstadoAjax({{ $t->id }}, 'completada')">Completar &check;</button>
+                                            <span class="badge bg-info text-dark small" style="font-size: 0.68rem;">En Proceso</span>
                                         </div>
                                     </div>
                                 @endforeach
@@ -1002,6 +1002,7 @@
                                     <div class="kanban-card">
                                         <div class="fw-bold task-title-text small mb-1">{{ $t->titulo }}</div>
                                         <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary">
+                                            <span class="badge bg-secondary-subtle text-dark border border-secondary small" style="font-size: 0.68rem;">{{ ucfirst($t->prioridad ?? 'Media') }}</span>
                                             <span class="badge bg-success-subtle text-success border border-success small" style="font-size: 0.68rem;">Completada</span>
                                         </div>
                                     </div>
@@ -1017,8 +1018,12 @@
                             </div>
                             <div class="kanban-cards-container">
                                 @foreach ($kanban_tareas['cancelada'] as $t)
-                                    <div class="kanban-card opacity-50">
+                                    <div class="kanban-card opacity-75">
                                         <div class="fw-bold task-title-text small mb-1">{{ $t->titulo }}</div>
+                                        <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary">
+                                            <span class="badge bg-secondary-subtle text-dark border border-secondary small" style="font-size: 0.68rem;">{{ ucfirst($t->prioridad ?? 'Media') }}</span>
+                                            <span class="badge bg-secondary text-white small" style="font-size: 0.68rem;">Cancelada</span>
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>
