@@ -732,72 +732,98 @@
                         </a>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0 exp-table">
-                            <thead class="exp-thead">
-                                <tr>
-                                    <th class="py-3 text-muted">Código</th>
-                                    <th class="py-3 text-muted">Asignatura / Módulo</th>
-                                    <th class="py-3 text-muted">Período y Fechas</th>
-                                    <th class="py-3 text-muted">Docente / Grupo</th>
-                                    <th class="py-3 text-muted">Modalidad / Horario</th>
-                                    <th class="py-3 text-muted text-center">Créd.</th>
-                                    <th class="py-3 text-muted text-center">Nota</th>
-                                    <th class="py-3 text-muted text-center">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($cursosHistorial as $ch)
-                                <tr>
-                                    <td class="font-monospace fw-bold text-muted">{{ $ch['codigo'] }}</td>
-                                    <td>
-                                        <div class="fw-semibold">{{ $ch['materia'] }}</div>
-                                        <div class="small text-muted">Duración: {{ $ch['duracion'] ?? 'N/D' }}</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-secondary bg-opacity-25 text-light">{{ $ch['periodo'] ?: 'N/D' }}</span>
-                                        <div class="small text-muted mt-1" style="font-size: 0.78rem;">
-                                            Inicio: {{ $ch['fecha_inicio'] ? \Carbon\Carbon::parse($ch['fecha_inicio'])->format('d/m/Y') : 'N/D' }}<br>
-                                            Fin: {{ $ch['fecha_final'] ? \Carbon\Carbon::parse($ch['fecha_final'])->format('d/m/Y') : 'N/D' }}
-                                        </div>
-                                    </td>
-                                    <td class="small">
-                                        <div class="text-body fw-medium">{{ $ch['prof_nombre'] }}</div>
-                                        <div class="text-muted">Grupo: {{ $ch['grupo'] ?? 'N/D' }}</div>
-                                    </td>
-                                    <td class="small">
-                                        <div class="text-body">{{ $ch['modalidad'] ?? 'N/D' }}</div>
-                                        <div class="text-muted">{{ $ch['horario'] ?? 'N/D' }}</div>
-                                    </td>
-                                    <td class="text-center">{{ $ch['creditos_calc'] }}</td>
-                                    <td class="text-center font-monospace fw-bold fs-6">
-                                        @if($ch['calificacion'] !== null && $ch['calificacion'] !== '')
-                                            {{ number_format((float)$ch['calificacion'], 1) }}
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center">
-                                        @if($ch['estado_calc'] === 'Aprobado')
-                                            <span class="badge bg-success rounded-pill px-3 py-1">Aprobado</span>
-                                        @elseif($ch['estado_calc'] === 'Reprobado')
-                                            <span class="badge bg-danger rounded-pill px-3 py-1">Reprobado</span>
-                                        @else
-                                            <span class="badge bg-secondary rounded-pill px-3 py-1">En Curso</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="8" class="text-center py-5 text-muted">
-                                        <i class="bi bi-book fs-1 d-block mb-2"></i>
-                                        El estudiante no tiene asignaturas matriculadas o registradas en el sistema.
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                    @php
+                        $cursosPorPrograma = collect($cursosHistorial)->groupBy(fn($item) => $item['nombre_programa'] ?? 'Programa General');
+                        $programaIndex = 0;
+                    @endphp
+
+                    @forelse($cursosPorPrograma as $programaNombre => $cursosProg)
+                    @php
+                        $programaIndex++;
+                        $aprobadosProg = $cursosProg->where('estado_calc', 'Aprobado')->count();
+                        $notasProg = $cursosProg->filter(fn($x) => $x['calificacion'] !== null && $x['calificacion'] !== '');
+                        $promProg = $notasProg->count() > 0 ? round($notasProg->avg(fn($x) => (float) $x['calificacion']), 1) : null;
+                    @endphp
+                    <div class="border rounded-4 overflow-hidden mb-4">
+                        <div class="px-4 py-3 d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom" style="background: rgba(59, 130, 246, 0.08);">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary rounded-pill">Programa {{ $programaIndex }}</span>
+                                <h6 class="fw-bold mb-0">{{ $programaNombre }}</h6>
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center gap-2 small">
+                                <span class="badge bg-secondary bg-opacity-25 text-body">{{ $cursosProg->count() }} módulo(s)</span>
+                                <span class="badge bg-success bg-opacity-25 text-success">{{ $aprobadosProg }} aprobado(s)</span>
+                                @if($promProg !== null)
+                                    <span class="badge bg-info bg-opacity-25 text-info">Promedio: {{ number_format($promProg, 1) }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 exp-table">
+                                <thead class="exp-thead">
+                                    <tr>
+                                        <th class="py-3 text-muted">Código</th>
+                                        <th class="py-3 text-muted">Asignatura / Módulo</th>
+                                        <th class="py-3 text-muted">Período y Fechas</th>
+                                        <th class="py-3 text-muted">Docente / Grupo</th>
+                                        <th class="py-3 text-muted">Modalidad / Horario</th>
+                                        <th class="py-3 text-muted text-center">Créd.</th>
+                                        <th class="py-3 text-muted text-center">Nota</th>
+                                        <th class="py-3 text-muted text-center">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($cursosProg as $ch)
+                                    <tr>
+                                        <td class="font-monospace fw-bold text-muted">{{ $ch['codigo'] }}</td>
+                                        <td>
+                                            <div class="fw-semibold">{{ $ch['materia'] }}</div>
+                                            <div class="small text-muted">Duración: {{ $ch['duracion'] ?? 'N/D' }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary bg-opacity-25 text-light">{{ $ch['periodo'] ?: 'N/D' }}</span>
+                                            <div class="small text-muted mt-1" style="font-size: 0.78rem;">
+                                                Inicio: {{ $ch['fecha_inicio'] ? \Carbon\Carbon::parse($ch['fecha_inicio'])->format('d/m/Y') : 'N/D' }}<br>
+                                                Fin: {{ $ch['fecha_final'] ? \Carbon\Carbon::parse($ch['fecha_final'])->format('d/m/Y') : 'N/D' }}
+                                            </div>
+                                        </td>
+                                        <td class="small">
+                                            <div class="text-body fw-medium">{{ $ch['prof_nombre'] }}</div>
+                                            <div class="text-muted">Grupo: {{ $ch['grupo'] ?? 'N/D' }}</div>
+                                        </td>
+                                        <td class="small">
+                                            <div class="text-body">{{ $ch['modalidad'] ?? 'N/D' }}</div>
+                                            <div class="text-muted">{{ $ch['horario'] ?? 'N/D' }}</div>
+                                        </td>
+                                        <td class="text-center">{{ $ch['creditos_calc'] }}</td>
+                                        <td class="text-center font-monospace fw-bold fs-6">
+                                            @if($ch['calificacion'] !== null && $ch['calificacion'] !== '')
+                                                {{ number_format((float)$ch['calificacion'], 1) }}
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            @if($ch['estado_calc'] === 'Aprobado')
+                                                <span class="badge bg-success rounded-pill px-3 py-1">Aprobado</span>
+                                            @elseif($ch['estado_calc'] === 'Reprobado')
+                                                <span class="badge bg-danger rounded-pill px-3 py-1">Reprobado</span>
+                                            @else
+                                                <span class="badge bg-secondary rounded-pill px-3 py-1">En Curso</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                    @empty
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-book fs-1 d-block mb-2"></i>
+                        El estudiante no tiene asignaturas matriculadas o registradas en el sistema.
+                    </div>
+                    @endforelse
                 </div>
 
                 <!-- 3. ESTADO DE CUENTA & FINANZAS -->

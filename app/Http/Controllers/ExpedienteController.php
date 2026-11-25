@@ -142,6 +142,7 @@ class ExpedienteController extends Controller
 
             $cursosHistorial[] = [
                 'id_matricula'   => $c->id_matricula,
+                'nombre_programa'=> $c->nombre_programa ?: 'Programa General',
                 'codigo'         => $c->codigo,
                 'materia'        => $c->materia,
                 'periodo'        => $c->periodo,

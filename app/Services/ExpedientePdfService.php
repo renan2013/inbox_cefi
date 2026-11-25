@@ -305,18 +305,21 @@ class ExpedientePdfService
         $cursosPdf = \Illuminate\Support\Facades\DB::table('matriculas as m')
             ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
             ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+            ->leftJoin('programas as p', 'pe.id_programa', '=', 'p.id_programa')
             ->leftJoin('usuarios as u_prof', 'ca.id_profesor', '=', 'u_prof.id')
             ->where('m.id_estudiante', $expediente->id_usuario)
             ->where(function ($q) {
                 $q->whereNull('m.estado')->orWhere('m.estado', '!=', 'Retirado');
             })
             ->select(
+                'p.nombre_programa',
                 'pe.codigo', 'pe.materia', 'pe.modalidad as pe_modalidad', 'pe.duracion',
                 'ca.fecha_inicio', 'ca.fecha_final', 'ca.modalidad as ca_modalidad',
                 'ca.horario', 'ca.hora_inicio', 'ca.hora_final', 'ca.nombre_grupo',
                 'u_prof.nombre as prof_nombre', 'u_prof.apellidos as prof_apellidos',
                 'm.calificacion'
             )
+            ->orderBy('p.nombre_programa')
             ->orderByDesc('ca.fecha_inicio')
             ->get();
 
@@ -325,9 +328,19 @@ class ExpedientePdfService
                 $pdf->AddPage();
             }
             $imprimirSeccion("VI. MÓDULOS / CURSOS MATRICULADOS");
+            $programaActual = null;
             foreach ($cursosPdf as $cp) {
                 if ($pdf->GetY() > 245) {
                     $pdf->AddPage();
+                }
+                $nombreProg = $cp->nombre_programa ?: 'Programa General';
+                if ($nombreProg !== $programaActual) {
+                    $programaActual = $nombreProg;
+                    $pdf->SetFont('Arial', 'B', 8.5);
+                    $pdf->SetFillColor(239, 246, 255);
+                    $pdf->SetTextColor(30, 64, 175);
+                    $pdf->Cell(180, 5.5, $pdf->toPdf("Programa: {$programaActual}"), 0, 1, 'L', true);
+                    $pdf->Ln(1);
                 }
                 $mod = $cp->ca_modalidad ?: ($cp->pe_modalidad ?: 'N/D');
                 $hor = trim((string) ($cp->horario ?? ''));
