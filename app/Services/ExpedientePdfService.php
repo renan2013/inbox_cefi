@@ -301,8 +301,69 @@ class ExpedientePdfService
         }
         $pdf->Ln(2);
 
-        // --- VI. DICTAMEN DE REGISTRO & FORMALIZACIÓN ---
-        $imprimirSeccion("VI. FORMALIZACIÓN Y DICTAMEN DE REGISTRO");
+        // --- VI. MÓDULOS / CURSOS MATRICULADOS ---
+        $cursosPdf = \Illuminate\Support\Facades\DB::table('matriculas as m')
+            ->join('cursos_activos as ca', 'm.id_curso_activo', '=', 'ca.id_curso_activo')
+            ->join('plan_estudios as pe', 'ca.id_plan', '=', 'pe.id_plan')
+            ->leftJoin('usuarios as u_prof', 'ca.id_profesor', '=', 'u_prof.id')
+            ->where('m.id_estudiante', $expediente->id_usuario)
+            ->where(function ($q) {
+                $q->whereNull('m.estado')->orWhere('m.estado', '!=', 'Retirado');
+            })
+            ->select(
+                'pe.codigo', 'pe.materia', 'pe.modalidad as pe_modalidad', 'pe.duracion',
+                'ca.fecha_inicio', 'ca.fecha_final', 'ca.modalidad as ca_modalidad',
+                'ca.horario', 'ca.hora_inicio', 'ca.hora_final', 'ca.nombre_grupo',
+                'u_prof.nombre as prof_nombre', 'u_prof.apellidos as prof_apellidos',
+                'm.calificacion'
+            )
+            ->orderByDesc('ca.fecha_inicio')
+            ->get();
+
+        if ($cursosPdf->count() > 0) {
+            if ($pdf->GetY() > 235) {
+                $pdf->AddPage();
+            }
+            $imprimirSeccion("VI. MÓDULOS / CURSOS MATRICULADOS");
+            foreach ($cursosPdf as $cp) {
+                if ($pdf->GetY() > 245) {
+                    $pdf->AddPage();
+                }
+                $mod = $cp->ca_modalidad ?: ($cp->pe_modalidad ?: 'N/D');
+                $hor = trim((string) ($cp->horario ?? ''));
+                if ($hor === '' && ($cp->hora_inicio || $cp->hora_final)) {
+                    $hor = trim(($cp->hora_inicio ?? '') . ($cp->hora_inicio && $cp->hora_final ? ' - ' : '') . ($cp->hora_final ?? ''));
+                }
+                $hor = $hor ?: 'N/D';
+                $dur = $cp->duracion ?: 'N/D';
+                $grp = $cp->nombre_grupo ?: 'N/D';
+                $doc = $cp->prof_nombre ? trim("{$cp->prof_nombre} {$cp->prof_apellidos}") : 'Docente Asignado';
+                $fIni = $cp->fecha_inicio ? date('d/m/Y', strtotime($cp->fecha_inicio)) : 'N/D';
+                $fFin = $cp->fecha_final ? date('d/m/Y', strtotime($cp->fecha_final)) : 'N/D';
+
+                $pdf->SetFont('Arial', 'B', 8);
+                $pdf->SetTextColor(15, 23, 42);
+                $pdf->Cell(180, 4.5, $pdf->toPdf("{$cp->codigo} - {$cp->materia}"), 0, 1, 'L');
+
+                $pdf->SetFont('Arial', '', 7.5);
+                $pdf->SetTextColor(51, 65, 85);
+                $pdf->Cell(90, 4, $pdf->toPdf("Docente: {$doc}"), 0, 0, 'L');
+                $pdf->Cell(90, 4, $pdf->toPdf("Grupo: {$grp}"), 0, 1, 'L');
+                $pdf->Cell(60, 4, $pdf->toPdf("Modalidad: {$mod}"), 0, 0, 'L');
+                $pdf->Cell(60, 4, $pdf->toPdf("Duración: {$dur}"), 0, 0, 'L');
+                $pdf->Cell(60, 4, $pdf->toPdf("Horario: {$hor}"), 0, 1, 'L');
+                $pdf->Cell(90, 4, $pdf->toPdf("Fecha de inicio: {$fIni}"), 0, 0, 'L');
+                $pdf->Cell(90, 4, $pdf->toPdf("Fecha de finalización: {$fFin}"), 0, 1, 'L');
+                $pdf->Ln(1.5);
+            }
+            $pdf->Ln(1);
+        }
+
+        // --- VII. DICTAMEN DE REGISTRO & FORMALIZACIÓN ---
+        if ($pdf->GetY() > 240) {
+            $pdf->AddPage();
+        }
+        $imprimirSeccion("VII. FORMALIZACIÓN Y DICTAMEN DE REGISTRO");
         $pdf->SetFont('Arial', '', 8.5);
         $pdf->SetTextColor(15, 23, 42);
         $estadoExp = $expediente->estado ?: 'Pendiente';

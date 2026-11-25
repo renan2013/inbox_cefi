@@ -737,9 +737,10 @@
                             <thead class="exp-thead">
                                 <tr>
                                     <th class="py-3 text-muted">Código</th>
-                                    <th class="py-3 text-muted">Asignatura</th>
-                                    <th class="py-3 text-muted">Período</th>
-                                    <th class="py-3 text-muted">Docente</th>
+                                    <th class="py-3 text-muted">Asignatura / Módulo</th>
+                                    <th class="py-3 text-muted">Período y Fechas</th>
+                                    <th class="py-3 text-muted">Docente / Grupo</th>
+                                    <th class="py-3 text-muted">Modalidad / Horario</th>
                                     <th class="py-3 text-muted text-center">Créd.</th>
                                     <th class="py-3 text-muted text-center">Nota</th>
                                     <th class="py-3 text-muted text-center">Estado</th>
@@ -749,9 +750,25 @@
                                 @forelse($cursosHistorial as $ch)
                                 <tr>
                                     <td class="font-monospace fw-bold text-muted">{{ $ch['codigo'] }}</td>
-                                    <td class="fw-semibold">{{ $ch['materia'] }}</td>
-                                    <td><span class="badge bg-secondary bg-opacity-25 text-light">{{ $ch['periodo'] ?: 'N/D' }}</span></td>
-                                    <td class="small text-muted">{{ $ch['prof_nombre'] }}</td>
+                                    <td>
+                                        <div class="fw-semibold">{{ $ch['materia'] }}</div>
+                                        <div class="small text-muted">Duración: {{ $ch['duracion'] ?? 'N/D' }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary bg-opacity-25 text-light">{{ $ch['periodo'] ?: 'N/D' }}</span>
+                                        <div class="small text-muted mt-1" style="font-size: 0.78rem;">
+                                            Inicio: {{ $ch['fecha_inicio'] ? \Carbon\Carbon::parse($ch['fecha_inicio'])->format('d/m/Y') : 'N/D' }}<br>
+                                            Fin: {{ $ch['fecha_final'] ? \Carbon\Carbon::parse($ch['fecha_final'])->format('d/m/Y') : 'N/D' }}
+                                        </div>
+                                    </td>
+                                    <td class="small">
+                                        <div class="text-body fw-medium">{{ $ch['prof_nombre'] }}</div>
+                                        <div class="text-muted">Grupo: {{ $ch['grupo'] ?? 'N/D' }}</div>
+                                    </td>
+                                    <td class="small">
+                                        <div class="text-body">{{ $ch['modalidad'] ?? 'N/D' }}</div>
+                                        <div class="text-muted">{{ $ch['horario'] ?? 'N/D' }}</div>
+                                    </td>
                                     <td class="text-center">{{ $ch['creditos_calc'] }}</td>
                                     <td class="text-center font-monospace fw-bold fs-6">
                                         @if($ch['calificacion'] !== null && $ch['calificacion'] !== '')
@@ -772,7 +789,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted">
+                                    <td colspan="8" class="text-center py-5 text-muted">
                                         <i class="bi bi-book fs-1 d-block mb-2"></i>
                                         El estudiante no tiene asignaturas matriculadas o registradas en el sistema.
                                     </td>

@@ -94,7 +94,9 @@ class ExpedienteController extends Controller
             ->select(
                 'm.id_matricula', 'm.calificacion', 'm.comentarios',
                 'ca.id_curso_activo', 'ca.periodo', 'ca.fecha_inicio', 'ca.fecha_final', 'ca.check_acta',
-                'pe.materia', 'pe.codigo', DB::raw('IFNULL(pe.creditos, 3) as creditos'),
+                'ca.modalidad as ca_modalidad', 'ca.horario', 'ca.hora_inicio', 'ca.hora_final', 'ca.nombre_grupo',
+                'pe.materia', 'pe.codigo', 'pe.modalidad as pe_modalidad', 'pe.duracion',
+                DB::raw('IFNULL(pe.creditos, 3) as creditos'),
                 'p.nombre_programa',
                 'u_prof.nombre as prof_nombre', 'u_prof.apellidos as prof_apellidos'
             )
@@ -133,11 +135,22 @@ class ExpedienteController extends Controller
                 $cntEnCurso++;
             }
 
+            $horarioCurso = trim((string) ($c->horario ?? ''));
+            if ($horarioCurso === '' && ($c->hora_inicio || $c->hora_final)) {
+                $horarioCurso = trim(($c->hora_inicio ?? '') . ($c->hora_inicio && $c->hora_final ? ' - ' : '') . ($c->hora_final ?? ''));
+            }
+
             $cursosHistorial[] = [
                 'id_matricula'   => $c->id_matricula,
                 'codigo'         => $c->codigo,
                 'materia'        => $c->materia,
                 'periodo'        => $c->periodo,
+                'fecha_inicio'   => $c->fecha_inicio,
+                'fecha_final'    => $c->fecha_final,
+                'modalidad'      => $c->ca_modalidad ?: ($c->pe_modalidad ?: 'N/D'),
+                'horario'        => $horarioCurso ?: 'N/D',
+                'duracion'       => $c->duracion ?: 'N/D',
+                'grupo'          => $c->nombre_grupo ?: 'N/D',
                 'creditos_calc'  => $cred,
                 'calificacion'   => $c->calificacion,
                 'estado_calc'    => $estadoCurso,

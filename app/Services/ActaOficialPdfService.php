@@ -120,9 +120,18 @@ class ActaOficialPdfService
                 'ca.id_profesor',
                 'ca.titulo_prefijo',
                 'ca.titulo_sufijo',
+                'ca.fecha_inicio',
+                'ca.fecha_final',
+                'ca.modalidad as ca_modalidad',
+                'ca.horario',
+                'ca.hora_inicio',
+                'ca.hora_final',
+                'ca.nombre_grupo',
                 'pe.id_plan',
                 'pe.materia',
                 'pe.codigo',
+                'pe.modalidad as pe_modalidad',
+                'pe.duracion',
                 'p.nombre_programa',
                 'u.nombre as prof_nombre',
                 'u.apellidos as prof_apellidos'
@@ -243,7 +252,69 @@ class ActaOficialPdfService
         $pdf->SetFont('Arial', '', 9);
         $pdf->Cell($w_val_fecha, 4.5, $pdf->toPdf($texto_fecha_val), 0, 1);
 
-        $pdf->Ln(3.5);
+        // Línea 4: Grupo (Izq), Modalidad (Centro), Duración (Der)
+        $grupo_val = $curso->nombre_grupo ?: 'N/D';
+        $modalidad_val = $curso->ca_modalidad ?: ($curso->pe_modalidad ?: 'N/D');
+        $duracion_val = $curso->duracion ?: 'N/D';
+
+        $pdf->SetX(10);
+        $pdf->SetFont('Arial', 'B', 9);
+        $w_lbl = $pdf->GetStringWidth($pdf->toPdf('Grupo: '));
+        $pdf->Cell($w_lbl, 4.5, $pdf->toPdf('Grupo: '), 0, 0);
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->Cell(90, 4.5, $pdf->toPdf($grupo_val), 0, 0);
+
+        $pdf->SetX(135);
+        $pdf->SetFont('Arial', 'B', 9);
+        $w_lbl = $pdf->GetStringWidth($pdf->toPdf('Modalidad: '));
+        $pdf->Cell($w_lbl, 4.5, $pdf->toPdf('Modalidad: '), 0, 0);
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->Cell(60, 4.5, $pdf->toPdf($modalidad_val), 0, 0);
+
+        $pdf->SetFont('Arial', 'B', 9);
+        $w_lbl_dur = $pdf->GetStringWidth($pdf->toPdf('Duración: '));
+        $pdf->SetFont('Arial', '', 9);
+        $w_val_dur = $pdf->GetStringWidth($pdf->toPdf($duracion_val));
+        $pdf->SetX(287 - ($w_lbl_dur + $w_val_dur));
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->Cell($w_lbl_dur, 4.5, $pdf->toPdf('Duración: '), 0, 0);
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->Cell($w_val_dur, 4.5, $pdf->toPdf($duracion_val), 0, 1);
+
+        // Línea 5: Horario (Izq), Inicio (Centro), Finalización (Der)
+        $horario_val = trim((string) ($curso->horario ?? ''));
+        if ($horario_val === '' && ($curso->hora_inicio || $curso->hora_final)) {
+            $horario_val = trim(($curso->hora_inicio ?? '') . ($curso->hora_inicio && $curso->hora_final ? ' - ' : '') . ($curso->hora_final ?? ''));
+        }
+        $horario_val = $horario_val ?: 'N/D';
+        $inicio_val = $curso->fecha_inicio ? date('d/m/Y', strtotime($curso->fecha_inicio)) : 'N/D';
+        $final_val = $curso->fecha_final ? date('d/m/Y', strtotime($curso->fecha_final)) : 'N/D';
+
+        $pdf->SetX(10);
+        $pdf->SetFont('Arial', 'B', 9);
+        $w_lbl = $pdf->GetStringWidth($pdf->toPdf('Horario: '));
+        $pdf->Cell($w_lbl, 4.5, $pdf->toPdf('Horario: '), 0, 0);
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->Cell(95, 4.5, $pdf->toPdf($horario_val), 0, 0);
+
+        $pdf->SetX(135);
+        $pdf->SetFont('Arial', 'B', 9);
+        $w_lbl = $pdf->GetStringWidth($pdf->toPdf('Inicio: '));
+        $pdf->Cell($w_lbl, 4.5, $pdf->toPdf('Inicio: '), 0, 0);
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->Cell(50, 4.5, $pdf->toPdf($inicio_val), 0, 0);
+
+        $pdf->SetFont('Arial', 'B', 9);
+        $w_lbl_fin = $pdf->GetStringWidth($pdf->toPdf('Finalización: '));
+        $pdf->SetFont('Arial', '', 9);
+        $w_val_fin = $pdf->GetStringWidth($pdf->toPdf($final_val));
+        $pdf->SetX(287 - ($w_lbl_fin + $w_val_fin));
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->Cell($w_lbl_fin, 4.5, $pdf->toPdf('Finalización: '), 0, 0);
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->Cell($w_val_fin, 4.5, $pdf->toPdf($final_val), 0, 1);
+
+        $pdf->Ln(2.5);
 
         // --- Construcción de Tabla Horizontal ---
         $pdf->SetLineWidth(0.2);
