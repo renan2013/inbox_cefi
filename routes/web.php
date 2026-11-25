@@ -228,6 +228,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/tareas/{id}/detalle', [DashboardController::class, 'obtenerTarea'])->name('tareas.obtener');
         Route::post('/tareas/{id}/actualizar', [DashboardController::class, 'actualizarTarea'])->name('tareas.actualizar');
         Route::post('/tareas/{id}/notificar', [DashboardController::class, 'notificarResponsables'])->name('tareas.notificar');
+        Route::get('/tareas/{id}/historial-notificaciones', [DashboardController::class, 'historialNotificaciones'])->name('tareas.historial_notificaciones');
         Route::delete('/tareas/{id}/eliminar', [DashboardController::class, 'eliminarTarea'])->name('tareas.eliminar');
     });
 

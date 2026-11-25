@@ -1098,7 +1098,10 @@
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="d-inline-flex gap-1">
-                                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-2 py-1" onclick="notificarResponsableTarea({{ (int)$tg->id }})" title="Notificar al responsable por correo">
+                                                    <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-2 py-1" onclick="verHistorialNotifTarea({{ (int)$tg->id }})" title="Historial de notificaciones">
+                                                        <i class="bi bi-clock-history"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1" onclick="notificarResponsableTarea({{ (int)$tg->id }})" title="Notificar al responsable por correo">
                                                         <i class="bi bi-bell-fill"></i>
                                                     </button>
                                                     <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2 py-1" onclick="abrirModalEditarTarea({{ $tg->id }})" title="Editar Tarea">
@@ -1604,6 +1607,44 @@
             }
         } catch (err) {
             Swal.fire('Error', 'Error de conexión al enviar la notificación.', 'error');
+        }
+    }
+
+    async function verHistorialNotifTarea(id) {
+        try {
+            const res = await fetch(`{{ url('/tareas') }}/${id}/historial-notificaciones`, {
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await res.json();
+            const list = (data && Array.isArray(data.historial)) ? data.historial : [];
+            if (list.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Historial de Notificaciones',
+                    text: 'Aún no se han enviado notificaciones de seguimiento para esta tarea.'
+                });
+                return;
+            }
+            const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const html = `<div class="text-start" style="max-height: 340px; overflow-y: auto;">` + list.map(item => `
+                <div class="p-2 mb-2 rounded-3 border bg-light small">
+                    <div class="d-flex justify-content-between fw-bold text-dark mb-1">
+                        <span><i class="bi bi-person-badge me-1 text-primary"></i>${esc(item.remitente_nombre)}</span>
+                        <span class="text-muted">${esc(item.fecha_envio)}</span>
+                    </div>
+                    <div class="text-muted mb-1"><strong>Para:</strong> ${esc(item.destinatarios)}</div>
+                    ${item.mensaje ? `<div class="text-dark border-top pt-1 mt-1">${esc(item.mensaje)}</div>` : ''}
+                </div>
+            `).join('') + `</div>`;
+
+            Swal.fire({
+                title: `Historial de Seguimiento (${list.length})`,
+                html,
+                width: 600,
+                confirmButtonText: 'Cerrar'
+            });
+        } catch (err) {
+            Swal.fire('Error', 'No se pudo cargar el historial de notificaciones.', 'error');
         }
     }
 

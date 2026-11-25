@@ -419,9 +419,67 @@ class DashboardController extends Controller
             return response()->json(['success' => false, 'message' => 'No se pudo enviar el correo. Verifique la configuración SMTP.'], 500);
         }
 
+        try {
+            self::ensureTareaNotificacionesTable();
+            DB::table('tarea_notificaciones')->insert([
+                'id_tarea'         => (int)$id,
+                'id_remitente'     => Auth::id(),
+                'remitente_nombre' => $remitente,
+                'destinatarios'    => implode(', ', $enviados),
+                'mensaje'          => $notaAdmin !== '' ? $notaAdmin : null,
+                'fecha_envio'      => Carbon::now('America/Costa_Rica')->format('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $eLog) {
+            \Illuminate\Support\Facades\Log::warning("No se pudo guardar historial de notificación tarea #{$id}: " . $eLog->getMessage());
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Notificación enviada a: ' . implode(', ', $enviados),
         ]);
+    }
+
+    /**
+     * Devuelve el historial de notificaciones de seguimiento de una tarea.
+     */
+    public function historialNotificaciones($id)
+    {
+        self::ensureTareaNotificacionesTable();
+        $rows = DB::table('tarea_notificaciones')
+            ->where('id_tarea', (int)$id)
+            ->orderByDesc('fecha_envio')
+            ->orderByDesc('id')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'historial' => $rows,
+        ]);
+    }
+
+    /**
+     * Asegura la existencia de la tabla tarea_notificaciones.
+     */
+    protected static function ensureTareaNotificacionesTable(): void
+    {
+        static $checked = false;
+        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_tarea_notif_ok_v1')) {
+            $checked = true;
+            return;
+        }
+        $checked = true;
+
+        if (!Schema::hasTable('tarea_notificaciones')) {
+            Schema::create('tarea_notificaciones', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('id_tarea')->index();
+                $table->unsignedBigInteger('id_remitente')->nullable();
+                $table->string('remitente_nombre', 150);
+                $table->text('destinatarios');
+                $table->text('mensaje')->nullable();
+                $table->dateTime('fecha_envio');
+            });
+        }
+        \Illuminate\Support\Facades\Cache::put('schema_tarea_notif_ok_v1', true, 86400);
     }
 }
