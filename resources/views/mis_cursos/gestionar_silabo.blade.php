@@ -374,8 +374,8 @@
                         <div class="p-3 rounded-4 border bg-light bg-opacity-50 mb-4">
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                 <h6 class="fw-bold text-primary mb-0"><i class="bi bi-card-checklist me-1"></i> Datos Oficiales del Curso (Estándar CONESUP)</h6>
-                                <span class="badge bg-secondary bg-opacity-15 text-secondary border border-secondary border-opacity-25 px-3 py-2 rounded-pill">
-                                    <i class="bi bi-lock-fill me-1"></i> Solo lectura — Programado desde Administración
+                                <span class="badge px-3 py-2 rounded-pill" style="background-color: #eef2f6; color: #334155; border: 1px solid #cbd5e1;">
+                                    <i class="bi bi-lock-fill me-1 text-secondary"></i> Solo lectura — Programado desde Administración
                                 </span>
                             </div>
                             <div class="row g-3">
