@@ -291,6 +291,21 @@ class BoletaPdfService
             $subtotal_materias = floatval($boleta->total);
         }
 
+        $razonesDesc = json_decode($boleta->razones_descuento_json ?? '[]', true);
+        $obsDesc = trim((string) ($boleta->observacion_descuento ?? ''));
+        if ((is_array($razonesDesc) && count($razonesDesc) > 0) || $obsDesc !== '') {
+            $textoRazones = is_array($razonesDesc) && count($razonesDesc) > 0 ? implode(', ', $razonesDesc) : '';
+            $lineaMotivo = 'Motivo de Descuento / Ajuste: ' . $textoRazones;
+            if ($obsDesc !== '') {
+                $lineaMotivo .= ($textoRazones !== '' ? ' - ' : '') . $obsDesc;
+            }
+            $pdf->Ln(2);
+            $pdf->SetFont('Arial', 'I', 8.5);
+            $pdf->SetTextColor(21, 128, 61);
+            $pdf->MultiCell(180, 4.5, $pdf->toPdf($lineaMotivo), 0, 'L');
+            $pdf->SetTextColor(0, 0, 0);
+        }
+
         $pdf->Ln(4);
 
         // 3. Resumen Financiero y Plan de Pagos

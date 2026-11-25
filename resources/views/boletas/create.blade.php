@@ -495,6 +495,30 @@
                 </div>
             </div>
 
+            <!-- Razón de Descuento / Ajuste de Precio -->
+            <div class="p-3 rounded-4 border bg-light mb-4" id="razones-descuento-card">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-tags-fill text-success me-1"></i> Razón del Descuento o Ajuste de Precio
+                        </h6>
+                        <small class="text-muted">Si modificó el precio de algún curso o aplicó descuento, marque la(s) razón(es):</small>
+                    </div>
+                    <button type="button" class="btn btn-outline-success btn-sm rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalRazonesDescuento">
+                        <i class="bi bi-gear-fill me-1"></i> Gestionar Razones
+                    </button>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-2" id="razones-descuento-list">
+                    @foreach($razonesDescuento ?? [] as $rd)
+                        <label class="btn btn-sm btn-outline-secondary rounded-pill d-inline-flex align-items-center gap-1 px-3 py-1 cursor-pointer razon-pill-label">
+                            <input type="checkbox" class="form-check-input m-0 razon-descuento-check" value="{{ $rd->nombre }}">
+                            <span>{{ $rd->nombre }}</span>
+                        </label>
+                    @endforeach
+                </div>
+                <input type="text" id="boleta-observacion-descuento" class="form-control form-control-sm" maxlength="255" placeholder="Detalle adicional opcional (ej: Promo 20% matrícula temprana, Beca aprobada por Dirección...)">
+            </div>
+
             <!-- Opciones Financieras y Proyección -->
             <div class="row mb-4 g-4">
                 <div class="col-md-6">
@@ -1341,6 +1365,23 @@
         recalculateTotal(subtotal);
     }
 
+    function getRazonesDescuentoSeleccionadas() {
+        const list = [];
+        $('#razones-descuento-list .razon-descuento-check:checked').each(function() {
+            list.push($(this).val());
+        });
+        return list;
+    }
+
+    $(document).on('change', '.razon-descuento-check', function() {
+        const label = $(this).closest('.razon-pill-label');
+        if ($(this).is(':checked')) {
+            label.removeClass('btn-outline-secondary').addClass('btn-success text-white');
+        } else {
+            label.removeClass('btn-success text-white').addClass('btn-outline-secondary');
+        }
+    });
+
     $(document).on('input', '.boleta-curso-precio-input', function() {
         const idx = parseInt($(this).data('index'), 10);
         const val = Math.max(0, parseFloat($(this).val()) || 0);
@@ -1507,6 +1548,8 @@
                 fechas_vencimiento: fechas_vencimiento,
                 cursos_ids: cursos_seleccionados,
                 cursos_precios: getCursosPreciosMap(),
+                razones_descuento: getRazonesDescuentoSeleccionadas(),
+                observacion_descuento: ($('#boleta-observacion-descuento').val() || '').trim(),
                 otros_rubros: window.otrosRubrosSeleccionados
             },
             dataType: 'json',
@@ -1616,6 +1659,8 @@
                         fechas_vencimiento: fechas_vencimiento,
                         cursos_ids: cursos_seleccionados,
                         cursos_precios: getCursosPreciosMap(),
+                        razones_descuento: getRazonesDescuentoSeleccionadas(),
+                        observacion_descuento: ($('#boleta-observacion-descuento').val() || '').trim(),
                         otros_rubros: window.otrosRubrosSeleccionados,
                         signature: signatureBase64
                     },
@@ -1738,4 +1783,5 @@
     }
 </script>
 @include('partials.modal_otros_rubros')
+@include('partials.modal_razones_descuento')
 @endsection

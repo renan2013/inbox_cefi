@@ -28,7 +28,7 @@ class BoletaController extends Controller
     protected static function ensureBoletasColumns()
     {
         static $checked = false;
-        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_boletas_ok_v2')) {
+        if ($checked || \Illuminate\Support\Facades\Cache::has('schema_boletas_ok_v3')) {
             $checked = true;
             return;
         }
@@ -59,6 +59,8 @@ class BoletaController extends Controller
                 'fechas_vencimiento_json' => "ALTER TABLE `boletas` ADD COLUMN `fechas_vencimiento_json` TEXT NULL",
                 'otros_rubros_json' => "ALTER TABLE `boletas` ADD COLUMN `otros_rubros_json` LONGTEXT NULL",
                 'cursos_precios_json' => "ALTER TABLE `boletas` ADD COLUMN `cursos_precios_json` LONGTEXT NULL AFTER `otros_rubros_json`",
+                'razones_descuento_json' => "ALTER TABLE `boletas` ADD COLUMN `razones_descuento_json` LONGTEXT NULL AFTER `cursos_precios_json`",
+                'observacion_descuento' => "ALTER TABLE `boletas` ADD COLUMN `observacion_descuento` VARCHAR(255) NULL AFTER `razones_descuento_json`",
                 'ruta_firma' => "ALTER TABLE `boletas` ADD COLUMN `ruta_firma` VARCHAR(255) NULL",
                 'fecha_firma' => "ALTER TABLE `boletas` ADD COLUMN `fecha_firma` DATETIME NULL",
                 'token_firma' => "ALTER TABLE `boletas` ADD COLUMN `token_firma` VARCHAR(100) NULL",
@@ -76,7 +78,7 @@ class BoletaController extends Controller
                 DB::statement("ALTER TABLE `boletas` MODIFY COLUMN `estado` VARCHAR(50) NOT NULL DEFAULT 'pendiente_firma'");
             } catch (\Throwable $eEstado) {}
 
-            \Illuminate\Support\Facades\Cache::put('schema_boletas_ok_v2', true, 86400);
+            \Illuminate\Support\Facades\Cache::put('schema_boletas_ok_v3', true, 86400);
 
             // Asegurar que matriculas tenga id_boleta
             if (Schema::hasTable('matriculas') && !Schema::hasColumn('matriculas', 'id_boleta')) {
@@ -562,10 +564,12 @@ class BoletaController extends Controller
         }
 
         $otrosRubros = \App\Services\OtrosRubrosService::all();
+        $razonesDescuento = \App\Services\RazonesDescuentoService::all();
 
         return view('boletas.create', compact(
             'programas_agrupados',
             'otrosRubros',
+            'razonesDescuento',
             'id_programa_auto',
             'id_plan_auto',
             'categoria_auto',
@@ -834,6 +838,65 @@ class BoletaController extends Controller
     }
 
     /**
+     * Crear o actualizar una razón de descuento / ajuste de precio (AJAX)
+     */
+    public function guardarRazonDescuento(Request $request)
+    {
+        \App\Services\RazonesDescuentoService::ensureTable();
+        $nombre = trim((string) $request->input('nombre', ''));
+        $id = $request->input('id');
+
+        if ($nombre === '') {
+            return response()->json(['success' => false, 'message' => 'El nombre es obligatorio.'], 422);
+        }
+
+        try {
+            if ($id) {
+                DB::table('razones_descuento')
+                    ->where('id', (int) $id)
+                    ->update(['nombre' => $nombre, 'activo' => 1]);
+            } else {
+                $existing = DB::table('razones_descuento')->where('nombre', $nombre)->first();
+                if ($existing) {
+                    DB::table('razones_descuento')->where('id', $existing->id)->update(['activo' => 1]);
+                } else {
+                    DB::table('razones_descuento')->insert([
+                        'nombre' => $nombre,
+                        'activo' => 1,
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'razones' => \App\Services\RazonesDescuentoService::all(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'No se pudo guardar: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Eliminar (desactivar) una razón de descuento / ajuste de precio (AJAX)
+     */
+    public function eliminarRazonDescuento($id)
+    {
+        \App\Services\RazonesDescuentoService::ensureTable();
+        try {
+            DB::table('razones_descuento')
+                ->where('id', (int) $id)
+                ->update(['activo' => 0]);
+
+            return response()->json([
+                'success' => true,
+                'razones' => \App\Services\RazonesDescuentoService::all(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'No se pudo eliminar.'], 500);
+        }
+    }
+
+    /**
      * Enviar Boleta al Estudiante para Firma Digital (Paso 3 - Acción 1)
      */
     public function enviarEnlaceFirma(Request $request)
@@ -874,6 +937,8 @@ class BoletaController extends Controller
             $saldo_pendiente = max(0, $total - $pago_inicial);
             $fechas_vencimiento = $request->fechas_vencimiento ?? [];
             $cursos_precios = $this->parseCursosPrecios($request->input('cursos_precios', []));
+            $razones_descuento = array_values(array_filter(array_map('trim', (array) $request->input('razones_descuento', []))));
+            $observacion_descuento = trim((string) $request->input('observacion_descuento', ''));
 
             $token_firma = bin2hex(random_bytes(32));
             $token_expiracion = Carbon::now()->addDays(7);
@@ -899,6 +964,8 @@ class BoletaController extends Controller
                 'fechas_vencimiento_json' => !empty($fechas_vencimiento) ? json_encode($fechas_vencimiento) : null,
                 'otros_rubros_json' => !empty($otros_rubros) ? json_encode($otros_rubros) : null,
                 'cursos_precios_json' => !empty($cursos_precios) ? json_encode($cursos_precios) : null,
+                'razones_descuento_json' => !empty($razones_descuento) ? json_encode($razones_descuento) : null,
+                'observacion_descuento' => $observacion_descuento !== '' ? $observacion_descuento : null,
                 'token_firma' => $token_firma,
                 'token_expiracion' => $token_expiracion,
                 'fecha_creacion' => Carbon::now()
@@ -983,6 +1050,8 @@ class BoletaController extends Controller
             $pago_inicial_referencia = empty($ref_input) ? "Cobrado por: {$funcionario}" : "{$ref_input} (Cobrado por: {$funcionario})";
             $fechas_vencimiento = $request->fechas_vencimiento ?? [];
             $cursos_precios = $this->parseCursosPrecios($request->input('cursos_precios', []));
+            $razones_descuento = array_values(array_filter(array_map('trim', (array) $request->input('razones_descuento', []))));
+            $observacion_descuento = trim((string) $request->input('observacion_descuento', ''));
 
             // Procesar firma en canvas si se dibujó
             $ruta_firma = null;
@@ -1023,6 +1092,8 @@ class BoletaController extends Controller
                 'fechas_vencimiento_json' => !empty($fechas_vencimiento) ? json_encode($fechas_vencimiento) : null,
                 'otros_rubros_json' => !empty($otros_rubros) ? json_encode($otros_rubros) : null,
                 'cursos_precios_json' => !empty($cursos_precios) ? json_encode($cursos_precios) : null,
+                'razones_descuento_json' => !empty($razones_descuento) ? json_encode($razones_descuento) : null,
+                'observacion_descuento' => $observacion_descuento !== '' ? $observacion_descuento : null,
                 'ruta_firma' => $ruta_firma,
                 'fecha_firma' => $ruta_firma ? Carbon::now() : null,
                 'fecha_creacion' => Carbon::now()
@@ -1144,6 +1215,8 @@ class BoletaController extends Controller
             $pago_inicial_referencia = empty($ref_input) ? "Cobrado por: {$funcionario}" : "{$ref_input} (Cobrado por: {$funcionario})";
             $fechas_vencimiento = $request->fechas_vencimiento ?? [];
             $cursos_precios = $this->parseCursosPrecios($request->input('cursos_precios', []));
+            $razones_descuento = array_values(array_filter(array_map('trim', (array) $request->input('razones_descuento', []))));
+            $observacion_descuento = trim((string) $request->input('observacion_descuento', ''));
 
             $saldo_pendiente = max(0, $total - $pago_inicial);
             $estado = ($saldo_pendiente <= 0) ? 'pagada' : (($pago_inicial > 0) ? 'pago_parcial' : 'pendiente');

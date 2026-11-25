@@ -27,6 +27,8 @@ class Boleta extends Model
         'fechas_vencimiento_json',
         'otros_rubros_json',
         'cursos_precios_json',
+        'razones_descuento_json',
+        'observacion_descuento',
         'estado',
         'cuotas',
         'aplicar_cargos_fijos',
