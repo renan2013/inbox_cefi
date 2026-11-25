@@ -964,7 +964,7 @@
                                     <div class="kanban-card">
                                         <div class="fw-bold task-title-text small mb-1">{{ $t->titulo }}</div>
                                         <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary">
-                                            <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 small" style="font-size: 0.65rem;">{{ ucfirst($t->prioridad) }}</span>
+                                            <span class="badge bg-warning-subtle text-dark border border-warning small" style="font-size: 0.68rem;">{{ ucfirst($t->prioridad ?? 'Media') }}</span>
                                             <button class="btn btn-sm btn-outline-info py-0 px-2" style="font-size: 0.7rem;" onclick="cambiarEstadoAjax({{ $t->id }}, 'en_proceso')">Procesar &rarr;</button>
                                         </div>
                                     </div>
@@ -983,7 +983,7 @@
                                     <div class="kanban-card">
                                         <div class="fw-bold task-title-text small mb-1">{{ $t->titulo }}</div>
                                         <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary">
-                                            <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25 small" style="font-size: 0.65rem;">{{ ucfirst($t->prioridad) }}</span>
+                                            <span class="badge bg-info-subtle text-dark border border-info small" style="font-size: 0.68rem;">{{ ucfirst($t->prioridad ?? 'Media') }}</span>
                                             <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.7rem;" onclick="cambiarEstadoAjax({{ $t->id }}, 'completada')">Completar &check;</button>
                                         </div>
                                     </div>
@@ -1002,7 +1002,7 @@
                                     <div class="kanban-card">
                                         <div class="fw-bold task-title-text small mb-1">{{ $t->titulo }}</div>
                                         <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary">
-                                            <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 small" style="font-size: 0.65rem;">Completada</span>
+                                            <span class="badge bg-success-subtle text-success border border-success small" style="font-size: 0.68rem;">Completada</span>
                                         </div>
                                     </div>
                                 @endforeach
