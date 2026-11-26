@@ -1821,21 +1821,34 @@ class BoletaController extends Controller
                 }
             }
 
-            // 4. Desvincular o limpiar matrículas asociadas a la boleta
+            // 4. Eliminar matrículas asociadas a la boleta y limpiar grupos auto-creados sin profesor vacíos
             if (Schema::hasTable('matriculas')) {
+                $cursosAfectados = [];
                 if (Schema::hasColumn('matriculas', 'id_boleta')) {
-                    try {
-                        DB::table('matriculas')->where('id_boleta', $id)->update(['id_boleta' => null]);
-                    } catch (\Throwable $eMat) {
-                        // En caso de restricción NOT NULL en id_boleta, eliminar la matrícula de prueba
-                        DB::table('matriculas')->where('id_boleta', $id)->delete();
-                    }
+                    $cursosAfectados = array_merge(
+                        $cursosAfectados,
+                        DB::table('matriculas')->where('id_boleta', $id)->pluck('id_curso_activo')->filter()->toArray()
+                    );
+                    DB::table('matriculas')->where('id_boleta', $id)->delete();
                 }
                 if (Schema::hasColumn('matriculas', 'boleta_id')) {
-                    try {
-                        DB::table('matriculas')->where('boleta_id', $id)->update(['boleta_id' => null]);
-                    } catch (\Throwable $eMat2) {
-                        DB::table('matriculas')->where('boleta_id', $id)->delete();
+                    $cursosAfectados = array_merge(
+                        $cursosAfectados,
+                        DB::table('matriculas')->where('boleta_id', $id)->pluck('id_curso_activo')->filter()->toArray()
+                    );
+                    DB::table('matriculas')->where('boleta_id', $id)->delete();
+                }
+
+                $cursosAfectados = array_unique(array_map('intval', $cursosAfectados));
+                if (!empty($cursosAfectados) && Schema::hasTable('cursos_activos')) {
+                    foreach ($cursosAfectados as $idCa) {
+                        $tieneMatriculas = DB::table('matriculas')->where('id_curso_activo', $idCa)->exists();
+                        if (!$tieneMatriculas) {
+                            DB::table('cursos_activos')
+                                ->where('id_curso_activo', $idCa)
+                                ->whereNull('id_profesor')
+                                ->delete();
+                        }
                     }
                 }
             }
