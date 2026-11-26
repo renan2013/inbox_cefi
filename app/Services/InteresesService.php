@@ -129,7 +129,7 @@ class InteresesService
     public static function actualizarTotalesBoleta($id_boleta)
     {
         $boleta = Boleta::find($id_boleta);
-        if (!$boleta) return;
+        if (!$boleta || $boleta->estado === 'anulada') return;
 
         // Sumar todos los intereses de las cuotas pendientes
         $nuevo_interes_acumulado = floatval(

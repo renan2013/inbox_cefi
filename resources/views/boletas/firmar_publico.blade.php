@@ -142,6 +142,8 @@
                             $max_ins = $cursos->isNotEmpty() ? floatval($cursos->max('costo_inscripcion_unica') ?? 0) : 0;
                             $max_bib = $cursos->isNotEmpty() ? floatval($cursos->max('costo_biblioteca') ?? 0) : 0;
                             $max_mat = $cursos->isNotEmpty() ? floatval($cursos->max('costo_matricula') ?? 0) : 0;
+                            if ($boleta->cobrar_inscripcion && $max_ins <= 0) $max_ins = 8000;
+                            if ($boleta->cobrar_biblioteca && $max_bib <= 0) $max_bib = 5000;
                             $otrosRubrosList = json_decode($boleta->otros_rubros_json ?? '[]', true);
                             if (!is_array($otrosRubrosList)) $otrosRubrosList = [];
                             $subtotal_calc = 0;

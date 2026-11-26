@@ -162,6 +162,9 @@ class BoletaController extends Controller
         $cuotasVencidas = SeguimientoPago::with(['boleta', 'estudiante'])
             ->where('estado', 'pendiente')
             ->where('fecha_vencimiento', '<', $hoy)
+            ->whereHas('boleta', function ($q) {
+                $q->whereNotIn('estado', ['anulada', 'pagada']);
+            })
             ->get();
 
         $deudores = [];
@@ -739,7 +742,7 @@ class BoletaController extends Controller
                 // 1. Buscar o crear curso activo para el periodo
                 $cursoActivo = DB::table('cursos_activos')
                     ->where('id_plan', $id_plan)
-                    ->where('periodo', $periodo)
+                    ->whereRaw('TRIM(periodo) = TRIM(?)', [$periodo])
                     ->first();
 
                 $id_curso_activo = null;
@@ -771,7 +774,7 @@ class BoletaController extends Controller
                     ->first();
 
                 if ($matricula) {
-                    if ($id_boleta && Schema::hasColumn('matriculas', 'id_boleta')) {
+                    if ($id_boleta && Schema::hasColumn('matriculas', 'id_boleta') && empty($matricula->id_boleta)) {
                         DB::table('matriculas')
                             ->where('id_matricula', $matricula->id_matricula)
                             ->update(['id_boleta' => $id_boleta]);
@@ -1204,6 +1207,13 @@ class BoletaController extends Controller
 
         $boleta = Boleta::findOrFail($id);
 
+        if ($boleta->estado !== 'firmada') {
+            return response()->json([
+                'success' => false,
+                'message' => "Esta boleta no puede oficializarse porque su estado actual es '{$boleta->estado}'."
+            ], 422);
+        }
+
         try {
             DB::beginTransaction();
 
@@ -1397,7 +1407,15 @@ class BoletaController extends Controller
         ]);
 
         $boleta = Boleta::findOrFail($id);
-        $monto_pago = floatval($request->monto);
+
+        if (in_array($boleta->estado, ['anulada', 'pagada', 'pendiente_firma', 'firmada'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => "No se puede registrar un pago sobre una boleta en estado '{$boleta->estado}'."
+            ], 422);
+        }
+
+        $monto_pago = round(floatval($request->monto), 2);
         $metodo = $request->metodo ?: 'Efectivo';
         $referencia_input = trim($request->referencia ?? '');
         $funcionario = auth()->user()->nombre ?? 'Sistema';
@@ -1457,11 +1475,11 @@ class BoletaController extends Controller
 
                 // Amortizar mora acumulada primero, luego capital de la cuota
                 if ($interes_cuota > 0) {
-                    if ($monto_restante >= $interes_cuota) {
-                        $monto_restante -= $interes_cuota;
+                    if ($monto_restante >= ($interes_cuota - 0.005)) {
+                        $monto_restante = round(max(0, $monto_restante - $interes_cuota), 2);
                         $interes_cuota = 0.00;
                     } else {
-                        $interes_cuota = round($interes_cuota - $monto_restante, 2);
+                        $interes_cuota = round(max(0, $interes_cuota - $monto_restante), 2);
                         $monto_restante = 0;
                     }
                 }
@@ -1473,7 +1491,7 @@ class BoletaController extends Controller
                         'interes_acumulado' => 0.00,
                         'fecha_pago' => Carbon::now()
                     ]);
-                    $monto_restante = max(0, $monto_restante - $monto_cuota);
+                    $monto_restante = round(max(0, $monto_restante - $monto_cuota), 2);
                 } else {
                     $nuevo_capital = max(0, round($monto_cuota - $monto_restante, 2));
                     $cuota->update([
@@ -1485,7 +1503,7 @@ class BoletaController extends Controller
             }
 
             // Actualizar montos pagados en boleta
-            $nuevo_pagado = floatval($boleta->monto_pagado ?? 0) + $monto_pago;
+            $nuevo_pagado = round(floatval($boleta->monto_pagado ?? 0) + $monto_pago, 2);
             $boleta->monto_pagado = $nuevo_pagado;
             $boleta->save();
 
@@ -1549,6 +1567,13 @@ class BoletaController extends Controller
     {
         $boleta = Boleta::findOrFail($id);
 
+        if ($boleta->estado !== 'firmada') {
+            return response()->json([
+                'success' => false,
+                'message' => "Esta boleta no puede oficializarse porque su estado actual es '{$boleta->estado}'."
+            ], 422);
+        }
+
         try {
             DB::beginTransaction();
 
@@ -1561,10 +1586,12 @@ class BoletaController extends Controller
             // 3. Desvincular matrículas
             DB::table('matriculas')->where('id_boleta', $id)->update(['id_boleta' => null]);
 
-            // 4. Marcar como anulada
+            // 4. Marcar como anulada y limpiar montos contables
             $boleta->update([
                 'estado' => 'anulada',
-                'saldo_pendiente' => 0.00
+                'saldo_pendiente' => 0.00,
+                'monto_pagado' => 0.00,
+                'interes_acumulado' => 0.00,
             ]);
 
             DB::commit();
